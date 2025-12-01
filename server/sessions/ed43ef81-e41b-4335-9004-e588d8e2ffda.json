@@ -1,0 +1,46 @@
+{
+  "id": "ed43ef81-e41b-4335-9004-e588d8e2ffda",
+  "title": "jai besoin dun prompts relatif...",
+  "messages": [
+    {
+      "id": "9f877c8b-79c7-4450-9d34-58ec55985b3a",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "4ee20da8-3bad-41fc-a837-06ce90069ac6",
+      "role": "user",
+      "content": "jai besoin dun prompts relatifs a linstallation de lapplication dans un autre ordinateur"
+    },
+    {
+      "id": "49ebc45c-9965-461c-9ae8-9a0d610843fc",
+      "role": "assistant",
+      "content": "## 🚀 PROTOCOLE DE DÉPLOIEMENT (R-I-S-E)\n\nPour obtenir une procédure d'installation parfaite d'une IA, il ne faut pas juste demander \"comment installer\". Il faut utiliser la structure **R-I-S-E** (Rôle, Input, Étapes, Attente).\n\nVoici 3 modèles de prompts (invites de commande) prêts à copier-coller selon ta situation exacte.\n\n### 📁 OPTION 1 : Migration Complète (Le \"Clone\")\n*À utiliser si tu veux transférer tes configurations, plugins et données (ex: Obsidian, Navigateur, Logiciel comptable).*\n\n> **Prompt à copier :**\n> \"Agis en tant qu'**Architecte Système Senior** (Role). Je dois installer **[NOM DE L'APPLICATION]** sur un nouvel ordinateur **[WINDOWS/MAC]** en récupérant toutes mes configurations actuelles depuis mon ancien PC (Input).\n>\n> Liste les étapes séquentielles pour :\n> 1. Localiser les dossiers de sauvegarde/config sur l'ancien PC.\n> 2. Installer la version propre sur le nouveau PC.\n> 3. Transférer les fichiers aux bons endroits pour retrouver mon environnement exact (Steps).\n>\n> **Attente :** Fournis un guide technique précis, étape par étape, avec les chemins d'accès aux fichiers cachés si nécessaire (AppData, Library, etc.).\"\n\n### 💿 OPTION 2 : Installation \"Clean\" (Nouveau Départ)\n*À utiliser pour une installation fraîche sans importer de vieux fichiers.*\n\n> **Prompt à copier :**\n> \"Agis en tant qu'**Expert Support IT** (Role). Je veux installer la dernière version stable de **[NOM DE L'APPLICATION]** sur **[WINDOWS 11 / MACOS]** (Input).\n>\n> Détaille la procédure pour :\n> 1. Télécharger la source officielle (évite les bloatwares).\n> 2. Les options à cocher/décocher durant l'installation pour une performance optimale.\n> 3. Les premiers réglages essentiels à faire au premier démarrage (Steps).\n>\n> **Attente :** Un tutoriel concis et sécuritaire sous forme de liste à puces.\"\n\n### 🔧 OPTION 3 : Dépannage / Compatibilité\n*À utiliser si tu passes d'un OS à un autre (ex: de Mac à PC) et que tu crains des bugs.*\n\n> **Prompt à copier :**\n> \"Agis en tant qu'**Ingénieur Logiciel Cross-Platform** (Role). Je migre mon workflow **[NOM DE L'APPLICATION]** d'un environnement **[SOURCE, EX: MAC]** vers **[CIBLE, EX: WINDOWS]** (Input).\n>\n> Identifie :\n> 1. Les problèmes de compatibilité potentiels (formats de fichiers, raccourcis clavier).\n> 2. La procédure d'installation adaptée au nouvel OS.\n> 3. Comment re-mapper mes habitudes de travail (Steps).\n>\n> **Attente :** Une analyse des risques et un guide de transition fluide.\"\n\n---\n\n**Action requise :** Choisis le prompt qui correspond à ton besoin, remplace les éléments entre crochets **[ ]**, et exécute. Si c'est pour **Obsidian**, prends l'Option 1."
+    },
+    {
+      "id": "9405d9d1-fde9-4d42-a80b-cb94e8deb27f",
+      "role": "user",
+      "content": "resumer du projet th3 thirty3"
+    },
+    {
+      "id": "6588d8a6-15b5-4060-b356-9788248a4d1c",
+      "role": "user",
+      "content": "resumer du projet th3 thirty3"
+    },
+    {
+      "id": "1e7d8af7-6f56-4ea1-987f-05773dbdead3",
+      "role": "assistant",
+      "content": "# ONE SENTENCE SUMMARY:\n\nTH3 THIRTY3 est un jumeau numérique IA transformant la paralysie du TDAH en exécution stratégique fluide et hautement rentable.\n\n# MAIN POINTS:\n\n1. TH3 THIRTY3 agit comme un jumeau numérique et une infrastructure cognitive autonome.\n2. Le système résout la procrastination et les blocages d'exécution liés au TDAH.\n3. L'IA analyse la psychologie et les habitudes pour traiter les problèmes à la source.\n4. L'objectif immédiat est de libérer 10 heures par semaine pour l'Opérateur.\n5. Le projet vise une commercialisation future sous forme de solution SaaS White Label.\n6. Le système filtre le bruit pour orienter vers des décisions durables et rentables.\n7. Une bienveillance rigoureuse transforme la neurodivergence en un avantage stratégique concret.\n8. L'architecture est conçue pour apprendre et évoluer sans supervision constante.\n9. Le processus comble le fossé entre la vision théorique et les résultats réels.\n10. L'Opérateur gagne une fluidité exécutive absolue et une clarté d'esprit totale.\n\n# TAKEAWAYS:\n\n1. Le système convertit la connaissance statique en action fluide et résultats concrets.\n2. Le TDAH devient un atout grâce au guidage psychologique adaptatif de l'IA.\n3. La rentabilité interne valide le modèle avant toute expansion commerciale externe.\n4. L'autonomie du jumeau numérique réduit drastiquement la charge mentale de l'Opérateur.\n5. La priorité absolue est l'exécution rapide vers les opportunités les plus lucratives."
+    },
+    {
+      "id": "11129ba4-1dbd-45f8-af9d-948e4d2e47e9",
+      "role": "user",
+      "content": "parfaits jai besoin des exemple de planning parfaits"
+    },
+    {
+      "id": "15171b3b-bd67-42f8-8a3d-46b24f7287b9",
+      "role": "assistant",
+      "content": "## 📐 Protocoles d'Exécution : Modèles de Planning\n\nPour un profil comme le tien (Visionnaire / TDAH), le planning \"parfait\" n'est pas une grille Excel remplie à la minute. C'est une structure flexible qui protège ton énergie mentale et force l'exécution sur les \"Big Rocks\" avant que le brouillard ne s'installe.\n\nVoici 3 exemples de structures adaptées à ta réalité actuelle, basées sur nos impératifs (Desjardins & Notaire).\n\n### 🛡️ Modèle 1 : Le \"Deep Work\" (Mode Guerre)\n*Utilisation : Quand il faut tuer un dossier critique immédiatement (ex: La situation Desjardins).*\n\nCe planning sacrifie tout pour une seule victoire majeure.\n\n*   **08:00 - 09:00 : Allumage Système.** Pas de courriels, pas de réseaux. Café, hydratation, préparation mentale. Tu rassembles les documents pour Desjardins (K2/Finart).\n*   **09:00 - 11:00 : Le Bloc Unique.**\n    *   **Action :** Appel Caisse Desjardins. Tu ne raccroches pas tant que l'accès n'est pas confirmé fermé ou le problème résolu.\n    *   **Règle :** Téléphone en mode \"Ne pas déranger\" sauf pour l'appel en cours.\n*   **11:00 - 11:30 : Décompression & Victoire.** Une fois l'appel terminé, tu prends une pause physique. Tu marches. Tu laisses l'adrénaline redescendre.\n*   **11:30 - 12:00 : Admin Rapide.** C'est là que tu traites le courriel du notaire (le 465 $). C'est une tâche binaire (fait/pas fait), facile à exécuter après la grosse victoire.\n\n### 🌊 Modèle 2 : Le Cycle Pomodoro Étendu (Mode Flow)\n*Utilisation : Pour avancer sur le Business Model ou des tâches créatives sans t'épuiser.*\n\nCe modèle utilise des cycles pour maintenir la dopamine active.\n\n*   **Bloc 1 (45 min) :** Focus total sur une section du Business Model (ex: Structure de Coûts).\n*   **Pause (15 min) :** Vraie pause. Pas d'écran.\n*   **Bloc 2 (45 min) :** Révision des notes \"Important.md\" et ajustement du plan.\n*   **Pause (15 min) :** Musique ou mouvement.\n*   **Bloc 3 (30 min) :** Tâches administratives (Emails, validation notaire).\n\n### 🚀 Modèle 3 : L'Application Immédiate (Ton Planning d'Aujourd'hui)\nVoici la version \"Parfaite\" pour **ce matin**, basée sur ta mémoire active et l'urgence des dossiers. C'est ce que je recommande d'exécuter maintenant.\n\n**La Séquence Critique :**\n\n1.  **Préparation (Maintenant) :** Ouvre ton dossier Desjardins. Aie les numéros de comptes K2 et Finart sous les yeux.\n2.  **L'Assaut (Dès que possible) :** Appelle Desjardins. C'est la priorité absolue mentionnée hier.\n    *   *Objectif :* Confirmer la fermeture des accès ou le blocage des transactions sortantes.\n3.  **Le Nettoyage :** Immédiatement après, valide le courriel pour le notaire (465 $). Enlève cette charge mentale.\n4.  **Le Bilan :** Une fois ces deux \"dangers\" écartés, on fait un point de situation pour le reste de la journée.\n\n**Action requise :** On part sur le **Modèle 3**. Est-ce que tu as les documents Desjardins devant toi ?"
+    }
+  ]
+}

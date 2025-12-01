@@ -12,3 +12,6 @@ yarn-error.log*
 .idea/
 *.swp
 *.swo
+
+# Secrets
+server/tokens/
