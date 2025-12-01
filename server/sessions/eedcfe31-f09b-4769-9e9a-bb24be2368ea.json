@@ -1,0 +1,18 @@
+{
+  "id": "eedcfe31-f09b-4769-9e9a-bb24be2368ea",
+  "title": "Parle moi du projets...",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "role": "user",
+      "content": "Parle moi du projets"
+    },
+    {
+      "role": "assistant",
+      "content": "There is no relevant information in this workspace to answer your query."
+    }
+  ]
+}

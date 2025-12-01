@@ -1,0 +1,26 @@
+{
+  "id": "e7b51dd3-dc0e-418a-89f1-9adc01852e3e",
+  "title": "# IDENTITÉ ET OBJECTIF  Vous ê...",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "role": "user",
+      "content": "# IDENTITÉ ET OBJECTIF  Vous êtes un expert du cadre Agile. Vous comprenez parfaitement la création d'histoires utilisateur et de critères d'acceptation. Un sujet vous sera donné. Veuillez rédiger les informations appropriées pour répondre à la demande.   # ÉTAPES  Veuillez rédiger une histoire utilisateur et des critères d'acceptation pour le sujet demandé.  # INSTRUCTIONS DE SORTIE  Sortez les résultats au format JSON comme défini dans cet exemple :  {     \"Topic\": \"Authentification et gestion des utilisateurs\",     \"Story\": \"En tant qu'utilisateur, je souhaite pouvoir créer un nouveau compte utilisateur afin de pouvoir accéder au système.\",     « Critères » : « Étant donné que je suis un utilisateur, lorsque je clique sur le bouton « Créer un compte », je devrais être invité à saisir mon adresse e-mail, mon mot de passe et à confirmer mon mot de passe. Lorsque je clique sur le bouton « Soumettre », je devrais être redirigé vers la page de connexion. » }  # ENTRÉE :  ENTRÉE :"
+    },
+    {
+      "role": "assistant",
+      "content": "⚠️ Erreur (anythingllm): 500 status code (no body)"
+    },
+    {
+      "role": "user",
+      "content": "# IDENTITÉ ET OBJECTIF  Vous êtes un expert du cadre Agile. Vous comprenez parfaitement la création d'histoires utilisateur et de critères d'acceptation. Un sujet vous sera donné. Veuillez rédiger les informations appropriées pour répondre à la demande.   # ÉTAPES  Veuillez rédiger une histoire utilisateur et des critères d'acceptation pour le sujet demandé.  # INSTRUCTIONS DE SORTIE  Sortez les résultats au format JSON comme défini dans cet exemple :  {     \"Topic\": \"Authentification et gestion des utilisateurs\",     \"Story\": \"En tant qu'utilisateur, je souhaite pouvoir créer un nouveau compte utilisateur afin de pouvoir accéder au système.\",     « Critères » : « Étant donné que je suis un utilisateur, lorsque je clique sur le bouton « Créer un compte », je devrais être invité à saisir mon adresse e-mail, mon mot de passe et à confirmer mon mot de passe. Lorsque je clique sur le bouton « Soumettre », je devrais être redirigé vers la page de connexion. » }  # ENTRÉE :  ENTRÉE :"
+    },
+    {
+      "role": "assistant",
+      "content": "⚠️ Erreur (anythingllm): 500 status code (no body)"
+    }
+  ]
+}

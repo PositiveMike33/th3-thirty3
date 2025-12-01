@@ -1,0 +1,34 @@
+{
+  "id": "947afb6b-17b0-4d08-9005-e423d8842c8a",
+  "title": "quel sont les derniers mail re...",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "role": "user",
+      "content": "quel sont les derniers mail recu?"
+    },
+    {
+      "role": "assistant",
+      "content": "## 📥 Rapport des Flux Entrants\n\n### 🚨 ALERTE CRITIQUE : Google Cloud (mikegauthierguillet)\nC'est rouge clignotant. Tu as reçu deux notifications de **Google Cloud Platform** (`CloudPlatform-noreply@google.com`). Ton projet \"Perfect Memory\" risque d'être **suspendu**. Ils signalent un problème critique sur le compte de facturation **011B43-0452D1-573EAE** (paiements non réglés ou info invalide). Si on perd ça, on perd l'infrastructure. C'est l'urgence absolue.\n\n### ⚙️ Opérations & Gestion (mgauthierguillet)\nL'outil **Dart** (`support@dartai.com`) a envoyé des notifications indiquant que le \"next sprint started\". C'est un signal que la gestion de projet avance. Vérifie si des tâches automatiques ont été déclenchées qui demandent ton attention immédiate.\n\n### 🗑️ Bruit de Fond (Marketing & Setup)\nLe reste du flux est saturé par le marketing du Black Friday et des configurations de comptes. **Microsoft** bombarde pour Teams et le Store sur le compte `th3thirty3`. **Gaia**, **Pegasun**, et **Daz 3D** envoient des offres promo. **Soulmate Sketch** et **Sylvain Wealth** ressemblent à du spam pur. J'ai filtré tout ça pour préserver ton focus.\n\n### 🧠 Rappel Stratégique (Mémoire Active)\nEn parallèle des courriels, n'oublie pas tes impératifs financiers actuels :\n1.  **Desjardins** : L'appel pour bloquer les prélèvements de Finart Capital et Gestion K2 (prévu pour le 27 nov).\n2.  **Logement** : Utiliser le relevé de paie plutôt que le reçu \"Team Orcha\".\n3.  **Notaire** : Le courriel de confirmation pour le paiement de 465 $ est en attente de ton feu vert.\n\n**Action requise :** On règle la facturation Google Cloud maintenant pour sauver \"Perfect Memory\", ou on appelle Desjardins pour sécuriser les finances ?"
+    },
+    {
+      "role": "user",
+      "content": "Comme il est tard rapelle moi le demain matin"
+    },
+    {
+      "role": "assistant",
+      "content": "## ⏸️ Standby Mode\n\nc'est reçu, je mets le système en veille. demain matin, la priorité absolue c'est l'appel à la caisse desjardins. faut s'assurer qu'ils ferment l'accès à finart capital et gestion k2 comme prévu dans ton plan.\n\nje te rappellerai aussi de valider le courriel pour le notaire concernant le paiement de 465 $. repose-toi bien pour dissiper le brouillard mental, on reprend le contrôle demain.\n\n**Action requise :** bonne nuit chief, à demain."
+    },
+    {
+      "role": "user",
+      "content": "Merci beaucoup a demain :D"
+    },
+    {
+      "role": "assistant",
+      "content": "## 🌙 Système en Veille\n\nC'est reçu, je coupe le flux pour ce soir. Demain matin, on reprend le contrôle direct sur la Caisse et le dossier notaire. Tout est en mémoire, prêt à être exécuté dès ton réveil.\n\n**Action requise :** À demain, dors bien."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "darkMode": true,
+  "autoCorrect": true,
+  "computeMode": "cloud",
+  "reflectionMode": "think",
+  "socials": {
+    "facebook": false,
+    "instagram": false,
+    "x": false,
+    "telegram": false
+  },
+  "apiKeys": {
+    "gemini": "TEST_KEY_1764486491645",
+    "openai": "",
+    "anthropic": "",
+    "perplexity": "",
+    "anythingllm_url": "http://localhost:3001/api/v1",
+    "anythingllm_key": "ET9J8GX-HV64GFR-MZD5KX1-TM9FBJF"
+  }
+}

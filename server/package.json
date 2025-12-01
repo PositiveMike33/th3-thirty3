@@ -1,0 +1,27 @@
+{
+    "name": "th3-thirty3-server",
+    "version": "1.0.0",
+    "description": "Backend for th3 thirty3 agent",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "@anthropic-ai/sdk": "^0.71.0",
+        "@google/generative-ai": "^0.24.1",
+        "@modelcontextprotocol/sdk": "^1.23.0",
+        "ccxt": "^4.5.22",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "google-auth-library": "^10.5.0",
+        "googleapis": "^166.0.0",
+        "mammoth": "^1.11.0",
+        "ollama": "^0.6.3",
+        "openai": "^6.9.1",
+        "pdf-parse": "^2.4.5",
+        "uuid": "^13.0.0",
+        "vectordb": "^0.21.2",
+        "zod": "^4.1.13"
+    }
+}

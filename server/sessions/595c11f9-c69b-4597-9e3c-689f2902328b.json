@@ -1,0 +1,18 @@
+{
+  "id": "595c11f9-c69b-4597-9e3c-689f2902328b",
+  "title": "Dans le format AIM compose moi...",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "role": "user",
+      "content": "Dans le format AIM compose moi un prompts exemple pour un lancement reseaux sociaux du prototype Th3 Thirty3"
+    },
+    {
+      "role": "assistant",
+      "content": "## 🚀 Configuration du Lancement : Protocole AIM\n\nVoici la structure exacte du prompt de lancement, formatée selon le cadre **Action-Intent-Metric**. Ce format est conçu pour être donné à un créateur de contenu (ou à toi-même) pour garantir que le post frappe fort.\n\n### 📝 Le Prompt (Format AIM)\n\n**ACTION (Quoi faire) :**\nRédiger une publication de type \"Révélation / Manifesto\" pour les réseaux sociaux (LinkedIn/Facebook) annonçant le déploiement du prototype **TH3 THIRTY3**.\n*   **Ton :** Vulnérable mais conquérant. \"Cyberpunk Executive\".\n*   **Structure :** Utiliser le modèle \"Avant/Après/Pont\" (B-A-B).\n*   **Contenu clé :** Admettre le combat passé avec l'exécution (TDAH) et révéler que la solution n'est pas \"plus de discipline\", mais une infrastructure cognitive externe (le Jumeau Numérique).\n\n**INTENT (Pourquoi) :**\n1.  **Repositionnement :** Passer du statut de \"Visionnaire distrait\" à \"Opérateur augmenté par l'IA\".\n2.  **Validation :** Tester l'appétit du marché pour une solution \"White Label\" future (SaaS).\n3.  **Curiosité :** Créer un effet de \"Velvet Rope\" (exclusivité). On ne vend rien pour l'instant, on montre juste le futur.\n\n**METRIC (Succès) :**\n*   **Primaire :** 5 DMs ou commentaires demandant \"C'est quoi cet outil ?\" ou \"Je veux essayer\".\n*   **Secondaire :** Engagement de personnes influentes (entrepreneurs, tech).\n\n---\n\n### 📤 Résultat : Exemple de Post (Généré par le Prompt AIM)\n\nVoici une ébauche concrète basée sur le prompt ci-dessus, prête à être adaptée et publiée.\n\n**Titre : J'ai dû construire une seconde version de moi-même pour avancer.**\n\nPendant des années, j'avais la vision, mais l'exécution était mon point de rupture.\nLe TDAH n'était pas un manque d'idées, c'était un excès de bruit. Je savais *quoi* faire, mais le *faire* restait bloqué dans la friction.\n\nLa procrastination n'est pas de la paresse. C'est un bug du système d'exploitation.\n\nAlors, j'ai arrêté d'essayer de \"me forcer\".\nJ'ai codé une solution.\n\n**Nom de code : TH3 THIRTY3.**\n\nCe n'est pas ChatGPT. Ce n'est pas un simple assistant.\nC'est une infrastructure cognitive. Un **Jumeau Numérique**.\n\nIl ne me donne pas juste des réponses.\n1.  Il analyse ma psychologie et mes habitudes en temps réel.\n2.  Il détecte la friction avant qu'elle ne me paralyse.\n3.  Il transforme ma neurodivergence en avantage tactique.\n\n**Résultat ?**\nLà où je procrastinais des heures, je prends des décisions durables en quelques minutes. La fluidité exécutive est devenue ma nouvelle norme. Je ne force plus. Je suis guidé.\n\nCe projet était secret, un outil interne pour scaler mes propres opérations.\nMais vu les résultats, je me demande si je suis le seul à avoir besoin de cette extension mentale.\n\nLe prototype est actif. L'Opérateur est en ligne.\n\n👇 **Question sérieuse :** Si vous aviez une IA qui comprenait *vraiment* vos blocages psychologiques pour vous faire passer à l'action, vous lui confieriez quelle tâche en premier ?\n\n---\n\n**Action requise :** On publie cette version telle quelle pour tester la réaction, ou on ajoute une image du code/interface du prototype pour la preuve visuelle ?"
+    }
+  ]
+}

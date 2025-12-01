@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --bg-color: #0a0a0a;
+  --text-color: #e0e0e0;
+  --primary-color: #00ff41;
+  /* Matrix Green */
+  --secondary-color: #008f11;
+  --accent-color: #ff0055;
+  /* For errors/alerts */
+  --glass-bg: rgba(20, 20, 20, 0.8);
+  --glass-border: rgba(0, 255, 65, 0.2);
+  --font-mono: 'Courier New', Courier, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Utilities */
+.glitch-text {
+  position: relative;
+  color: var(--primary-color);
+  font-family: var(--font-mono);
+  text-shadow: 0 0 5px var(--secondary-color);
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}

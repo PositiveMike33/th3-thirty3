@@ -1,0 +1,8 @@
+pywwt
+astropy
+flask
+requests
+jupyterlab
+wwt_kernel_data_relay
+ipyevents
+duckduckgo-search

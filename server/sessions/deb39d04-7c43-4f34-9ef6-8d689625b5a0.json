@@ -1,0 +1,18 @@
+{
+  "id": "deb39d04-7c43-4f34-9ef6-8d689625b5a0",
+  "title": "quels est le dernier email rec...",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "role": "user",
+      "content": "quels est le dernier email recu pour mikegauthierguillet@gmail.com"
+    },
+    {
+      "role": "assistant",
+      "content": "## 📥 Dernier Log Entrant\n\nBasé sur la télémétrie actuelle du compte `mikegauthierguillet@gmail.com`, voici le tout dernier courriel en haut de la pile :\n\n*   **Expéditeur :** Zeelool `<donotreply@e.zeelool.com>`\n*   **Sujet :** `$0 Frames + 20% Off Lenses💥`\n*   **Type :** Marketing / Spam (Black Friday).\n\n### ⚠️ Alerte Opérationnelle (Critique)\n\nJe détecte un signal beaucoup plus important un peu plus bas dans la liste. Je te conseille d'ignorer le spam Zeelool et de vérifier celui-ci immédiatement :\n\n*   **Expéditeur :** SchedulePro `<no-reply@schedulepro.ca>`\n*   **Sujet :** **SPRO – Notification de modification de quart de travail**\n\n**Action requise :** Veux-tu que j'analyse le contenu du courriel SPRO ou qu'on reste focus sur les dossiers financiers (K2/Finart) ?"
+    }
+  ]
+}
