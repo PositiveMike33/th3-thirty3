@@ -4,8 +4,9 @@ const pdf = require('pdf-parse');
 const mammoth = require('mammoth');
 
 class ContextService {
-    constructor(memoryService) {
+    constructor(memoryService, mcpService) {
         this.memoryService = memoryService;
+        this.mcpService = mcpService;
     }
 
     // Helper: Recursive file search in Vault
@@ -38,6 +39,26 @@ class ContextService {
                     enrichedMessage += `--- SOUVENIR ${index + 1} (Source: ${result.source}${dateInfo}) ---\n${result.text}\n`;
                 });
                 console.log(`[MEMORY] ${searchResults.length} souvenirs retrouvés.`);
+            }
+        }
+
+        // 0.5 Pieces Memory (MCP)
+        if (this.mcpService && message.length > 5) {
+            try {
+                // Try to find a relevant tool for searching pieces
+                const tools = await this.mcpService.listTools();
+                const piecesSearchTool = tools.find(t => t.server === 'pieces' && (t.name.includes('search') || t.name.includes('query')));
+
+                if (piecesSearchTool) {
+                    console.log(`[MEMORY] Querying Pieces via ${piecesSearchTool.name}...`);
+                    const result = await this.mcpService.callTool('pieces', piecesSearchTool.originalName, { query: message });
+                    if (result && result.content && result.content.length > 0) {
+                        const piecesContext = result.content.map(c => c.text).join('\n');
+                        enrichedMessage += `\n\n[MÉMOIRE PIECES]\n${piecesContext}\n`;
+                    }
+                }
+            } catch (e) {
+                console.error("[MEMORY] Pieces query failed:", e.message);
             }
         }
 

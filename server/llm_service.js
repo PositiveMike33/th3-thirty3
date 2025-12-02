@@ -98,6 +98,14 @@ class LLMService {
         console.log(`[LLM] Request: Provider=${providerId}, Model=${modelId}`);
 
         try {
+            // RESOURCE MANAGEMENT:
+            // If we are NOT using local/ollama, ensure we unload any loaded local models to free VRAM
+            // This is critical when running AnythingLLM or other heavy local apps alongside.
+            if (providerId !== 'local') {
+                // We don't await this to avoid slowing down the request
+                this.unloadModel('granite3.1-moe:1b').catch(e => console.log("[LLM] Background unload failed:", e.message));
+            }
+
             switch (providerId) {
                 case 'gemini':
                     return await this.generateGeminiResponse(prompt, imageBase64, modelId, systemPrompt);

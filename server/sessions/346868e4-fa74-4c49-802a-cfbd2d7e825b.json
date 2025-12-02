@@ -1,0 +1,21 @@
+{
+  "id": "346868e4-fa74-4c49-802a-cfbd2d7e825b",
+  "title": "fais un analyse psycho...",
+  "messages": [
+    {
+      "id": "634b95ad-1047-4d4c-acac-f03c80c32aeb",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "292c8b50-04d3-4a7b-8098-d4d015ead27d",
+      "role": "user",
+      "content": "fais un analyse psycho"
+    },
+    {
+      "id": "e7a953fe-562e-46d6-b528-81fad813bce7",
+      "role": "assistant",
+      "content": "* Le perfectionnisme fige l'action; attendre les conditions idéales garantit l'échec opérationnel immédiat et frustrant.\n* La quête de dopamine rend les tâches de maintenance invisibles et dangereusement négligées au quotidien.\n* La cécité temporelle fausse l'estimation des délais, créant une urgence artificielle et un stress constant.\n* L'accumulation excessive de connaissances sans application crée une illusion de compétence qui masque l'inaction réelle.\n* La dysrégulation émotionnelle transforme les petits obstacles en murs infranchissables, stoppant net tout élan critique.\n* La pensée binaire « tout ou rien » sabote la constance imparfaite nécessaire aux résultats durables.\n* Surestimer la capacité énergétique future mène à un surmenage cyclique et à des promesses brisées.\n* Négliger le repos biologique pour forcer la productivité cognitive accélère inévitablement l'effondrement du système exécutif."
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const FABRIC_PATH_1 = path.join(__dirname, 'fabric', 'patterns');
-const FABRIC_PATH_2 = path.join(__dirname, 'fabric', 'data', 'patterns'); // Some versions might have it here?
-const FABRIC_PATH_3 = path.join(__dirname, 'fabric', 'server', 'patterns'); // Just in case
+const FABRIC_PATH_1 = path.join(__dirname, '..', 'fabric', 'patterns');
+const FABRIC_PATH_2 = path.join(__dirname, '..', 'fabric', 'data', 'patterns'); // Some versions might have it here?
+const FABRIC_PATH_3 = path.join(__dirname, '..', 'fabric', 'server', 'patterns'); // Just in case
 
 const getPatternsDir = () => {
     // Check data/patterns first as that seems to be the correct location in this clone

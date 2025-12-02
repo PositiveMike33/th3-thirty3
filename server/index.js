@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const { getPatterns, getPatternContent } = require('./fabric_service');
 const MemoryService = require('./memory_service');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -41,17 +42,17 @@ if (currentSettings.apiKeys) {
     if (currentSettings.apiKeys.anythingllm_key) process.env.ANYTHING_LLM_KEY = currentSettings.apiKeys.anythingllm_key;
 }
 
+// Initialize MCP Service (Protocol Nexus)
+const MCPService = require('./mcp_service');
+const mcpService = new MCPService();
+
 // Initialize Context Service
 const ContextService = require('./context_service');
-const contextService = new ContextService(memoryService);
+const contextService = new ContextService(memoryService, mcpService);
 
 // Initialize LLM Service
 const LLMService = require('./llm_service');
 const llmService = new LLMService();
-
-// Initialize MCP Service (Protocol Nexus)
-const MCPService = require('./mcp_service');
-const mcpService = new MCPService();
 
 // Initialize Google Service
 const GoogleService = require('./google_service');
@@ -79,6 +80,12 @@ mcpService.registerLocalTool(webSearch, webSearch.handler);
 // } else {
 //     console.warn("[MCP] OBSIDIAN_VAULT_PATH not set. Skipping Obsidian connection.");
 // }
+
+// Connect to Pieces MCP Server
+const PIECES_MCP_URL = 'http://localhost:39300/model_context_protocol/2024-11-05/sse';
+const piecesSessionId = uuidv4();
+mcpService.connectSSE('pieces', PIECES_MCP_URL, piecesSessionId)
+    .catch(err => console.error("[MCP] Failed to connect to Pieces:", err));
 
 // Pass MCP Service to LLM Service
 llmService.setMCPService(mcpService);
@@ -368,8 +375,40 @@ app.post('/chat', async (req, res) => {
         // Handle Bye Command (Unload Memory for Gaming)
         if (message.trim().toLowerCase() === '/bye') {
             try {
+                console.log("[BYE] Initiating System Integrity Check...");
+                const { execSync } = require('child_process');
+
+                try {
+                    // Run self-healing script from project root
+                    execSync('node server/self_heal.js', { stdio: 'inherit', cwd: require('path').join(__dirname, '..') });
+                    console.log("[BYE] System Integrity Verified.");
+                } catch (err) {
+                    console.error("[BYE] System Integrity Check Failed:", err.message);
+                    return res.json({ reply: "⚠️ ATTENTION : Les tests de sécurité ont échoué. Vérifiez les logs avant de fermer." });
+                }
+
                 await llmService.unloadModel(model || "granite3.1-moe:1b");
-                return res.json({ reply: "Cerveau déconnecté. VRAM libérée. Bon jeu !" });
+
+                const byeResponse = `### SYSTÈME TH3 THIRTY3
+
+**PROTOCOLE DE SAUVEGARDE ACTIVÉ.**
+
+Données enregistrées :
+*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arrêt Hémorragie.
+*   **Objectif Actuel (LOCK) :** Logistique de déploiement & Exécution du shift de travail (Cible : 484$).
+*   **Statut :** EN ATTENTE D'EXÉCUTION.
+
+Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
+
+À ton retour, la première chose que tu verras sera :
+> **RAPPEL OBJECTIF :** Shift Travail terminé ?
+> **STATUS :** [YES/NO]
+
+**SERVER SHUTDOWN...**
+**VRAM CLEARED.**
+**GO.**`;
+
+                return res.json({ reply: byeResponse });
             } catch (e) {
                 console.error("Error unloading model:", e);
                 return res.json({ reply: "Erreur lors de la déconnexion du cerveau. Check la console." });

@@ -3,6 +3,7 @@ import Avatar from './Avatar';
 import GoogleAuthPanel from './components/GoogleAuthPanel';
 import FeedbackModal from './components/FeedbackModal';
 import PatternModal from './components/PatternModal';
+import WebcamInput from './components/WebcamInput';
 import ModelSelector from './components/ModelSelector';
 import Dashboard from './Dashboard'; // Import Dashboard
 import SpaceDashboard from './SpaceDashboard'; // Import SpaceDashboard
@@ -42,6 +43,10 @@ const ChatInterface = () => {
     const [patternModalOpen, setPatternModalOpen] = useState(false);
     const [viewingPatternContent, setViewingPatternContent] = useState('');
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
+
+    // Vision State
+    const [showWebcam, setShowWebcam] = useState(false);
+    const [capturedImage, setCapturedImage] = useState(null);
 
     const isMutedRef = useRef(isMuted);
 
@@ -171,9 +176,16 @@ const ChatInterface = () => {
     const handleSend = async () => {
         if (!input.trim()) return;
 
-        const userMessage = { id: messages.length + 1, sender: 'user', text: input };
+        const userMessage = {
+            id: messages.length + 1,
+            sender: 'user',
+            text: input,
+            image: capturedImage // Store image in local message for display
+        };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
+        const imageToSend = capturedImage;
+        setCapturedImage(null); // Clear immediately
 
         try {
             setIsAgentSpeaking(true);
@@ -182,6 +194,7 @@ const ChatInterface = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: input,
+                    image: imageToSend, // Send image
                     pattern: selectedPattern,
                     provider: selectedProvider,
                     model: selectedModel,
@@ -454,6 +467,11 @@ const ChatInterface = () => {
                                             </button>
                                         </div>
                                         <div className="whitespace-pre-wrap leading-relaxed text-sm">
+                                            {msg.image && (
+                                                <div className="mb-2">
+                                                    <img src={msg.image} alt="Captured" className="max-w-xs rounded border border-cyan-500/30" />
+                                                </div>
+                                            )}
                                             {msg.text}
                                         </div>
                                         {msg.sender === 'agent' && (
@@ -490,7 +508,20 @@ const ChatInterface = () => {
                                 >
                                     {isListening ? '🛑' : '🎤'}
                                 </button>
+                                <button
+                                    onClick={() => setShowWebcam(true)}
+                                    className={`absolute right-12 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${capturedImage ? 'text-green-500' : 'text-cyan-600 hover:text-cyan-400'}`}
+                                    title="Activer la Vision"
+                                >
+                                    📷
+                                </button>
                             </div>
+                            {capturedImage && (
+                                <div className="mt-2 flex items-center gap-2">
+                                    <span className="text-xs text-green-500 font-mono">Image capturée</span>
+                                    <button onClick={() => setCapturedImage(null)} className="text-red-500 text-xs hover:underline">Supprimer</button>
+                                </div>
+                            )}
                             <div className="text-center mt-2 text-[10px] text-gray-600 uppercase tracking-widest">
                                 Système Sécurisé • Chiffrage End-to-End • {APP_CONFIG.version}
                             </div>
@@ -513,6 +544,18 @@ const ChatInterface = () => {
                 onClose={() => setPatternModalOpen(false)}
                 content={viewingPatternContent}
             />
+
+            {
+                showWebcam && (
+                    <WebcamInput
+                        onCapture={(img) => {
+                            setCapturedImage(img);
+                            setShowWebcam(false);
+                        }}
+                        onClose={() => setShowWebcam(false)}
+                    />
+                )
+            }
         </div >
     );
 };
