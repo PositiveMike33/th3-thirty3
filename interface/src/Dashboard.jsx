@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Wallet, TrendingUp, DollarSign, Activity } from 'lucide-react';
 
+const SYMBOLS = ['BTC/CAD', 'ETH/CAD', 'SOL/CAD'];
+
 const Dashboard = () => {
     const [portfolio, setPortfolio] = useState([]);
     const [tickers, setTickers] = useState({});
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const SYMBOLS = ['BTC/CAD', 'ETH/CAD', 'SOL/CAD'];
 
     useEffect(() => {
         const fetchData = async () => {

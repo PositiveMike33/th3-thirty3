@@ -3,18 +3,15 @@ import React, { useState, useEffect } from 'react';
 const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
     const [models, setModels] = useState({ local: [], cloud: [] });
     const [isOpen, setIsOpen] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetch('http://localhost:3000/models')
             .then(res => res.json())
             .then(data => {
                 setModels(data);
-                setLoading(false);
             })
             .catch(err => {
                 console.error("Failed to load models", err);
-                setLoading(false);
             });
     }, []);
 

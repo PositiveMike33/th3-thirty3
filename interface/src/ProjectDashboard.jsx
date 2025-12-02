@@ -3,26 +3,26 @@ import { ExternalLink, Calendar, Briefcase, RefreshCw } from 'lucide-react';
 
 const ProjectDashboard = () => {
     const dartUrl = "https://app.itsdart.com/";
-    const calendarUrl = "https://calendar.google.com/";
 
     const [events, setEvents] = useState("Chargement...");
     const [loading, setLoading] = useState(false);
 
-    const fetchCalendar = async () => {
+    const fetchCalendar = React.useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetch('http://localhost:3000/google/calendar');
             const data = await res.json();
             setEvents(data.events || "Aucun événement trouvé.");
-        } catch (e) {
+        } catch {
             setEvents("Erreur de chargement du calendrier.");
         }
         setLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchCalendar();
-    }, []);
+    }, [fetchCalendar]);
 
     return (
         <div className="flex-1 p-8 bg-black text-cyan-300 overflow-y-auto bg-[url('/grid.png')]">

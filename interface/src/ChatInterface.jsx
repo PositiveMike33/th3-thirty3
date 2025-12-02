@@ -21,7 +21,6 @@ const ChatInterface = () => {
     const messagesEndRef = useRef(null);
     const [patterns, setPatterns] = useState([]);
     const [selectedPattern, setSelectedPattern] = useState('');
-    const [patternError, setPatternError] = useState(null);
 
     // View State (Chat vs Dashboard)
     const [currentView, setCurrentView] = useState('chat');
@@ -84,6 +83,15 @@ const ChatInterface = () => {
         }
     };
 
+    const loadSessions = () => {
+        fetch('http://localhost:3000/sessions')
+            .then(res => res.json()
+                .then(data => {
+                    setSessions(data);
+                }))
+            .catch(err => console.error("Failed to load sessions", err));
+    };
+
     useEffect(() => {
         // Load Patterns
         fetch('http://localhost:3000/patterns')
@@ -109,15 +117,6 @@ const ChatInterface = () => {
         // Load Sessions
         loadSessions();
     }, []);
-
-    const loadSessions = () => {
-        fetch('http://localhost:3000/sessions')
-            .then(res => res.json())
-            .then(data => {
-                setSessions(data);
-            })
-            .catch(err => console.error("Failed to load sessions", err));
-    };
 
     const createNewSession = () => {
         setMessages([{ id: 1, sender: 'agent', text: `Initialisation... ${APP_CONFIG.name} en ligne. C'est quoi le plan ?` }]);
@@ -269,7 +268,7 @@ const ChatInterface = () => {
                 alert("Correction envoyée !");
                 setFeedbackModalOpen(false);
                 setCorrectionText('');
-            } catch (e) {
+            } catch {
                 alert("Erreur lors de l'envoi du feedback.");
             }
         }
@@ -282,7 +281,7 @@ const ChatInterface = () => {
                 setViewingPatternContent(data.content);
                 setPatternModalOpen(true);
             })
-            .catch(err => alert("Impossible de charger le pattern"));
+            .catch(() => alert("Impossible de charger le pattern"));
     };
 
     return (
