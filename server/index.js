@@ -62,6 +62,10 @@ const googleService = new GoogleService();
 const FinanceService = require('./finance_service');
 const financeService = new FinanceService();
 
+// Initialize Project Service
+const ProjectService = require('./project_service');
+const projectService = new ProjectService();
+
 // Register Local Tools
 const pythonRunner = require('./tools/python_runner');
 const webSearch = require('./tools/web_search');
@@ -264,12 +268,42 @@ app.get('/google/status', async (req, res) => {
 });
 
 app.get('/google/calendar', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0]; // Default to first account
+    const email = req.query.email || ACCOUNTS[0];
     if (!email) return res.status(400).json({ error: "No account configured" });
 
     try {
-        const events = await googleService.listUpcomingEvents(email);
+        const events = await googleService.getUpcomingEvents(email);
         res.json({ events });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/google/emails', async (req, res) => {
+    const email = req.query.email || ACCOUNTS[0];
+    try {
+        const emails = await googleService.getUnreadEmails(email);
+        res.json({ emails });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/google/tasks', async (req, res) => {
+    const email = req.query.email || ACCOUNTS[0];
+    try {
+        const tasks = await googleService.getTasks(email);
+        res.json({ tasks });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/google/drive', async (req, res) => {
+    const email = req.query.email || ACCOUNTS[0];
+    try {
+        const files = await googleService.getDriveFiles(email);
+        res.json({ files });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -283,6 +317,49 @@ app.get('/finance/portfolio', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+// Project Management Endpoints
+app.get('/projects', (req, res) => {
+    const projects = projectService.getProjects();
+    res.json(projects);
+});
+
+app.post('/projects', (req, res) => {
+    const { name, description } = req.body;
+    if (!name) return res.status(400).json({ error: "Name required" });
+    const project = projectService.createProject(name, description);
+    res.json(project);
+});
+
+app.put('/projects/:id', (req, res) => {
+    const project = projectService.updateProject(req.params.id, req.body);
+    if (project) res.json(project);
+    else res.status(404).json({ error: "Project not found" });
+});
+
+app.delete('/projects/:id', (req, res) => {
+    const success = projectService.deleteProject(req.params.id);
+    res.json({ success });
+});
+
+app.post('/projects/:id/tasks', (req, res) => {
+    const { content, status } = req.body;
+    if (!content) return res.status(400).json({ error: "Content required" });
+    const task = projectService.addTask(req.params.id, content, status);
+    if (task) res.json(task);
+    else res.status(404).json({ error: "Project not found" });
+});
+
+app.put('/projects/:id/tasks/:taskId', (req, res) => {
+    const task = projectService.updateTask(req.params.id, req.params.taskId, req.body);
+    if (task) res.json(task);
+    else res.status(404).json({ error: "Task not found" });
+});
+
+app.delete('/projects/:id/tasks/:taskId', (req, res) => {
+    const success = projectService.deleteTask(req.params.id, req.params.taskId);
+    res.json({ success });
 });
 
 app.post('/feedback', async (req, res) => {

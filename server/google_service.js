@@ -80,23 +80,32 @@ class GoogleService {
     }
 
     async listUnreadEmails(email) {
+        const messages = await this.getUnreadEmails(email);
+        if (!messages || messages.length === 0) return "Aucun email non lu.";
+
+        let summary = "";
+        messages.forEach(msg => {
+            summary += `- De: ${msg.from} | Sujet: ${msg.subject}\n`;
+        });
+        return summary;
+    }
+
+    async getUnreadEmails(email) {
         const auth = await this.getClient(email);
-        if (!auth) return `[ERREUR] Compte ${email} non connecté.`;
+        if (!auth) return [];
 
         const gmail = google.gmail({ version: 'v1', auth });
         try {
             const res = await gmail.users.messages.list({
                 userId: 'me',
                 q: 'is:unread',
-                maxResults: 5
+                maxResults: 10
             });
 
             const messages = res.data.messages;
-            if (!messages || messages.length === 0) {
-                return "Aucun email non lu.";
-            }
+            if (!messages || messages.length === 0) return [];
 
-            let summary = "";
+            const emailData = [];
             for (const message of messages) {
                 const msg = await gmail.users.messages.get({
                     userId: 'me',
@@ -105,100 +114,114 @@ class GoogleService {
                 const headers = msg.data.payload.headers;
                 const subject = headers.find(h => h.name === 'Subject')?.value || '(Sans sujet)';
                 const from = headers.find(h => h.name === 'From')?.value || '(Inconnu)';
-                summary += `- De: ${from} | Sujet: ${subject}\n`;
+                const date = headers.find(h => h.name === 'Date')?.value;
+
+                emailData.push({
+                    id: message.id,
+                    subject,
+                    from,
+                    date,
+                    snippet: msg.data.snippet
+                });
             }
-            return summary;
+            return emailData;
         } catch (error) {
             console.error(`Error fetching emails for ${email}:`, error);
-            return "Erreur lors de la lecture des emails.";
+            return [];
         }
     }
 
     async listUpcomingEvents(email) {
+        const events = await this.getUpcomingEvents(email);
+        if (!events || events.length === 0) return "Aucun événement à venir.";
+
+        let summary = "";
+        events.forEach(event => {
+            const start = event.start.dateTime || event.start.date;
+            summary += `- ${start} : ${event.summary}\n`;
+        });
+        return summary;
+    }
+
+    async getUpcomingEvents(email) {
         const auth = await this.getClient(email);
-        if (!auth) return `[ERREUR] Compte ${email} non connecté.`;
+        if (!auth) return [];
 
         const calendar = google.calendar({ version: 'v3', auth });
         try {
             const res = await calendar.events.list({
                 calendarId: 'primary',
                 timeMin: (new Date()).toISOString(),
-                maxResults: 5,
+                maxResults: 10,
                 singleEvents: true,
                 orderBy: 'startTime',
             });
-
-            const events = res.data.items;
-            if (!events || events.length === 0) {
-                return "Aucun événement à venir.";
-            }
-
-            let summary = "";
-            events.map((event, i) => {
-                const start = event.start.dateTime || event.start.date;
-                summary += `- ${start} : ${event.summary}\n`;
-            });
-            return summary;
+            return res.data.items || [];
         } catch (error) {
             console.error(`Error fetching calendar for ${email}:`, error);
-            return "Erreur lors de la lecture du calendrier.";
+            return [];
         }
     }
 
     async listTasks(email) {
+        const tasks = await this.getTasks(email);
+        if (!tasks || tasks.length === 0) return "Aucune tâche à faire.";
+
+        let summary = "";
+        tasks.forEach(t => {
+            summary += `- [ ] ${t.title} (Due: ${t.due ? t.due.split('T')[0] : 'Pas de date'})\n`;
+        });
+        return summary;
+    }
+
+    async getTasks(email) {
         const auth = await this.getClient(email);
-        if (!auth) return `[ERREUR] Compte ${email} non connecté.`;
+        if (!auth) return [];
 
         const service = google.tasks({ version: 'v1', auth });
         try {
-            // Get default task list
             const taskLists = await service.tasklists.list({ maxResults: 1 });
-            if (!taskLists.data.items || taskLists.data.items.length === 0) return "Aucune liste de tâches.";
+            if (!taskLists.data.items || taskLists.data.items.length === 0) return [];
 
             const taskListId = taskLists.data.items[0].id;
             const res = await service.tasks.list({
                 tasklist: taskListId,
-                maxResults: 5,
+                maxResults: 10,
                 showCompleted: false
             });
-
-            const tasks = res.data.items;
-            if (!tasks || tasks.length === 0) return "Aucune tâche à faire.";
-
-            let summary = "";
-            tasks.map(t => {
-                summary += `- [ ] ${t.title} (Due: ${t.due ? t.due.split('T')[0] : 'Pas de date'})\n`;
-            });
-            return summary;
+            return res.data.items || [];
         } catch (error) {
             console.error(`Error fetching tasks for ${email}:`, error);
-            return "Erreur lors de la lecture des tâches.";
+            return [];
         }
     }
 
     async listDriveFiles(email) {
+        const files = await this.getDriveFiles(email);
+        if (!files || files.length === 0) return "Aucun fichier récent.";
+
+        let summary = "";
+        files.forEach(f => {
+            summary += `- [${f.mimeType.split('/').pop()}] ${f.name} (Modifié: ${f.modifiedTime})\n`;
+        });
+        return summary;
+    }
+
+    async getDriveFiles(email) {
         const auth = await this.getClient(email);
-        if (!auth) return `[ERREUR] Compte ${email} non connecté.`;
+        if (!auth) return [];
 
         const drive = google.drive({ version: 'v3', auth });
         try {
             const res = await drive.files.list({
-                pageSize: 5,
-                fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
+                pageSize: 10,
+                fields: 'nextPageToken, files(id, name, mimeType, modifiedTime, webViewLink)',
                 orderBy: 'modifiedTime desc'
             });
-
-            const files = res.data.files;
-            if (!files || files.length === 0) return "Aucun fichier récent.";
-
-            let summary = "";
-            files.map(f => {
-                summary += `- [${f.mimeType.split('/').pop()}] ${f.name} (Modifié: ${f.modifiedTime})\n`;
-            });
-            return summary;
+            return res.data.files || [];
         } catch (error) {
             console.error(`Error fetching drive files for ${email}:`, error);
-            return "Erreur lors de la lecture de Google Drive.";
+            return [];
         }
     }
     async archiveEmail(email, messageId) {
