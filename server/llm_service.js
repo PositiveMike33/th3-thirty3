@@ -6,6 +6,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 class LLMService {
     constructor() {
         this.ollama = new Ollama();
+        this.socketService = null;
         this.providers = {
             local: { name: 'Local (Ollama)', type: 'local' },
             gemini: { name: 'Google Gemini', type: 'cloud' },
@@ -14,6 +15,10 @@ class LLMService {
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
+    }
+
+    setSocketService(socketService) {
+        this.socketService = socketService;
     }
 
     /**
@@ -96,6 +101,10 @@ class LLMService {
 
     async generateResponse(prompt, imageBase64, providerId, modelId, systemPrompt) {
         console.log(`[LLM] Request: Provider=${providerId}, Model=${modelId}`);
+        if (this.socketService) {
+            this.socketService.emitAgentStart({ provider: providerId, model: modelId, prompt });
+            this.socketService.emitAgentStatus("Thinking...");
+        }
 
         try {
             // RESOURCE MANAGEMENT:
@@ -106,27 +115,43 @@ class LLMService {
                 this.unloadModel('granite3.1-moe:1b').catch(e => console.log("[LLM] Background unload failed:", e.message));
             }
 
+            let response;
             switch (providerId) {
                 case 'gemini':
-                    return await this.generateGeminiResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateGeminiResponse(prompt, imageBase64, modelId, systemPrompt);
+                    break;
                 case 'openai':
-                    return await this.generateOpenAIResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateOpenAIResponse(prompt, imageBase64, modelId, systemPrompt);
+                    break;
                 case 'claude':
-                    return await this.generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt);
+                    break;
                 case 'perplexity':
-                    return await this.generatePerplexityResponse(prompt, modelId, systemPrompt);
+                    response = await this.generatePerplexityResponse(prompt, modelId, systemPrompt);
+                    break;
                 case 'openrouter':
-                    return await this.generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt);
+                    break;
                 case 'anythingllm':
-                    return await this.generateAnythingLLMResponse(prompt, modelId, systemPrompt);
+                    response = await this.generateAnythingLLMResponse(prompt, modelId, systemPrompt);
+                    break;
                 case 'lmstudio':
-                    return await this.generateLMStudioResponse(prompt, modelId, systemPrompt);
+                    response = await this.generateLMStudioResponse(prompt, modelId, systemPrompt);
+                    break;
                 case 'local':
                 default:
-                    return await this.generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt);
+                    break;
             }
+
+            if (this.socketService) {
+                this.socketService.emitAgentEnd(response);
+                this.socketService.emitAgentStatus("Idle");
+            }
+            return response;
         } catch (error) {
             console.error(`[LLM] Error with ${providerId}:`, error);
+            if (this.socketService) this.socketService.emitAgentStatus("Error");
             return `⚠️ Erreur (${providerId}): ${error.message}`;
         }
     }
@@ -294,6 +319,10 @@ class LLMService {
 
             try {
                 console.log(`[MCP] Executing ${toolName} on ${serverName}...`);
+                if (this.socketService) {
+                    this.socketService.emitAgentTool(toolName, args);
+                    this.socketService.emitAgentStatus(`Using Tool: ${toolName}`);
+                }
                 const toolResult = await this.mcpService.callTool(serverName, originalToolName, args);
                 const resultParts = [{
                     functionResponse: {

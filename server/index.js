@@ -6,7 +6,9 @@ const { getPatterns, getPatternContent } = require('./fabric_service');
 const MemoryService = require('./memory_service');
 const { v4: uuidv4 } = require('uuid');
 
+const http = require('http');
 const app = express();
+const server = http.createServer(app);
 const port = process.env.PORT || 3000;
 
 app.use(cors());
@@ -98,10 +100,13 @@ llmService.setMCPService(mcpService);
 const StyleService = require('./style_service');
 const styleService = new StyleService();
 
-// Load Persona
-const { PERSONA, MINIMAL_PERSONA } = require('./persona');
+// Initialize OSINT Service
+const OsintService = require('./osint_service');
+const osintService = new OsintService();
 
-// Initialize Session Manager
+// Initialize Socket Service
+const SocketService = require('./socket_service');
+const socketService = new SocketService();
 const SessionManager = require('./session_manager');
 const sessionManager = new SessionManager();
 
@@ -304,6 +309,21 @@ app.get('/google/drive', async (req, res) => {
     try {
         const files = await googleService.getDriveFiles(email);
         res.json({ files });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// OSINT Endpoints
+app.get('/osint/tools', (req, res) => {
+    res.json(osintService.getTools());
+});
+
+app.post('/osint/run', async (req, res) => {
+    const { toolId, target } = req.body;
+    try {
+        const result = await osintService.runTool(toolId, target);
+        res.json({ result });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
