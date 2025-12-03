@@ -16,37 +16,44 @@ class GoogleService {
         this.credentialsPath = path.join(__dirname, 'credentials.json');
         this.tokensDir = path.join(__dirname, 'tokens');
         this.clients = {}; // Map<email, OAuth2Client>
+        this.credentials = null;
 
         if (!fs.existsSync(this.tokensDir)) {
             fs.mkdirSync(this.tokensDir);
         }
+
+        // Load credentials once
+        if (fs.existsSync(this.credentialsPath)) {
+            try {
+                const content = fs.readFileSync(this.credentialsPath);
+                this.credentials = JSON.parse(content);
+            } catch (e) {
+                console.error("[GOOGLE] Failed to load credentials.json:", e.message);
+            }
+        }
     }
 
     getAuthUrl(email) {
-        if (!fs.existsSync(this.credentialsPath)) {
-            throw new Error("Fichier credentials.json manquant !");
+        if (!this.credentials) {
+            throw new Error("Fichier credentials.json manquant ou invalide !");
         }
 
-        const content = fs.readFileSync(this.credentialsPath);
-        const credentials = JSON.parse(content);
-        const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
-
+        const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
         const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
-        // Store client temporarily to retrieve token later
+        // Store client temporarily
         this.clients[email] = oAuth2Client;
 
         return oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
-            state: email, // Pass email as state to know which account is authenticating
-            prompt: 'consent' // Force consent to ensure we get a refresh_token
+            state: email,
+            prompt: 'consent'
         });
     }
 
     async handleCallback(code, email) {
         if (!this.clients[email]) {
-            // Re-instantiate if missing (e.g. server restart during auth)
             this.getAuthUrl(email);
         }
 
@@ -54,29 +61,39 @@ class GoogleService {
         const { tokens } = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
 
-        // Save token
+        // Save token async
         const tokenPath = path.join(this.tokensDir, `token_${email}.json`);
-        fs.writeFileSync(tokenPath, JSON.stringify(tokens));
+        await require('fs').promises.writeFile(tokenPath, JSON.stringify(tokens));
         console.log(`[GOOGLE] Token stored for ${email}`);
 
         return true;
     }
 
     async getClient(email) {
+        // Return cached client if credentials are valid
+        if (this.clients[email] && this.clients[email].credentials) {
+            return this.clients[email];
+        }
+
         const tokenPath = path.join(this.tokensDir, `token_${email}.json`);
         if (!fs.existsSync(tokenPath)) return null;
+        if (!this.credentials) return null;
 
-        if (!fs.existsSync(this.credentialsPath)) return null;
-
-        const content = fs.readFileSync(this.credentialsPath);
-        const credentials = JSON.parse(content);
-        const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
-
+        const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
         const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-        const tokens = JSON.parse(fs.readFileSync(tokenPath));
-        oAuth2Client.setCredentials(tokens);
 
-        return oAuth2Client;
+        try {
+            const tokenContent = await require('fs').promises.readFile(tokenPath, 'utf8');
+            const tokens = JSON.parse(tokenContent);
+            oAuth2Client.setCredentials(tokens);
+
+            // Cache the client
+            this.clients[email] = oAuth2Client;
+            return oAuth2Client;
+        } catch (e) {
+            console.error(`[GOOGLE] Failed to load token for ${email}:`, e.message);
+            return null;
+        }
     }
 
     async listUnreadEmails(email) {

@@ -8,6 +8,8 @@ import ChatInterface from './ChatInterface';
 import SecurityScreen from './SecurityScreen';
 import './index.css';
 
+import GlobalChat from './GlobalChat';
+
 function App() {
   // isLocked state is removed as routing will handle different views
 
@@ -44,6 +46,12 @@ function App() {
             </div>
 
             <AgentMonitor />
+
+            {/* Global Chat Overlay - Hidden on Main Chat Route */}
+            <Routes>
+              <Route path="/" element={null} />
+              <Route path="*" element={<GlobalChat />} />
+            </Routes>
           </div>
         </div>
       </div>

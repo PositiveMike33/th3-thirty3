@@ -112,7 +112,12 @@ const sessionManager = new SessionManager();
 
 // Helper: Inject File Content (Delegated to ContextService)
 const injectFileContent = async (message) => {
-    return await contextService.injectContext(message);
+    try {
+        return await contextService.injectContext(message);
+    } catch (error) {
+        console.error("[CONTEXT] File injection failed:", error.message);
+        return "";
+    }
 };
 
 // Helper: Fetch Google Context
@@ -120,28 +125,33 @@ const fetchGoogleContext = async (message) => {
     const checks = [];
     const msg = message.toLowerCase();
 
-    if (msg.includes('mail') || msg.includes('courriel')) {
-        checks.push(Promise.all(ACCOUNTS.map(email => googleService.listUnreadEmails(email)))
-            .then(res => "\n\n[EMAILS RECENTS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-    }
+    try {
+        if (msg.includes('mail') || msg.includes('courriel')) {
+            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listUnreadEmails(email).catch(e => `Error: ${e.message}`)))
+                .then(res => "\n\n[EMAILS RECENTS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
+        }
 
-    if (msg.includes('calendrier') || msg.includes('agenda') || msg.includes('rendez-vous')) {
-        checks.push(Promise.all(ACCOUNTS.map(email => googleService.listUpcomingEvents(email)))
-            .then(res => "\n\n[AGENDA]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-    }
+        if (msg.includes('calendrier') || msg.includes('agenda') || msg.includes('rendez-vous')) {
+            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listUpcomingEvents(email).catch(e => `Error: ${e.message}`)))
+                .then(res => "\n\n[AGENDA]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
+        }
 
-    if (msg.includes('tâche') || msg.includes('todo')) {
-        checks.push(Promise.all(ACCOUNTS.map(email => googleService.listTasks(email)))
-            .then(res => "\n\n[GOOGLE TASKS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-    }
+        if (msg.includes('tâche') || msg.includes('todo')) {
+            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listTasks(email).catch(e => `Error: ${e.message}`)))
+                .then(res => "\n\n[GOOGLE TASKS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
+        }
 
-    if (msg.includes('drive') || msg.includes('fichiers')) {
-        checks.push(Promise.all(ACCOUNTS.map(email => googleService.listDriveFiles(email)))
-            .then(res => "\n\n[GOOGLE DRIVE (Récents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-    }
+        if (msg.includes('drive') || msg.includes('fichiers')) {
+            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listDriveFiles(email).catch(e => `Error: ${e.message}`)))
+                .then(res => "\n\n[GOOGLE DRIVE (Récents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
+        }
 
-    const results = await Promise.all(checks);
-    return results.join('');
+        const results = await Promise.all(checks);
+        return results.join('');
+    } catch (error) {
+        console.error("[CONTEXT] Google fetch failed:", error.message);
+        return "";
+    }
 };
 
 // Helper: Fetch Finance Context
@@ -149,15 +159,27 @@ const fetchFinanceContext = async (message) => {
     const msg = message.toLowerCase();
     let context = "";
 
-    if (msg.includes('solde') || msg.includes('balance') || msg.includes('portefeuille') || msg.includes('kraken')) {
-        const portfolio = await financeService.getPortfolio();
-        context += `\n\n[FINANCE - KRAKEN]\n${portfolio}\n`;
-    }
+    try {
+        if (msg.includes('solde') || msg.includes('balance') || msg.includes('portefeuille') || msg.includes('kraken')) {
+            try {
+                const portfolio = await financeService.getPortfolio();
+                context += `\n\n[FINANCE - KRAKEN]\n${portfolio}\n`;
+            } catch (e) {
+                console.error("[FINANCE] Portfolio fetch failed:", e.message);
+            }
+        }
 
-    if (msg.includes('prix') || msg.includes('cours') || msg.includes('btc') || msg.includes('bitcoin')) {
-        // Simple heuristic for now, default to BTC/USD
-        const ticker = await financeService.getTicker('BTC/USD');
-        context += `\n\n[MARCHE]\n${ticker}\n`;
+        if (msg.includes('prix') || msg.includes('cours') || msg.includes('btc') || msg.includes('bitcoin')) {
+            try {
+                // Simple heuristic for now, default to BTC/USD
+                const ticker = await financeService.getTicker('BTC/USD');
+                context += `\n\n[MARCHE]\n${ticker}\n`;
+            } catch (e) {
+                console.error("[FINANCE] Ticker fetch failed:", e.message);
+            }
+        }
+    } catch (error) {
+        console.error("[CONTEXT] Finance fetch failed:", error.message);
     }
 
     return context;

@@ -153,40 +153,45 @@ class MemoryService {
     async ingestVault(vaultPath) {
         console.log(`[MEMORY] Starting ingestion of vault: ${vaultPath}`);
         let count = 0;
+        const fsPromises = require('fs').promises;
 
         const processFile = async (filePath) => {
-            const content = fs.readFileSync(filePath, 'utf8');
-            // Skip small files
-            if (content.length < 50) return;
+            try {
+                const content = await fsPromises.readFile(filePath, 'utf8');
+                // Skip small files
+                if (content.length < 50) return;
 
-            const relativePath = path.relative(vaultPath, filePath);
-            const stat = fs.statSync(filePath);
+                const relativePath = path.relative(vaultPath, filePath);
+                const stat = await fsPromises.stat(filePath);
 
-            // Deduplication: Remove old chunks for this file
-            if (this.table) {
-                // Future implementation: Delete old chunks before adding new ones
-                // await this.table.delete(`source = '${relativePath}'`); 
-            }
+                // Deduplication: Remove old chunks for this file
+                if (this.table) {
+                    // Future implementation: Delete old chunks before adding new ones
+                    // await this.table.delete(`source = '${relativePath}'`); 
+                }
 
-            const chunks = this.chunkText(content);
+                const chunks = this.chunkText(content);
 
-            for (const chunk of chunks) {
-                await this.addDocument(chunk, {
-                    source: relativePath,
-                    type: 'obsidian_note',
-                    created: stat.birthtime.toISOString(),
-                    modified: stat.mtime.toISOString()
-                });
+                for (const chunk of chunks) {
+                    await this.addDocument(chunk, {
+                        source: relativePath,
+                        type: 'obsidian_note',
+                        created: stat.birthtime.toISOString(),
+                        modified: stat.mtime.toISOString()
+                    });
+                }
                 process.stdout.write('.');
+                count++;
+            } catch (err) {
+                console.error(`[MEMORY] Error processing file ${filePath}:`, err.message);
             }
-            count++;
         };
 
         const walkDir = async (dir) => {
-            const files = fs.readdirSync(dir);
+            const files = await fsPromises.readdir(dir);
             for (const file of files) {
                 const fullPath = path.join(dir, file);
-                const stat = fs.statSync(fullPath);
+                const stat = await fsPromises.stat(fullPath);
                 if (stat.isDirectory()) {
                     if (file.startsWith('.')) continue; // Skip hidden dirs
                     await walkDir(fullPath);

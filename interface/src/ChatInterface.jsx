@@ -301,9 +301,9 @@ const ChatInterface = () => {
         <div className="flex h-screen w-full bg-gray-900 text-cyan-300 font-mono overflow-hidden">
             {/* SIDEBAR */}
             <div className="w-64 bg-black border-r border-cyan-900 flex flex-col">
-                <div className="p-6 border-b border-cyan-900 flex justify-center items-center">
-                    <div className="transform scale-150">
-                        <Avatar isSpeaking={isAgentSpeaking} />
+                <div className="p-6 pt-12 border-b border-cyan-900 flex justify-center items-center"> {/* Added pt-12 to push avatar down */}
+                    <div className="">
+                        <Avatar isSpeaking={isAgentSpeaking} size="w-32 h-32" />
                     </div>
                 </div>
 
@@ -402,27 +402,30 @@ const ChatInterface = () => {
                                 setSelectedProvider(provider);
                             }}
                         />
+                        {/* Moved Pattern Selector Here */}
+                        <div className="flex items-center gap-2 border-l border-cyan-900 pl-4">
+                            <select
+                                value={selectedPattern}
+                                onChange={(e) => setSelectedPattern(e.target.value)}
+                                className="bg-black border border-cyan-700 text-cyan-400 rounded px-3 py-1 text-sm focus:outline-none focus:border-cyan-400"
+                            >
+                                <option value="">Mode: Standard</option>
+                                {patterns.map(p => (
+                                    <option key={p} value={p}>{p}</option>
+                                ))}
+                            </select>
+                            {selectedPattern && (
+                                <button
+                                    onClick={() => openPatternModal(selectedPattern)}
+                                    className="text-cyan-600 hover:text-cyan-400"
+                                    title="Voir le pattern"
+                                >
+                                    👁️
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <select
-                            value={selectedPattern}
-                            onChange={(e) => setSelectedPattern(e.target.value)}
-                            className="bg-black border border-cyan-700 text-cyan-400 rounded px-3 py-1 text-sm focus:outline-none focus:border-cyan-400"
-                        >
-                            <option value="">Mode: Standard</option>
-                            {patterns.map(p => (
-                                <option key={p} value={p}>{p}</option>
-                            ))}
-                        </select>
-                        {selectedPattern && (
-                            <button
-                                onClick={() => openPatternModal(selectedPattern)}
-                                className="text-cyan-600 hover:text-cyan-400"
-                                title="Voir le pattern"
-                            >
-                                👁️
-                            </button>
-                        )}
                         <button
                             onClick={() => setIsMuted(!isMuted)}
                             className={`p-2 rounded-full border ${isMuted ? 'border-red-500 text-red-500' : 'border-cyan-500 text-cyan-500'} hover:bg-gray-800 transition-all`}
