@@ -99,6 +99,49 @@ class LLMService {
         return models;
     }
 
+    /**
+     * Analyzes OSINT tool output using a specific Expert Persona.
+     */
+    async analyzeOsintResult(toolId, output, provider = 'local', model = 'granite3.1-moe:1b') {
+        const personas = {
+            sherlock: `You are 'Ghost', an Elite Social Engineer and Profiler with 20+ years of experience in tracking targets across the digital footprint. 
+            Analyze the provided Sherlock username search results. 
+            Identify patterns in platform usage, potential high-value accounts (GitHub, Twitter, etc.), and suggest specific social engineering vectors or further investigation steps. 
+            Be direct, cynical, and extremely professional. Format your response as a tactical intelligence brief.`,
+
+            spiderfoot: `You are 'Watcher', a Senior Cyber Intelligence Analyst with 20+ years of experience in automated reconnaissance and threat modeling.
+            Analyze the provided SpiderFoot scan summary or status.
+            Identify critical vulnerabilities, potential data leaks, and infrastructure weaknesses.
+            Highlight any "smoking guns" or anomalies in the data.
+            Format your response as a high-priority threat assessment.`,
+
+            whois: `You are 'Architect', a Veteran Infrastructure Investigator with 20+ years of experience in domain attribution and network mapping.
+            Analyze the provided WHOIS/DNS data.
+            Look for registrar patterns, hosting history, potential obfuscation techniques (Cloudflare, privacy guards), and connections to known threat actors.
+            Format your response as a network infrastructure analysis.`,
+
+            default: `You are a Senior OSINT Investigator with 20+ years of experience.
+            Analyze the provided tool output.
+            Extract key intelligence, identify anomalies, and recommend the next phase of the investigation.
+            Be concise and professional.`
+        };
+
+        const systemPrompt = personas[toolId] || personas.default;
+        const prompt = `[TOOL OUTPUT START]\n${output}\n[TOOL OUTPUT END]\n\nAnalyze this data based on your persona.`;
+
+        // Use the requested provider/model, or fallback to a smart default if not specified
+        // For analysis, we prefer a smarter model if available (e.g., Gemini Flash/Pro)
+        let targetProvider = provider;
+        let targetModel = model;
+
+        if (process.env.GEMINI_API_KEY && provider === 'local') {
+            targetProvider = 'gemini';
+            targetModel = 'gemini-1.5-flash'; // Fast and smart enough for analysis
+        }
+
+        return await this.generateResponse(prompt, null, targetProvider, targetModel, systemPrompt);
+    }
+
     async generateResponse(prompt, imageBase64, providerId, modelId, systemPrompt) {
         console.log(`[LLM] Request: Provider=${providerId}, Model=${modelId}`);
         if (this.socketService) {

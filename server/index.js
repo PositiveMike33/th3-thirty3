@@ -645,7 +645,22 @@ ${styleInstructions}`;
     }
 });
 
-app.listen(port, () => {
+// OSINT Analysis Endpoint
+app.post('/osint/analyze', async (req, res) => {
+    const { toolId, output } = req.body;
+    if (!toolId || !output) return res.status(400).json({ error: "Missing toolId or output" });
+
+    try {
+        // Use Gemini Flash by default for speed/quality balance if available, otherwise local
+        const analysis = await llmService.analyzeOsintResult(toolId, output);
+        res.json({ analysis });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Start Server
+server.listen(port, () => {
     console.log(`Server running on port ${port}`);
     console.log(`System ready. Identity: ${IDENTITY.name}`);
 });

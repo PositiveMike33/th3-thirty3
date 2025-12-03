@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ProjectDashboard from './ProjectDashboard';
 import OsintDashboard from './OsintDashboard';
 import AgentMonitor from './AgentMonitor';
-import ModelSelector from './ModelSelector';
+import ModelSelector from './components/ModelSelector';
 import ChatInterface from './ChatInterface';
 import SecurityScreen from './SecurityScreen';
 import './index.css';

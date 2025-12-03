@@ -47,23 +47,41 @@ const OsintDashboard = () => {
         setLoading(false);
     };
 
+    const [analysis, setAnalysis] = useState("");
+    const [analyzing, setAnalyzing] = useState(false);
+
     const handleRun = async () => {
         if (!target || !selectedTool) return;
         setLoading(true);
+        setAnalysis(""); // Clear previous analysis
         setOutput(prev => prev + `\n> Running ${selectedTool} on ${target}...\n`);
 
         try {
+            // 1. Run the Tool
             const res = await fetch(`${API_URL}/osint/run`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ toolId: selectedTool, target })
             });
             const data = await res.json();
-            setOutput(prev => prev + data.result + "\n\n");
+            const toolOutput = data.result;
+            setOutput(prev => prev + toolOutput + "\n\n");
+
+            // 2. Trigger Expert Analysis
+            setAnalyzing(true);
+            const analyzeRes = await fetch(`${API_URL}/osint/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ toolId: selectedTool, output: toolOutput })
+            });
+            const analyzeData = await analyzeRes.json();
+            setAnalysis(analyzeData.analysis);
+
         } catch (error) {
             setOutput(prev => prev + `[ERROR] ${error.message}\n\n`);
         }
         setLoading(false);
+        setAnalyzing(false);
     };
 
     return (
@@ -91,14 +109,14 @@ const OsintDashboard = () => {
                                 key={tool.id}
                                 onClick={() => setSelectedTool(tool.id)}
                                 className={`text-left p-3 rounded border transition-all flex items-center gap-3 ${selectedTool === tool.id
-                                        ? 'bg-green-900/30 border-green-500 text-green-300'
-                                        : 'bg-gray-900/30 border-gray-800 text-gray-500 hover:border-green-700 hover:text-green-400'
+                                    ? 'bg-green-900/30 border-green-500 text-green-300'
+                                    : 'bg-gray-900/30 border-gray-800 text-gray-500 hover:border-green-700 hover:text-green-400'
                                     }`}
                             >
                                 {tool.id === 'whois' && <Globe size={16} />}
                                 {tool.id === 'nslookup' && <Server size={16} />}
                                 {tool.id === 'sherlock' && <User size={16} />}
-                                {tool.id === 'ping' && <ActivityIcon />}
+                                {tool.id === 'ping' && <Activity size={16} />}
                                 <div>
                                     <div className="font-bold text-sm uppercase">{tool.name}</div>
                                     <div className="text-[10px] opacity-70">{tool.description}</div>
@@ -140,10 +158,25 @@ const OsintDashboard = () => {
                         </div>
 
                         {/* Output Console */}
-                        <div className="flex-1 bg-black border border-gray-800 rounded-lg p-4 overflow-y-auto font-mono text-sm shadow-inner shadow-black">
-                            <pre className="whitespace-pre-wrap text-green-500/80">
+                        <div className="flex-1 bg-black border border-gray-800 rounded-lg p-4 overflow-y-auto font-mono text-sm shadow-inner shadow-black flex flex-col gap-4">
+                            <pre className="whitespace-pre-wrap text-green-500/80 flex-1">
                                 {output || "// OSINT Console Ready...\n// Select a tool and enter a target to begin."}
                             </pre>
+
+                            {/* Expert Analysis Panel */}
+                            {(analyzing || analysis) && (
+                                <div className="border-t border-green-900/50 pt-4 mt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="flex items-center gap-2 text-cyan-400 mb-2">
+                                        <Activity size={16} className={analyzing ? "animate-spin" : ""} />
+                                        <h3 className="font-bold tracking-widest text-xs uppercase">
+                                            {analyzing ? "EXPERT AGENT ANALYZING..." : "INTELLIGENCE BRIEF"}
+                                        </h3>
+                                    </div>
+                                    <div className="bg-cyan-900/10 border border-cyan-900/30 p-3 rounded text-cyan-300 text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                                        {analysis || "Decrypting data patterns..."}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -222,19 +255,13 @@ const NavButton = ({ active, onClick, icon, label }) => (
     <button
         onClick={onClick}
         className={`flex items-center gap-3 p-3 rounded transition-all ${active
-                ? 'bg-green-900/50 text-green-300 border-l-4 border-green-500'
-                : 'text-gray-500 hover:bg-gray-900/50 hover:text-green-400'
+            ? 'bg-green-900/50 text-green-300 border-l-4 border-green-500'
+            : 'text-gray-500 hover:bg-gray-900/50 hover:text-green-400'
             }`}
     >
         {icon}
         <span className="font-bold text-sm tracking-wider">{label}</span>
     </button>
-);
-
-const ActivityIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-    </svg>
 );
 
 export default OsintDashboard;
