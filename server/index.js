@@ -329,6 +329,34 @@ app.post('/osint/run', async (req, res) => {
     }
 });
 
+// SpiderFoot Endpoints
+app.post('/osint/spiderfoot/start', async (req, res) => {
+    try {
+        const result = await osintService.startSpiderFoot();
+        res.json({ result });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/osint/spiderfoot/stop', async (req, res) => {
+    try {
+        const result = await osintService.stopSpiderFoot();
+        res.json({ result });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/osint/spiderfoot/status', async (req, res) => {
+    try {
+        const status = await osintService.getSpiderFootStatus();
+        res.json({ status });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Finance Endpoints
 app.get('/finance/portfolio', async (req, res) => {
     try {

@@ -8,8 +8,10 @@ class OsintService {
             { id: 'whois', name: 'WHOIS Lookup', description: 'Domain registration info' },
             { id: 'nslookup', name: 'DNS Lookup', description: 'Domain name server info' },
             { id: 'ping', name: 'Ping', description: 'Check host availability' },
-            { id: 'sherlock', name: 'Sherlock (Username)', description: 'Find usernames across social networks' }
+            { id: 'sherlock', name: 'Sherlock (Username)', description: 'Find usernames across social networks' },
+            { id: 'spiderfoot', name: 'SpiderFoot (Full Scan)', description: 'Automated OSINT collection (Web UI)' }
         ];
+        this.ensureDockerRunning();
     }
 
     getTools() {
@@ -69,6 +71,58 @@ class OsintService {
             return await this.runCommand(command);
         } catch (error) {
             return `Error running Sherlock: ${error.message}`;
+        }
+    }
+
+    // SpiderFoot Management
+    async startSpiderFoot() {
+        // Runs SpiderFoot on port 5001
+        const command = `docker run -d -p 5001:5001 --name spiderfoot spiderfoot/spiderfoot`;
+        try {
+            await this.runCommand(command);
+            return "SpiderFoot started on http://localhost:5001";
+        } catch (error) {
+            if (error.message.includes("Conflict")) {
+                return "SpiderFoot is already running (or container exists). Try accessing http://localhost:5001";
+            }
+            return `Error starting SpiderFoot: ${error.message}`;
+        }
+    }
+
+    async stopSpiderFoot() {
+        try {
+            await this.runCommand(`docker stop spiderfoot`);
+            await this.runCommand(`docker rm spiderfoot`);
+            return "SpiderFoot stopped and container removed.";
+        } catch (error) {
+            return `Error stopping SpiderFoot: ${error.message}`;
+        }
+    }
+
+    async getSpiderFootStatus() {
+        try {
+            const output = await this.runCommand(`docker ps --filter "name=spiderfoot" --format "{{.Status}}"`);
+            return output.trim() ? "Running" : "Stopped";
+        } catch (error) {
+            return "Unknown";
+        }
+    }
+
+    async ensureDockerRunning() {
+        try {
+            await this.runCommand('docker info');
+            console.log("[OSINT] Docker is running.");
+        } catch (error) {
+            console.log("[OSINT] Docker not running. Attempting to start...");
+            try {
+                // Attempt to start Docker Desktop on Windows
+                // Using 'start' command to launch the executable without waiting
+                const startCommand = `start "" "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe"`;
+                await this.runCommand(startCommand);
+                console.log("[OSINT] Docker Desktop launch command sent. Waiting for initialization...");
+            } catch (startError) {
+                console.error("[OSINT] Failed to start Docker:", startError.message);
+            }
         }
     }
 }
