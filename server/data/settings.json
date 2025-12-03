@@ -10,11 +10,11 @@
     "telegram": false
   },
   "apiKeys": {
-    "gemini": "TEST_KEY_1764486491645",
+    "gemini": "AQ.Ab8RN6Kmd-2NTTLugcuZmmL6Kyc8kS0yS3eH8xTiSX20uAfgPw",
     "openai": "",
     "anthropic": "",
     "perplexity": "",
     "anythingllm_url": "http://localhost:3001/api/v1",
-    "anythingllm_key": "ET9J8GX-HV64GFR-MZD5KX1-TM9FBJF"
+    "anythingllm_key": "N1NP3NN-DH3MB05-J9CRN92-27SFYS9"
   }
 }

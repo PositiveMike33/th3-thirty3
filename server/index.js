@@ -31,6 +31,10 @@ console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connecté : ${modelN
 const memoryService = new MemoryService();
 memoryService.initialize();
 
+// Initialize Pieces Service
+const PiecesService = require('./pieces_service');
+const piecesService = new PiecesService();
+
 // Initialize Settings & Load Keys
 const settingsService = require('./settings_service');
 const currentSettings = settingsService.getSettings();
@@ -42,11 +46,15 @@ if (currentSettings.apiKeys) {
     if (currentSettings.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = currentSettings.apiKeys.perplexity;
     if (currentSettings.apiKeys.anythingllm_url) process.env.ANYTHING_LLM_URL = currentSettings.apiKeys.anythingllm_url;
     if (currentSettings.apiKeys.anythingllm_key) process.env.ANYTHING_LLM_KEY = currentSettings.apiKeys.anythingllm_key;
+    if (currentSettings.apiKeys.pieces_host) piecesService.setHost(currentSettings.apiKeys.pieces_host);
 }
 
 // Initialize MCP Service (Protocol Nexus)
 const MCPService = require('./mcp_service');
 const mcpService = new MCPService();
+
+// Initial Health Check for Pieces
+piecesService.healthCheck();
 
 // Initialize Context Service
 const ContextService = require('./context_service');
@@ -74,18 +82,9 @@ const webSearch = require('./tools/web_search');
 mcpService.registerLocalTool(pythonRunner, pythonRunner.handler);
 mcpService.registerLocalTool(webSearch, webSearch.handler);
 
-// Connect to Obsidian MCP Server
-// Connect to Obsidian MCP Server
-// const vaultPath = process.env.OBSIDIAN_VAULT_PATH;
-// if (vaultPath) {
-//     mcpService.connectStdio(
-//         'obsidian',
-//         'npx',
-//         ['-y', '@modelcontextprotocol/server-filesystem', vaultPath]
-//     ).catch(err => console.error("[MCP] Failed to connect to Obsidian:", err));
-// } else {
-//     console.warn("[MCP] OBSIDIAN_VAULT_PATH not set. Skipping Obsidian connection.");
-// }
+// Obsidian MCP Connection (Disabled/Legacy)
+// To enable, uncomment and configure OBSIDIAN_VAULT_PATH
+
 
 // Connect to Pieces MCP Server
 const PIECES_MCP_URL = 'http://localhost:39300/model_context_protocol/2024-11-05/sse';
@@ -589,7 +588,17 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
         messageWithContext += financeContext;
         console.timeEnd("FinanceService");
 
-        // 3. System Prompt Construction
+        // 4. Pieces Memory (RAG)
+        console.time("PiecesService");
+        const piecesResults = await piecesService.search(message);
+        if (piecesResults && piecesResults.length > 0) {
+            const piecesContext = piecesResults.map(p => `[Snippet: ${p.name}]\n${p.content}`).join('\n---\n');
+            messageWithContext += `\n\n[MÉMOIRE PIECES (EXTERNE)]\nVoici des snippets pertinents trouvés dans Pieces :\n${piecesContext}\n[FIN PIECES]\n`;
+            console.log(`[PIECES] Injected ${piecesResults.length} snippets.`);
+        }
+        console.timeEnd("PiecesService");
+
+        // 5. System Prompt Construction
         console.time("StyleAnalysis");
         let finalSystemPrompt;
 

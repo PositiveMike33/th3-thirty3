@@ -25,7 +25,8 @@ const SettingsPage = () => {
         anthropic: '',
         perplexity: '',
         anythingllm_url: '',
-        anythingllm_key: ''
+        anythingllm_key: '',
+        pieces_host: ''
     });
 
     // Load Settings & Status on Mount
@@ -246,6 +247,18 @@ const SettingsPage = () => {
                                     onChange={handleApiKeyChange}
                                     placeholder="API Key..."
                                     className="w-full bg-black/40 border border-gray-700 rounded p-2 text-xs text-white focus:border-purple-500 focus:outline-none"
+                                />
+                            </div>
+
+                            <div className="pt-2 border-t border-gray-800 mt-2">
+                                <label className="text-xs text-gray-500 block mb-1">Pieces OS Host</label>
+                                <input
+                                    type="text"
+                                    name="pieces_host"
+                                    value={apiKeys.pieces_host || 'http://localhost:39300'}
+                                    onChange={handleApiKeyChange}
+                                    placeholder="http://localhost:39300"
+                                    className="w-full bg-black/40 border border-gray-700 rounded p-2 text-xs text-white focus:border-orange-500 focus:outline-none"
                                 />
                             </div>
 

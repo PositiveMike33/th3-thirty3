@@ -21,7 +21,8 @@ const DEFAULTS = {
         anthropic: "",
         perplexity: "",
         anythingllm_url: "",
-        anythingllm_key: ""
+        anythingllm_key: "",
+        pieces_host: "http://localhost:39300"
     }
 };
 
