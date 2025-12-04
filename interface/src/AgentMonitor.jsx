@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
-import { Terminal, Activity, Cpu, Shield } from 'lucide-react';
+import { Terminal, Activity, Cpu, Shield, RotateCcw } from 'lucide-react';
 
 const AgentMonitor = () => {
     const [logs, setLogs] = useState([]);
@@ -11,6 +11,14 @@ const AgentMonitor = () => {
 
     const addLog = (type, message) => {
         setLogs(prev => [...prev.slice(-50), { type, message, timestamp: new Date() }]);
+    };
+
+    const handleReset = (e) => {
+        e.stopPropagation(); // Prevent drag
+        setLogs([]);
+        setStatus("Idle");
+        setActiveTool(null);
+        addLog('SYSTEM', 'Monitor reset.');
     };
 
     useEffect(() => {
@@ -108,8 +116,18 @@ const AgentMonitor = () => {
                     <Activity size={14} className={status !== 'Idle' ? 'animate-pulse' : ''} />
                     <span className="font-bold tracking-wider">AGENT MONITOR</span>
                 </div>
-                <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${status === 'Idle' ? 'bg-gray-800 text-gray-400' : 'bg-cyan-900 text-cyan-300 animate-pulse'}`}>
-                    {status.toUpperCase()}
+                <div className="flex items-center gap-2">
+                    <button
+                        onMouseDown={handleReset}
+                        onClick={handleReset}
+                        className="text-gray-500 hover:text-red-400 transition-colors"
+                        title="Reset Monitor"
+                    >
+                        <RotateCcw size={12} />
+                    </button>
+                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${status === 'Idle' ? 'bg-gray-800 text-gray-400' : 'bg-cyan-900 text-cyan-300 animate-pulse'}`}>
+                        {status.toUpperCase()}
+                    </div>
                 </div>
             </div>
 
