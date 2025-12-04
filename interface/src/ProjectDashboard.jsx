@@ -53,22 +53,23 @@ const ProjectDashboard = () => {
     };
 
     const fetchProjects = React.useCallback(async () => {
-        // setLoading(true);
         try {
             const res = await fetch(`${API_URL}/projects`);
             const data = await res.json();
             setProjects(data);
-            if (activeProject) {
-                const updated = data.find(p => p.id === activeProject.id);
-                if (updated) setActiveProject(updated);
-            }
+            setActiveProject(current => {
+                if (current) {
+                    const updated = data.find(p => p.id === current.id);
+                    return updated || current;
+                }
+                return current;
+            });
         } catch (error) {
             console.error("Error fetching projects:", error);
         }
-        // setLoading(false);
-    }, [activeProject]);
+    }, []);
 
-    const fetchGoogleData = async () => {
+    const fetchGoogleData = React.useCallback(async () => {
         setGoogleLoading(true);
         try {
             const [eventsRes, emailsRes, tasksRes, filesRes] = await Promise.all([
@@ -93,7 +94,7 @@ const ProjectDashboard = () => {
             console.error("Error fetching Google data:", error);
         }
         setGoogleLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         fetchProjects();
@@ -102,7 +103,7 @@ const ProjectDashboard = () => {
         // Real-time refresh every 10s (was 60s)
         const interval = setInterval(fetchGoogleData, 10000);
         return () => clearInterval(interval);
-    }, [fetchProjects]);
+    }, [fetchProjects, fetchGoogleData]);
 
     // --- PROJECT ACTIONS ---
 

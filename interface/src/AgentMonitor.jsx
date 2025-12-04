@@ -9,9 +9,9 @@ const AgentMonitor = () => {
     const logsEndRef = useRef(null);
     const socketRef = useRef(null);
 
-    const addLog = (type, message) => {
+    const addLog = useCallback((type, message) => {
         setLogs(prev => [...prev.slice(-50), { type, message, timestamp: new Date() }]);
-    };
+    }, []);
 
     const handleReset = (e) => {
         e.stopPropagation(); // Prevent drag
@@ -56,7 +56,7 @@ const AgentMonitor = () => {
         return () => {
             if (socketRef.current) socketRef.current.disconnect();
         };
-    }, []);
+    }, [addLog]);
 
     useEffect(() => {
         logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
