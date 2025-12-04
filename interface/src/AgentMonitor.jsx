@@ -54,11 +54,57 @@ const AgentMonitor = () => {
         setLogs(prev => [...prev.slice(-50), { type, message, timestamp: new Date() }]);
     };
 
+    // Dragging Logic
+    const [position, setPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 300 });
+    const [isDragging, setIsDragging] = useState(false);
+    const dragOffset = useRef({ x: 0, y: 0 });
+
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        dragOffset.current = {
+            x: e.clientX - position.x,
+            y: e.clientY - position.y
+        };
+    };
+
+    const handleMouseMove = (e) => {
+        if (isDragging) {
+            setPosition({
+                x: e.clientX - dragOffset.current.x,
+                y: e.clientY - dragOffset.current.y
+            });
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        } else {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging]);
+
     return (
-        <div className="fixed bottom-4 right-4 w-96 bg-black/90 border border-cyan-500/50 rounded-lg shadow-2xl overflow-hidden backdrop-blur-md z-50 font-mono text-xs">
-            {/* Header */}
-            <div className="bg-gray-900/80 p-2 border-b border-cyan-900 flex justify-between items-center">
-                <div className="flex items-center gap-2 text-cyan-400">
+        <div
+            className="fixed w-96 bg-black/90 border border-cyan-500/50 rounded-lg shadow-2xl overflow-hidden backdrop-blur-md z-50 font-mono text-xs"
+            style={{ left: position.x, top: position.y, cursor: isDragging ? 'grabbing' : 'auto' }}
+        >
+            {/* Header - Draggable Handle */}
+            <div
+                className="bg-gray-900/80 p-2 border-b border-cyan-900 flex justify-between items-center cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={handleMouseDown}
+            >
+                <div className="flex items-center gap-2 text-cyan-400 pointer-events-none">
                     <Activity size={14} className={status !== 'Idle' ? 'animate-pulse' : ''} />
                     <span className="font-bold tracking-wider">AGENT MONITOR</span>
                 </div>
@@ -76,14 +122,14 @@ const AgentMonitor = () => {
             )}
 
             {/* Logs Area */}
-            <div className="h-48 overflow-y-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-cyan-900">
+            <div className="h-48 overflow-y-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-cyan-900" onMouseDown={(e) => e.stopPropagation()}>
                 {logs.map((log, i) => (
                     <div key={i} className="flex gap-2 text-gray-300">
                         <span className="text-gray-600">[{log.timestamp.toLocaleTimeString().split(' ')[0]}]</span>
                         <span className={`font-bold ${log.type === 'SYSTEM' ? 'text-green-500' :
-                                log.type === 'AGENT' ? 'text-blue-400' :
-                                    log.type === 'TOOL' ? 'text-yellow-400' :
-                                        'text-gray-400'
+                            log.type === 'AGENT' ? 'text-blue-400' :
+                                log.type === 'TOOL' ? 'text-yellow-400' :
+                                    'text-gray-400'
                             }`}>
                             {log.type}:
                         </span>
@@ -94,9 +140,11 @@ const AgentMonitor = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-gray-900/80 p-1 text-[10px] text-gray-500 text-center border-t border-gray-800 flex justify-center gap-4">
+            <div className="bg-gray-900/80 p-1 text-[10px] text-gray-500 text-center border-t border-gray-800 flex justify-center gap-4 select-none" onMouseDown={handleMouseDown}>
                 <span className="flex items-center gap-1"><Shield size={10} /> SECURE</span>
-                <span className="flex items-center gap-1"><Terminal size={10} /> SOCKET.IO</span>
+                <span className={`flex items-center gap-1 transition-colors ${status.includes('Private Web') ? 'text-green-400 animate-pulse' : ''}`}>
+                    <Terminal size={10} /> {status.includes('Private Web') ? 'PRIVATE WEB ACTIVE' : 'SOCKET.IO'}
+                </span>
             </div>
         </div>
     );

@@ -14,8 +14,10 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const headers = { 'x-api-key': localStorage.getItem('th3_api_key') || '' };
+
                 // Fetch Portfolio
-                const portRes = await fetch('http://localhost:3000/finance/portfolio');
+                const portRes = await fetch('http://localhost:3000/finance/portfolio', { headers });
                 const portData = await portRes.json();
 
                 if (portData.error) {
@@ -28,14 +30,14 @@ const Dashboard = () => {
                 // Fetch Tickers
                 const newTickers = {};
                 for (const sym of SYMBOLS) {
-                    const tickRes = await fetch(`http://localhost:3000/finance/ticker?symbol=${sym}`);
+                    const tickRes = await fetch(`http://localhost:3000/finance/ticker?symbol=${sym}`, { headers });
                     const tickData = await tickRes.json();
                     if (!tickData.error) newTickers[sym] = tickData;
                 }
                 setTickers(newTickers);
 
                 // Fetch News
-                const newsRes = await fetch('http://localhost:3000/finance/news');
+                const newsRes = await fetch('http://localhost:3000/finance/news', { headers });
                 const newsData = await newsRes.json();
                 if (!newsData.error) setNews(newsData);
 

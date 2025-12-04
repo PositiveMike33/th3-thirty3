@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+
 import Avatar from './Avatar';
 import GoogleAuthPanel from './components/GoogleAuthPanel';
 import FeedbackModal from './components/FeedbackModal';
@@ -10,7 +12,8 @@ import SpaceDashboard from './SpaceDashboard'; // Import SpaceDashboard
 import ProjectDashboard from './ProjectDashboard'; // Import ProjectDashboard
 import SettingsPage from './SettingsPage'; // Import SettingsPage
 import { APP_CONFIG } from './config';
-import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase } from 'lucide-react';
+import FabricLibrary from './components/FabricLibrary';
+import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase, BookOpen, X } from 'lucide-react';
 
 const ChatInterface = () => {
     const [messages, setMessages] = useState([
@@ -20,8 +23,9 @@ const ChatInterface = () => {
     const [isListening, setIsListening] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const messagesEndRef = useRef(null);
-    const [patterns, setPatterns] = useState([]);
+    // const [patterns, setPatterns] = useState([]);
     const [selectedPattern, setSelectedPattern] = useState('');
+    const [libraryOpen, setLibraryOpen] = useState(false);
 
     // View State (Chat vs Dashboard)
     const [currentView, setCurrentView] = useState('chat');
@@ -40,8 +44,7 @@ const ChatInterface = () => {
     const [currentSessionId, setCurrentSessionId] = useState(null);
 
     // Pattern View State
-    const [patternModalOpen, setPatternModalOpen] = useState(false);
-    const [viewingPatternContent, setViewingPatternContent] = useState('');
+
     const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
 
     // Vision State
@@ -88,26 +91,37 @@ const ChatInterface = () => {
         }
     };
 
-    const loadSessions = () => {
+    const loadSessions = useCallback(() => {
         fetch('http://localhost:3000/sessions')
             .then(res => res.json()
                 .then(data => {
                     setSessions(data);
                 }))
             .catch(err => console.error("Failed to load sessions", err));
-    };
+    }, []);
 
     useEffect(() => {
         // Load Patterns
-        fetch('http://localhost:3000/patterns')
-            .then(res => res.json())
-            .then(data => setPatterns(data))
-            .catch(err => console.error("Failed to load patterns", err));
+        // Patterns are loaded by FabricLibrary now
+        // fetch('http://localhost:3000/patterns')
+        //     .then(res => res.json())
+        //     .then(data => setPatterns(data))
+        //     .catch(err => console.error("Failed to load patterns", err));
 
-        // Load Settings (Compute Mode)
+        // Load Settings (Compute Mode & API Key)
         fetch('http://localhost:3000/settings')
             .then(res => res.json())
             .then(data => {
+                if (data.apiKeys && data.apiKeys.userApiKey) {
+                    // Store key in a ref or state if needed, but for now we just need it for requests
+                    // Ideally, we should use a Context or a global store.
+                    // For simplicity, we'll store it in localStorage or just rely on the settings endpoint returning it (which is insecure).
+                    // BETTER: The user enters it in Settings, it's saved to backend.
+                    // BUT: The backend needs it in the HEADER.
+                    // So we must fetch it here and store it to send with chat requests.
+                    localStorage.setItem('th3_api_key', data.apiKeys.userApiKey);
+                }
+
                 if (data.computeMode) {
                     setSelectedProvider(data.computeMode);
                     // Set default model based on mode
@@ -121,7 +135,7 @@ const ChatInterface = () => {
 
         // Load Sessions
         loadSessions();
-    }, []);
+    }, [loadSessions]);
 
     const createNewSession = () => {
         setMessages([{ id: 1, sender: 'agent', text: `Initialisation... ${APP_CONFIG.name} en ligne. C'est quoi le plan ?` }]);
@@ -191,7 +205,10 @@ const ChatInterface = () => {
             setIsAgentSpeaking(true);
             const response = await fetch('http://localhost:3000/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': localStorage.getItem('th3_api_key') || ''
+                },
                 body: JSON.stringify({
                     message: input,
                     image: imageToSend, // Send image
@@ -287,18 +304,43 @@ const ChatInterface = () => {
         }
     };
 
-    const openPatternModal = (patternName) => {
-        fetch(`http://localhost:3000/patterns/${patternName}`)
-            .then(res => res.json())
-            .then(data => {
-                setViewingPatternContent(data.content);
-                setPatternModalOpen(true);
+    // const openPatternModal = (patternName) => {
+    //     fetch(`http://localhost:3000/patterns/${patternName}`)
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             setViewingPatternContent(data.content);
+    //             setPatternModalOpen(true);
+    //         })
+    //         .catch(() => alert("Impossible de charger le pattern"));
+    // };
+    const handleModelSelect = (model, provider) => {
+        setSelectedModel(model);
+        setSelectedProvider(provider);
+
+        // Map provider to computeMode (local vs cloud)
+        const isLocal = provider === 'local' || provider === 'lmstudio';
+        const computeMode = isLocal ? 'local' : 'cloud';
+
+        // 1. Persist to Server
+        fetch('http://localhost:3000/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                computeMode: computeMode,
             })
-            .catch(() => alert("Impossible de charger le pattern"));
+        }).catch(err => console.error("Failed to save model preference", err));
+
+        // 2. Visual Feedback
+        const systemMsg = {
+            id: messages.length + 1,
+            sender: 'agent',
+            text: `[SYSTEM] Module activé : ${model} (${provider.toUpperCase()})`
+        };
+        setMessages(prev => [...prev, systemMsg]);
     };
 
     return (
-        <div className="flex h-screen w-full bg-gray-900 text-cyan-300 font-mono overflow-hidden">
+        <div className="flex h-screen w-full bg-transparent text-cyan-300 font-mono overflow-hidden">
             {/* SIDEBAR */}
             <div className="w-64 bg-black border-r border-cyan-900 flex flex-col">
                 <div className="p-6 pt-12 border-b border-cyan-900 flex justify-center items-center"> {/* Added pt-12 to push avatar down */}
@@ -338,6 +380,14 @@ const ChatInterface = () => {
                     >
                         <Briefcase size={18} />
                         <span>Gestion Projet</span>
+                    </button>
+
+                    <button
+                        onClick={() => setLibraryOpen(true)}
+                        className={`w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-cyan-900/20 text-gray-400 hover:text-cyan-300`}
+                    >
+                        <BookOpen size={18} />
+                        <span>Bibliothèque Fabric</span>
                     </button>
                 </div>
 
@@ -390,40 +440,45 @@ const ChatInterface = () => {
             </div>
 
             {/* MAIN CONTENT AREA */}
-            <div className="flex-1 flex flex-col relative bg-[url('/grid.png')]">
+            <div className="flex-1 flex flex-col relative bg-transparent">
                 {/* Header Toolbar */}
                 <div className="h-16 border-b border-cyan-900 bg-black/80 backdrop-blur flex items-center justify-between px-6 z-40">
                     <div className="flex items-center gap-4">
                         <ModelSelector
                             currentProvider={selectedProvider}
                             currentModel={selectedModel}
-                            onSelectModel={(model, provider) => {
-                                setSelectedModel(model);
-                                setSelectedProvider(provider);
-                            }}
+                            onSelectModel={handleModelSelect}
                         />
+
                         {/* Moved Pattern Selector Here */}
                         <div className="flex items-center gap-2 border-l border-cyan-900 pl-4">
-                            <select
-                                value={selectedPattern}
-                                onChange={(e) => setSelectedPattern(e.target.value)}
-                                className="bg-black border border-cyan-700 text-cyan-400 rounded px-3 py-1 text-sm focus:outline-none focus:border-cyan-400"
+                            <button
+                                onClick={() => setLibraryOpen(true)}
+                                className={`flex items-center gap-2 px-3 py-1 rounded text-sm border transition-all ${selectedPattern
+                                    ? 'bg-cyan-900/50 border-cyan-500 text-cyan-300'
+                                    : 'bg-black border-cyan-900 text-gray-400 hover:text-cyan-400 hover:border-cyan-700'}`}
                             >
-                                <option value="">Mode: Standard</option>
-                                {patterns.map(p => (
-                                    <option key={p} value={p}>{p}</option>
-                                ))}
-                            </select>
+                                <BookOpen size={14} />
+                                <span>{selectedPattern || "Bibliothèque Fabric"}</span>
+                            </button>
+
                             {selectedPattern && (
                                 <button
-                                    onClick={() => openPatternModal(selectedPattern)}
-                                    className="text-cyan-600 hover:text-cyan-400"
-                                    title="Voir le pattern"
+                                    onClick={() => setSelectedPattern('')}
+                                    className="text-gray-500 hover:text-red-400"
+                                    title="Désactiver le pattern"
                                 >
-                                    👁️
+                                    <X size={14} />
                                 </button>
                             )}
                         </div>
+
+                        {/* ... Modals ... */}
+                        <FabricLibrary
+                            isOpen={libraryOpen}
+                            onClose={() => setLibraryOpen(false)}
+                            onSelectPattern={(pattern) => setSelectedPattern(pattern)}
+                        />
                     </div>
                     <div className="flex items-center gap-4">
                         <button
@@ -542,11 +597,7 @@ const ChatInterface = () => {
                 setCorrectionText={setCorrectionText}
             />
 
-            <PatternModal
-                isOpen={patternModalOpen}
-                onClose={() => setPatternModalOpen(false)}
-                content={viewingPatternContent}
-            />
+
 
             {
                 showWebcam && (
@@ -559,6 +610,19 @@ const ChatInterface = () => {
                     />
                 )
             }
+
+            <FabricLibrary
+                isOpen={libraryOpen}
+                onClose={() => setLibraryOpen(false)}
+                onSelectPattern={(pattern) => {
+                    setSelectedPattern(pattern);
+                    setMessages(prev => [...prev, {
+                        id: Date.now(),
+                        sender: 'agent',
+                        text: `[SYSTEM] Pattern FABRIC activé : ${pattern}`
+                    }]);
+                }}
+            />
         </div >
     );
 };

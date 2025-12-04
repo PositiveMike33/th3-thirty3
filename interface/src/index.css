@@ -23,7 +23,20 @@ body {
   color: var(--text-color);
   font-family: 'Inter', sans-serif;
   overflow: hidden;
-  background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.95) 40%, rgba(0, 0, 0, 0.95) 60%, rgba(0, 0, 0, 0.7)),
+    url('/profile.jpg'),
+    url('/bg-logo.jpg');
+  background-position:
+    center,
+    left center,
+    right center;
+  background-repeat: no-repeat;
+  background-size:
+    cover,
+    contain,
+    contain;
+  background-attachment: fixed;
 }
 
 #root {

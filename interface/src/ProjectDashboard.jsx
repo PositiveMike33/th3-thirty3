@@ -11,7 +11,8 @@ const ProjectDashboard = () => {
     // Project State
     const [projects, setProjects] = useState([]);
     const [activeProject, setActiveProject] = useState(null);
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false); // Unused
+    // const [loading, setLoading] = useState(false); // Removed unused state
     const [showNewProjectInput, setShowNewProjectInput] = useState(false);
     const [newProjectName, setNewProjectName] = useState("");
     const [newTaskContent, setNewTaskContent] = useState("");
@@ -25,10 +26,33 @@ const ProjectDashboard = () => {
     });
     const [googleLoading, setGoogleLoading] = useState(false);
 
+    // Agent State
+    const [agents, setAgents] = useState([]);
+    const [showAgentModal, setShowAgentModal] = useState(false);
+    const [selectedAgent, setSelectedAgent] = useState("");
+    const [agentTask, setAgentTask] = useState("");
+
     // --- DATA FETCHING ---
 
-    const fetchProjects = async () => {
-        setLoading(true);
+    const fetchAgents = async () => {
+        try {
+            const res = await fetch(`${API_URL}/models?computeMode=cloud`);
+            const data = await res.json();
+            // Filter for AnythingLLM agents
+            // The backend returns them with provider 'anythingllm'
+            const agentList = data.filter(m => m.provider === 'anythingllm');
+            console.log("Agents found:", agentList);
+            setAgents(agentList);
+            if (agentList.length > 0 && !selectedAgent) {
+                setSelectedAgent(agentList[0].id);
+            }
+        } catch (error) {
+            console.error("Error fetching agents:", error);
+        }
+    };
+
+    const fetchProjects = React.useCallback(async () => {
+        // setLoading(true);
         try {
             const res = await fetch(`${API_URL}/projects`);
             const data = await res.json();
@@ -40,8 +64,8 @@ const ProjectDashboard = () => {
         } catch (error) {
             console.error("Error fetching projects:", error);
         }
-        setLoading(false);
-    };
+        // setLoading(false);
+    }, [activeProject]);
 
     const fetchGoogleData = async () => {
         setGoogleLoading(true);
@@ -74,10 +98,10 @@ const ProjectDashboard = () => {
         fetchProjects();
         fetchGoogleData();
 
-        // Real-time refresh every 60s
-        const interval = setInterval(fetchGoogleData, 60000);
+        // Real-time refresh every 10s (was 60s)
+        const interval = setInterval(fetchGoogleData, 10000);
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchProjects]);
 
     // --- PROJECT ACTIONS ---
 
@@ -113,7 +137,7 @@ const ProjectDashboard = () => {
     const handleAddTask = async (status = 'todo') => {
         if (!newTaskContent.trim() || !activeProject) return;
         try {
-            const res = await fetch(`${API_URL}/projects/${activeProject.id}/tasks`, {
+            await fetch(`${API_URL}/projects/${activeProject.id}/tasks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: newTaskContent, status })
@@ -213,7 +237,7 @@ const ProjectDashboard = () => {
     };
 
     return (
-        <div className="flex h-full bg-black text-cyan-300 bg-[url('/grid.png')] overflow-hidden">
+        <div className="flex h-full bg-transparent text-cyan-300 overflow-hidden">
             {/* SIDEBAR */}
             <div className="w-64 border-r border-gray-800 bg-gray-900/30 flex flex-col p-4 shrink-0">
                 <div className="flex items-center gap-2 mb-8 text-cyan-500">
@@ -278,12 +302,93 @@ const ProjectDashboard = () => {
                             <RefreshCw size={14} className={googleLoading ? "animate-spin" : ""} />
                             SYNC
                         </button>
-                        <button className="flex items-center gap-2 bg-cyan-900/30 hover:bg-cyan-800 text-cyan-300 px-3 py-1.5 rounded text-sm border border-cyan-800">
+                        <button
+                            onClick={() => {
+                                fetchAgents();
+                                setShowAgentModal(true);
+                            }}
+                            className="flex items-center gap-2 bg-cyan-900/30 hover:bg-cyan-800 text-cyan-300 px-3 py-1.5 rounded text-sm border border-cyan-800"
+                        >
                             <Terminal size={14} />
                             AI ASSISTANT
                         </button>
                     </div>
                 </div>
+
+                {/* AGENT MODAL */}
+                {showAgentModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                        <div className="bg-gray-900 border border-cyan-500 rounded-lg p-6 w-96 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+                            <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
+                                <Terminal size={20} /> DÉPLOIEMENT AGENT
+                            </h3>
+
+                            {/* Agent Selector */}
+                            <div className="mb-4">
+                                <label className="text-xs text-gray-500 block mb-1">SÉLECTIONNER L'AGENT (Workspace)</label>
+                                <select
+                                    value={selectedAgent}
+                                    onChange={(e) => setSelectedAgent(e.target.value)}
+                                    className="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white focus:border-cyan-500 outline-none"
+                                >
+                                    <option value="">-- Choisir un Agent --</option>
+                                    {agents.map(agent => (
+                                        <option key={agent.id} value={agent.id}>
+                                            {agent.name.replace('[AGENT] ', '')}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Task Input */}
+                            <div className="mb-6">
+                                <label className="text-xs text-gray-500 block mb-1">MISSION</label>
+                                <textarea
+                                    value={agentTask}
+                                    onChange={(e) => setAgentTask(e.target.value)}
+                                    placeholder="Ex: Analyse ce projet et liste les risques..."
+                                    className="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white focus:border-cyan-500 outline-none h-24 resize-none"
+                                />
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowAgentModal(false)}
+                                    className="flex-1 bg-gray-800 text-gray-400 py-2 rounded hover:bg-gray-700 transition-colors"
+                                >
+                                    ANNULER
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!selectedAgent || !agentTask.trim()) return;
+
+                                        // Trigger Agent
+                                        fetch(`${API_URL}/chat`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'x-api-key': localStorage.getItem('th3_api_key') || ''
+                                            },
+                                            body: JSON.stringify({
+                                                message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
+                                                provider: 'anythingllm',
+                                                model: selectedAgent // Pass the selected workspace slug
+                                            })
+                                        }).catch(err => console.error("Agent trigger failed", err));
+
+                                        setShowAgentModal(false);
+                                        setAgentTask("");
+                                        alert("Agent déployé. Vérifiez le moniteur.");
+                                    }}
+                                    className="flex-1 bg-cyan-900 text-cyan-300 border border-cyan-700 py-2 rounded hover:bg-cyan-800 transition-colors font-bold"
+                                >
+                                    EXÉCUTER
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* MAPS (Main Feature - Swapped) */}
                 <div className="col-span-12 lg:col-span-8 bg-gray-900/50 border border-gray-800 rounded-lg p-1 min-h-[500px] relative group">
@@ -295,7 +400,7 @@ const ProjectDashboard = () => {
                         height="100%"
                         frameBorder="0"
                         style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }}
-                        src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d10000.0!2d-73.5673!3d45.5017!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sca!4v1600000000000!5m2!1sen!2sca`}
+                        src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d44750.0!2d-73.5673!3d45.5017!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sca!4v1600000000000!5m2!1sen!2sca&layer=t`}
                         allowFullScreen
                     ></iframe>
                 </div>
@@ -370,21 +475,23 @@ const ProjectDashboard = () => {
                 </div>
 
                 {/* KANBAN BOARD (Bottom Full Width) */}
-                {activeProject ? (
-                    <div className="col-span-12 grid grid-cols-3 gap-4 h-fit">
-                        {renderColumn("À FAIRE", 'todo', <Circle size={16} className="text-gray-500" />)}
-                        {renderColumn("EN COURS", 'in-progress', <Loader size={16} className="text-blue-500 animate-spin-slow" />)}
-                        {renderColumn("TERMINÉ", 'done', <CheckCircle size={16} className="text-green-500" />)}
-                    </div>
-                ) : (
-                    <div className="col-span-12 flex flex-col items-center justify-center text-gray-600 border border-dashed border-gray-800 rounded-lg min-h-[200px]">
-                        <Briefcase size={48} className="mb-4 opacity-20" />
-                        <p>Sélectionnez un projet pour voir les tâches.</p>
-                    </div>
-                )}
+                {
+                    activeProject ? (
+                        <div className="col-span-12 grid grid-cols-3 gap-4 h-fit">
+                            {renderColumn("À FAIRE", 'todo', <Circle size={16} className="text-gray-500" />)}
+                            {renderColumn("EN COURS", 'in-progress', <Loader size={16} className="text-blue-500 animate-spin-slow" />)}
+                            {renderColumn("TERMINÉ", 'done', <CheckCircle size={16} className="text-green-500" />)}
+                        </div>
+                    ) : (
+                        <div className="col-span-12 flex flex-col items-center justify-center text-gray-600 border border-dashed border-gray-800 rounded-lg min-h-[200px]">
+                            <Briefcase size={48} className="mb-4 opacity-20" />
+                            <p>Sélectionnez un projet pour voir les tâches.</p>
+                        </div>
+                    )
+                }
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

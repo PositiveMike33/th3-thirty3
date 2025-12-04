@@ -5,6 +5,9 @@ const SettingsPage = () => {
     // State for Settings
     const [settings, setSettings] = useState({
         darkMode: true,
+        themeMode: 'dark', // 'dark' | 'light' | 'paint'
+        customWallpaper: '', // URL for 'paint' mode
+        language: 'fr-QC', // 'fr-QC' | 'en-US' | 'fr-FR'
         autoCorrect: true,
         computeMode: 'local',
         reflectionMode: 'think'
@@ -25,7 +28,8 @@ const SettingsPage = () => {
         anthropic: '',
         perplexity: '',
         anythingllm_url: '',
-        anythingllm_key: ''
+        anythingllm_key: '',
+        userApiKey: '' // New field for SaaS Key
     });
 
     // Load Settings & Status on Mount
@@ -146,6 +150,57 @@ const SettingsPage = () => {
                         </div>
                     </div>
 
+                    {/* THEME & WALLPAPER */}
+                    <div className="bg-gray-900/50 border border-pink-800 p-6 rounded-lg backdrop-blur">
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <Activity size={20} /> APPARENCE & LANGUE
+                        </h3>
+
+                        {/* THEME SELECTOR */}
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                            {['dark', 'light', 'paint'].map(mode => (
+                                <button
+                                    key={mode}
+                                    onClick={() => updateSetting('themeMode', mode)}
+                                    className={`p-2 rounded border text-center transition-all ${settings.themeMode === mode
+                                        ? 'bg-pink-900/80 border-pink-400 text-white'
+                                        : 'bg-black/40 border-gray-700 text-gray-500 hover:border-pink-700'
+                                        }`}
+                                >
+                                    <div className="text-xs uppercase font-bold">{mode === 'paint' ? 'Sur Mesure' : mode}</div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* WALLPAPER INPUT (Only if Paint mode) */}
+                        {settings.themeMode === 'paint' && (
+                            <div className="mb-4">
+                                <label className="text-xs text-gray-500 block mb-1">URL du Fond d'écran</label>
+                                <input
+                                    type="text"
+                                    value={settings.customWallpaper || ''}
+                                    onChange={(e) => updateSetting('customWallpaper', e.target.value)}
+                                    placeholder="https://example.com/image.jpg"
+                                    className="w-full bg-black/40 border border-gray-700 rounded p-2 text-xs text-white focus:border-pink-500 focus:outline-none"
+                                />
+                            </div>
+                        )}
+
+                        {/* LANGUAGE SELECTOR */}
+                        <div>
+                            <label className="text-xs text-gray-500 block mb-1">Langue / Région</label>
+                            <select
+                                value={settings.language || 'fr-QC'}
+                                onChange={(e) => updateSetting('language', e.target.value)}
+                                className="w-full bg-black/40 border border-gray-700 rounded p-2 text-xs text-white focus:border-pink-500 focus:outline-none"
+                            >
+                                <option value="fr-QC">Français (Québec) ⚜️</option>
+                                <option value="fr-FR">Français (France)</option>
+                                <option value="en-US">English (US)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     {/* COMPUTE MODE */}
                     <div className="bg-gray-900/50 border border-purple-800 p-6 rounded-lg backdrop-blur">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -247,6 +302,33 @@ const SettingsPage = () => {
                                     placeholder="API Key..."
                                     className="w-full bg-black/40 border border-gray-700 rounded p-2 text-xs text-white focus:border-purple-500 focus:outline-none"
                                 />
+                            </div>
+
+                            {/* USER API KEY (SAAS) */}
+                            <div className="pt-4 border-t border-gray-800 mt-4">
+                                <h3 className="text-sm font-bold text-cyan-400 mb-2 flex items-center gap-2">
+                                    <Shield size={14} />
+                                    CLÉ D'ACCÈS UTILISATEUR (SaaS)
+                                </h3>
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="text-xs text-gray-500">Votre Clé API (Th3 Thirty3)</label>
+                                    {apiKeys.userApiKey && (
+                                        <span className="text-[10px] text-cyan-400 flex items-center gap-1">
+                                            <CheckCircle size={10} /> ENREGISTRÉ
+                                        </span>
+                                    )}
+                                </div>
+                                <input
+                                    type="password"
+                                    name="userApiKey"
+                                    value={apiKeys.userApiKey}
+                                    onChange={handleApiKeyChange}
+                                    placeholder="sk-..."
+                                    className="w-full bg-black/40 border border-cyan-900 rounded p-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                                />
+                                <p className="text-[10px] text-gray-500 mt-1">
+                                    Cette clé détermine votre niveau d'accès (Initiate, Operator, Shadow).
+                                </p>
                             </div>
 
                             <button

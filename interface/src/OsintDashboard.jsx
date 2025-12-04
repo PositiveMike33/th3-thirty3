@@ -29,7 +29,7 @@ const OsintDashboard = () => {
             const res = await fetch(`${API_URL}/osint/spiderfoot/status`);
             const data = await res.json();
             setSpiderfootStatus(data.status);
-        } catch (e) {
+        } catch {
             setSpiderfootStatus("Error");
         }
     };
@@ -85,7 +85,7 @@ const OsintDashboard = () => {
     };
 
     return (
-        <div className="flex h-full bg-black text-green-400 font-mono p-6 gap-6 bg-[url('/grid.png')]">
+        <div className="flex h-full bg-transparent text-green-400 font-mono p-6 gap-6">
 
             {/* Sidebar / Tool Selection */}
             <div className="w-64 flex flex-col gap-4">
