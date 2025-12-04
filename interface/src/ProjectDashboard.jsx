@@ -38,9 +38,10 @@ const ProjectDashboard = () => {
         try {
             const res = await fetch(`${API_URL}/models?computeMode=cloud`);
             const data = await res.json();
+            // The backend returns { local: [], cloud: [] }
+            const allModels = [...(data.local || []), ...(data.cloud || [])];
             // Filter for AnythingLLM agents
-            // The backend returns them with provider 'anythingllm'
-            const agentList = data.filter(m => m.provider === 'anythingllm');
+            const agentList = allModels.filter(m => m.provider === 'anythingllm');
             console.log("Agents found:", agentList);
             setAgents(agentList);
             if (agentList.length > 0 && !selectedAgent) {

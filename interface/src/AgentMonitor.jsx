@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { Terminal, Activity, Cpu, Shield } from 'lucide-react';
 
@@ -59,26 +59,26 @@ const AgentMonitor = () => {
     const [isDragging, setIsDragging] = useState(false);
     const dragOffset = useRef({ x: 0, y: 0 });
 
-    const handleMouseDown = (e) => {
+    const handleMouseDown = useCallback((e) => {
         setIsDragging(true);
         dragOffset.current = {
             x: e.clientX - position.x,
             y: e.clientY - position.y
         };
-    };
+    }, [position]);
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (isDragging) {
             setPosition({
                 x: e.clientX - dragOffset.current.x,
                 y: e.clientY - dragOffset.current.y
             });
         }
-    };
+    }, [isDragging]);
 
-    const handleMouseUp = () => {
+    const handleMouseUp = useCallback(() => {
         setIsDragging(false);
-    };
+    }, []);
 
     useEffect(() => {
         if (isDragging) {
@@ -92,7 +92,7 @@ const AgentMonitor = () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging]);
+    }, [isDragging, handleMouseMove, handleMouseUp]);
 
     return (
         <div
