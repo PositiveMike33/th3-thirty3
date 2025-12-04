@@ -1,3 +1,9 @@
+/* 
+   !!! CORE THEME FILE - DO NOT MODIFY !!!
+   This file contains the stable, approved visual identity (Ascended 33).
+   Any changes here may corrupt the application's aesthetic.
+   Last Verified: 2025-12-04
+*/
 @import "tailwindcss";
 
 :root {
@@ -24,18 +30,11 @@ body {
   font-family: 'Inter', sans-serif;
   overflow: hidden;
   background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.95) 40%, rgba(0, 0, 0, 0.95) 60%, rgba(0, 0, 0, 0.7)),
-    url('/profile.jpg'),
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
     url('/bg-logo.jpg');
-  background-position:
-    center,
-    left center,
-    right center;
+  background-position: center;
   background-repeat: no-repeat;
-  background-size:
-    cover,
-    contain,
-    contain;
+  background-size: cover;
   background-attachment: fixed;
 }
 

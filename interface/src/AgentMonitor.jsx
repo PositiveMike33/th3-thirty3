@@ -9,6 +9,10 @@ const AgentMonitor = () => {
     const logsEndRef = useRef(null);
     const socketRef = useRef(null);
 
+    const addLog = (type, message) => {
+        setLogs(prev => [...prev.slice(-50), { type, message, timestamp: new Date() }]);
+    };
+
     useEffect(() => {
         // Connect to Socket.io
         socketRef.current = io('http://localhost:3000');
@@ -49,10 +53,6 @@ const AgentMonitor = () => {
     useEffect(() => {
         logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [logs]);
-
-    const addLog = (type, message) => {
-        setLogs(prev => [...prev.slice(-50), { type, message, timestamp: new Date() }]);
-    };
 
     // Dragging Logic
     const [position, setPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 300 });
