@@ -954,6 +954,10 @@ offlineService.on('online', (data) => {
     console.log('[SYSTEM] 🟢 ONLINE MODE RESTORED - Cloud services available');
 });
 
+// Orchestrator Routes (Multi-Agent Team Leader)
+const orchestratorRoutes = require('./orchestrator_routes');
+app.use('/api/orchestrator', orchestratorRoutes);
+
 // Start Server
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
