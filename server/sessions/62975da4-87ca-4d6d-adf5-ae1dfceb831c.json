@@ -1,0 +1,21 @@
+{
+  "id": "62975da4-87ca-4d6d-adf5-ae1dfceb831c",
+  "title": "Mon probleme de blockage procr...",
+  "messages": [
+    {
+      "id": "a93e4a86-75ac-4fd7-b844-fc1a5e8c1005",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "3304ebee-e7d8-44ea-affd-74f804308f97",
+      "role": "user",
+      "content": "Mon probleme de blockage procrastinatoire me pousse a leguer mes actions a ma propre creation IA aide moi a changer de train de vie mode survie a labondance illimité    "
+    },
+    {
+      "id": "5f5c764d-1018-42ae-b9ba-3c7f699e4b46",
+      "role": "assistant",
+      "content": "⚠️ Erreur (cloud): model 'gemini-1.5-flash' not found"
+    }
+  ]
+}

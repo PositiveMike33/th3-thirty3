@@ -1,0 +1,21 @@
+{
+  "id": "d0bd3744-fe75-4a1b-9cd1-399613e862a1",
+  "title": "[AGENT TASK] analyse des risqu...",
+  "messages": [
+    {
+      "id": "a77af142-fed5-4258-a9bd-6fa2aff6c298",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "c5da1603-0555-4989-8442-a64b4bd70dce",
+      "role": "user",
+      "content": "[AGENT TASK] analyse des risque\n (Context: Project undefined)"
+    },
+    {
+      "id": "e8804bd6-7ce7-4b01-a161-9f9c91373159",
+      "role": "assistant",
+      "content": "## 🛡️ RAPPORT D'ANALYSE DES MENACES (THREAT MODEL)\n\nJ'ai scanné tes paramètres actuels. Voici les failles critiques dans ton système pour la semaine. Pas de niaisage, check ça :\n\n### 1. 🧬 RISQUE BIOLOGIQUE (Niveau : CRITIQUE)\n**Vecteur :** Le \"Marathon\" (Shift 16h : Ven 15h -> Sam 07h).\n*   **La Menace :** Crash métabolique et neurochimique. Ton corps n'est pas une machine infinie.\n*   **Facteur aggravant :** Ton stack de suppléments (5-HTP/Méthylation).\n*   **Danger Spécifique :** Si tu doses trop de 5-HTP en état de fatigue extrême, tu risques un **Syndrome Sérotoninergique** (surtchauffe du CPU mental) ou juste un crash brutal le samedi matin.\n*   **Mitigation :** Hydratation forcée, caféine *stratégique* (pas en continu), et sommeil absolu dès 07h01 samedi.\n\n### 2. 💸 RISQUE FINANCIER (Niveau : ÉLEVÉ)\n**Vecteur :** Prélèvements Finart / Gestion K2.\n*   **La Menace :** Hémorragie de cash passive.\n*   **État :** Inconnu. Si l'appel à Desjardins n'a pas été fait le 27/28, l'argent sort potentiellement encore.\n*   **Conséquence :** Perte de ressources pour ton projet \"Héritage\".\n*   **Action :** Vérifie ton compte banque *maintenant*. Si ça a passé, c'est une brèche.\n\n### 3. 📝 RISQUE BUREAUCRATIQUE (Niveau : MOYEN)\n**Vecteur :** Formulaire État Civil (Papier).\n*   **La Menace :** Blocage de processus (Deadlock).\n*   **Analyse :** Tant que cette enveloppe n'est pas dans la boîte aux lettres, le dossier Notaire est *brick*. C'est une tâche \"basse résolution\" (facile) qui bloque un résultat \"haute résolution\" (héritage).\n*   **Risque :** Rejet du dossier si tu utilises le reçu de loyer au lieu du relevé de paie (comme vu en mémoire). Utilise le relevé de paie.\n\n### 4. 🧠 VULNÉRABILITÉ PSYCHOLOGIQUE (Latente)\n**Vecteur :** \"Analysis Paralysis\".\n*   **La Menace :** Tu passes plus de temps à configurer le système (Dart, Fabric, Calendrier) qu'à l'utiliser.\n*   **Symptôme :** Lire sur la dopamine au lieu de produire du contenu.\n*   **Correction :** Arrête d'optimiser, commence à exécuter. \"Done is better than perfect\".\n\n---\n\n**PLAN D'URGENCE :**\n1.  **Immédiat :** Confirme le statut Desjardins (Bloqué ou non ?).\n2.  **Aujourd'hui :** Poste la lettre pour l'État Civil.\n3.  **Vendredi :** Mode survie pour le 16h.\n\nOn patch quoi en premier, big ?"
+    }
+  ]
+}

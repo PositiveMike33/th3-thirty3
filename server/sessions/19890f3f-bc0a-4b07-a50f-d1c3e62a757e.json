@@ -1,0 +1,21 @@
+{
+  "id": "19890f3f-bc0a-4b07-a50f-d1c3e62a757e",
+  "title": "Eclaire moi sur les opportunit...",
+  "messages": [
+    {
+      "id": "299b2698-9b1f-4741-9845-1aa6e85ebc87",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "00ef83a1-1c37-442b-9e21-304086c42e9b",
+      "role": "user",
+      "content": "Eclaire moi sur les opportunité que je ne vois pas"
+    },
+    {
+      "id": "dfed8efe-0709-4e98-8cd9-ade0a126a7dc",
+      "role": "assistant",
+      "content": "⚠️ Erreur (cloud): model 'gemini-1.5-flash' not found"
+    }
+  ]
+}

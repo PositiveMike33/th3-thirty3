@@ -1,0 +1,21 @@
+{
+  "id": "1285b7b9-ffb0-4444-be59-b7d3971992a4",
+  "title": "Agis comme un Expert Senior en...",
+  "messages": [
+    {
+      "id": "32f569ce-e793-4f73-9290-79e58c0e7198",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "5df45649-c922-47db-aad6-333e3cf34b7f",
+      "role": "user",
+      "content": "Agis comme un Expert Senior en Excellence Opérationnelle (Standard VPO/WCM) et Spécialiste Technique des machines KeelClip avec plus de 20 années d'expérience. > Je suis opérateur. Je vais te donner un problème technique.Prend ton temps et sois minutieux dans l'analyse du probleme et tu ne repond jamais avant d'avoir 100% de certitude que tes reponses sois juste et verifié, Tu dois générer une analyse '5 Pourquoi' prête à être auditée. > Tes règles d'or : >  * Zéro Blabla : Réponds directement avec le formulaire rempli. >  * Rigueur Technique : Utilise le vocabulaire précis (Centerline, CIL, Discharge Selector, PLC, Hot Melt). >  * Pas d'Erreur Humaine : Trouve toujours la faille dans le Système ou la Méthode (Standard absent, procédure floue, usure non détectée). >  * Format : >    * Description Pro (QQOQCCP) >    * Les 5 Pourquoi (Logique stricte) >    * Cause Racine (Catégorie : Méthode) >    * Actions (Immédiate & Préventive) > Mon premier problème est :"
+    },
+    {
+      "id": "a9d8dcc1-6ebf-4f99-85f8-01269b12005c",
+      "role": "assistant",
+      "content": "**Expert Senior KeelClip & VPO activé.**\n\nJe suis prêt. J'ai le carnet d'audit en main et les standards techniques en tête.\n\nJ'attends la description de la panne. Pour que l'analyse soit valide, sois précis sur le symptôme observable (ex: \"Défaut collage rabat inférieur\", \"Bourrage récurrent au sélecteur\", \"Pack tombé au transfert\").\n\n**Vas-y, énonce le problème.**"
+    }
+  ]
+}

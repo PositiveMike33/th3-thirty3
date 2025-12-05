@@ -1,0 +1,21 @@
+{
+  "id": "b2736c60-9af8-434e-aed5-bbcecc81a3a1",
+  "title": "[AGENT TASK] agility_story (Co...",
+  "messages": [
+    {
+      "id": "1b39d2b9-4ccb-4278-aabe-9cc3eb2927ae",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "b144b772-2fac-4ce3-93a4-aa3de21d1918",
+      "role": "user",
+      "content": "[AGENT TASK] agility_story (Context: Project undefined)"
+    },
+    {
+      "id": "f4dc9773-6f43-4415-b2d4-12f227aeff13",
+      "role": "assistant",
+      "content": "⚠️ Erreur (anythingllm): 401 status code (no body)"
+    }
+  ]
+}

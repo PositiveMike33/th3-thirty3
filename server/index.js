@@ -14,8 +14,15 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Auth Middleware
+const authMiddleware = require('./middleware/auth');
+const userService = require('./user_service');
+app.use(authMiddleware); // Apply to all routes
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
+
+const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
 const ACCOUNTS = [
     'th3thirty3@gmail.com',
@@ -36,7 +43,7 @@ const settingsService = require('./settings_service');
 const currentSettings = settingsService.getSettings();
 if (currentSettings.apiKeys) {
     console.log("[SYSTEM] Loading API Keys from Settings...");
-    if (currentSettings.apiKeys.gemini) process.env.GEMINI_API_KEY = currentSettings.apiKeys.gemini;
+
     if (currentSettings.apiKeys.openai) process.env.OPENAI_API_KEY = currentSettings.apiKeys.openai;
     if (currentSettings.apiKeys.anthropic) process.env.ANTHROPIC_API_KEY = currentSettings.apiKeys.anthropic;
     if (currentSettings.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = currentSettings.apiKeys.perplexity;
@@ -109,6 +116,16 @@ const SocketService = require('./socket_service');
 const socketService = new SocketService();
 const SessionManager = require('./session_manager');
 const sessionManager = new SessionManager();
+
+// Initialize Vision Service (Image/Video Analysis via AnythingLLM)
+const VisionService = require('./vision_service');
+const visionService = new VisionService(llmService);
+
+// Initialize KeelClip Analyzer (5-Why Generator)
+const KeelClipAnalyzer = require('./keelclip_analyzer');
+const keelclipAnalyzer = new KeelClipAnalyzer(llmService);
+
+
 
 // Helper: Inject File Content (Delegated to ContextService)
 const injectFileContent = async (message) => {
@@ -239,7 +256,9 @@ app.get('/patterns/:name', (req, res) => {
 app.get('/models', async (req, res) => {
     try {
         const settings = settingsService.getSettings();
-        const models = await llmService.listModels(settings.computeMode);
+        // Use query param if present, otherwise use global setting
+        const mode = req.query.computeMode || settings.computeMode;
+        const models = await llmService.listModels(mode);
         res.json(models);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -353,6 +372,7 @@ app.post('/osint/run', async (req, res) => {
 
 // SpiderFoot Endpoints
 app.post('/osint/spiderfoot/start', async (req, res) => {
+    if (!userService.canUseTool(req.user, 'osint_full')) return res.status(403).json({ error: "Upgrade required for SpiderFoot" });
     try {
         const result = await osintService.startSpiderFoot();
         res.json({ result });
@@ -362,6 +382,7 @@ app.post('/osint/spiderfoot/start', async (req, res) => {
 });
 
 app.post('/osint/spiderfoot/stop', async (req, res) => {
+    if (!userService.canUseTool(req.user, 'osint_full')) return res.status(403).json({ error: "Upgrade required for SpiderFoot" });
     try {
         const result = await osintService.stopSpiderFoot();
         res.json({ result });
@@ -371,6 +392,7 @@ app.post('/osint/spiderfoot/stop', async (req, res) => {
 });
 
 app.get('/osint/spiderfoot/status', async (req, res) => {
+    if (!userService.canUseTool(req.user, 'osint_full')) return res.status(403).json({ error: "Upgrade required for SpiderFoot" });
     try {
         const status = await osintService.getSpiderFootStatus();
         res.json({ status });
@@ -379,10 +401,169 @@ app.get('/osint/spiderfoot/status', async (req, res) => {
     }
 });
 
+
+// ===== KEELCLIP INCIDENT ANALYSIS ENDPOINTS =====
+
+/**
+ * Analyze incident from image/video
+ * POST /incident/analyze
+ * Body: { media: base64 or path, mediaType: 'image'|'video', description: 'optional operator input' }
+ */
+app.post('/incident/analyze', async (req, res) => {
+    try {
+        const { media, mediaType = 'image', description = '' } = req.body;
+        
+        if (!media) {
+            return res.status(400).json({ error: 'Media (image or video) required' });
+        }
+
+        console.log(`[INCIDENT] Analyzing ${mediaType}...`);
+        
+        // Step 1: Vision Analysis
+        const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
+        console.log('[INCIDENT] Vision analysis complete');
+
+        // Step 2: Generate Quick Summary
+        const summary = keelclipAnalyzer.generateQuickSummary(visionAnalysis);
+
+        res.json({
+            success: true,
+            analysis: visionAnalysis,
+            summary: summary
+        });
+
+    } catch (error) {
+        console.error('[INCIDENT] Analysis failed:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Generate 5-Why report from analysis
+ * POST /incident/generate-5why
+ * Body: { analysis: visionAnalysis object, description: 'operator input' }
+ */
+app.post('/incident/generate-5why', async (req, res) => {
+    try {
+        const { analysis, description = '' } = req.body;
+        
+        if (!analysis) {
+            return res.status(400).json({ error: 'Vision analysis required' });
+        }
+
+        console.log('[INCIDENT] Generating 5-Why report...');
+        
+        // Generate complete 5-Why report
+        const report = await keelclipAnalyzer.generate5Why(analysis, description);
+        
+        // Validate report quality
+        const validation = keelclipAnalyzer.validate5WhyReport(report);
+        
+        console.log(`[INCIDENT] Report generated - Score: ${validation.score}/100`);
+
+        res.json({
+            success: true,
+            report: report,
+            validation: validation
+        });
+
+    } catch (error) {
+        console.error('[INCIDENT] 5-Why generation failed:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Complete workflow: Analyze + Generate 5-Why in one call
+ * POST /incident/complete
+ * Body: { media: base64 or path, mediaType: 'image'|'video', description: 'operator input' }
+ */
+app.post('/incident/complete', async (req, res) => {
+    try {
+        const { media, mediaType = 'image', description = '' } = req.body;
+        
+        if (!media) {
+            return res.status(400).json({ error: 'Media (image or video) required' });
+        }
+
+        console.log(`[INCIDENT] Complete workflow: ${mediaType} → 5-Why`);
+        
+        // Step 1: Vision Analysis
+        const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
+        console.log('[INCIDENT] ✓ Vision analysis');
+
+        // Step 2: Generate 5-Why
+        const report = await keelclipAnalyzer.generate5Why(visionAnalysis, description);
+        console.log('[INCIDENT] ✓ 5-Why generated');
+
+        // Step 3: Validate
+        const validation = keelclipAnalyzer.validate5WhyReport(report);
+        console.log(`[INCIDENT] ✓ Validation: ${validation.score}/100`);
+
+        res.json({
+            success: true,
+            analysis: visionAnalysis,
+            report: report,
+            validation: validation,
+            summary: keelclipAnalyzer.generateQuickSummary(visionAnalysis)
+        });
+
+    } catch (error) {
+        console.error('[INCIDENT] Complete workflow failed:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Validate existing 5-Why report
+ * POST /incident/validate
+ * Body: { report: 'text of report' }
+ */
+app.post('/incident/validate', (req, res) => {
+    try {
+        const { report } = req.body;
+        
+        if (!report) {
+            return res.status(400).json({ error: 'Report text required' });
+        }
+
+        const validation = keelclipAnalyzer.validate5WhyReport(report);
+        
+        res.json({
+            success: true,
+            validation: validation
+        });
+
+    } catch (error) {
+        console.error('[INCIDENT] Validation failed:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Finance Endpoints
 app.get('/finance/portfolio', async (req, res) => {
+    if (!userService.canUseTool(req.user, 'finance_dashboard')) return res.status(403).json({ error: "Upgrade required for Finance" });
     try {
         const data = await financeService.getPortfolioData();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/finance/news', async (req, res) => {
+    try {
+        const news = await financeService.getNews();
+        res.json(news);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/finance/ticker', async (req, res) => {
+    const symbol = req.query.symbol || 'BTC/USD';
+    try {
+        const data = await financeService.getTickerData(symbol);
         res.json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -451,21 +632,17 @@ app.post('/feedback', async (req, res) => {
 
 // Settings Endpoints
 app.get('/settings', (req, res) => {
-    console.log("[SETTINGS] GET request received.");
     const settings = settingsService.getSettings();
-    console.log("[SETTINGS] Sending:", JSON.stringify(settings.apiKeys));
     res.json(settings);
 });
 
 app.post('/settings', (req, res) => {
     try {
-        console.log("[SETTINGS] Received update:", JSON.stringify(req.body, null, 2));
         const updated = settingsService.saveSettings(req.body);
-        console.log("[SETTINGS] Saved. New Keys:", updated.apiKeys ? "Present" : "Missing");
 
         // Apply API Keys to Env
         if (updated.apiKeys) {
-            if (updated.apiKeys.gemini) process.env.GEMINI_API_KEY = updated.apiKeys.gemini;
+
             if (updated.apiKeys.openai) process.env.OPENAI_API_KEY = updated.apiKeys.openai;
             if (updated.apiKeys.anthropic) process.env.ANTHROPIC_API_KEY = updated.apiKeys.anthropic;
             if (updated.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = updated.apiKeys.perplexity;
@@ -482,6 +659,25 @@ app.post('/settings', (req, res) => {
 app.post('/chat', async (req, res) => {
     try {
         const { message, image, pattern, provider, model, sessionId } = req.body;
+        const user = req.user;
+
+        // PERMISSION CHECK: Model
+        if (!userService.canUseModel(user, provider || 'local', model || '')) {
+            return res.status(403).json({
+                reply: `⛔ ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser le modèle ${model} (${provider}).`,
+                error: "Insufficient Permissions"
+            });
+        }
+
+        // PERMISSION CHECK: Fabric Pattern
+        if (pattern && !userService.canUseTool(user, `fabric_basic`)) {
+            return res.status(403).json({
+                reply: `⛔ ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser la bibliothèque Fabric.`,
+                error: "Insufficient Permissions"
+            });
+        }
+
+        console.log(`[CHAT] User: ${user.username} (${user.tier}) | Provider: ${provider} | Model: ${model}`);
 
         // Load Session
         let currentSession = sessionId ? sessionManager.getSession(sessionId) : null;
@@ -563,33 +759,70 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
         }
 
         const startTotal = Date.now();
+        console.log("[CHAT] Step 1: Context Injection");
 
         // 1. Context Injection (Local Files + Vector Memory)
         console.time("ContextInjection");
         let messageWithContext = await injectFileContent(message);
 
         // RAG: Search Long-Term Memory
+        console.log("[CHAT] Step 1b: Memory Search");
         const memoryResults = await memoryService.search(message, 3); // Top 3 relevant memories
         if (memoryResults.length > 0) {
             const memoryContext = memoryResults.map(m => m.text).join('\n---\n');
             messageWithContext += `\n\n[MÉMOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tirées de ta mémoire (notes ou conversations passées) :\n${memoryContext}\n[FIN MÉMOIRE]\n`;
             console.log(`[RAG] Injected ${memoryResults.length} memories.`);
         }
+
+        // 1c. INCIDENT ANALYSIS (Auto-detect VPO context)
+        const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'défaut', 'bourrage'];
+        const isIncidentContext = vpoKeywords.some(keyword => message.toLowerCase().includes(keyword));
+        
+        let incidentAnalysis = null;
+        if (image && isIncidentContext) {
+            console.log("[CHAT] 🔍 VPO INCIDENT DETECTED - Analyzing image...");
+            try {
+                // Analyze incident image
+                incidentAnalysis = await visionService.analyzeKeelClipIncident(image, 'image');
+                const summary = keelclipAnalyzer.generateQuickSummary(incidentAnalysis);
+                
+                messageWithContext += `\n\n[ANALYSE VISUELLE INCIDENT]\n${summary}\n[FIN ANALYSE]\n`;
+                console.log("[CHAT] ✓ Incident analysis injected");
+                
+                // If user explicitly asks for 5-Why, generate it
+                if (message.toLowerCase().includes('5 why') || message.toLowerCase().includes('5why') || message.toLowerCase().includes('rapport')) {
+                    console.log("[CHAT] 📋 Generating 5-Why report...");
+                    const report = await keelclipAnalyzer.generate5Why(incidentAnalysis, message);
+                    const validation = keelclipAnalyzer.validate5WhyReport(report);
+                    
+                    messageWithContext += `\n\n[RAPPORT 5-WHY GÉNÉRÉ]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
+                    console.log(`[CHAT] ✓ 5-Why report generated (Score: ${validation.score})`);
+                }
+            } catch (error) {
+                console.error("[CHAT] Incident analysis failed:", error.message);
+                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle échouée - ${error.message}]\n`;
+            }
+        }
+        
         console.timeEnd("ContextInjection");
 
+
         // 2. Google Data Requests (Parallelized)
+        console.log("[CHAT] Step 2: Google Context");
         console.time("GoogleService");
         const googleContext = await fetchGoogleContext(message);
         messageWithContext += googleContext;
         console.timeEnd("GoogleService");
 
         // 3. Finance Data Requests
+        console.log("[CHAT] Step 3: Finance Context");
         console.time("FinanceService");
         const financeContext = await fetchFinanceContext(message);
         messageWithContext += financeContext;
         console.timeEnd("FinanceService");
 
         // 3. System Prompt Construction
+        console.log("[CHAT] Step 4: System Prompt");
         console.time("StyleAnalysis");
         let finalSystemPrompt;
 
@@ -630,6 +863,7 @@ ${styleInstructions}`;
         console.timeEnd("StyleAnalysis");
 
         // 4. LLM Generation
+        console.log("[CHAT] Step 5: LLM Generation");
         console.time("LLMGeneration");
         // Pass provider and model to LLM Service
         const reply = await llmService.generateResponse(messageWithContext, image, provider, model, finalSystemPrompt);
@@ -660,6 +894,7 @@ ${styleInstructions}`;
 
     } catch (error) {
         console.error('CRITICAL ERROR:', error);
+        require('fs').writeFileSync('server_error.log', `[${new Date().toISOString()}] ${error.stack}\n`, { flag: 'a' });
         res.status(500).json({
             reply: "Erreur système critique.",
             error: error.message
@@ -681,8 +916,51 @@ app.post('/osint/analyze', async (req, res) => {
     }
 });
 
+// Cyber Training Routes (Ethical Hacking Agent Training)
+const cyberTrainingRoutes = require('./cyber_training_routes');
+app.use('/api/cyber-training', cyberTrainingRoutes);
+
+// Tracking Routes (5-Why Incident Tracking)
+const trackingRoutes = require('./tracking_routes');
+app.use('/api/tracking', trackingRoutes);
+
+// Expert Agents Routes (Multi-Agent Specialized Experts)
+const expertAgentsRoutes = require('./expert_agents_routes');
+app.use('/api/experts', expertAgentsRoutes);
+
+// OSINT Expert Agents Routes (Tool-Specific OSINT Experts)
+const osintExpertAgentsRoutes = require('./osint_expert_agents_routes');
+app.use('/api/osint-experts', osintExpertAgentsRoutes);
+
+// Hacking Expert Agents Routes (Tool-Specific Hacking Experts)
+const hackingExpertAgentsRoutes = require('./hacking_expert_agents_routes');
+app.use('/api/hacking-experts', hackingExpertAgentsRoutes);
+
+// Agent Memory Routes (Embeddings + Pieces Integration)
+const agentMemoryRoutes = require('./agent_memory_routes');
+app.use('/api/agent-memory', agentMemoryRoutes);
+
+// Offline Mode Routes (Network Detection + Energy Optimization)
+const offlineModeRoutes = require('./offline_mode_routes');
+app.use('/api/offline-mode', offlineModeRoutes);
+
+// Initialize Offline Mode Service (monitors network automatically)
+const OfflineModeService = require('./offline_mode_service');
+const offlineService = new OfflineModeService();
+offlineService.on('offline', (data) => {
+    console.log('[SYSTEM] 🔴 OFFLINE MODE ACTIVATED - Using local agents');
+});
+offlineService.on('online', (data) => {
+    console.log('[SYSTEM] 🟢 ONLINE MODE RESTORED - Cloud services available');
+});
+
 // Start Server
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
     console.log(`System ready. Identity: ${IDENTITY.name}`);
 });
+
+
+
+
+

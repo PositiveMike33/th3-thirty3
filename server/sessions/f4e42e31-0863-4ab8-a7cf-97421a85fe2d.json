@@ -1,0 +1,21 @@
+{
+  "id": "f4e42e31-0863-4ab8-a7cf-97421a85fe2d",
+  "title": "[AGENT TASK] analyse du projet...",
+  "messages": [
+    {
+      "id": "f2a0ce57-267a-4702-a230-92160d15a8e2",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "72185a2c-a342-4bdc-a72e-f42bd3c84c87",
+      "role": "user",
+      "content": "[AGENT TASK] analyse du projet en cour (Context: Project undefined)"
+    },
+    {
+      "id": "9a5aa0be-9688-4177-8cdd-a25cbbccc097",
+      "role": "assistant",
+      "content": "⚠️ Erreur (anythingllm): 401 status code (no body)"
+    }
+  ]
+}

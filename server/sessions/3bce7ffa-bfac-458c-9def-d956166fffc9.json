@@ -1,0 +1,21 @@
+{
+  "id": "3bce7ffa-bfac-458c-9def-d956166fffc9",
+  "title": "Michael Gauthier Guillet profi...",
+  "messages": [
+    {
+      "id": "c426160e-692e-4f67-a8fc-44628f2395fc",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "0eb20cd5-7b48-43e6-acc7-4b0f96709984",
+      "role": "user",
+      "content": "Michael Gauthier Guillet profil psyanalyste"
+    },
+    {
+      "id": "6f36e2e8-4a86-4fed-b1a0-3f4b2951acce",
+      "role": "assistant",
+      "content": "⚠️ Erreur (cloud): model 'gemini-1.5-flash' not found"
+    }
+  ]
+}

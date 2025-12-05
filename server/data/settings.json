@@ -2,7 +2,7 @@
   "darkMode": true,
   "autoCorrect": true,
   "computeMode": "cloud",
-  "reflectionMode": "ultra",
+  "reflectionMode": "think",
   "socials": {
     "facebook": false,
     "instagram": false,
@@ -10,11 +10,13 @@
     "telegram": false
   },
   "apiKeys": {
-    "gemini": "TEST_KEY_1764486491645",
     "openai": "",
     "anthropic": "",
     "perplexity": "",
     "anythingllm_url": "http://localhost:3001/api/v1",
-    "anythingllm_key": "ET9J8GX-HV64GFR-MZD5KX1-TM9FBJF"
-  }
+    "anythingllm_key": "ET9J8GX-HV64GFR-MZD5KX1-TM9FBJF",
+    "gemini": "TEST_KEY_1764486491645",
+    "userApiKey": "sk-ADMIN-TH3-THIRTY3-MASTER-KEY "
+  },
+  "themeMode": "paint"
 }

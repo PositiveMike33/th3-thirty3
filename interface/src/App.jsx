@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ProjectDashboard from './ProjectDashboard';
 import OsintDashboard from './OsintDashboard';
+import ProfessionalPage from './ProfessionalPage';
+import CyberTrainingPage from './CyberTrainingPage';
 import AgentMonitor from './AgentMonitor';
 import ModelSelector from './components/ModelSelector';
 import ChatInterface from './ChatInterface';
@@ -43,8 +45,10 @@ function App() {
           {/* Navigation */}
           <nav className="p-4 bg-gray-900/80 border-b border-gray-800 text-white flex justify-center gap-8 backdrop-blur-md z-20">
             <Link to="/" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">CHAT</Link>
+            <Link to="/professional" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROFESSIONAL</Link>
             <Link to="/projects" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROJECTS</Link>
             <Link to="/osint" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">OSINT</Link>
+            <Link to="/cyber-training" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🔒 CYBER</Link>
           </nav>
 
           <div className="flex-grow flex overflow-hidden relative">
@@ -57,8 +61,10 @@ function App() {
             <div className="flex-grow h-full">
               <Routes>
                 <Route path="/" element={<ChatInterface />} />
+                <Route path="/professional" element={<ProfessionalPage />} />
                 <Route path="/projects" element={<ProjectDashboard />} />
                 <Route path="/osint" element={<OsintDashboard />} />
+                <Route path="/cyber-training" element={<CyberTrainingPage />} />
               </Routes>
             </div>
 

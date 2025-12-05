@@ -123,11 +123,11 @@ const ChatInterface = () => {
                 }
 
                 if (data.computeMode) {
-                    setSelectedProvider(data.computeMode);
+                    setSelectedProvider(data.computeMode === 'cloud' ? 'anythingllm' : data.computeMode);
                     // Set default model based on mode
                     if (data.computeMode === 'cloud') {
-                        // Try to pick a cloud model if available, otherwise default to Gemini
-                        setSelectedModel('gemini-1.5-flash');
+                        // Try to pick a cloud model if available, otherwise default to AnythingLLM (GPT-4o)
+                        setSelectedModel('gpt-4o');
                     }
                 }
             })
@@ -340,7 +340,7 @@ const ChatInterface = () => {
     };
 
     return (
-        <div className="flex h-screen w-full bg-transparent text-cyan-300 font-mono overflow-hidden">
+        <div className="flex h-full w-full bg-transparent text-cyan-300 font-mono overflow-hidden">
             {/* SIDEBAR */}
             <div className="w-64 bg-black border-r border-cyan-900 flex flex-col">
                 <div className="p-6 pt-12 border-b border-cyan-900 flex justify-center items-center"> {/* Added pt-12 to push avatar down */}
@@ -572,6 +572,13 @@ const ChatInterface = () => {
                                     title="Activer la Vision"
                                 >
                                     📷
+                                </button>
+                                <button
+                                    onClick={() => setIsMuted(!isMuted)}
+                                    className={`absolute right-20 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${isMuted ? 'text-red-500' : 'text-cyan-600 hover:text-cyan-400'}`}
+                                    title={isMuted ? "Activer le son" : "Couper le son"}
+                                >
+                                    {isMuted ? '🔇' : '🔊'}
                                 </button>
                             </div>
                             {capturedImage && (

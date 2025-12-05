@@ -1,0 +1,21 @@
+{
+  "id": "15ee4ecc-64bf-4d57-81e5-b7a353f7723e",
+  "title": "quels sont les tache daujourdh...",
+  "messages": [
+    {
+      "id": "b42b598c-bc75-4026-8398-f594bfedf333",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "d7e6a471-2743-4d1c-be3b-9c1d8158e5aa",
+      "role": "user",
+      "content": "quels sont les tache daujourdhuis?"
+    },
+    {
+      "id": "f4f0d5a3-26ec-4188-9cef-307109f2415d",
+      "role": "assistant",
+      "content": "La prochaine étape est que je rédige un courriel pour l'appel du notaire et la valider pour le paiement de 465 $. Bonne nuit cher Zeelo, on reprend le contrôle demain."
+    }
+  ]
+}

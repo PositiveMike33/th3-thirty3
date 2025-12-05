@@ -18,13 +18,13 @@ async function testTools() {
     // Test 1: Python Calculation
     console.log("\n--- TEST 1: Python Calculation ---");
     const prompt1 = "Calculate the 10th Fibonacci number using Python.";
-    const response1 = await llmService.generateResponse(prompt1, null, 'gemini', 'gemini-1.5-flash', "You are a helpful assistant.");
+    const response1 = await llmService.generateResponse(prompt1, null, 'anythingllm', 'gpt-4o', "You are a helpful assistant.");
     console.log("Response:", response1);
 
     // Test 2: Web Search
     console.log("\n--- TEST 2: Web Search ---");
     const prompt2 = "Search for 'current price of Bitcoin' and tell me the result.";
-    const response2 = await llmService.generateResponse(prompt2, null, 'gemini', 'gemini-1.5-flash', "You are a helpful assistant.");
+    const response2 = await llmService.generateResponse(prompt2, null, 'anythingllm', 'gpt-4o', "You are a helpful assistant.");
     console.log("Response:", response2);
 }
 

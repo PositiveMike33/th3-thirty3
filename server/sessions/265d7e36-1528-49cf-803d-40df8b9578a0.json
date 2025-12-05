@@ -1,0 +1,21 @@
+{
+  "id": "265d7e36-1528-49cf-803d-40df8b9578a0",
+  "title": "ton point de vue...",
+  "messages": [
+    {
+      "id": "43cd5abd-02f2-4ec0-9550-d248313621af",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "76660473-a364-4b99-ba25-c22a464780e5",
+      "role": "user",
+      "content": "ton point de vue"
+    },
+    {
+      "id": "2dce903d-70ff-4ac2-9d4d-c6f97916adad",
+      "role": "assistant",
+      "content": "⚠️ Erreur AnythingLLM: fetch failed"
+    }
+  ]
+}

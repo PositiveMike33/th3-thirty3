@@ -17,6 +17,7 @@
         "google-auth-library": "^10.5.0",
         "googleapis": "^166.0.0",
         "mammoth": "^1.11.0",
+        "nodemailer": "^7.0.11",
         "ollama": "^0.6.3",
         "openai": "^6.9.1",
         "pdf-parse": "^2.4.5",

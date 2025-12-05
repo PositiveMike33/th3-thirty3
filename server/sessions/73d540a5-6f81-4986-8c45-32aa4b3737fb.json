@@ -1,0 +1,21 @@
+{
+  "id": "73d540a5-6f81-4986-8c45-32aa4b3737fb",
+  "title": "analyse psychologique de Micha...",
+  "messages": [
+    {
+      "id": "40867692-4961-4afe-b770-f2a7135f1a9e",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "815b50dc-57e6-43ca-80d6-c55cdd625f00",
+      "role": "user",
+      "content": "analyse psychologique de Michael Gauthier Guillet"
+    },
+    {
+      "id": "d3092e79-782a-4a7c-afc2-285142b13bf4",
+      "role": "assistant",
+      "content": "Voici des informations pertinentes tirées de ta mémoire (notes ou conversations passées) :\n\nLe constat : Plusieurs études montrent que le 5-HTP est plus efficace qu'un placebo pour soulager la dépression légère à modérée.\n\nLa nuance technique : Il fonctionne de manière similaire aux antidépresseurs (ISRS), mais en augmentant la _matière première_ plutôt qu'en empêchant la perte de sérotonine.\n\nNiveau de preuve : Modéré à Élevé. Des études comparatives suggèrent une efficacité proche de certains médicaments conventionnels, mais avec moins d'effets secondaires sexuels."
+    }
+  ]
+}

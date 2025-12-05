@@ -1,0 +1,25 @@
+{
+    "users": [
+        {
+            "id": "admin_000",
+            "username": "th3thirty3",
+            "key": "sk-ADMIN-TH3-THIRTY3-MASTER-KEY",
+            "tier": "architect",
+            "created_at": "2025-01-01T00:00:00Z"
+        },
+        {
+            "id": "test_initiate",
+            "username": "newbie",
+            "key": "sk-TEST-INITIATE",
+            "tier": "initiate",
+            "created_at": "2025-12-03T00:00:00Z"
+        },
+        {
+            "id": "test_operator",
+            "username": "pro_user",
+            "key": "sk-TEST-OPERATOR",
+            "tier": "operator",
+            "created_at": "2025-12-03T00:00:00Z"
+        }
+    ]
+}

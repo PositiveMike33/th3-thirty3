@@ -1,0 +1,21 @@
+{
+  "id": "7c249c82-43b6-4321-814a-d68d5f6ca028",
+  "title": "salut...",
+  "messages": [
+    {
+      "id": "3634417c-63f2-4a88-b00d-a15240521563",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "9a8c26b0-8f64-43a8-9d97-4c7d9c50b43b",
+      "role": "user",
+      "content": "salut"
+    },
+    {
+      "id": "3e71c403-bf35-4255-b2ba-848612584d0d",
+      "role": "assistant",
+      "content": "⚠️ Erreur (cloud): model 'gpt-4o' not found"
+    }
+  ]
+}

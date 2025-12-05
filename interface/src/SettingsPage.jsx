@@ -23,7 +23,7 @@ const SettingsPage = () => {
 
     // State for API Keys
     const [apiKeys, setApiKeys] = useState({
-        gemini: '',
+
         openai: '',
         anthropic: '',
         perplexity: '',
@@ -251,7 +251,7 @@ const SettingsPage = () => {
                         </h3>
                         <div className="space-y-3">
                             {[
-                                { label: 'Google Gemini API Key', name: 'gemini', placeholder: 'AIza...' },
+
                                 { label: 'OpenAI API Key', name: 'openai', placeholder: 'sk-...' },
                                 { label: 'Anthropic Claude Key', name: 'anthropic', placeholder: 'sk-ant-...' },
                                 { label: 'Perplexity API Key', name: 'perplexity', placeholder: 'pplx-...' },

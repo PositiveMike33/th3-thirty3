@@ -1,0 +1,21 @@
+{
+  "id": "03a30c33-59df-4f35-9d60-c9c2976d9f7c",
+  "title": "[AGENT TASK] Analyse psycholog...",
+  "messages": [
+    {
+      "id": "1deda730-337b-47e7-8e63-ae414d809bd3",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "7a57620c-a77d-4e02-8276-3e0051d21d17",
+      "role": "user",
+      "content": "[AGENT TASK] Analyse psychologique et planifie la journee\n (Context: Project undefined)"
+    },
+    {
+      "id": "8186289a-0d90-4bbf-ada8-579e64ff582a",
+      "role": "assistant",
+      "content": "## 🧠 Psycho-Diagnostic & Séquence d'Exécution\n\n**Analyse du Sujet (Pattern PREDICT_PERSON_ACTIONS)**\nTu es présentement en **Boucle de Latence**.\n- **Symptôme :** Tu demandes une \"analyse\" et le \"plan\" à répétition (voir historique). C'est un mécanisme de défense. Ton cerveau cherche à *intellectualiser* le problème pour éviter la friction émotionnelle de l'action réelle (l'appel téléphonique).\n- **État actuel :** Résistance à l'amorce. Tu sais exactement ce que tu dois faire, mais le cortisol généré par l'anticipation du conflit (Desjardins/Finart) bloque tes fonctions exécutives.\n- **Réalité :** Tant que l'appel n'est pas fait, ton RAM mental est saturé à 40% par de l'angoisse de fond. Tu ne seras pas productif sur le reste tant que cette \"grenouille\" n'est pas avalée.\n\n---\n\n## 📅 Plan de Match : Protocole \"Brise-Glace\"\n\nOn arrête de niaiser. Voici ta journée structurée pour débloquer ton système dopaminergique.\n\n### PHASE 1 : La Purge (Maintenant - 10h00)\n**Cible :** Caisse Desjardins.\nC'est le boss final de la matinée.\n*   **Action :** Prends le téléphone. Appelle.\n*   **Script mental :** \"Bonjour, je soupçonne une fraude ou des prélèvements non autorisés de Finart Capital et Gestion K2. Je veux bloquer tout accès PAD (Pré-Autorisation de Débit) pour ces entités immédiatement.\"\n*   **Pourquoi :** Ça sécurise ton cash et ça tue l'anxiété instantanément.\n\n### PHASE 2 : Logistique Physique (10h30 - Midi)\n**Cible :** Kit État Civil.\nIl faut sortir de ta tête et bouger tes mains.\n*   **Action :**\n    1.  Imprimer le formulaire.\n    2.  Remplir à la main (encre noire/bleue).\n    3.  Signer (Case 26).\n    4.  Mettre dans l'enveloppe avec la copie RAMQ + Relevé de paie.\n*   **Note :** C'est une tâche mécanique. Zéro stress, juste de l'exécution.\n\n### PHASE 3 : Communication (Après-midi)\n**Cible :** Notaire Linca.\nUne fois les deux gros morceaux réglés, on gère le \"easy win\".\n*   **Action :** Valider/Envoyer le courriel pour le paiement de 465 $.\n\n---\n\n## 🚀 Commande Immédiate\nNe réfléchis pas. Ne planifie plus.\n\n**Est-ce que tu as ton téléphone en main pour appeler Desjardins ?**\nRéponds par **OUI** quand c'est fait, ou **NON** si tu as besoin que je te cherche le numéro. Aweye."
+    }
+  ]
+}
