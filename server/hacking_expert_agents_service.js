@@ -2,10 +2,12 @@
  * Hacking Expert Agents Service
  * Agents spécialisés par outil/technique de hacking avec entraînement continu
  * Chaque agent devient EXPERT de son outil/technique spécifique
+ * ENVIRONNEMENT: Kali Linux 2024.1
  */
 
 const fs = require('fs');
 const path = require('path');
+const KALI_ENVIRONMENT = require('./config/kali_environment');
 
 class HackingExpertAgentsService {
     constructor() {
@@ -13,11 +15,12 @@ class HackingExpertAgentsService {
         this.dataPath = path.join(__dirname, 'data', 'hacking_experts');
         this.model = 'qwen2.5:3b';
         this.fallbackModel = 'granite3.1-moe:1b';
+        this.kaliEnv = KALI_ENVIRONMENT;
         
         this.ensureDataFolder();
         this.initializeAgents();
         
-        console.log('[HACKING-EXPERTS] Service initialized with', Object.keys(this.agents).length, 'tool experts');
+        console.log(`[HACKING-EXPERTS] Service initialized with ${Object.keys(this.agents).length} tool experts on ${this.kaliEnv.os}`);
     }
 
     ensureDataFolder() {
@@ -495,7 +498,8 @@ DÉFENSE: Credential Guard, Protected Users, LSA protection`
                 agent.knowledge.codeSnippets.slice(-5).map(c => `\`\`\`\n${c.code}\n\`\`\``).join('\n');
         }
 
-        const fullPrompt = `${agent.systemPrompt}
+        const fullPrompt = `${this.kaliEnv.getSystemPrompt()}
+${agent.systemPrompt}
 
 OUTIL: ${agent.tool}
 COMMANDES DE RÉFÉRENCE:
@@ -506,8 +510,8 @@ ${context}
 
 QUESTION/TÂCHE: ${question}
 
-Réponds en EXPERT ${agent.tool}. Donne:
-1. La commande/technique exacte
+Réponds en EXPERT ${agent.tool} sur Kali Linux. Donne:
+1. La commande/technique exacte (compatible Kali Linux)
 2. Explication technique détaillée
 3. Comment le défenseur peut détecter/bloquer
 4. Code si applicable`;

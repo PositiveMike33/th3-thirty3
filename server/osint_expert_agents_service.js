@@ -2,22 +2,25 @@
  * OSINT Expert Agents Service
  * Agents spécialisés par outil OSINT avec apprentissage indépendant
  * Chaque agent devient EXPERT de son outil spécifique
+ * ENVIRONNEMENT: Kali Linux 2024.1
  */
 
 const fs = require('fs');
 const path = require('path');
+const KALI_ENVIRONMENT = require('./config/kali_environment');
 
 class OsintExpertAgentsService {
     constructor() {
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.dataPath = path.join(__dirname, 'data', 'osint_experts');
-        this.model = 'qwen2.5:3b';  // Modèle léger pour tous les agents OSINT
+        this.model = 'qwen2.5:3b';
         this.fallbackModel = 'granite3.1-moe:1b';
+        this.kaliEnv = KALI_ENVIRONMENT;
         
         this.ensureDataFolder();
         this.initializeAgents();
         
-        console.log('[OSINT-EXPERTS] Service initialized with', Object.keys(this.agents).length, 'tool experts');
+        console.log(`[OSINT-EXPERTS] Service initialized with ${Object.keys(this.agents).length} tool experts on ${this.kaliEnv.os}`);
     }
 
     ensureDataFolder() {
@@ -323,7 +326,8 @@ RÈGLE: Suivre le flux, identifier les exchanges, wallet profiling`
                 agent.knowledge.successfulTechniques.slice(-5).join('\n');
         }
 
-        const fullPrompt = `${agent.systemPrompt}
+        const fullPrompt = `${this.kaliEnv.getSystemPrompt()}
+${agent.systemPrompt}
 
 OUTIL: ${agent.tool}
 COMMANDES PRINCIPALES:
@@ -334,7 +338,7 @@ ${context}
 
 QUESTION: ${question}
 
-Réponds en expert ${agent.tool}. Sois technique, précis, et donne des commandes concrètes.`;
+Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et donne des commandes compatibles Kali.`;
 
         try {
             const response = await fetch(`${this.ollamaUrl}/api/generate`, {

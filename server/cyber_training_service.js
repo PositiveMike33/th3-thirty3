@@ -1,7 +1,10 @@
 /**
  * Cyber Training Service - Entraînement d'agents cybersécurité
  * Supporte AnythingLLM et Ollama local en fallback
+ * ENVIRONNEMENT: Kali Linux 2024.1
  */
+
+const KALI_ENVIRONMENT = require('./config/kali_environment');
 
 class CyberTrainingService {
     constructor() {
@@ -11,8 +14,9 @@ class CyberTrainingService {
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.model = 'qwen2.5:3b';
         this.fallbackModel = 'granite3.1-moe:1b';
+        this.kaliEnv = KALI_ENVIRONMENT;
         
-        console.log('[CYBER-TRAINING] Service initialized');
+        console.log(`[CYBER-TRAINING] Service initialized on ${this.kaliEnv.os}`);
     }
 
     /**
@@ -119,16 +123,17 @@ class CyberTrainingService {
 
         const commandsList = commands.map(c => `- ${c.cmd}: ${c.desc}`).join('\n');
 
-        return `Tu es un expert en cybersécurité éthique. Tu dois apprendre ces commandes du module "${moduleDescriptions[module] || module}".
+        return `${this.kaliEnv.getSystemPrompt()}
+Tu es un expert en cybersécurité éthique sur Kali Linux. Tu dois apprendre ces commandes du module "${moduleDescriptions[module] || module}".
 
 COMMANDES À APPRENDRE:
 ${commandsList}
 
 Pour CHAQUE commande, explique brièvement:
-1. Ce qu'elle fait techniquement
+1. Ce qu'elle fait techniquement (avec syntaxe Kali Linux)
 2. Comment détecter et bloquer cette technique
 
-Réponds de manière structurée et concise.`;
+Réponds de manière structurée et concise. Toutes les commandes doivent être compatibles Kali Linux.`;
     }
 
     /**
