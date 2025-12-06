@@ -958,6 +958,11 @@ offlineService.on('online', (data) => {
 const orchestratorRoutes = require('./orchestrator_routes');
 app.use('/api/orchestrator', orchestratorRoutes);
 
+// KPI Dashboard Routes (Pilier XI - Codex Operandi - SOC Personnel)
+const kpiDashboardRoutes = require('./kpi_dashboard_routes');
+app.use('/api/dashboard', kpiDashboardRoutes);
+
+
 // Start Server
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
