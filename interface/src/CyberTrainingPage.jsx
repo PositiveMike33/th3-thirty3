@@ -1,10 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const CyberTrainingPage = () => {
   const [selectedModule, setSelectedModule] = useState('recon');
   const [terminalOutput, setTerminalOutput] = useState('> Agent prêt pour entraînement...\n');
   const [isTraining, setIsTraining] = useState(false);
   const [agentResponse, setAgentResponse] = useState('');
+  
+  // Aikido Security State
+  const [aikidoData, setAikidoData] = useState(null);
+  const [aikidoLoading, setAikidoLoading] = useState(false);
+  const [aikidoError, setAikidoError] = useState(null);
+
+  // Charger les données Aikido quand le module est sélectionné
+  useEffect(() => {
+    if (selectedModule === 'aikido') {
+      loadAikidoData();
+    }
+  }, [selectedModule]);
+
+  const loadAikidoData = async () => {
+    setAikidoLoading(true);
+    setAikidoError(null);
+    try {
+      const response = await fetch('http://localhost:3000/api/cyber-training/aikido/summary');
+      const data = await response.json();
+      if (data.error) {
+        setAikidoError(data.error);
+      } else {
+        setAikidoData(data);
+      }
+    } catch (error) {
+      setAikidoError('Impossible de se connecter à Aikido. Vérifiez vos credentials.');
+    }
+    setAikidoLoading(false);
+  };
 
   const modules = {
     recon: {
@@ -97,6 +126,13 @@ const CyberTrainingPage = () => {
         { cmd: 'last -a', desc: 'Dernières connexions' },
         { cmd: 'grep "Failed password" /var/log/auth.log', desc: 'Tentatives brute-force' }
       ]
+    },
+    aikido: {
+      title: '🛡️ Aikido Security',
+      icon: '🔒',
+      color: 'from-indigo-500 to-purple-600',
+      description: 'Scan automatique de vulnérabilités (SAST, SCA, Secrets)',
+      type: 'scanner'
     }
   };
 
