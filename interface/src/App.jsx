@@ -4,6 +4,7 @@ import ProjectDashboard from './ProjectDashboard';
 import OsintDashboard from './OsintDashboard';
 import ProfessionalPage from './ProfessionalPage';
 import CyberTrainingPage from './CyberTrainingPage';
+import KPIDashboard from './KPIDashboard';
 import AgentMonitor from './AgentMonitor';
 import ModelSelector from './components/ModelSelector';
 import ChatInterface from './ChatInterface';
@@ -49,6 +50,7 @@ function App() {
             <Link to="/projects" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROJECTS</Link>
             <Link to="/osint" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">OSINT</Link>
             <Link to="/cyber-training" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🔒 CYBER</Link>
+            <Link to="/dashboard" className="hover:text-purple-400 transition-colors font-mono text-sm tracking-widest">🎯 SOC</Link>
           </nav>
 
           <div className="flex-grow flex overflow-hidden relative">
@@ -65,6 +67,7 @@ function App() {
                 <Route path="/projects" element={<ProjectDashboard />} />
                 <Route path="/osint" element={<OsintDashboard />} />
                 <Route path="/cyber-training" element={<CyberTrainingPage />} />
+                <Route path="/dashboard" element={<KPIDashboard />} />
               </Routes>
             </div>
 
