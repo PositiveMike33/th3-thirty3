@@ -1,0 +1,21 @@
+{
+  "id": "4fdb1828-d9c4-4a5f-87bd-1b43cebf83b1",
+  "title": "analyse les rapport en cyber a...",
+  "messages": [
+    {
+      "id": "2d000ff2-09bb-48c2-811a-ac1e87834970",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "e8663da4-dc76-4080-bb7a-901491aaa99d",
+      "role": "user",
+      "content": "analyse les rapport en cyber attack"
+    },
+    {
+      "id": "16af73e6-6792-4262-a676-a25ef24ae56c",
+      "role": "assistant",
+      "content": "⚠️ Erreur (local): timed out waiting for llama runner to start - progress 0.00 - "
+    }
+  ]
+}

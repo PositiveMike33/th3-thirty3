@@ -2,11 +2,13 @@
 const { Ollama } = require('ollama');
 const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
+const AnythingLLMWrapper = require('./anythingllm_wrapper');
 
 class LLMService {
     constructor() {
         this.ollama = new Ollama();
         this.socketService = null;
+        this.anythingLLMWrapper = new AnythingLLMWrapper();
         this.providers = {
             local: { name: 'Local (Ollama)', type: 'local' },
 
@@ -290,77 +292,22 @@ class LLMService {
 
     async generateAnythingLLMResponse(prompt, modelId, systemPrompt) {
         if (this.socketService) {
-            this.socketService.emitAgentStatus("Accessing Private Web (AnythingLLM Native)...");
-        }
-
-        const baseUrl = process.env.ANYTHING_LLM_URL;
-        const apiKey = process.env.ANYTHING_LLM_KEY;
-
-        if (!baseUrl || !apiKey) {
-            throw new Error("AnythingLLM URL or Key missing.");
+            this.socketService.emitAgentStatus("Accessing Private Web (AnythingLLM with Hybrid Embeddings)...");
         }
 
         try {
-            // 1. Get Workspace Slug if not cached
-            if (!this.anythingLLMSlug) {
-                console.log("[ANYTHING_LLM] Fetching workspaces...");
-                const res = await fetch(`${baseUrl}/workspaces`, {
-                    headers: { 'Authorization': `Bearer ${apiKey}` }
-                });
-                if (!res.ok) throw new Error(`Failed to list workspaces: ${res.status}`);
-                const data = await res.json();
-                
-                if (!data.workspaces || data.workspaces.length === 0) {
-                    throw new Error("No workspaces found in AnythingLLM.");
-                }
-
-                // Prefer 'agent-thirty3' or 'th3-thirty3', else first
-                const preferred = data.workspaces.find(w => w.slug.includes('thirty3'));
-                this.anythingLLMSlug = preferred ? preferred.slug : data.workspaces[0].slug;
-                console.log(`[ANYTHING_LLM] Selected Workspace: ${this.anythingLLMSlug}`);
+            // Use the wrapper which handles Gemini → nomic-embed-text fallback automatically
+            const response = await this.anythingLLMWrapper.chat(prompt, 'chat');
+            
+            // Log stats periodically
+            const stats = this.anythingLLMWrapper.getStats();
+            if (stats.total_requests % 10 === 0) {
+                console.log('[ANYTHINGLLM] Stats:', stats);
             }
-
-            // 2. Send Chat with Retry
-            console.log(`[ANYTHING_LLM] Sending to ${this.anythingLLMSlug}...`);
-            let chatRes;
-            try {
-                chatRes = await fetch(`${baseUrl}/workspace/${this.anythingLLMSlug}/chat`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: prompt,
-                        mode: 'chat'
-                    })
-                });
-            } catch (err) {
-                console.warn("[ANYTHING_LLM] First attempt failed, retrying...", err.message);
-                await new Promise(r => setTimeout(r, 1000));
-                chatRes = await fetch(`${baseUrl}/workspace/${this.anythingLLMSlug}/chat`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: prompt,
-                        mode: 'chat'
-                    })
-                });
-            }
-
-            if (!chatRes.ok) {
-                const errText = await chatRes.text();
-                throw new Error(`AnythingLLM Chat Failed: ${chatRes.status} - ${errText}`);
-            }
-
-            const chatData = await chatRes.json();
-            return chatData.textResponse;
-
+            
+            return response;
         } catch (error) {
-            console.error("[ANYTHING_LLM] Error:", error);
+            console.error("[ANYTHINGLLM] Error:", error);
             return `⚠️ Erreur AnythingLLM: ${error.message}`;
         }
     }

@@ -1,0 +1,21 @@
+{
+  "id": "30b1a3aa-a412-48c5-8789-e3a7e8bee233",
+  "title": "Resume moi le travail ethique ...",
+  "messages": [
+    {
+      "id": "326ef276-2559-479f-8127-279d24f686f0",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "8c4a5090-2812-44a7-bf87-4cabb05bc98e",
+      "role": "user",
+      "content": "Resume moi le travail ethique des hackers?"
+    },
+    {
+      "id": "a54e2d54-36ec-4a2d-937a-e2f46c6eda48",
+      "role": "assistant",
+      "content": "⚠️ Erreur AnythingLLM: AnythingLLM Chat Failed: 500 - {\"id\":\"edc304bc-50cf-483b-8070-c0949855b5a2\",\"type\":\"abort\",\"textResponse\":null,\"sources\":[],\"close\":true,\"error\":\"Gemini Failed to embed: [failed_to_embed]: Connection error.\"}"
+    }
+  ]
+}
