@@ -5,63 +5,27 @@
 
 class AikidoSecurityService {
     constructor() {
+        // Utiliser le token IDE fourni
+        this.apiToken = process.env.AIKIDO_API_TOKEN;
         this.apiUrl = 'https://app.aikido.dev/api/public/v1';
-        this.clientId = process.env.AIKIDO_CLIENT_ID;
-        this.clientSecret = process.env.AIKIDO_CLIENT_SECRET;
-        this.accessToken = null;
-        this.tokenExpiry = null;
+        this.ideApiUrl = 'https://ide.aikido.dev';
         
-        console.log('[AIKIDO] Service initialized');
+        // Région extraite du token (eu)
+        this.region = 'eu';
+        
+        console.log('[AIKIDO] Service initialized with IDE token');
     }
 
     /**
-     * Obtenir un access token OAuth2
+     * Requête API authentifiée avec le token IDE
      */
-    async getAccessToken() {
-        // Si on a un token valide, le réutiliser
-        if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
-            return this.accessToken;
-        }
-
-        try {
-            const response = await fetch(`${this.apiUrl}/oauth/token`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    grant_type: 'client_credentials',
-                    client_id: this.clientId,
-                    client_secret: this.clientSecret
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Auth failed: ${response.status}`);
-            }
-
-            const data = await response.json();
-            this.accessToken = data.access_token;
-            // Token valide 1h, on refresh 5min avant
-            this.tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
-            
-            console.log('[AIKIDO] Access token obtained');
-            return this.accessToken;
-
-        } catch (error) {
-            console.error('[AIKIDO] Auth error:', error.message);
-            throw error;
-        }
-    }
-
-    /**
-     * Requête API authentifiée
-     */
-    async apiRequest(endpoint, method = 'GET', body = null) {
-        const token = await this.getAccessToken();
+    async apiRequest(endpoint, method = 'GET', body = null, useIdeApi = false) {
+        const baseUrl = useIdeApi ? this.ideApiUrl : this.apiUrl;
         
         const options = {
             method,
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${this.apiToken}`,
                 'Content-Type': 'application/json'
             }
         };
@@ -70,14 +34,20 @@ class AikidoSecurityService {
             options.body = JSON.stringify(body);
         }
 
-        const response = await fetch(`${this.apiUrl}${endpoint}`, options);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API error ${response.status}: ${errorText}`);
-        }
+        try {
+            const response = await fetch(`${baseUrl}${endpoint}`, options);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`[AIKIDO] API error ${response.status}:`, errorText);
+                throw new Error(`API error ${response.status}: ${errorText}`);
+            }
 
-        return response.json();
+            return response.json();
+        } catch (error) {
+            console.error('[AIKIDO] Request error:', error.message);
+            throw error;
+        }
     }
 
     /**

@@ -227,39 +227,136 @@ const CyberTrainingPage = () => {
             ))}
           </div>
 
-          {/* Commands Panel */}
+          {/* Commands Panel OR Aikido Dashboard */}
           <div className="lg:col-span-1 bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <span className="text-2xl">{modules[selectedModule].icon}</span>
               {modules[selectedModule].title}
             </h3>
             
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {modules[selectedModule].commands.map((cmd, i) => (
-                <div 
-                  key={i}
-                  className="bg-gray-900/80 border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 transition-all cursor-pointer group"
-                  onClick={() => executeCommand(cmd.cmd)}
+            {/* Aikido Security Dashboard */}
+            {selectedModule === 'aikido' ? (
+              <div className="space-y-4">
+                {aikidoLoading && (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <p className="text-gray-400">Chargement des données Aikido...</p>
+                  </div>
+                )}
+                
+                {aikidoError && (
+                  <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4">
+                    <p className="text-red-400 text-sm">⚠️ {aikidoError}</p>
+                    <p className="text-gray-500 text-xs mt-2">
+                      Vérifiez vos credentials dans .env (AIKIDO_CLIENT_ID et AIKIDO_CLIENT_SECRET)
+                    </p>
+                    <button 
+                      onClick={loadAikidoData}
+                      className="mt-3 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm"
+                    >
+                      🔄 Réessayer
+                    </button>
+                  </div>
+                )}
+                
+                {aikidoData && !aikidoLoading && (
+                  <>
+                    {/* Workspace Info */}
+                    <div className="bg-gray-900/50 rounded-lg p-4 border border-purple-500/30">
+                      <p className="text-purple-400 text-sm mb-1">Workspace</p>
+                      <p className="text-white font-bold">{aikidoData.workspace}</p>
+                      <p className="text-gray-500 text-xs mt-1">{aikidoData.repoCount} repos scannés</p>
+                    </div>
+                    
+                    {/* Security Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-red-900/30 rounded-lg p-3 border border-red-500/30 text-center">
+                        <p className="text-3xl font-bold text-red-400">{aikidoData.stats.critical}</p>
+                        <p className="text-xs text-gray-400">Critical</p>
+                      </div>
+                      <div className="bg-orange-900/30 rounded-lg p-3 border border-orange-500/30 text-center">
+                        <p className="text-3xl font-bold text-orange-400">{aikidoData.stats.high}</p>
+                        <p className="text-xs text-gray-400">High</p>
+                      </div>
+                      <div className="bg-yellow-900/30 rounded-lg p-3 border border-yellow-500/30 text-center">
+                        <p className="text-3xl font-bold text-yellow-400">{aikidoData.stats.medium}</p>
+                        <p className="text-xs text-gray-400">Medium</p>
+                      </div>
+                      <div className="bg-blue-900/30 rounded-lg p-3 border border-blue-500/30 text-center">
+                        <p className="text-3xl font-bold text-blue-400">{aikidoData.stats.low}</p>
+                        <p className="text-xs text-gray-400">Low</p>
+                      </div>
+                    </div>
+                    
+                    {/* Total */}
+                    <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-lg p-4 border border-purple-500/30 text-center">
+                      <p className="text-4xl font-bold text-white">{aikidoData.stats.total}</p>
+                      <p className="text-purple-400">Issues de sécurité détectés</p>
+                    </div>
+                    
+                    {/* Recent Issues */}
+                    {aikidoData.recentIssues?.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-gray-400 text-sm">Issues récents:</p>
+                        {aikidoData.recentIssues.slice(0, 3).map((issue, i) => (
+                          <div key={i} className="bg-gray-900/50 rounded-lg p-2 border border-gray-700 text-xs">
+                            <p className="text-white truncate">{issue.title || issue.name || 'Issue'}</p>
+                            <p className="text-gray-500">{issue.severity}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                <button
+                  onClick={loadAikidoData}
+                  disabled={aikidoLoading}
+                  className="w-full mt-4 py-3 rounded-lg font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
                 >
-                  <code className="text-cyan-400 text-sm font-mono block mb-1 group-hover:text-cyan-300">
-                    $ {cmd.cmd}
-                  </code>
-                  <p className="text-gray-500 text-xs">{cmd.desc}</p>
+                  {aikidoLoading ? '⏳ Chargement...' : '🔄 Actualiser les données'}
+                </button>
+                
+                <a 
+                  href="https://app.aikido.dev" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block w-full text-center py-2 text-purple-400 hover:text-purple-300 text-sm"
+                >
+                  📊 Ouvrir Aikido Dashboard →
+                </a>
+              </div>
+            ) : (
+              /* Standard Commands Panel */
+              <>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {modules[selectedModule].commands?.map((cmd, i) => (
+                    <div 
+                      key={i}
+                      className="bg-gray-900/80 border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 transition-all cursor-pointer group"
+                      onClick={() => executeCommand(cmd.cmd)}
+                    >
+                      <code className="text-cyan-400 text-sm font-mono block mb-1 group-hover:text-cyan-300">
+                        $ {cmd.cmd}
+                      </code>
+                      <p className="text-gray-500 text-xs">{cmd.desc}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <button
-              onClick={() => trainAgent(selectedModule)}
-              disabled={isTraining}
-              className={`w-full mt-6 py-3 rounded-lg font-bold text-white transition-all ${
-                isTraining 
-                  ? 'bg-gray-600 cursor-not-allowed' 
-                  : `bg-gradient-to-r ${modules[selectedModule].color} hover:shadow-lg hover:scale-105`
-              }`}
-            >
-              {isTraining ? '⏳ Entraînement en cours...' : `🎯 Entraîner l'Agent sur ${modules[selectedModule].title}`}
-            </button>
+                <button
+                  onClick={() => trainAgent(selectedModule)}
+                  disabled={isTraining}
+                  className={`w-full mt-6 py-3 rounded-lg font-bold text-white transition-all ${
+                    isTraining 
+                      ? 'bg-gray-600 cursor-not-allowed' 
+                      : `bg-gradient-to-r ${modules[selectedModule].color} hover:shadow-lg hover:scale-105`
+                  }`}
+                >
+                  {isTraining ? '⏳ Entraînement en cours...' : `🎯 Entraîner l'Agent sur ${modules[selectedModule].title}`}
+                </button>
+              </>
+            )}
           </div>
 
           {/* Terminal Output */}
