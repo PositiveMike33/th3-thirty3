@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs'); // CRITICAL: Required for patterns route
 const { getPatterns, getPatternContent } = require('./fabric_service');
 const MemoryService = require('./memory_service');
 const { v4: uuidv4 } = require('uuid');
