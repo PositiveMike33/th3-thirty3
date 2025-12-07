@@ -52,6 +52,15 @@ const AgentMonitor = () => {
     const logsEndRef = useRef(null);
     const socketRef = useRef(null);
     const typingRef = useRef(null);
+    
+    // Tor Security State
+    const [torStatus, setTorStatus] = useState({
+        connected: false,
+        ip: null,
+        usingTor: false,
+        circuitChanges: 0,
+        lastCheck: null
+    });
 
     const addLog = useCallback((type, message) => {
         setLogs(prev => [...prev.slice(-50), { type, message, timestamp: new Date() }]);
@@ -153,6 +162,52 @@ const AgentMonitor = () => {
         logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [logs]);
 
+    // Tor Status Polling
+    useEffect(() => {
+        const checkTorStatus = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/tor/status');
+                const data = await response.json();
+                if (data.success) {
+                    setTorStatus({
+                        connected: data.tor?.running || false,
+                        ip: data.tor?.ip || null,
+                        usingTor: data.tor?.usingTor || false,
+                        circuitChanges: data.stats?.ipChanges || 0,
+                        lastCheck: new Date()
+                    });
+                }
+            } catch {
+                setTorStatus(prev => ({ ...prev, connected: false, lastCheck: new Date() }));
+            }
+        };
+
+        checkTorStatus();
+        const interval = setInterval(checkTorStatus, 30000); // Check every 30s
+        return () => clearInterval(interval);
+    }, []);
+
+    // Request new Tor identity
+    const requestNewIdentity = async () => {
+        try {
+            addLog('TOR', '🔄 Requesting new identity...');
+            const response = await fetch('http://localhost:3000/api/tor/new-identity', { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                addLog('TOR', `✅ New IP: ${data.newIP}`);
+                setTorStatus(prev => ({
+                    ...prev,
+                    ip: data.newIP,
+                    circuitChanges: data.totalChanges
+                }));
+            } else {
+                addLog('TOR', `❌ ${data.error}`);
+            }
+        } catch (error) {
+            addLog('TOR', `❌ Failed: ${error.message}`);
+        }
+    };
+
     // Dragging Logic
     const [position, setPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 350 });
     const [isDragging, setIsDragging] = useState(false);
@@ -236,6 +291,34 @@ const AgentMonitor = () => {
                 </div>
             </div>
 
+            {/* Tor Security Status */}
+            <div className="bg-gray-950 p-2 border-b border-purple-900/30">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${torStatus.connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                        <span className={`text-[10px] font-bold ${torStatus.connected ? 'text-green-400' : 'text-red-400'}`}>
+                            TOR {torStatus.connected ? 'ACTIVE' : 'OFFLINE'}
+                        </span>
+                        {torStatus.usingTor && (
+                            <span className="text-[9px] bg-purple-900/50 text-purple-300 px-1 rounded">🧅 ONION</span>
+                        )}
+                    </div>
+                    <button
+                        onClick={requestNewIdentity}
+                        className="text-[9px] bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded transition-colors"
+                        title="Get new Tor identity"
+                    >
+                        🔄 NEW IP
+                    </button>
+                </div>
+                {torStatus.connected && (
+                    <div className="flex justify-between mt-1 text-[9px] text-gray-500">
+                        <span>IP: <span className="text-cyan-400">{torStatus.ip || '...'}</span></span>
+                        <span>Changes: <span className="text-yellow-400">{torStatus.circuitChanges}</span></span>
+                    </div>
+                )}
+            </div>
+
             {/* Active Tool Overlay */}
             {activeTool && (
                 <div className="bg-cyan-900/20 p-2 border-b border-cyan-900/50 flex items-center gap-2 text-cyan-300 animate-in slide-in-from-top duration-300">
@@ -274,7 +357,10 @@ const AgentMonitor = () => {
 
             {/* Footer */}
             <div className="bg-gray-900/80 p-1.5 text-[10px] text-gray-500 border-t border-gray-800 flex justify-between items-center select-none" onMouseDown={handleMouseDown}>
-                <span className="flex items-center gap-1"><Shield size={10} className="text-green-500" /> SECURE</span>
+                <span className="flex items-center gap-1">
+                    <Shield size={10} className={torStatus.connected ? 'text-green-500' : 'text-yellow-500'} />
+                    {torStatus.connected ? 'TOR SECURE' : 'DIRECT'}
+                </span>
                 <span className="flex items-center gap-1 text-cyan-500">
                     <Terminal size={10} />
                     {logs.length} logs
