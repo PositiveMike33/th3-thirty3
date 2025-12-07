@@ -85,12 +85,12 @@ class LLMService {
                 models.cloud.push({ id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'claude' });
             }
 
-            // Groq (Ultra-fast)
+            // Groq (Ultra-fast) - Modèles actuels vérifiés
             if (process.env.GROQ_API_KEY) {
-                models.cloud.push({ id: 'llama-3.1-70b-versatile', name: '⚡ Llama 3.1 70B', provider: 'groq' });
+                models.cloud.push({ id: 'llama-3.3-70b-versatile', name: '⚡ Llama 3.3 70B Versatile', provider: 'groq' });
                 models.cloud.push({ id: 'llama-3.1-8b-instant', name: '⚡ Llama 3.1 8B Instant', provider: 'groq' });
-                models.cloud.push({ id: 'mixtral-8x7b-32768', name: '⚡ Mixtral 8x7B', provider: 'groq' });
-                models.cloud.push({ id: 'gemma2-9b-it', name: '⚡ Gemma 2 9B', provider: 'groq' });
+                models.cloud.push({ id: 'qwen/qwen3-32b', name: '⚡ Qwen 3 32B', provider: 'groq' });
+                models.cloud.push({ id: 'groq/compound', name: '⚡ Groq Compound', provider: 'groq' });
             }
 
             // Perplexity
