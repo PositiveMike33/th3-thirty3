@@ -33,6 +33,10 @@ app.use(securityZoneService.zoneIsolationMiddleware()); // Apply zone isolation
 const subscriptionRoutes = require('./subscription_routes');
 app.use('/api/subscription', subscriptionRoutes);
 
+// Payment Routes (Stripe & PayPal)
+const paymentRoutes = require('./payment_routes');
+app.use('/api/payment', paymentRoutes);
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
