@@ -71,6 +71,10 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
     
     try {
         // Vérifier la signature Stripe
+        if (!process.env.STRIPE_SECRET_KEY) {
+            console.error('[PAYMENT] STRIPE_SECRET_KEY not configured');
+            return res.status(500).json({ error: 'Stripe not configured' });
+        }
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         let event;
 
