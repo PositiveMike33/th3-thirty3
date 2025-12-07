@@ -261,16 +261,40 @@ app.delete('/sessions/:sessionId/messages/:messageId', (req, res) => {
 
 // Fabric Patterns Endpoints
 app.get('/patterns', (req, res) => {
-    const patterns = getPatterns();
-    res.json(patterns);
+    try {
+        const patternsDir = path.join(__dirname, 'fabric', 'data', 'patterns');
+        const patterns = fs.readdirSync(patternsDir)
+            .filter(name => {
+                const fullPath = path.join(patternsDir, name);
+                return fs.statSync(fullPath).isDirectory();
+            })
+            .sort();
+        res.json(patterns);
+    } catch (error) {
+        console.error("Error reading patterns:", error);
+        res.status(500).json({ error: "Failed to read patterns" });
+    }
 });
 
 app.get('/patterns/:name', (req, res) => {
-    const content = getPatternContent(req.params.name);
-    if (content) {
-        res.json({ content });
-    } else {
-        res.status(404).json({ error: "Pattern not found" });
+    try {
+        const patternName = req.params.name;
+        const patternDir = path.join(__dirname, 'fabric', 'data', 'patterns', patternName);
+        
+        if (!fs.existsSync(patternDir)) {
+            return res.status(404).json({ error: "Pattern not found" });
+        }
+
+        const systemPath = path.join(patternDir, 'system.md');
+        const userPath = path.join(patternDir, 'user.md');
+
+        const system = fs.existsSync(systemPath) ? fs.readFileSync(systemPath, 'utf8') : '';
+        const user = fs.existsSync(userPath) ? fs.readFileSync(userPath, 'utf8') : '';
+
+        res.json({ content: system, system, user });
+    } catch (error) {
+        console.error("Error reading pattern content:", error);
+        res.status(500).json({ error: "Failed to read pattern content" });
     }
 });
 
