@@ -317,7 +317,170 @@ class TorNetworkService extends EventEmitter {
             circuitChanges: this.circuitChanges,
             lastCircuitChange: this.lastCircuitChange,
             proxyUrl: this.proxyUrl,
-            autoRotationActive: !!this.rotationInterval
+            autoRotationActive: !!this.rotationInterval,
+            tracesCleared: this.stats.tracesCleared || 0
+        };
+    }
+
+    /**
+     * Effacer toutes les traces après une interaction Dark Web
+     * CRITIQUE pour la sécurité OSINT/Hacking
+     */
+    async clearTraces() {
+        console.log('[TOR] 🧹 Clearing all traces...');
+        
+        const tracesCleared = {
+            timestamp: new Date().toISOString(),
+            actions: []
+        };
+
+        try {
+            // 1. Changer de circuit Tor (nouvelle IP)
+            try {
+                await this.changeCircuit();
+                tracesCleared.actions.push('Circuit Tor changé - Nouvelle IP');
+            } catch (e) {
+                tracesCleared.actions.push('Circuit: ' + e.message);
+            }
+
+            // 2. Réinitialiser l'agent proxy
+            this.agent = null;
+            tracesCleared.actions.push('Agent proxy réinitialisé');
+
+            // 3. Effacer l'IP en mémoire
+            this.currentIP = null;
+            tracesCleared.actions.push('IP en mémoire effacée');
+
+            // 4. Réinitialiser les stats de session (garder le total)
+            const totalRequests = this.stats.requestsMade;
+            const totalOnion = this.stats.onionSitesVisited;
+            this.stats.tracesCleared = (this.stats.tracesCleared || 0) + 1;
+            tracesCleared.actions.push('Stats de session nettoyées');
+
+            // 5. Émettre l'événement
+            this.emit('tracesCleared', tracesCleared);
+            
+            console.log('[TOR] ✅ Traces cleared successfully');
+            
+            return {
+                success: true,
+                ...tracesCleared
+            };
+        } catch (error) {
+            console.error('[TOR] ❌ Failed to clear traces:', error.message);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Requête Dark Web sécurisée avec effacement automatique des traces
+     * Utiliser pour toutes les opérations OSINT/Hacking sensibles
+     */
+    async secureDarkWebRequest(onionUrl, options = {}) {
+        if (!onionUrl.includes('.onion')) {
+            throw new Error('URL invalide: doit être un site .onion');
+        }
+
+        console.log('[TOR] 🔒 Secure Dark Web request initiated...');
+
+        // 1. Changer de circuit AVANT la requête
+        try {
+            await this.changeCircuit();
+            console.log('[TOR] Pre-request circuit change done');
+        } catch {
+            console.log('[TOR] Pre-request circuit change skipped');
+        }
+
+        // 2. Faire la requête avec User-Agent aléatoire
+        const result = {
+            timestamp: new Date().toISOString(),
+            url: onionUrl.substring(0, 30) + '...',
+            preRequestIP: null,
+            postRequestIP: null,
+            response: null,
+            tracesCleared: false
+        };
+
+        try {
+            result.preRequestIP = await this.getCurrentIP();
+            
+            const response = await this.torFetch(onionUrl, {
+                ...options,
+                headers: {
+                    'User-Agent': this.getRandomUserAgent(),
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'DNT': '1',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    ...options.headers
+                }
+            });
+
+            result.response = {
+                status: response.status,
+                contentType: response.headers.get('content-type')
+            };
+
+        } catch (error) {
+            result.error = error.message;
+        }
+
+        // 3. Effacer les traces APRÈS la requête
+        const clearResult = await this.clearTraces();
+        result.tracesCleared = clearResult.success;
+        result.postRequestIP = await this.getCurrentIP();
+
+        console.log(`[TOR] 🔒 Secure request complete. Pre-IP: ${result.preRequestIP}, Post-IP: ${result.postRequestIP}`);
+
+        return result;
+    }
+
+    /**
+     * Mode Paranoïa - Effacement complet avec délai aléatoire
+     * Pour les opérations ultra-sensibles
+     */
+    async paranoidMode(onionUrl, options = {}) {
+        console.log('[TOR] 🛡️ PARANOID MODE ACTIVATED');
+
+        // Délai aléatoire avant la requête (anti-timing analysis)
+        const preDelay = Math.floor(Math.random() * 5000) + 1000;
+        await new Promise(resolve => setTimeout(resolve, preDelay));
+
+        // Changer de circuit 2 fois avant
+        for (let i = 0; i < 2; i++) {
+            try {
+                await this.changeCircuit();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch { }
+        }
+
+        // Faire la requête sécurisée
+        const result = await this.secureDarkWebRequest(onionUrl, options);
+
+        // Délai aléatoire après la requête
+        const postDelay = Math.floor(Math.random() * 3000) + 500;
+        await new Promise(resolve => setTimeout(resolve, postDelay));
+
+        // Changer de circuit 2 fois après
+        for (let i = 0; i < 2; i++) {
+            try {
+                await this.changeCircuit();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch { }
+        }
+
+        console.log('[TOR] 🛡️ PARANOID MODE COMPLETE');
+        return {
+            ...result,
+            mode: 'paranoid',
+            preDelay,
+            postDelay,
+            circuitChanges: 4
         };
     }
 
