@@ -962,6 +962,10 @@ app.use('/api/orchestrator', orchestratorRoutes);
 const kpiDashboardRoutes = require('./kpi_dashboard_routes');
 app.use('/api/dashboard', kpiDashboardRoutes);
 
+// Tor Network Routes (Connexion anonyme pour OSINT/Hacking)
+const torRoutes = require('./tor_routes');
+app.use('/api/tor', torRoutes);
+
 
 // Start Server
 server.listen(port, () => {
