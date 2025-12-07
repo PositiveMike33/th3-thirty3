@@ -116,12 +116,12 @@ class SecurityZoneService extends EventEmitter {
      * Déterminer la zone d'une route
      */
     getZoneForRoute(path) {
-        for (const [zoneName, zone] of Object.entries(this.zones)) {
+        for (const [zoneKey, zone] of Object.entries(this.zones)) {
             if (zone.routes.some(route => path.startsWith(route))) {
-                return { name: zoneName, ...zone };
+                return { key: zoneKey, ...zone };
             }
         }
-        return { name: 'public', ...this.zones.public };
+        return { key: 'public', ...this.zones.public };
     }
 
     /**
@@ -132,20 +132,22 @@ class SecurityZoneService extends EventEmitter {
             const path = req.path;
             const clientIP = req.ip || req.connection.remoteAddress;
             const zone = this.getZoneForRoute(path);
+            const zoneKey = zone.key; // Use key for stats access
 
             // Créer un contexte de zone isolé
             req.securityZone = {
+                key: zoneKey,
                 name: zone.name,
                 level: zone.level,
                 isolated: zone.isolated
             };
 
-            this.zoneStats[zone.name].requests++;
-            this.zoneStats[zone.name].lastAccess = new Date();
+            this.zoneStats[zoneKey].requests++;
+            this.zoneStats[zoneKey].lastAccess = new Date();
 
             // 1. Vérifier si zone nécessite authentification
             if (zone.requiresAuth && !this.isAuthenticated(req)) {
-                this.logBreachAttempt(zone.name, clientIP, 'UNAUTHENTICATED');
+                this.logBreachAttempt(zoneKey, clientIP, 'UNAUTHENTICATED');
                 return res.status(401).json({
                     error: 'Authentication required',
                     zone: zone.name,
@@ -154,9 +156,9 @@ class SecurityZoneService extends EventEmitter {
             }
 
             // 2. Vérifier IP Whitelist pour zones critiques
-            if (zone.ipWhitelist && !this.isIPWhitelisted(zone.name, clientIP)) {
-                this.logBreachAttempt(zone.name, clientIP, 'IP_NOT_WHITELISTED');
-                this.zoneStats[zone.name].blocked++;
+            if (zone.ipWhitelist && !this.isIPWhitelisted(zoneKey, clientIP)) {
+                this.logBreachAttempt(zoneKey, clientIP, 'IP_NOT_WHITELISTED');
+                this.zoneStats[zoneKey].blocked++;
                 return res.status(403).json({
                     error: 'Access denied - IP not authorized',
                     zone: zone.name
@@ -165,8 +167,8 @@ class SecurityZoneService extends EventEmitter {
 
             // 3. Vérifier localOnly pour zone admin
             if (zone.localOnly && !this.isLocalhost(clientIP)) {
-                this.logBreachAttempt(zone.name, clientIP, 'REMOTE_ACCESS_DENIED');
-                this.zoneStats[zone.name].blocked++;
+                this.logBreachAttempt(zoneKey, clientIP, 'REMOTE_ACCESS_DENIED');
+                this.zoneStats[zoneKey].blocked++;
                 return res.status(403).json({
                     error: 'Admin zone accessible only from localhost',
                     zone: zone.name
@@ -174,8 +176,8 @@ class SecurityZoneService extends EventEmitter {
             }
 
             // 4. Rate limiting par zone
-            if (zone.maxRequests && !this.checkZoneRateLimit(zone.name, clientIP, zone.maxRequests)) {
-                this.zoneStats[zone.name].blocked++;
+            if (zone.maxRequests && !this.checkZoneRateLimit(zoneKey, clientIP, zone.maxRequests)) {
+                this.zoneStats[zoneKey].blocked++;
                 return res.status(429).json({
                     error: 'Zone rate limit exceeded',
                     zone: zone.name,
