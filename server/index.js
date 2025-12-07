@@ -19,6 +19,11 @@ const authMiddleware = require('./middleware/auth');
 const userService = require('./user_service');
 app.use(authMiddleware); // Apply to all routes
 
+// Security Middleware (Protection intrusions)
+const securityRoutes = require('./security_routes');
+app.use(securityRoutes.middleware); // Apply security checks to all routes
+app.use('/api/security', securityRoutes); // Security management routes
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
