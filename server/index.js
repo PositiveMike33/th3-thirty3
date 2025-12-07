@@ -24,6 +24,11 @@ const securityRoutes = require('./security_routes');
 app.use(securityRoutes.middleware); // Apply security checks to all routes
 app.use('/api/security', securityRoutes); // Security management routes
 
+// Zone Isolation Middleware (Conteneurisation par zone)
+const SecurityZoneService = require('./security_zone_service');
+const securityZoneService = new SecurityZoneService();
+app.use(securityZoneService.zoneIsolationMiddleware()); // Apply zone isolation
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
