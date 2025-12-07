@@ -162,33 +162,65 @@ const AgentMonitor = () => {
         logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [logs]);
 
-    // Tor Status Polling
+    // Tor Status Polling - Always Active
     useEffect(() => {
         const checkTorStatus = async () => {
             try {
                 const response = await fetch('http://localhost:3000/api/tor/status');
                 const data = await response.json();
                 if (data.success) {
+                    const wasDisconnected = !torStatus.connected;
+                    const isNowConnected = data.tor?.running || false;
+                    
                     setTorStatus({
-                        connected: data.tor?.running || false,
+                        connected: isNowConnected,
                         ip: data.tor?.ip || null,
                         usingTor: data.tor?.usingTor || false,
                         circuitChanges: data.stats?.ipChanges || 0,
                         lastCheck: new Date()
                     });
+
+                    // Alert when Tor connects or disconnects
+                    if (wasDisconnected && isNowConnected) {
+                        addLog('TOR', '🟢 Tor Network CONNECTED - Secure mode active');
+                    } else if (!isNowConnected && !wasDisconnected) {
+                        addLog('TOR', '🔴 WARNING: Tor DISCONNECTED - Start Tor Browser!');
+                    }
                 }
             } catch {
+                if (torStatus.connected) {
+                    addLog('TOR', '⚠️ Connection to Tor service lost');
+                }
                 setTorStatus(prev => ({ ...prev, connected: false, lastCheck: new Date() }));
             }
         };
 
+        // Initial check
         checkTorStatus();
-        const interval = setInterval(checkTorStatus, 30000); // Check every 30s
-        return () => clearInterval(interval);
-    }, []);
+        addLog('TOR', '🧅 Tor Monitor initialized - Checking connection...');
+
+        // Check every 10s (more frequent for security)
+        const interval = setInterval(checkTorStatus, 10000);
+        
+        // Try to auto-start Tor if not connected
+        const startupCheck = setTimeout(() => {
+            if (!torStatus.connected) {
+                addLog('TOR', '⚠️ Tor not detected - Please start Tor Browser for secure operations');
+            }
+        }, 5000);
+
+        return () => {
+            clearInterval(interval);
+            clearTimeout(startupCheck);
+        };
+    }, [addLog, torStatus.connected]);
 
     // Request new Tor identity
     const requestNewIdentity = async () => {
+        if (!torStatus.connected) {
+            addLog('TOR', '❌ Cannot change identity - Tor not connected!');
+            return;
+        }
         try {
             addLog('TOR', '🔄 Requesting new identity...');
             const response = await fetch('http://localhost:3000/api/tor/new-identity', { method: 'POST' });
