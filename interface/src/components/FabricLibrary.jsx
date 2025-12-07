@@ -153,7 +153,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                                     setPreviewPattern(pattern);
                                                     setLoadingPreview(true);
                                                     try {
-                                                        const res = await fetch(`http://localhost:3000/patterns/${pattern}/content`);
+                                                        const res = await fetch(`http://localhost:3000/patterns/${pattern}`);
                                                         const data = await res.json();
                                                         setPatternContent(data);
                                                     } catch (err) {
