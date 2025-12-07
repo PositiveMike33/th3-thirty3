@@ -71,12 +71,14 @@ echo   - All agents via Tor proxy
 echo   - Intrusion protection ON
 echo.
 
-REM Open in Brave with Tor mode
-echo [4/4] Opening Brave with Tor protection...
+REM Open in Brave with private mode (NOT --tor for localhost access)
+echo [4/4] Opening Brave in private mode...
 if exist "%BRAVE_PATH%" (
-    REM Open in Brave's Tor mode (private window with Tor)
-    start "" "%BRAVE_PATH%" --incognito --tor "http://localhost:5173"
-    echo      Opened in Brave Tor Mode!
+    REM Note: --tor flag cannot access localhost, so we use private mode only
+    REM Tor is still active via the backend service for external requests
+    start "" "%BRAVE_PATH%" --incognito "http://localhost:5173"
+    echo      Opened in Brave Private Mode!
+    echo      NOTE: Agents use Tor via backend for external requests
 ) else (
     echo      [!] Brave not found, opening in default browser...
     start http://localhost:5173
