@@ -37,6 +37,10 @@ app.use('/api/subscription', subscriptionRoutes);
 const paymentRoutes = require('./payment_routes');
 app.use('/api/payment', paymentRoutes);
 
+// Payment Dashboard Routes (Stats temps réel)
+const paymentDashboardRoutes = require('./payment_dashboard_routes');
+app.use('/api/payment', paymentDashboardRoutes);
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
