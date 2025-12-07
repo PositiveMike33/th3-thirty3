@@ -1,4 +1,7 @@
 const userService = require('../user_service');
+const SubscriptionService = require('../subscription_service');
+
+const subscriptionService = new SubscriptionService();
 
 const authMiddleware = (req, res, next) => {
     // 1. Get Key from Header
@@ -37,4 +40,73 @@ const authMiddleware = (req, res, next) => {
     next();
 };
 
-module.exports = authMiddleware;
+/**
+ * Middleware pour vérifier le tier minimum requis
+ * @param {String} minimumTier - Tier minimum requis (initiate, operator, architect)
+ * @returns {Function} Middleware Express
+ */
+const requireTier = (minimumTier) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ 
+                error: "Unauthorized",
+                message: "Authentication required"
+            });
+        }
+
+        const userLevel = subscriptionService.TIERS[req.user.tier]?.level ?? -1;
+        const requiredLevel = subscriptionService.TIERS[minimumTier]?.level ?? 99;
+
+        if (userLevel < requiredLevel) {
+            const requiredTierInfo = subscriptionService.TIERS[minimumTier];
+            return res.status(403).json({ 
+                error: "Forbidden",
+                message: `This feature requires ${requiredTierInfo.label} subscription`,
+                current_tier: subscriptionService.getTierInfo(req.user).label,
+                required_tier: requiredTierInfo.label,
+                upgrade_available: req.user.tier !== 'architect'
+            });
+        }
+
+        next();
+    };
+};
+
+/**
+ * Middleware pour vérifier l'accès à une fonctionnalité spécifique
+ * @param {String} feature - Nom de la fonctionnalité
+ * @returns {Function} Middleware Express
+ */
+const requireFeature = (feature) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ 
+                error: "Unauthorized",
+                message: "Authentication required"
+            });
+        }
+
+        if (!subscriptionService.hasAccess(req.user, feature)) {
+            const requiredTier = subscriptionService.FEATURES[feature];
+            const requiredTierInfo = subscriptionService.TIERS[requiredTier];
+            
+            return res.status(403).json({ 
+                error: "Forbidden",
+                message: `Access to "${feature}" requires ${requiredTierInfo.label} subscription`,
+                current_tier: subscriptionService.getTierInfo(req.user).label,
+                required_tier: requiredTierInfo.label,
+                upgrade_available: req.user.tier !== 'architect'
+            });
+        }
+
+        next();
+    };
+};
+
+module.exports = { 
+    authMiddleware, 
+    requireTier, 
+    requireFeature,
+    subscriptionService 
+};
+
