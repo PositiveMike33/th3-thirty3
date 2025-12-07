@@ -1,0 +1,31 @@
+{
+  "id": "7b11b506-38be-40fa-b3b4-c59cce571c14",
+  "title": "salut...",
+  "messages": [
+    {
+      "id": "7e125873-3939-4d00-ab1e-0dc836c778aa",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "a6864e95-b502-42db-907b-f26bb6b28146",
+      "role": "user",
+      "content": "salut"
+    },
+    {
+      "id": "6d60975c-b7f6-4c77-b772-f34f5d3b402c",
+      "role": "assistant",
+      "content": "⚠️ Erreur (groq): 400 The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead."
+    },
+    {
+      "id": "5502469c-5d3b-4528-8e76-5d8e54cbe12e",
+      "role": "user",
+      "content": "salut"
+    },
+    {
+      "id": "db08a148-d89d-4591-bbc4-8c13d7b307b1",
+      "role": "assistant",
+      "content": "⚠️ Erreur (local): timed out waiting for llama runner to start - progress 0.00 - "
+    }
+  ]
+}

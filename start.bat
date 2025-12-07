@@ -14,7 +14,7 @@ echo.
 
 REM Define Brave path
 set "BRAVE_PATH=%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe"
-set "TOR_PATH=%UserProfile%\Desktop\Tor Browser\Browser\firefox.exe"
+set "TOR_PATH=%UserProfile%\OneDrive\Desktop\Tor Browser\Browser\firefox.exe"
 
 REM Start Tor Browser in background (for SOCKS proxy on port 9050)
 echo [0/4] Starting Tor Network...
