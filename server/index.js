@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // Auth Middleware
-const authMiddleware = require('./middleware/auth');
+const { authMiddleware, requireTier, requireFeature } = require('./middleware/auth');
 const userService = require('./user_service');
 app.use(authMiddleware); // Apply to all routes
 
@@ -28,6 +28,10 @@ app.use('/api/security', securityRoutes); // Security management routes
 const SecurityZoneService = require('./security_zone_service');
 const securityZoneService = new SecurityZoneService();
 app.use(securityZoneService.zoneIsolationMiddleware()); // Apply zone isolation
+
+// Subscription Management Routes
+const subscriptionRoutes = require('./subscription_routes');
+app.use('/api/subscription', subscriptionRoutes);
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
@@ -928,7 +932,7 @@ app.post('/osint/analyze', async (req, res) => {
 
 // Cyber Training Routes (Ethical Hacking Agent Training)
 const cyberTrainingRoutes = require('./cyber_training_routes');
-app.use('/api/cyber-training', cyberTrainingRoutes);
+app.use('/api/cyber-training', requireTier('operator'), cyberTrainingRoutes); // PREMIUM+
 
 // Tracking Routes (5-Why Incident Tracking)
 const trackingRoutes = require('./tracking_routes');
@@ -940,11 +944,11 @@ app.use('/api/experts', expertAgentsRoutes);
 
 // OSINT Expert Agents Routes (Tool-Specific OSINT Experts)
 const osintExpertAgentsRoutes = require('./osint_expert_agents_routes');
-app.use('/api/osint-experts', osintExpertAgentsRoutes);
+app.use('/api/osint-experts', requireTier('operator'), osintExpertAgentsRoutes); // PREMIUM+
 
 // Hacking Expert Agents Routes (Tool-Specific Hacking Experts)
 const hackingExpertAgentsRoutes = require('./hacking_expert_agents_routes');
-app.use('/api/hacking-experts', hackingExpertAgentsRoutes);
+app.use('/api/hacking-experts', requireTier('operator'), hackingExpertAgentsRoutes); // PREMIUM+
 
 // Agent Memory Routes (Embeddings + Pieces Integration)
 const agentMemoryRoutes = require('./agent_memory_routes');
