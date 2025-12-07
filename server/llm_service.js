@@ -11,9 +11,9 @@ class LLMService {
         this.anythingLLMWrapper = new AnythingLLMWrapper();
         this.providers = {
             local: { name: 'Local (Ollama)', type: 'local' },
-
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
+            groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
@@ -74,15 +74,24 @@ class LLMService {
             // }
 
             // OpenAI
-            // if (process.env.OPENAI_API_KEY) {
-            //     models.cloud.push({ id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' });
-            //     models.cloud.push({ id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' });
-            // }
+            if (process.env.OPENAI_API_KEY) {
+                models.cloud.push({ id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' });
+                models.cloud.push({ id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' });
+            }
 
-            // Claude
-            // if (process.env.ANTHROPIC_API_KEY) {
-            //     models.cloud.push({ id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'claude' });
-            // }
+            // Claude (Anthropic)
+            if (process.env.ANTHROPIC_API_KEY) {
+                models.cloud.push({ id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'claude' });
+                models.cloud.push({ id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'claude' });
+            }
+
+            // Groq (Ultra-fast)
+            if (process.env.GROQ_API_KEY) {
+                models.cloud.push({ id: 'llama-3.1-70b-versatile', name: '⚡ Llama 3.1 70B', provider: 'groq' });
+                models.cloud.push({ id: 'llama-3.1-8b-instant', name: '⚡ Llama 3.1 8B Instant', provider: 'groq' });
+                models.cloud.push({ id: 'mixtral-8x7b-32768', name: '⚡ Mixtral 8x7B', provider: 'groq' });
+                models.cloud.push({ id: 'gemma2-9b-it', name: '⚡ Gemma 2 9B', provider: 'groq' });
+            }
 
             // Perplexity
             // if (process.env.PERPLEXITY_API_KEY) {
@@ -189,6 +198,9 @@ class LLMService {
                 case 'claude':
                     response = await this.generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt);
                     break;
+                case 'groq':
+                    response = await this.generateGroqResponse(prompt, modelId, systemPrompt);
+                    break;
                 case 'perplexity':
                     response = await this.generatePerplexityResponse(prompt, modelId, systemPrompt);
                     break;
@@ -275,6 +287,14 @@ class LLMService {
             apiKey: process.env.PERPLEXITY_API_KEY,
             baseURL: 'https://api.perplexity.ai',
             providerName: 'perplexity'
+        });
+    }
+
+    async generateGroqResponse(prompt, modelId, systemPrompt) {
+        return this.generateOpenAICompatibleResponse(prompt, null, modelId || "llama-3.1-8b-instant", systemPrompt, {
+            apiKey: process.env.GROQ_API_KEY,
+            baseURL: 'https://api.groq.com/openai/v1',
+            providerName: 'groq'
         });
     }
 
