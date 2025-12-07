@@ -1,0 +1,21 @@
+{
+  "id": "ec025ea6-f43f-4c93-8766-b6d3c4a0b7ad",
+  "title": "[AGENT TASK] analyse des tache...",
+  "messages": [
+    {
+      "id": "35e6b5d0-f654-42be-a774-926ab1e6b963",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "db371404-f293-4dbf-9d4f-8249537594fa",
+      "role": "user",
+      "content": "[AGENT TASK] analyse des taches hebdo\n (Context: Project undefined)"
+    },
+    {
+      "id": "531e9a56-4551-443f-aee2-d5b0fecf85e7",
+      "role": "assistant",
+      "content": "## 📅 **ANALYSE TACTIQUE HEBDOMADAIRE**\n\nT'as une semaine chargée, big. Entre le grind industriel et la bureaucratie, y'a pas de place pour le niaisage.\n\n### 🔴 **URGENCE CRITIQUE (ADMIN)**\n*   **Dossier État Civil (Priorité #1)** : Le formulaire papier traîne.\n    *   **Action** : Imprimer, remplir (stylo noir/bleu), signer (Case 26).\n    *   **Pièces** : Photocopie RAMQ (recto-verso) + Relevé de paie (Preuve adresse).\n    *   **Paiement** : 63,00 $.\n    *   **Envoi** : Poste ça au Directeur de l'état civil à Québec ASAP. Tant que c'est pas fait, le notaire est bloqué.\n\n### 🏭 **OPÉRATIONS INDUSTRIELLES (AB INBEV)**\n*   **Le Marathon (16h)** : Vendredi 5 (15h) au Samedi 6 (07h).\n    *   **Séquence** : Shift régulier + Overtime de nuit.\n    *   **Risque** : Fatigue extrême samdi matin.\n    *   **Logistique** : Prépare ta bouffe et ta caféine jeudi soir. Pas d'improvisation.\n\n### 💸 **FINANCE & SYSTÈME**\n*   **Finart / Desjardins** : On est le 28+ (selon logs). As-tu appelé pour bloquer les prélèvements ? Si non, ton cash est à risque.\n*   **Notaire** : Mémoire indique une validation de paiement de 465 $. À vérifier une fois l'acte de naissance envoyé.\n\n### 🧬 **PROTOCOLE BIO**\n*   **Samedi 6 (07h+)** : **ZONE ROUGE**.\n    *   Crash post-overtime. Aucune décision financière ou exécutive ce jour-là.\n    *   Dors, récupère, laisse le système rebooter.\n\n**Action requise :**\n1. Le formulaire part-il à la poste aujourd'hui ?\n2. L'appel Desjardins est fait ?"
+    }
+  ]
+}

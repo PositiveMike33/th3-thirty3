@@ -1,17 +1,19 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 const { Ollama } = require('ollama');
 const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
+const AnythingLLMWrapper = require('./anythingllm_wrapper');
 
 class LLMService {
     constructor() {
         this.ollama = new Ollama();
         this.socketService = null;
+        this.anythingLLMWrapper = new AnythingLLMWrapper();
         this.providers = {
             local: { name: 'Local (Ollama)', type: 'local' },
-            gemini: { name: 'Google Gemini', type: 'cloud' },
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
+            groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
@@ -25,12 +27,18 @@ class LLMService {
      * Lists all available models (Local + Cloud + Agents).
      */
     async listModels(computeMode = 'local') {
+        console.log("[LLM] listModels called");
         const models = { local: [], cloud: [] };
 
         // --- LOCAL MODE (Always Available) ---
         // 1. Ollama
+        console.log("[LLM] Checking Ollama...");
         try {
-            const list = await this.ollama.list();
+            // Wrap Ollama call in a timeout promise
+            const list = await Promise.race([
+                this.ollama.list(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Ollama Timeout")), 2000))
+            ]);
             models.local = list.models.map(m => m.name);
         } catch (e) {
             console.error("Failed to list local models:", e.message);
@@ -40,13 +48,19 @@ class LLMService {
         // 2. LM Studio
         if (process.env.LM_STUDIO_URL) {
             try {
-                const response = await fetch(`${process.env.LM_STUDIO_URL}/models`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
+
+                const response = await fetch(`${process.env.LM_STUDIO_URL}/models`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     const data = await response.json();
                     const lmModels = data.data.map(m => `[LMS] ${m.id}`);
                     models.local.push(...lmModels);
                 }
             } catch (e) {
+                // console.log("LM Studio offline");
                 models.local.push("[LMS] Offline");
             }
         }
@@ -54,10 +68,10 @@ class LLMService {
         // --- CLOUD MODE ---
         if (computeMode === 'cloud') {
             // Gemini
-            if (process.env.GEMINI_API_KEY) {
-                models.cloud.push({ id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' });
-                models.cloud.push({ id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'gemini' });
-            }
+            // if (process.env.GEMINI_API_KEY) {
+            //     models.cloud.push({ id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' });
+            //     models.cloud.push({ id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'gemini' });
+            // }
 
             // OpenAI
             if (process.env.OPENAI_API_KEY) {
@@ -65,33 +79,50 @@ class LLMService {
                 models.cloud.push({ id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' });
             }
 
-            // Claude
+            // Claude (Anthropic)
             if (process.env.ANTHROPIC_API_KEY) {
                 models.cloud.push({ id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'claude' });
+                models.cloud.push({ id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'claude' });
+            }
+
+            // Groq (Ultra-fast) - Modèles actuels vérifiés
+            if (process.env.GROQ_API_KEY) {
+                models.cloud.push({ id: 'llama-3.3-70b-versatile', name: '⚡ Llama 3.3 70B Versatile', provider: 'groq' });
+                models.cloud.push({ id: 'llama-3.1-8b-instant', name: '⚡ Llama 3.1 8B Instant', provider: 'groq' });
+                models.cloud.push({ id: 'qwen/qwen3-32b', name: '⚡ Qwen 3 32B', provider: 'groq' });
+                models.cloud.push({ id: 'groq/compound', name: '⚡ Groq Compound', provider: 'groq' });
             }
 
             // Perplexity
-            if (process.env.PERPLEXITY_API_KEY) {
-                models.cloud.push({ id: 'llama-3.1-sonar-large-128k-online', name: 'Perplexity Sonar Large', provider: 'perplexity' });
-            }
+            // if (process.env.PERPLEXITY_API_KEY) {
+            //     models.cloud.push({ id: 'llama-3.1-sonar-large-128k-online', name: 'Perplexity Sonar Large', provider: 'perplexity' });
+            // }
 
             // AnythingLLM (Agents)
             if (process.env.ANYTHING_LLM_URL && process.env.ANYTHING_LLM_KEY) {
                 try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
                     const response = await fetch(`${process.env.ANYTHING_LLM_URL}/openai/models`, {
-                        headers: { 'Authorization': `Bearer ${process.env.ANYTHING_LLM_KEY}` }
+                        headers: { 'Authorization': `Bearer ${process.env.ANYTHING_LLM_KEY}` },
+                        signal: controller.signal
                     });
+                    clearTimeout(timeoutId);
+
                     if (response.ok) {
                         const data = await response.json();
-                        const agents = data.data.map(m => ({
-                            id: m.id,
-                            name: `[AGENT] ${m.id}`,
-                            provider: 'anythingllm'
-                        }));
-                        models.cloud.push(...agents);
+                        if (data && data.data) {
+                            const agents = data.data.map(m => ({
+                                id: m.id,
+                                name: `[AGENT] ${m.id}`,
+                                provider: 'anythingllm'
+                            }));
+                            models.cloud.push(...agents);
+                        }
                     }
                 } catch (e) {
-                    console.error("Failed to list AnythingLLM agents:", e.message);
+                    console.error("Failed to list AnythingLLM agents (Timeout/Error):", e.message);
                 }
             }
         }
@@ -134,9 +165,9 @@ class LLMService {
         let targetProvider = provider;
         let targetModel = model;
 
-        if (process.env.GEMINI_API_KEY && provider === 'local') {
-            targetProvider = 'gemini';
-            targetModel = 'gemini-1.5-flash'; // Fast and smart enough for analysis
+        if (process.env.ANYTHING_LLM_KEY && provider === 'local') {
+            targetProvider = 'anythingllm';
+            targetModel = 'gpt-4o'; // Default to a strong model via AnythingLLM
         }
 
         return await this.generateResponse(prompt, null, targetProvider, targetModel, systemPrompt);
@@ -160,14 +191,15 @@ class LLMService {
 
             let response;
             switch (providerId) {
-                case 'gemini':
-                    response = await this.generateGeminiResponse(prompt, imageBase64, modelId, systemPrompt);
-                    break;
+
                 case 'openai':
                     response = await this.generateOpenAIResponse(prompt, imageBase64, modelId, systemPrompt);
                     break;
                 case 'claude':
                     response = await this.generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt);
+                    break;
+                case 'groq':
+                    response = await this.generateGroqResponse(prompt, modelId, systemPrompt);
                     break;
                 case 'perplexity':
                     response = await this.generatePerplexityResponse(prompt, modelId, systemPrompt);
@@ -176,6 +208,7 @@ class LLMService {
                     response = await this.generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt);
                     break;
                 case 'anythingllm':
+                case 'cloud': // Force Cloud mode to AnythingLLM
                     response = await this.generateAnythingLLMResponse(prompt, modelId, systemPrompt);
                     break;
                 case 'lmstudio':
@@ -257,6 +290,14 @@ class LLMService {
         });
     }
 
+    async generateGroqResponse(prompt, modelId, systemPrompt) {
+        return this.generateOpenAICompatibleResponse(prompt, null, modelId || "llama-3.1-8b-instant", systemPrompt, {
+            apiKey: process.env.GROQ_API_KEY,
+            baseURL: 'https://api.groq.com/openai/v1',
+            providerName: 'groq'
+        });
+    }
+
     async generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt) {
         return this.generateOpenAICompatibleResponse(prompt, null, modelId || "auto", systemPrompt, {
             apiKey: process.env.OPENROUTER_API_KEY,
@@ -270,11 +311,25 @@ class LLMService {
     }
 
     async generateAnythingLLMResponse(prompt, modelId, systemPrompt) {
-        return this.generateOpenAICompatibleResponse(prompt, null, modelId, systemPrompt, {
-            apiKey: process.env.ANYTHING_LLM_KEY,
-            baseURL: `${process.env.ANYTHING_LLM_URL}/openai`,
-            providerName: 'anythingllm'
-        });
+        if (this.socketService) {
+            this.socketService.emitAgentStatus("Accessing Private Web (AnythingLLM with Hybrid Embeddings)...");
+        }
+
+        try {
+            // Use the wrapper which handles Gemini → nomic-embed-text fallback automatically
+            const response = await this.anythingLLMWrapper.chat(prompt, 'chat');
+            
+            // Log stats periodically
+            const stats = this.anythingLLMWrapper.getStats();
+            if (stats.total_requests % 10 === 0) {
+                console.log('[ANYTHINGLLM] Stats:', stats);
+            }
+            
+            return response;
+        } catch (error) {
+            console.error("[ANYTHINGLLM] Error:", error);
+            return `⚠️ Erreur AnythingLLM: ${error.message}`;
+        }
     }
 
     async generateLMStudioResponse(prompt, modelId, systemPrompt) {
@@ -311,80 +366,7 @@ class LLMService {
         this.mcpService = mcpService;
     }
 
-    async generateGeminiResponse(prompt, imageBase64, modelId, systemPrompt) {
-        if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY missing");
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: modelId || "gemini-1.5-flash" });
-
-        // Prepare Tools
-        let tools = [];
-        if (this.mcpService) {
-            const mcpTools = await this.mcpService.listTools();
-            if (mcpTools.length > 0) {
-                tools = [{
-                    functionDeclarations: mcpTools.map(t => ({
-                        name: t.name,
-                        description: t.description || "No description",
-                        parameters: t.inputSchema
-                    }))
-                }];
-            }
-        }
-
-        const parts = [{ text: systemPrompt + "\n\n" + prompt }];
-
-        if (imageBase64) {
-            parts.push({
-                inlineData: {
-                    data: imageBase64.replace(/^data:image\/\w+;base64,/, ""),
-                    mimeType: "image/jpeg",
-                },
-            });
-        }
-
-        const chat = model.startChat({
-            tools: tools,
-        });
-
-        const result = await chat.sendMessage(parts);
-        const response = result.response;
-
-        // Handle Function Calls
-        const calls = response.functionCalls();
-        if (calls && calls.length > 0) {
-            console.log("[LLM] Tool Call Detected:", calls);
-            const call = calls[0];
-            const toolName = call.name;
-            const args = call.args;
-            const [serverName, ...rest] = toolName.split('__');
-            const originalToolName = rest.join('__');
-
-            try {
-                console.log(`[MCP] Executing ${toolName} on ${serverName}...`);
-                if (this.socketService) {
-                    this.socketService.emitAgentTool(toolName, args);
-                    this.socketService.emitAgentStatus(`Using Tool: ${toolName}`);
-                }
-                const toolResult = await this.mcpService.callTool(serverName, originalToolName, args);
-                const resultParts = [{
-                    functionResponse: {
-                        functionResponse: {
-                            name: toolName,
-                            response: { result: toolResult }
-                        }
-                    }
-                }];
-                const finalResult = await chat.sendMessage(resultParts);
-                return finalResult.response.text();
-            } catch (err) {
-                console.error("[MCP] Tool execution failed:", err);
-                return `Erreur lors de l'exécution de l'outil ${toolName}: ${err.message}`;
-            }
-        }
-
-        return response.text();
-    }
 
     async generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt) {
         if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY missing");

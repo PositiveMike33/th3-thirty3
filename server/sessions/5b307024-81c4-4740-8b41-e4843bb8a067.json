@@ -1,0 +1,21 @@
+{
+  "id": "5b307024-81c4-4740-8b41-e4843bb8a067",
+  "title": "[AGENT TASK] verifie le ping a...",
+  "messages": [
+    {
+      "id": "7486e0f7-ddae-461f-ac50-f90994fc36f9",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "8b78b520-f156-4bc6-9ccc-5ebe232c2669",
+      "role": "user",
+      "content": "[AGENT TASK] verifie le ping a\n (Context: Project undefined)"
+    },
+    {
+      "id": "55a68b30-2f40-4d43-a81f-5d602ff8668d",
+      "role": "assistant",
+      "content": "Ouin, t'as coupé la ligne avant la fin, big. Je ping le vide là.\n\n- **Cible Manquante** : Il me faut une adresse IP ou un nom de domaine (URL).\n- **Exemple** : `google.com` ou `8.8.8.8`.\n- **Action Requise** : Aweye, donne-moi la cible et je lance le diagnostic de latence tout de suite."
+    }
+  ]
+}

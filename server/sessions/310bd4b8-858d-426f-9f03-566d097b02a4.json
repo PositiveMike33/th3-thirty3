@@ -1,0 +1,21 @@
+{
+  "id": "310bd4b8-858d-426f-9f03-566d097b02a4",
+  "title": "Hello...",
+  "messages": [
+    {
+      "id": "f84cb9aa-b539-4284-b4b5-c8a8e64a4d61",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "c554bc40-f3ef-4b5d-97b8-cac1ad26a15e",
+      "role": "user",
+      "content": "Hello"
+    },
+    {
+      "id": "765aaf1d-f42a-46e5-8a51-f67d616ea841",
+      "role": "assistant",
+      "content": "⚠️ Erreur (gemini): [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [400 Bad Request] API key not valid. Please pass a valid API key. [{\"@type\":\"type.googleapis.com/google.rpc.ErrorInfo\",\"reason\":\"API_KEY_INVALID\",\"domain\":\"googleapis.com\",\"metadata\":{\"service\":\"generativelanguage.googleapis.com\"}},{\"@type\":\"type.googleapis.com/google.rpc.LocalizedMessage\",\"locale\":\"en-US\",\"message\":\"API key not valid. Please pass a valid API key.\"}]"
+    }
+  ]
+}

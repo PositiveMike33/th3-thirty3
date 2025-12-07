@@ -1,0 +1,21 @@
+{
+  "id": "d5e7fdc7-e2a6-436a-b801-e8f7ebfaa11a",
+  "title": "System Check...",
+  "messages": [
+    {
+      "id": "a722a5e0-d193-4d1c-a089-4064b7b38548",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "65f3a7de-7bd9-46e1-ae3b-fe1bf1df03e2",
+      "role": "user",
+      "content": "System Check"
+    },
+    {
+      "id": "d776dd44-a51f-4eb7-98e9-08dcaa57c518",
+      "role": "assistant",
+      "content": "⚠️ Erreur (local): model 'mock-model' not found"
+    }
+  ]
+}

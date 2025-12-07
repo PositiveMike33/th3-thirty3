@@ -1,0 +1,32 @@
+{
+  "components": {
+    "Star Wheel": {
+      "defects": {
+        "Bourrage": {
+          "count": 1,
+          "rootCauses": [
+            "CIL incomplet - vérification alignement non incluse"
+          ],
+          "solutions": [
+            "Ajouter point vérification alignement au CIL quotidien"
+          ]
+        }
+      },
+      "totalIncidents": 1
+    }
+  },
+  "rootCauses": {
+    "CIL incomplet - vérification alignement non incluse": {
+      "count": 1,
+      "components": [
+        "Star Wheel"
+      ]
+    }
+  },
+  "solutions": {},
+  "tags": [
+    "désalignement",
+    "usure",
+    "ligne1"
+  ]
+}

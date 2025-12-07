@@ -1,0 +1,21 @@
+{
+  "id": "86fe9aab-cd77-43cd-83df-a2bc6b814b23",
+  "title": "Tag pour debug OSINT terminal...",
+  "messages": [
+    {
+      "id": "122f66b9-5aa4-4703-b05b-38ed4a434db6",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "bfa1fa00-b7a9-4db6-b5db-8f905d164c2f",
+      "role": "user",
+      "content": "Tag pour debug OSINT terminal"
+    },
+    {
+      "id": "18e80464-efd9-4879-901a-24ea2b5f17aa",
+      "role": "assistant",
+      "content": "⚠️ Erreur (cloud): model 'gemini-1.5-flash' not found"
+    }
+  ]
+}

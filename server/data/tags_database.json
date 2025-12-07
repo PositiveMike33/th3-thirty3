@@ -1,0 +1,46 @@
+{
+  "components": [
+    "Star Wheel",
+    "Lug Chain",
+    "Hot Melt Glue Gun",
+    "Discharge Selector",
+    "Infeed Conveyor",
+    "Outfeed Conveyor",
+    "Clip Magazine",
+    "Applicator Head",
+    "Encoder",
+    "Proximity Sensor",
+    "PLC",
+    "HMI",
+    "VFD",
+    "Servo Motor"
+  ],
+  "defects": [
+    "Bourrage",
+    "Désalignement",
+    "Usure",
+    "Surchauffe",
+    "Vibration",
+    "Bruit anormal",
+    "Fuite",
+    "Blocage",
+    "Défaut capteur",
+    "Erreur programme"
+  ],
+  "systemicCauses": [
+    "CIL incomplet",
+    "OPL manquante",
+    "Centerline non défini",
+    "Formation insuffisante",
+    "Standard absent",
+    "PM non planifiée",
+    "Pièce non standard",
+    "Procédure obsolète"
+  ],
+  "priorities": [
+    "critical",
+    "high",
+    "medium",
+    "low"
+  ]
+}

@@ -2,6 +2,9 @@ node_modules/
 dist/
 build/
 .env
+.env.local
+.env.development
+.env.production
 .DS_Store
 coverage/
 .vscode/
@@ -13,5 +16,40 @@ yarn-error.log*
 *.swp
 *.swo
 
-# Secrets
+# Secrets & Credentials (NEVER COMMIT)
 server/tokens/
+credentials.json
+*.pem
+*.key
+secrets/
+google-credentials.json
+
+# Fabric patterns (cloned separately)
+server/fabric/
+fabric/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Large files
+*.zip
+*.tar.gz
+*.mp4
+*.mkv
+
+# Local data
+*.db
+*.sqlite
+pieces_memory/
+anythingllm-data/
+
+# Runtime
+*.pid
+pids/
+
+# OS
+Thumbs.db
+desktop.ini

@@ -1,0 +1,21 @@
+{
+  "id": "383d0d23-30a9-49cc-a19e-8a3d9ae3f374",
+  "title": "quels sont les prochaine tache...",
+  "messages": [
+    {
+      "id": "1d58a645-0442-4f33-861b-dfe2f708b6fc",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "6df35cb5-1aa8-4a68-b487-8b12031221bc",
+      "role": "user",
+      "content": "quels sont les prochaine tache"
+    },
+    {
+      "id": "ba5af39a-a44d-426b-9490-6f98a3d57f34",
+      "role": "assistant",
+      "content": "L'état actuel est que je rédige un courriel pour l'appel du notaire et la validation du paiement de 465 $. Bonne nuit, chère Zeelo. On reprend le contrôle demain."
+    }
+  ]
+}

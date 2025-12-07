@@ -1,0 +1,21 @@
+{
+  "id": "c7893140-2a76-4627-9dc5-143d093f579e",
+  "title": "quesque jai a lagenda?...",
+  "messages": [
+    {
+      "id": "5104de40-7285-4929-9467-411f823b6441",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "dbe970bb-b425-4880-a79d-9bbe6aed3a4e",
+      "role": "user",
+      "content": "quesque jai a lagenda?"
+    },
+    {
+      "id": "4f1a7c11-d7c1-4d22-95d9-9cd566b0731b",
+      "role": "assistant",
+      "content": "[HISTORIQUE CHAT]\nUser: donne un exemple de requetes avec le modele gro\nAgent: ⚠️ Erreur (anythingllm): 500 status code (no body)\n--- Compte: th3thirty3@gmail.com ---\n- 2025-11-29 : 💰 AGENDA OPTIMISÉ - Horaires Réels Thirty3\n\n--- Compte: mgauthierguillet@gmail.com ---\n- 2026-07-25 : Happy birthday!\n- 2027-07-25 : Happy birthday!\n- 2028-07-25 : Happy birthday!\n- 2029-07-25 : Happy birthday!\n- 2030-07-25 : Happy birthday!\n- 2031-07-25 : Happy birthday!\n- 2032-07-25 : Happy birthday!\n- 2033-07-25 : Happy birthday!\n- 2034-07-25 : Happy birthday!\n- 2035-07-25 : Happy birthday!"
+    }
+  ]
+}

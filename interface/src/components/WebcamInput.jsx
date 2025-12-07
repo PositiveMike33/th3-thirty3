@@ -1,36 +1,36 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Camera, X, Check } from 'lucide-react';
 
 const WebcamInput = ({ onCapture, onClose }) => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const [stream, setStream] = useState(null);
+    const streamRef = useRef(null); // Use ref instead of state to avoid dependency cycles
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        startCamera();
-        return () => stopCamera();
+    const stopCamera = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
     }, []);
 
-    const startCamera = async () => {
-        try {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            setStream(mediaStream);
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream;
+    useEffect(() => {
+        const startCamera = async () => {
+            try {
+                const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                streamRef.current = mediaStream;
+                if (videoRef.current) {
+                    videoRef.current.srcObject = mediaStream;
+                }
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                setError("Impossible d'accéder à la caméra. Vérifiez les permissions.");
             }
-        } catch (err) {
-            console.error("Error accessing camera:", err);
-            setError("Impossible d'accéder à la caméra. Vérifiez les permissions.");
-        }
-    };
+        };
 
-    const stopCamera = () => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-        }
-    };
+        startCamera();
+        return () => stopCamera();
+    }, [stopCamera]);
 
     const capture = () => {
         if (videoRef.current && canvasRef.current) {

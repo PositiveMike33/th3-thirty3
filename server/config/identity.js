@@ -7,7 +7,7 @@ const IDENTITY = {
     // User accounts to manage
     accounts: ['th3thirty3@gmail.com', 'mikegauthierguillet@gmail.com', 'mgauthierguillet@gmail.com'],
     // Default model if none specified
-    default_model: "granite3.1-moe:1b"
+    default_model: "gpt-4o"
 };
 
 module.exports = IDENTITY;

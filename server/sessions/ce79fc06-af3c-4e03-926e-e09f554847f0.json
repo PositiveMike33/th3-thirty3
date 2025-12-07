@@ -1,0 +1,21 @@
+{
+  "id": "ce79fc06-af3c-4e03-926e-e09f554847f0",
+  "title": "ou en etions nous rendu?...",
+  "messages": [
+    {
+      "id": "ea3c9949-24af-47a9-b5b2-a280ed54d189",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "ea67f88e-5a9d-42c5-8990-2845256ffb38",
+      "role": "user",
+      "content": "ou en etions nous rendu?"
+    },
+    {
+      "id": "533ba7ff-f4d1-48e6-a8dc-aaf59d9c22c1",
+      "role": "assistant",
+      "content": "## 🔄 Reboot Système : État des Lieux\n\nBon matin. J'ai rechargé la mémoire vive. On a laissé le système en *standby* hier soir pour que tu puisses dormir, mais là, l'horloge tourne.\n\nVoici exactement où on en était, classé par priorité critique :\n\n### 1. 🚨 URGENCE FINANCIÈRE : Desjardins (Priorité #1)\nC'est le dossier brûlant. Tu dois appeler la Caisse Desjardins **ce matin**.\n*   **L'objectif :** Bloquer les accès de prélèvement pour **Finart Capital** et **Gestion K2**.\n*   **Pourquoi :** Pour sécuriser tes liquidités et éviter qu'ils siphonnent ton compte. Niaise pas avec ça.\n\n### 2. 📝 ADMINISTRATIF : Le \"Kit\" État Civil\nOn a préparé le plan pour débloquer le notaire (Me Linca). Tu dois assembler le dossier papier aujourd'hui.\n*   **Action :** Imprimer et remplir à la main le formulaire de **Demande de copie d'acte de naissance**.\n*   **Détails critiques à ne pas oublier :**\n    *   Parents : **Guillet Daniel** & **Gauthier Francine**.\n    *   Coût : **63,00 $**.\n    *   Preuves : Photocopie RAMQ + Ton **relevé de paie** (pour l'adresse).\n    *   **Signature manuelle** obligatoire.\n\n### 3. 📅 FUTUR PROCHE : Le Marathon 16h\nJuste un rappel dans ton HUD : ton quart de travail monstre (15h à 07h) arrive pour la nuit de vendredi à samedi. On focus là-dessus plus tard, mais garde-le en tête pour ton énergie.\n\n---\n\n**Action requise :** On attaque quoi en premier ? L'appel à Desjardins pour fermer la brèche, ou l'impression du formulaire pour l'État civil ?\n\n*Aweye, on se met en marche.*"
+    }
+  ]
+}

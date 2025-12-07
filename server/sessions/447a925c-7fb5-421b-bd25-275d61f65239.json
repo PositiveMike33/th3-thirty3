@@ -1,0 +1,11 @@
+{
+  "id": "447a925c-7fb5-421b-bd25-275d61f65239",
+  "title": "/summarize...",
+  "messages": [
+    {
+      "id": "af741b26-f21b-413d-b8c0-e001eab1918f",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "0d60ea6b-a119-4a04-8a6e-ab748d42a8c7",
+  "title": "salut...",
+  "messages": [
+    {
+      "id": "15542c02-2c4d-4d3e-af9f-4b157dcf9c1f",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "6cbdc5ee-3ff1-4ee1-8a70-fa25e07c8404",
+      "role": "user",
+      "content": "salut"
+    },
+    {
+      "id": "f8a3b791-6105-4344-8113-4b10977139ff",
+      "role": "assistant",
+      "content": "⚠️ Erreur (anythingllm): 401 status code (no body)"
+    }
+  ]
+}

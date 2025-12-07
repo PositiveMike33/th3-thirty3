@@ -1,0 +1,11 @@
+{
+  "id": "c00a96a5-b621-4f59-a127-51f0803384d2",
+  "title": "System Check...",
+  "messages": [
+    {
+      "id": "267e61fd-b464-4042-ace1-8a655fe02161",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    }
+  ]
+}

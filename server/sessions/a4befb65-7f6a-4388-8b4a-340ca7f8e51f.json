@@ -1,0 +1,21 @@
+{
+  "id": "a4befb65-7f6a-4388-8b4a-340ca7f8e51f",
+  "title": "Hello...",
+  "messages": [
+    {
+      "id": "9b10a938-96c3-4a98-af4d-94e94f21783f",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "d1dffdf8-1a85-429c-a313-5de0fe1b508f",
+      "role": "user",
+      "content": "Hello"
+    },
+    {
+      "id": "392411d6-38d5-4a69-b736-0924a9887657",
+      "role": "assistant",
+      "content": "Bonjour! Je suis heureux de vous aider. Comment puis-je vous soutenir aujourd'hui? (Hello! I'm happy to help you today.)\n\nAlors, que voulez-vous faire ? (So, what would you like to do?)"
+    }
+  ]
+}

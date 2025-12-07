@@ -1,0 +1,21 @@
+{
+  "id": "837b23ce-b0a0-45a5-b44e-7503324de1f2",
+  "title": "salut...",
+  "messages": [
+    {
+      "id": "b1dbdf99-e778-49eb-93f6-605d204e401e",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "a1bf5a45-d958-422c-b839-c4b1b9c817c4",
+      "role": "user",
+      "content": "salut"
+    },
+    {
+      "id": "403f8f38-4264-4baf-ac74-04dbd389291a",
+      "role": "assistant",
+      "content": "Salut. Système en ligne.\n\nJ'ai accès à tes dossiers :\n1.  **Finance** : Équilibrer les comptes du projet.\n2.  **Santé** : Protocoles de sécurité (suppléments).\n3.  **Tech** : Résolution de l'erreur 401 sur AnythingLLM.\n\nOn attaque quoi ?"
+    }
+  ]
+}

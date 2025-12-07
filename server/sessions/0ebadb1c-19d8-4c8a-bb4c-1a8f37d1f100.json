@@ -1,0 +1,21 @@
+{
+  "id": "0ebadb1c-19d8-4c8a-bb4c-1a8f37d1f100",
+  "title": "Salut...",
+  "messages": [
+    {
+      "id": "fabb4b4d-ea8e-4a72-8c51-96006cd251fc",
+      "role": "assistant",
+      "content": "Session initialisée. On attaque quoi ?"
+    },
+    {
+      "id": "3c0d0195-7e4d-4f53-8130-9518f50d44cf",
+      "role": "user",
+      "content": "Salut"
+    },
+    {
+      "id": "9665064f-9c6b-44c8-b8f1-8d03c566fd9e",
+      "role": "assistant",
+      "content": "Salut. J'suis pluggé.\n\nCheck ça, d'après les logs, on a du pain sur la planche :\n*   **Notaire / Finart Capital** : Suivi du dossier.\n*   **Transaction** : Validation du 465 $.\n*   **Crypto** : Surveillance du prix du Bitcoin.\n\nAweye, on start par quoi ?"
+    }
+  ]
+}

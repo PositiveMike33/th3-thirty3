@@ -1,0 +1,144 @@
+[
+  {
+    "id": "INC-1764950597721",
+    "title": "Bourrage Star Wheel - Désalignement 2mm",
+    "description": "Bourrage répétitif sur Star Wheel, clips non correctement indexés",
+    "component": "Star Wheel",
+    "line": "Ligne 1",
+    "report": null,
+    "rootCause": "CIL (Clean, Inspect, Lubricate) incomplet - vérification visuelle de l'alignement non incluse",
+    "assignedTo": [
+      "TECH-1764950597719",
+      "TECH-1764950597720"
+    ],
+    "supervisor": "TECH-1764950597721",
+    "status": "in_progress",
+    "priority": "high",
+    "correctiveAction": "Réaligner le Star Wheel et remplacer les guides usés",
+    "preventiveAction": "Ajouter point de vérification alignement au CIL quotidien",
+    "correctiveCompleted": true,
+    "preventiveCompleted": false,
+    "createdAt": "2025-12-05T16:03:17.721Z",
+    "dueDate": "2025-12-08T16:03:17.721Z",
+    "resolvedAt": null,
+    "closedAt": null,
+    "remindersSent": 0,
+    "lastReminderAt": null,
+    "nextReminderAt": "2025-12-06T16:03:17.722Z",
+    "history": [
+      {
+        "action": "created",
+        "timestamp": "2025-12-05T16:03:17.722Z",
+        "by": "Michael"
+      },
+      {
+        "action": "status_changed",
+        "from": "open",
+        "to": "in_progress",
+        "timestamp": "2025-12-05T16:03:17.723Z",
+        "by": "Jean-François Tremblay",
+        "notes": "Travaux commencés"
+      },
+      {
+        "action": "corrective_completed",
+        "timestamp": "2025-12-05T16:03:17.723Z",
+        "by": "Jean-François Tremblay",
+        "notes": "Star Wheel réaligné, nouveaux guides installés"
+      }
+    ]
+  },
+  {
+    "id": "INC-1764950597722",
+    "title": "Hot Melt Gun - Température instable",
+    "description": "Température de colle fluctue de ±15°C, collage inconsistant",
+    "component": "Hot Melt Glue Gun",
+    "line": "Ligne 2",
+    "report": null,
+    "rootCause": "Thermocouple défectueux - pas de PM planifiée pour remplacement",
+    "assignedTo": [
+      "TECH-1764950597720"
+    ],
+    "supervisor": "TECH-1764950597721",
+    "status": "pending_verification",
+    "priority": "critical",
+    "correctiveAction": "Remplacer thermocouple immédiatement",
+    "preventiveAction": "Ajouter remplacement thermocouple au PM annuel",
+    "correctiveCompleted": true,
+    "preventiveCompleted": true,
+    "createdAt": "2025-12-05T16:03:17.722Z",
+    "dueDate": "2025-12-06T16:03:17.722Z",
+    "resolvedAt": null,
+    "closedAt": null,
+    "remindersSent": 0,
+    "lastReminderAt": null,
+    "nextReminderAt": "2025-12-06T16:03:17.722Z",
+    "history": [
+      {
+        "action": "created",
+        "timestamp": "2025-12-05T16:03:17.722Z",
+        "by": "Michael"
+      },
+      {
+        "action": "status_changed",
+        "from": "open",
+        "to": "in_progress",
+        "timestamp": "2025-12-05T16:03:17.723Z",
+        "by": "Sophie Lavoie",
+        "notes": ""
+      },
+      {
+        "action": "corrective_completed",
+        "timestamp": "2025-12-05T16:03:17.724Z",
+        "by": "Sophie Lavoie",
+        "notes": "Thermocouple remplacé"
+      },
+      {
+        "action": "preventive_completed",
+        "timestamp": "2025-12-05T16:03:17.724Z",
+        "by": "Sophie Lavoie",
+        "notes": "Ajouté au plan PM annuel"
+      },
+      {
+        "action": "status_changed",
+        "from": "in_progress",
+        "to": "pending_verification",
+        "timestamp": "2025-12-05T16:03:17.724Z",
+        "by": "Sophie Lavoie",
+        "notes": "All actions completed"
+      }
+    ]
+  },
+  {
+    "id": "INC-1764950597722",
+    "title": "Lug Chain - Usure prématurée",
+    "description": "Chaîne montre usure après seulement 500h au lieu de 2000h prévues",
+    "component": "Lug Chain",
+    "line": "Ligne 1",
+    "report": null,
+    "rootCause": "Tension incorrecte - Centerline non défini",
+    "assignedTo": [
+      "TECH-1764950597720"
+    ],
+    "supervisor": "TECH-1764950597721",
+    "status": "open",
+    "priority": "medium",
+    "correctiveAction": "Remplacer chaîne et ajuster tension à 25N",
+    "preventiveAction": "Définir Centerline tension (25N ±2N) et OPL de vérification",
+    "correctiveCompleted": false,
+    "preventiveCompleted": false,
+    "createdAt": "2025-12-05T16:03:17.722Z",
+    "dueDate": "2025-12-12T16:03:17.722Z",
+    "resolvedAt": null,
+    "closedAt": null,
+    "remindersSent": 0,
+    "lastReminderAt": null,
+    "nextReminderAt": "2025-12-06T16:03:17.722Z",
+    "history": [
+      {
+        "action": "created",
+        "timestamp": "2025-12-05T16:03:17.722Z",
+        "by": "Michael"
+      }
+    ]
+  }
+]

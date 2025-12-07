@@ -16,7 +16,7 @@ const DEFAULTS = {
         telegram: false
     },
     apiKeys: {
-        gemini: "",
+
         openai: "",
         anthropic: "",
         perplexity: "",
