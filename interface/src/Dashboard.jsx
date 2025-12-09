@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Wallet, TrendingUp, DollarSign, Activity } from 'lucide-react';
+import PaymentDashboard from './PaymentDashboard';
 
 const SYMBOLS = ['BTC/CAD', 'ETH/CAD', 'SOL/CAD'];
 
@@ -10,6 +11,7 @@ const Dashboard = () => {
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeTab, setActiveTab] = useState('portfolio'); // portfolio ou payments
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,6 +67,34 @@ const Dashboard = () => {
                 CENTRE DE COMMANDEMENT FINANCIER
             </h1>
 
+            {/* Tabs */}
+            <div className="flex gap-4 mb-6">
+                <button 
+                    onClick={() => setActiveTab('portfolio')}
+                    className={`px-6 py-3 rounded-lg font-bold transition-all ${
+                        activeTab === 'portfolio' 
+                            ? 'bg-cyan-600 text-white' 
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }`}
+                >
+                    📊 Portfolio Kraken
+                </button>
+                <button 
+                    onClick={() => setActiveTab('payments')}
+                    className={`px-6 py-3 rounded-lg font-bold transition-all ${
+                        activeTab === 'payments' 
+                            ? 'bg-cyan-600 text-white' 
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }`}
+                >
+                    💳 Paiements (Stripe/PayPal)
+                </button>
+            </div>
+
+            {/* Content */}
+            {activeTab === 'payments' ? (
+                <PaymentDashboard />
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* PORTFOLIO CARD */}
                 <div className="bg-gray-800/50 p-6 rounded-lg border border-cyan-900/50 shadow-lg backdrop-blur-sm">
@@ -180,6 +210,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+            )}
         </div>
     );
 };
