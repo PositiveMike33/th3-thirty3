@@ -52,7 +52,11 @@ const OsintDashboard = () => {
     const [analyzing, setAnalyzing] = useState(false);
 
     const handleRun = async () => {
-        if (!target || !selectedTool) return;
+        if (!target || !selectedTool) {
+            setOutput(prev => prev + `\n[WARNING] Please enter a target and select a tool.\n`);
+            return;
+        }
+        
         setLoading(true);
         setAnalysis(""); // Clear previous analysis
         setOutput(prev => prev + `\n> Running ${selectedTool} on ${target}...\n`);
@@ -64,22 +68,46 @@ const OsintDashboard = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ toolId: selectedTool, target })
             });
+            
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server error: ${res.status}`);
+            }
+            
             const data = await res.json();
-            const toolOutput = data.result;
+            const toolOutput = data.result || data.error || '[No output received]';
             setOutput(prev => prev + toolOutput + "\n\n");
 
-            // 2. Trigger Expert Analysis
-            setAnalyzing(true);
-            const analyzeRes = await fetch(`${API_URL}/osint/analyze`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ toolId: selectedTool, output: toolOutput })
-            });
-            const analyzeData = await analyzeRes.json();
-            setAnalysis(analyzeData.analysis);
+            // 2. Only trigger Expert Analysis if tool succeeded (no error in output)
+            if (!toolOutput.includes('[ERROR]')) {
+                setAnalyzing(true);
+                try {
+                    const analyzeRes = await fetch(`${API_URL}/osint/analyze`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ toolId: selectedTool, output: toolOutput })
+                    });
+                    
+                    if (analyzeRes.ok) {
+                        const analyzeData = await analyzeRes.json();
+                        setAnalysis(analyzeData.analysis || 'Analysis completed.');
+                    }
+                } catch (analyzeError) {
+                    console.warn('Expert analysis unavailable:', analyzeError.message);
+                    // Don't show analysis error to user - it's optional
+                }
+            }
 
         } catch (error) {
-            setOutput(prev => prev + `[ERROR] ${error.message}\n\n`);
+            console.error('OSINT Error:', error);
+            let errorMessage = error.message;
+            
+            // User-friendly error messages
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                errorMessage = 'Cannot connect to server. Please ensure the backend is running.';
+            }
+            
+            setOutput(prev => prev + `[ERROR] ${errorMessage}\n\n`);
         }
         setLoading(false);
         setAnalyzing(false);
