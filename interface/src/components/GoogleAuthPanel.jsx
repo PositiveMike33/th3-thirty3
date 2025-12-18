@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 const GoogleAuthPanel = () => {
     const [googleStatus, setGoogleStatus] = useState({});
@@ -6,14 +7,14 @@ const GoogleAuthPanel = () => {
 
     useEffect(() => {
         // Check Google Status
-        fetch('http://localhost:3000/google/status')
+        fetch(`${API_URL}/google/status`)
             .then(res => res.json())
             .then(setGoogleStatus)
             .catch(console.error);
     }, []);
 
     const connectGoogle = (email) => {
-        window.open(`http://localhost:3000/auth/google?email=${email}`, '_blank', 'width=500,height=600');
+        window.open(`${API_URL}/auth/google?email=${email}`, '_blank', 'width=500,height=600');
     };
 
     return (

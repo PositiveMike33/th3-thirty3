@@ -45,6 +45,50 @@ class SocketService {
     emitAgentStatus(status) {
         if (this.io) this.io.emit('agent:status', { status, timestamp: new Date() });
     }
+
+    // --- TRAINING EVENTS ---
+
+    emitTrainingCommentary(data) {
+        if (this.io) {
+            this.io.emit('training:commentary', {
+                model: data.model,
+                score: data.score,
+                commentary: data.commentary,
+                timestamp: new Date()
+            });
+            console.log(`[SOCKET] Training commentary emitted for ${data.model}`);
+        }
+    }
+
+    emitBenchmarkComplete(data) {
+        if (this.io) {
+            this.io.emit('training:benchmark', {
+                model: data.model,
+                score: data.score,
+                category: data.category,
+                timestamp: new Date()
+            });
+            console.log(`[SOCKET] Benchmark complete emitted for ${data.model}`);
+        }
+    }
+
+    emitMetricsUpdate(data) {
+        if (this.io) {
+            this.io.emit('metrics:update', {
+                model: data.model,
+                category: data.category,
+                improvement: data.improvement,
+                timestamp: new Date()
+            });
+        }
+    }
+
+    // Generic log emission
+    emitLog(type, message) {
+        if (this.io) {
+            this.io.emit('log', { type, message, timestamp: new Date() });
+        }
+    }
 }
 
 module.exports = SocketService;

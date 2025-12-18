@@ -6,8 +6,88 @@
 const express = require('express');
 const router = express.Router();
 const TorNetworkService = require('./tor_network_service');
+const torStartupCheck = require('./tor_startup_check');
 
 const torService = new TorNetworkService();
+
+/**
+ * GET /tor/startup-check
+ * Vérifie le statut Tor au démarrage et tente de le lancer si nécessaire
+ */
+router.get('/startup-check', async (req, res) => {
+    try {
+        const result = await torStartupCheck.performStartupCheck();
+        res.json({
+            success: true,
+            ...result
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+/**
+ * GET /tor/verify
+ * Test rapide de connexion Tor réelle
+ */
+router.get('/verify', async (req, res) => {
+    try {
+        const verification = await torStartupCheck.verifyTorConnection();
+        res.json({
+            success: true,
+            ...verification,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+/**
+ * POST /tor/start
+ * Démarre tor.exe manuellement
+ */
+router.post('/start', async (req, res) => {
+    try {
+        await torStartupCheck.startTor();
+        const status = torStartupCheck.getStatus();
+        res.json({
+            success: true,
+            message: 'Tor started successfully',
+            ...status
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+/**
+ * POST /tor/stop
+ * Arrête tor.exe
+ */
+router.post('/stop', async (req, res) => {
+    try {
+        await torStartupCheck.stopTor();
+        res.json({
+            success: true,
+            message: 'Tor stopped'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 /**
  * GET /tor/status

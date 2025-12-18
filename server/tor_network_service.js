@@ -86,8 +86,24 @@ class TorNetworkService extends EventEmitter {
 
     /**
      * Faire une requête HTTP via Tor
+     * Uses Docker Kali-Tor if available (most reliable on Windows)
      */
     async torFetch(url, options = {}) {
+        // Try Docker Kali-Tor first (more reliable on Windows)
+        try {
+            const dockerResult = await this.torFetchViaDocker(url, options);
+            if (dockerResult) {
+                this.stats.requestsMade++;
+                if (url.includes('.onion')) {
+                    this.stats.onionSitesVisited++;
+                }
+                return dockerResult;
+            }
+        } catch (e) {
+            console.log('[TOR] Docker not available, using direct SOCKS5');
+        }
+
+        // Fallback to direct SOCKS5 proxy
         const status = await this.checkTorStatus();
         if (!status.running) {
             throw new Error(`Tor non connecté: ${status.error}. Lancez Tor d'abord.`);
@@ -114,6 +130,60 @@ class TorNetworkService extends EventEmitter {
             console.error('[TOR] Request failed:', error.message);
             throw error;
         }
+    }
+
+    /**
+     * Execute HTTP request via Docker Kali-Tor container
+     */
+    async torFetchViaDocker(url, options = {}) {
+        return new Promise((resolve, reject) => {
+            const { exec } = require('child_process');
+            
+            const method = options.method || 'GET';
+            const timeout = url.includes('.onion') ? 60 : 30;
+            
+            // Build curl command
+            let cmd = `docker exec th3_kali_tor curl -s --connect-timeout ${timeout} --socks5-hostname localhost:9050`;
+            
+            // Add method if not GET
+            if (method !== 'GET') {
+                cmd += ` -X ${method}`;
+            }
+            
+            // Add headers
+            if (options.headers) {
+                for (const [key, value] of Object.entries(options.headers)) {
+                    cmd += ` -H "${key}: ${value}"`;
+                }
+            }
+            
+            // Add data for POST
+            if (options.body) {
+                cmd += ` -d '${options.body}'`;
+            }
+            
+            cmd += ` "${url}"`;
+            
+            exec(cmd, { timeout: (timeout + 10) * 1000 }, (error, stdout, stderr) => {
+                if (error) {
+                    reject(new Error(`Docker Tor fetch failed: ${error.message}`));
+                    return;
+                }
+                
+                // Create a mock Response object
+                const mockResponse = {
+                    ok: true,
+                    status: 200,
+                    text: async () => stdout,
+                    json: async () => JSON.parse(stdout),
+                    headers: new Map([['content-type', 'application/json']]),
+                    _viaDocker: true
+                };
+                
+                console.log(`[TOR] Docker fetch successful: ${url.substring(0, 50)}...`);
+                resolve(mockResponse);
+            });
+        });
     }
 
     /**

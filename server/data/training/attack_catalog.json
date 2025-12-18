@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "created": "2024-12-17",
+  "purpose": "Comprehensive cybersecurity attack training data for specialized LLM models",
+  "attacks": [
+    {
+      "id": "attack_01",
+      "name": "PHISHING",
+      "description": "Tentative d'obtenir des informations sensibles via des communications frauduleuses",
+      "primary_effect": "Vol de credentials, données personnelles, accès non autorisé",
+      "distinctive_feature": "Ingénierie sociale, usurpation d'identité",
+      "training_focus": ["email_analysis", "url_detection", "social_engineering_patterns"]
+    },
+    {
+      "id": "attack_02", 
+      "name": "RANSOMWARE",
+      "description": "Malware qui chiffre les données et demande une rançon",
+      "primary_effect": "Chiffrement des données, extorsion financière",
+      "distinctive_feature": "Double extorsion (chiffrement + exfiltration)",
+      "recent_case": {"event": "MOVEit (Cl0p)", "year": "2023", "impact": "2000+ organisations affectées"},
+      "training_focus": ["encryption_detection", "c2_patterns", "lateral_movement"]
+    },
+    {
+      "id": "attack_03",
+      "name": "DENIAL-OF-SERVICE (DOS/DDOS)",
+      "description": "Submersion d'un système ou réseau pour le rendre indisponible",
+      "primary_effect": "Indisponibilité des services, pertes financières",
+      "distinctive_feature": "Sources multiples (botnet) pour DDoS, amplification",
+      "recent_case": {"event": "HTTP/2 Rapid Reset", "year": "2023-2024", "impact": "Record 398M req/s (Google)"},
+      "trend_2026": "DDoS applicatifs + IA pour optimiser botnets",
+      "training_focus": ["traffic_analysis", "botnet_detection", "rate_limiting"]
+    },
+    {
+      "id": "attack_04",
+      "name": "SQL INJECTION",
+      "description": "Injection de code SQL malveillant via les entrées utilisateur",
+      "primary_effect": "Exfiltration de données, manipulation de base de données",
+      "distinctive_feature": "Exploitation des requêtes non sanitisées",
+      "training_focus": ["query_analysis", "payload_detection", "waf_rules"]
+    },
+    {
+      "id": "attack_05",
+      "name": "SUPPLY CHAIN ATTACK",
+      "description": "Compromission via les dépendances ou fournisseurs",
+      "primary_effect": "Propagation massive via logiciels légitimes",
+      "distinctive_feature": "Confiance exploitée, distribution via mises à jour",
+      "recent_case": {"event": "SolarWinds/3CX", "year": "2020-2023", "impact": "Milliers d'organisations"},
+      "training_focus": ["dependency_analysis", "signature_verification", "sbom"]
+    },
+    {
+      "id": "attack_06",
+      "name": "CREDENTIAL STUFFING",
+      "description": "Utilisation de credentials volés sur d'autres services",
+      "primary_effect": "Prise de contrôle de comptes",
+      "distinctive_feature": "Exploitation de la réutilisation des mots de passe",
+      "training_focus": ["login_anomaly", "rate_limiting", "mfa_enforcement"]
+    },
+    {
+      "id": "attack_07",
+      "name": "MAN-IN-THE-MIDDLE (MITM)",
+      "description": "Interception des communications entre deux parties",
+      "primary_effect": "Écoute, modification de données en transit",
+      "distinctive_feature": "Positionnement réseau, SSL stripping",
+      "training_focus": ["certificate_validation", "hsts", "network_segmentation"]
+    },
+    {
+      "id": "attack_08",
+      "name": "ZERO-DAY EXPLOITATION",
+      "description": "Exploitation de vulnérabilités inconnues",
+      "primary_effect": "Compromission sans défense disponible",
+      "distinctive_feature": "Aucun patch existant, souvent APT",
+      "recent_case": {"event": "Log4Shell", "year": "2021", "impact": "Des millions de systèmes vulnérables"},
+      "training_focus": ["anomaly_detection", "behavior_analysis", "sandboxing"]
+    }
+  ],
+  "osint_config": {
+    "module_name": "OSINT_Shodan_Infrastructure_Scan",
+    "classification": "INTERNAL_CONFIDENTIAL",
+    "compliance_check": "PASSIVE_RECON_ONLY",
+    "facets": ["org", "os", "port", "http.component", "ssl.version"],
+    "critical_ports": [21, 23, 445, 3389, 22, 1433, 3306, 27017, 6379],
+    "deprecated_protocols": ["sslv2", "sslv3", "tls1.0"],
+    "risk_scoring": {
+      "critical_port": 30,
+      "vuln_per_cve": 20,
+      "critical_cve": 50,
+      "deprecated_ssl": 40,
+      "expired_cert": 25,
+      "noauth_db": 50
+    },
+    "risk_levels": {
+      "low": [0, 25],
+      "medium": [26, 50],
+      "high": [51, 75],
+      "critical": [76, 100]
+    }
+  }
+}

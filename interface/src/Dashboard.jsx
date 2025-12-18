@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Wallet, TrendingUp, DollarSign, Activity } from 'lucide-react';
 import PaymentDashboard from './PaymentDashboard';
+import { API_URL } from './config';
 
 const SYMBOLS = ['BTC/CAD', 'ETH/CAD', 'SOL/CAD'];
 
@@ -19,7 +20,7 @@ const Dashboard = () => {
                 const headers = { 'x-api-key': localStorage.getItem('th3_api_key') || '' };
 
                 // Fetch Portfolio
-                const portRes = await fetch('http://localhost:3000/finance/portfolio', { headers });
+                const portRes = await fetch(`${API_URL}/finance/portfolio`, { headers });
                 const portData = await portRes.json();
 
                 if (portData.error) {
@@ -32,14 +33,14 @@ const Dashboard = () => {
                 // Fetch Tickers
                 const newTickers = {};
                 for (const sym of SYMBOLS) {
-                    const tickRes = await fetch(`http://localhost:3000/finance/ticker?symbol=${sym}`, { headers });
+                    const tickRes = await fetch(`${API_URL}/finance/ticker?symbol=${sym}`, { headers });
                     const tickData = await tickRes.json();
                     if (!tickData.error) newTickers[sym] = tickData;
                 }
                 setTickers(newTickers);
 
                 // Fetch News
-                const newsRes = await fetch('http://localhost:3000/finance/news', { headers });
+                const newsRes = await fetch(`${API_URL}/finance/news`, { headers });
                 const newsData = await newsRes.json();
                 if (!newsData.error) setNews(newsData);
 

@@ -70,9 +70,15 @@ class GoogleService {
     }
 
     async getClient(email) {
-        // Return cached client if credentials are valid
+        // Return cached client if credentials are valid and not expired
         if (this.clients[email] && this.clients[email].credentials) {
-            return this.clients[email];
+            const tokens = this.clients[email].credentials;
+            const now = Date.now();
+            
+            // Check if token is expired (with 5 min buffer)
+            if (tokens.expiry_date && tokens.expiry_date > now + 300000) {
+                return this.clients[email];
+            }
         }
 
         const tokenPath = path.join(this.tokensDir, `token_${email}.json`);
@@ -86,6 +92,24 @@ class GoogleService {
             const tokenContent = await require('fs').promises.readFile(tokenPath, 'utf8');
             const tokens = JSON.parse(tokenContent);
             oAuth2Client.setCredentials(tokens);
+
+            // Check if token needs refresh
+            if (tokens.refresh_token && tokens.expiry_date && tokens.expiry_date < Date.now()) {
+                console.log(`[GOOGLE] Token expired for ${email}, refreshing...`);
+                try {
+                    const { credentials: newTokens } = await oAuth2Client.refreshAccessToken();
+                    oAuth2Client.setCredentials(newTokens);
+                    
+                    // Save refreshed token
+                    const updatedTokens = { ...tokens, ...newTokens };
+                    await require('fs').promises.writeFile(tokenPath, JSON.stringify(updatedTokens));
+                    console.log(`[GOOGLE] Token refreshed for ${email}`);
+                } catch (refreshError) {
+                    console.error(`[GOOGLE] Token refresh failed for ${email}:`, refreshError.message);
+                    // Token is invalid, needs re-auth
+                    return null;
+                }
+            }
 
             // Cache the client
             this.clients[email] = oAuth2Client;

@@ -33,9 +33,9 @@ class ConnectionSecurityService extends EventEmitter {
             ]),
             // Headers de sécurité requis
             requiredHeaders: ['x-api-key', 'authorization'],
-            // Rate limiting
+            // Rate limiting (increased for development)
             rateLimit: {
-                maxRequests: 100,
+                maxRequests: 300,
                 windowMs: 60000 // 1 minute
             }
         };

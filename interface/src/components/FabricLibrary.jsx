@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, BookOpen, ChevronRight, Filter } from 'lucide-react';
+import { API_URL } from '../config';
 
 // Descriptions en français des patterns populaires
 const PATTERN_DESCRIPTIONS_FR = {
@@ -78,7 +79,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
     useEffect(() => {
         if (isOpen) {
             setLoading(true);
-            fetch('http://localhost:3000/patterns')
+            fetch(`${API_URL}/patterns`)
                 .then(res => res.json())
                 .then(data => {
                     setPatterns(data.sort());
@@ -153,10 +154,10 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                                     setPreviewPattern(pattern);
                                                     setLoadingPreview(true);
                                                     try {
-                                                        const res = await fetch(`http://localhost:3000/patterns/${pattern}`);
+                                                        const res = await fetch(`${API_URL}/patterns/${pattern}`);
                                                         const data = await res.json();
                                                         setPatternContent(data);
-                                                    } catch (err) {
+                                                    } catch {
                                                         setPatternContent({ 
                                                             system: 'Erreur de chargement',
                                                             user: 'Serveur non disponible. Démarrez le serveur pour voir le contenu.'

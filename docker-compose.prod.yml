@@ -1,0 +1,118 @@
+# Docker Compose pour Nexus33 Production
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # ================================
+  # Frontend (Nginx + Vite Build)
+  # ================================
+  frontend:
+    build:
+      context: ./interface
+      dockerfile: Dockerfile
+    container_name: nexus33-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./interface/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    networks:
+      - nexus33-network
+
+  # ================================
+  # Backend API (Express.js)
+  # ================================
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nexus33-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CORS_ORIGINS=https://nexus33.io,https://www.nexus33.io
+      - JWT_SECRET=${JWT_SECRET}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongo:27017/nexus33}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    volumes:
+      - ./server/data:/app/data
+      - ./server/uploads:/app/uploads
+    depends_on:
+      - mongo
+      - ollama
+    networks:
+      - nexus33-network
+
+  # ================================
+  # MongoDB Database
+  # ================================
+  mongo:
+    image: mongo:7
+    container_name: nexus33-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=nexus33
+    networks:
+      - nexus33-network
+
+  # ================================
+  # Ollama LLM (si hébergé localement)
+  # ================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nexus33-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - nexus33-network
+
+  # ================================
+  # Redis Cache (optionnel)
+  # ================================
+  redis:
+    image: redis:alpine
+    container_name: nexus33-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - nexus33-network
+
+# ================================
+# Networks
+# ================================
+networks:
+  nexus33-network:
+    driver: bridge
+
+# ================================
+# Volumes
+# ================================
+volumes:
+  mongo-data:
+  ollama-data:
+  redis-data:

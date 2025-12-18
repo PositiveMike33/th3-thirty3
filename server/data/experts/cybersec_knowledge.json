@@ -1,0 +1,94 @@
+{
+  "interactions": 1,
+  "learned": [
+    {
+      "content": "ZERO-CLICK ATTACK - Définition: Une cyberattaque qui compromet un appareil sans aucune interaction de l'utilisateur (aucun clic, tapotement ou téléchargement n'est requis).",
+      "timestamp": "2025-12-18T06:49:02.907Z"
+    },
+    {
+      "content": "ZERO-CLICK ATTACK - Origine: Elle exploite des bugs ou vulnérabilités logicielles existants que l'attaquant utilise pour pénétrer le système.",
+      "timestamp": "2025-12-18T06:49:03.000Z"
+    },
+    {
+      "content": "ZERO-CLICK ATTACK - Vecteurs d'attaque: Peut passer par des MMS, des appels VoIP (WhatsApp), des iMessages ou être amplifiée par des agents IA autonomes.",
+      "timestamp": "2025-12-18T06:49:03.003Z"
+    },
+    {
+      "content": "ZERO-CLICK IMPACT - Exécution code à distance: L'attaquant envoie et exécute du code malveillant sur l'appareil sans permission.",
+      "timestamp": "2025-12-18T06:49:03.005Z"
+    },
+    {
+      "content": "ZERO-CLICK IMPACT - Surveillance totale: Permet un contrôle à distance complet : écoute via le microphone, activation de la caméra, lecture des messages/courriels et enregistrement des frappes clavier.",
+      "timestamp": "2025-12-18T06:49:03.007Z"
+    },
+    {
+      "content": "ZERO-CLICK IMPACT - Exfiltration via IA: Dans le cas des agents IA, une 'injection de prompt indirecte' (texte invisible dans un courriel) peut forcer l'IA à voler et envoyer des données confidentielles automatiquement.",
+      "timestamp": "2025-12-18T06:49:03.009Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE - Fondamentaux: Maintenir impérativement tous les logiciels à jour pour que les correctifs de sécurité des vendeurs soient appliqués.",
+      "timestamp": "2025-12-18T06:49:03.011Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE - Stratégie Zero Trust: Ne jamais faire confiance par défaut. Supposer que tout ce qui touche au système (texte, code, URL) est hostile jusqu'à vérification.",
+      "timestamp": "2025-12-18T06:49:03.013Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE IA - Moindre privilège: Limiter l'autonomie de l'agent IA et désactiver les capacités non essentielles.",
+      "timestamp": "2025-12-18T06:49:03.016Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE IA - Sandboxing: Isoler les agents IA dans un environnement restreint pour qu'ils ne puissent pas accéder à tout le système.",
+      "timestamp": "2025-12-18T06:49:03.019Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE IA - Pare-feu IA: Scanner les entrées pour détecter les injections de prompt et bloquer les sorties de données sensibles.",
+      "timestamp": "2025-12-18T06:49:03.021Z"
+    },
+    {
+      "content": "ZERO-CLICK ATTACK - Définition: Une cyberattaque qui compromet un appareil sans aucune interaction de l'utilisateur (aucun clic, tapotement ou téléchargement n'est requis).",
+      "timestamp": "2025-12-18T06:49:33.841Z"
+    },
+    {
+      "content": "ZERO-CLICK ATTACK - Origine: Elle exploite des bugs ou vulnérabilités logicielles existants que l'attaquant utilise pour pénétrer le système.",
+      "timestamp": "2025-12-18T06:49:37.062Z"
+    },
+    {
+      "content": "ZERO-CLICK ATTACK - Vecteurs d'attaque: Peut passer par des MMS, des appels VoIP (WhatsApp), des iMessages ou être amplifiée par des agents IA autonomes.",
+      "timestamp": "2025-12-18T06:49:37.099Z"
+    },
+    {
+      "content": "ZERO-CLICK IMPACT - Exécution code à distance: L'attaquant envoie et exécute du code malveillant sur l'appareil sans permission.",
+      "timestamp": "2025-12-18T06:49:37.117Z"
+    },
+    {
+      "content": "ZERO-CLICK IMPACT - Surveillance totale: Permet un contrôle à distance complet : écoute via le microphone, activation de la caméra, lecture des messages/courriels et enregistrement des frappes clavier.",
+      "timestamp": "2025-12-18T06:49:37.133Z"
+    },
+    {
+      "content": "ZERO-CLICK IMPACT - Exfiltration via IA: Dans le cas des agents IA, une 'injection de prompt indirecte' (texte invisible dans un courriel) peut forcer l'IA à voler et envoyer des données confidentielles automatiquement.",
+      "timestamp": "2025-12-18T06:49:37.150Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE - Fondamentaux: Maintenir impérativement tous les logiciels à jour pour que les correctifs de sécurité des vendeurs soient appliqués.",
+      "timestamp": "2025-12-18T06:49:37.167Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE - Stratégie Zero Trust: Ne jamais faire confiance par défaut. Supposer que tout ce qui touche au système (texte, code, URL) est hostile jusqu'à vérification.",
+      "timestamp": "2025-12-18T06:49:37.183Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE IA - Moindre privilège: Limiter l'autonomie de l'agent IA et désactiver les capacités non essentielles.",
+      "timestamp": "2025-12-18T06:49:37.201Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE IA - Sandboxing: Isoler les agents IA dans un environnement restreint pour qu'ils ne puissent pas accéder à tout le système.",
+      "timestamp": "2025-12-18T06:49:37.221Z"
+    },
+    {
+      "content": "ZERO-CLICK DEFENSE IA - Pare-feu IA: Scanner les entrées pour détecter les injections de prompt et bloquer les sorties de données sensibles.",
+      "timestamp": "2025-12-18T06:49:37.238Z"
+    }
+  ],
+  "patterns": {}
+}

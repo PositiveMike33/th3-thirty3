@@ -1,25 +1,36 @@
-/**
+﻿/**
  * Aikido Security Service - Intégration API pour le scan de vulnérabilités
  * Documentation: https://apidocs.aikido.dev
+ * 
+ * TEMPORARILY DISABLED - Token needs to be updated
  */
 
 class AikidoSecurityService {
     constructor() {
-        // Utiliser le token IDE fourni
         this.apiToken = process.env.AIKIDO_API_TOKEN;
         this.apiUrl = 'https://app.aikido.dev/api/public/v1';
         this.ideApiUrl = 'https://ide.aikido.dev';
-        
-        // Région extraite du token (eu)
         this.region = 'eu';
         
-        console.log('[AIKIDO] Service initialized with IDE token');
+        // Check if token is valid (basic check)
+        this.enabled = !!(this.apiToken && this.apiToken.length > 20);
+        
+        if (this.enabled) {
+            console.log('[AIKIDO] Service initialized with IDE token');
+        } else {
+            console.log('[AIKIDO] Service DISABLED - No valid token configured');
+        }
     }
 
     /**
      * Requête API authentifiée avec le token IDE
      */
     async apiRequest(endpoint, method = 'GET', body = null, useIdeApi = false) {
+        // Skip if disabled
+        if (!this.enabled) {
+            return { disabled: true, message: 'Aikido temporarily disabled' };
+        }
+        
         const baseUrl = useIdeApi ? this.ideApiUrl : this.apiUrl;
         
         const options = {
@@ -39,33 +50,33 @@ class AikidoSecurityService {
             
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`[AIKIDO] API error ${response.status}:`, errorText);
+                // Silent fail on 401 - token invalid
+                if (response.status === 401) {
+                    this.enabled = false;
+                    console.log('[AIKIDO] Token invalid - Service now disabled');
+                    return { disabled: true, message: 'Token invalid' };
+                }
                 throw new Error(`API error ${response.status}: ${errorText}`);
             }
 
             return response.json();
         } catch (error) {
-            console.error('[AIKIDO] Request error:', error.message);
-            throw error;
-        }
-    }
-
-    /**
-     * Récupérer les infos du workspace
-     */
-    async getWorkspaceInfo() {
-        try {
-            return await this.apiRequest('/workspace');
-        } catch (error) {
-            console.error('[AIKIDO] Workspace info error:', error.message);
+            // Silent fail
             return { error: error.message };
         }
     }
 
-    /**
-     * Lister tous les issues de sécurité ouverts
-     */
+    async getWorkspaceInfo() {
+        if (!this.enabled) return { disabled: true };
+        try {
+            return await this.apiRequest('/workspace');
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+
     async getOpenIssues(page = 0, pageSize = 25) {
+        if (!this.enabled) return { issues: [], disabled: true };
         try {
             const params = new URLSearchParams({
                 page: page.toString(),
@@ -73,123 +84,103 @@ class AikidoSecurityService {
             });
             return await this.apiRequest(`/issues/groups?${params}`);
         } catch (error) {
-            console.error('[AIKIDO] Get issues error:', error.message);
             return { issues: [], error: error.message };
         }
     }
 
-    /**
-     * Récupérer les détails d'un groupe d'issues
-     */
     async getIssueDetails(issueGroupId) {
+        if (!this.enabled) return { disabled: true };
         try {
             return await this.apiRequest(`/issues/groups/${issueGroupId}`);
         } catch (error) {
-            console.error('[AIKIDO] Issue details error:', error.message);
             return { error: error.message };
         }
     }
 
-    /**
-     * Exporter tous les issues (CSV/JSON)
-     */
     async exportIssues(format = 'json') {
+        if (!this.enabled) return { disabled: true };
         try {
             return await this.apiRequest(`/issues/export?format=${format}`);
         } catch (error) {
-            console.error('[AIKIDO] Export issues error:', error.message);
             return { error: error.message };
         }
     }
 
-    /**
-     * Lister les repositories scannés
-     */
     async getRepositories() {
+        if (!this.enabled) return { repositories: [], disabled: true };
         try {
             return await this.apiRequest('/code_repos');
         } catch (error) {
-            console.error('[AIKIDO] Get repos error:', error.message);
             return { repositories: [], error: error.message };
         }
     }
 
-    /**
-     * Obtenir le SBOM (Software Bill of Materials) d'un repo
-     */
     async getSBOM(repoId) {
+        if (!this.enabled) return { disabled: true };
         try {
             return await this.apiRequest(`/code_repos/${repoId}/sbom`);
         } catch (error) {
-            console.error('[AIKIDO] SBOM error:', error.message);
             return { error: error.message };
         }
     }
 
-    /**
-     * Lister les scans CI/CD récents
-     */
     async getCIScans(page = 0) {
+        if (!this.enabled) return { scans: [], disabled: true };
         try {
             return await this.apiRequest(`/reports/ci_scans?page=${page}`);
         } catch (error) {
-            console.error('[AIKIDO] CI scans error:', error.message);
             return { scans: [], error: error.message };
         }
     }
 
-    /**
-     * Obtenir le statut de conformité SOC2
-     */
     async getSOC2Compliance() {
+        if (!this.enabled) return { disabled: true };
         try {
             return await this.apiRequest('/compliance/soc2');
         } catch (error) {
-            console.error('[AIKIDO] SOC2 compliance error:', error.message);
             return { error: error.message };
         }
     }
 
-    /**
-     * Obtenir le statut de conformité ISO 27001
-     */
     async getISO27001Compliance() {
+        if (!this.enabled) return { disabled: true };
         try {
             return await this.apiRequest('/compliance/iso27001');
         } catch (error) {
-            console.error('[AIKIDO] ISO 27001 compliance error:', error.message);
             return { error: error.message };
         }
     }
 
-    /**
-     * Lister les équipes
-     */
     async getTeams() {
+        if (!this.enabled) return { teams: [], disabled: true };
         try {
             return await this.apiRequest('/teams');
         } catch (error) {
-            console.error('[AIKIDO] Get teams error:', error.message);
             return { teams: [], error: error.message };
         }
     }
 
-    /**
-     * Générer un rapport PDF
-     */
     async generateReport() {
+        if (!this.enabled) return { disabled: true };
         try {
             return await this.apiRequest('/reports/pdf');
         } catch (error) {
-            console.error('[AIKIDO] Generate report error:', error.message);
             return { error: error.message };
         }
     }
 
-    /**
-     * Résumé de sécurité pour le dashboard
-     */
     async getSecuritySummary() {
+        if (!this.enabled) {
+            return { 
+                success: false, 
+                disabled: true,
+                message: 'Aikido temporarily disabled - update token in .env',
+                stats: { critical: 0, high: 0, medium: 0, low: 0, total: 0 },
+                repoCount: 0,
+                recentIssues: []
+            };
+        }
+        
         try {
             const [workspace, issues, repos] = await Promise.all([
                 this.getWorkspaceInfo(),
@@ -197,7 +188,6 @@ class AikidoSecurityService {
                 this.getRepositories()
             ]);
 
-            // Calculer les stats par sévérité
             const issueList = issues.groups || issues.issues || [];
             const stats = {
                 critical: 0,
@@ -223,7 +213,6 @@ class AikidoSecurityService {
             };
 
         } catch (error) {
-            console.error('[AIKIDO] Security summary error:', error.message);
             return { 
                 success: false, 
                 error: error.message,

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import Avatar from './Avatar';
 import GoogleAuthPanel from './components/GoogleAuthPanel';
@@ -7,13 +6,14 @@ import FeedbackModal from './components/FeedbackModal';
 import PatternModal from './components/PatternModal';
 import WebcamInput from './components/WebcamInput';
 import ModelSelector from './components/ModelSelector';
-import Dashboard from './Dashboard'; // Import Dashboard
-import SpaceDashboard from './SpaceDashboard'; // Import SpaceDashboard
-import ProjectDashboard from './ProjectDashboard'; // Import ProjectDashboard
-import SettingsPage from './SettingsPage'; // Import SettingsPage
-import { APP_CONFIG } from './config';
+import Dashboard from './Dashboard';
+import SpaceDashboard from './SpaceDashboard';
+import ProjectDashboard from './ProjectDashboard';
+import SettingsPage from './SettingsPage';
+import OllamaTrainingDashboard from './OllamaTrainingDashboard';
+import { APP_CONFIG, API_URL } from './config';
 import FabricLibrary from './components/FabricLibrary';
-import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase, BookOpen, X } from 'lucide-react';
+import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase, BookOpen, X, Brain, Facebook, Youtube, Linkedin, Instagram, Twitter } from 'lucide-react';
 
 const ChatInterface = () => {
     const [messages, setMessages] = useState([
@@ -92,12 +92,36 @@ const ChatInterface = () => {
     };
 
     const loadSessions = useCallback(() => {
-        fetch('http://localhost:3000/sessions')
-            .then(res => res.json()
-                .then(data => {
+        fetch(`${API_URL}/sessions`)
+            .then(res => {
+                if (!res.ok) {
+                    // Handle rate limiting or other errors
+                    if (res.status === 429) {
+                        console.warn('[SESSIONS] Rate limited, retrying in 60s');
+                        return { sessions: [], rateLimited: true };
+                    }
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                // Ensure sessions is always an array
+                if (Array.isArray(data)) {
                     setSessions(data);
-                }))
-            .catch(err => console.error("Failed to load sessions", err));
+                } else if (data && Array.isArray(data.sessions)) {
+                    setSessions(data.sessions);
+                } else if (data && data.error) {
+                    console.warn('[SESSIONS] API Error:', data.error);
+                    setSessions([]);
+                } else {
+                    console.warn('[SESSIONS] Unexpected response format:', data);
+                    setSessions([]);
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load sessions", err);
+                setSessions([]); // Set empty array on error
+            });
     }, []);
 
     useEffect(() => {
@@ -109,7 +133,7 @@ const ChatInterface = () => {
         //     .catch(err => console.error("Failed to load patterns", err));
 
         // Load Settings (Compute Mode & API Key)
-        fetch('http://localhost:3000/settings')
+        fetch(`${API_URL}/settings`)
             .then(res => res.json())
             .then(data => {
                 if (data.apiKeys && data.apiKeys.userApiKey) {
@@ -143,7 +167,7 @@ const ChatInterface = () => {
     };
 
     const loadSession = (id) => {
-        fetch(`http://localhost:3000/sessions/${id}`)
+        fetch(`${API_URL}/sessions/${id}`)
             .then(res => res.json())
             .then(data => {
                 // Map backend format (role/content) to frontend format (sender/text)
@@ -162,7 +186,7 @@ const ChatInterface = () => {
     const deleteSession = (id, e) => {
         e.stopPropagation();
         if (window.confirm("Supprimer cette session ?")) {
-            fetch(`http://localhost:3000/sessions/${id}`, { method: 'DELETE' })
+            fetch(`${API_URL}/sessions/${id}`, { method: 'DELETE' })
                 .then(() => loadSessions());
         }
     };
@@ -173,7 +197,7 @@ const ChatInterface = () => {
 
         if (window.confirm("Supprimer ce message ?")) {
             try {
-                const response = await fetch(`http://localhost:3000/sessions/${currentSessionId}/messages/${msgId}`, {
+                const response = await fetch(`${API_URL}/sessions/${currentSessionId}/messages/${msgId}`, {
                     method: 'DELETE'
                 });
                 if (response.ok) {
@@ -203,7 +227,8 @@ const ChatInterface = () => {
 
         try {
             setIsAgentSpeaking(true);
-            const response = await fetch('http://localhost:3000/chat', {
+            const startTime = Date.now(); // Track response time for metrics
+            const response = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -219,6 +244,27 @@ const ChatInterface = () => {
                 }),
             });
             const data = await response.json();
+            const responseTime = Date.now() - startTime; // Calculate response time
+
+            // Track metrics for Training Dashboard - ALL PROVIDERS
+            if (selectedModel) {
+                // Format model name: prefix cloud models with provider for distinction
+                const trackingName = selectedProvider === 'local' 
+                    ? selectedModel 
+                    : `[${selectedProvider.toUpperCase()}] ${selectedModel}`;
+                
+                fetch(`${API_URL}/models/${encodeURIComponent(trackingName)}/track-query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        responseTime,
+                        tokensGenerated: Math.floor((data.reply?.length || 0) / 4),
+                        success: true,
+                        category: selectedPattern ? 'analysis' : null,
+                        qualityScore: null // Could be enhanced with user feedback
+                    })
+                }).catch(err => console.log('[METRICS] Tracking skipped:', err.message));
+            }
 
             if (data.sessionId) {
                 setCurrentSessionId(data.sessionId);
@@ -290,7 +336,7 @@ const ChatInterface = () => {
 
         if (originalQuery) {
             try {
-                await fetch('http://localhost:3000/feedback', {
+                await fetch(`${API_URL}/feedback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ originalQuery, wrongResponse, correction: correctionText })
@@ -322,7 +368,7 @@ const ChatInterface = () => {
         const computeMode = isLocal ? 'local' : 'cloud';
 
         // 1. Persist to Server
-        fetch('http://localhost:3000/settings', {
+        fetch(`${API_URL}/settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -343,52 +389,62 @@ const ChatInterface = () => {
         <div className="flex h-full w-full bg-transparent text-cyan-300 font-mono overflow-hidden">
             {/* SIDEBAR */}
             <div className="w-64 bg-black border-r border-cyan-900 flex flex-col">
-                <div className="p-6 pt-12 border-b border-cyan-900 flex justify-center items-center"> {/* Added pt-12 to push avatar down */}
-                    <div className="">
-                        <Avatar isSpeaking={isAgentSpeaking} size="w-32 h-32" />
+                <div className="p-4 border-b border-cyan-900 flex justify-center items-center">
+                    <div className="w-24 h-24 max-w-[96px] max-h-[96px]">
+                        <Avatar isSpeaking={isAgentSpeaking} size="w-full h-full" />
                     </div>
                 </div>
 
-                {/* Navigation */}
+                {/* Social Psychology Training - Social Media Links */}
                 <div className="p-2 space-y-1">
-                    <button
-                        onClick={() => setCurrentView('chat')}
-                        className={`w-full flex items-center gap-3 p-3 rounded transition-all ${currentView === 'chat' ? 'bg-cyan-900/50 text-white' : 'hover:bg-cyan-900/20 text-gray-400'}`}
+                    <div className="text-xs uppercase tracking-widest text-gray-500 px-3 py-2 mb-2">
+                        Réseaux Sociaux
+                    </div>
+                    <a
+                        href="https://www.facebook.com/mike.g.guillet"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-blue-900/30 text-gray-400 hover:text-blue-400 group"
                     >
-                        <MessageSquare size={18} />
-                        <span>Opérations</span>
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('dashboard')}
-                        className={`w-full flex items-center gap-3 p-3 rounded transition-all ${currentView === 'dashboard' ? 'bg-cyan-900/50 text-white' : 'hover:bg-cyan-900/20 text-gray-400'}`}
+                        <Facebook size={18} className="group-hover:scale-110 transition-transform" />
+                        <span>Facebook</span>
+                    </a>
+                    <a
+                        href="https://x.com/guillet_mike"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-gray-800/50 text-gray-400 hover:text-white group"
                     >
-                        <LayoutDashboard size={18} />
-                        <span>Finance QG</span>
-                    </button>
-
-                    <button
-                        onClick={() => setCurrentView('space')}
-                        className={`w-full flex items-center gap-3 p-3 rounded transition-all ${currentView === 'space' ? 'bg-cyan-900/50 text-white' : 'hover:bg-cyan-900/20 text-gray-400'}`}
+                        <Twitter size={18} className="group-hover:scale-110 transition-transform" />
+                        <span>X (Twitter)</span>
+                    </a>
+                    <a
+                        href="https://www.youtube.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-red-900/30 text-gray-400 hover:text-red-400 group"
                     >
-                        <Telescope size={18} />
-                        <span>Space Monitor</span>
-                    </button>
-
-                    <button
-                        onClick={() => setCurrentView('project')}
-                        className={`w-full flex items-center gap-3 p-3 rounded transition-all ${currentView === 'project' ? 'bg-cyan-900/50 text-white' : 'hover:bg-cyan-900/20 text-gray-400'}`}
+                        <Youtube size={18} className="group-hover:scale-110 transition-transform" />
+                        <span>YouTube</span>
+                    </a>
+                    <a
+                        href="https://www.instagram.com/mikegauthierguillet/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-pink-800/30 text-gray-400 hover:text-pink-300 group"
                     >
-                        <Briefcase size={18} />
-                        <span>Gestion Projet</span>
-                    </button>
-
-                    <button
-                        onClick={() => setLibraryOpen(true)}
-                        className={`w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-cyan-900/20 text-gray-400 hover:text-cyan-300`}
+                        <Instagram size={18} className="group-hover:scale-110 transition-transform" />
+                        <span>Instagram</span>
+                    </a>
+                    <a
+                        href="https://www.linkedin.com/in/micha%C3%ABl-gauthier-guillet-2141b8198/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-blue-800/30 text-gray-400 hover:text-blue-300 group"
                     >
-                        <BookOpen size={18} />
-                        <span>Bibliothèque Fabric</span>
-                    </button>
+                        <Linkedin size={18} className="group-hover:scale-110 transition-transform" />
+                        <span>LinkedIn</span>
+                    </a>
                 </div>
 
                 {/* Sessions List */}
@@ -423,7 +479,11 @@ const ChatInterface = () => {
 
                 {/* Footer Controls */}
                 <div className="p-4 border-t border-cyan-900 bg-black/50">
-                    {/* GoogleAuthPanel removed as per user request */}
+                    {/* Google Accounts Panel */}
+                    <div className="mb-2">
+                        <span className="text-xs text-gray-500 uppercase tracking-widest">Comptes Google</span>
+                        <GoogleAuthPanel />
+                    </div>
                     <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
                         <span>v1.2.0</span>
                         <div className="flex gap-2">
@@ -492,13 +552,25 @@ const ChatInterface = () => {
 
                 {/* CONDITIONAL RENDER: CHAT or DASHBOARD or SPACE */}
                 {currentView === 'dashboard' ? (
-                    <Dashboard />
+                    <div className="flex-1 overflow-hidden">
+                        <Dashboard />
+                    </div>
                 ) : currentView === 'space' ? (
-                    <SpaceDashboard />
+                    <div className="flex-1 overflow-hidden">
+                        <SpaceDashboard />
+                    </div>
                 ) : currentView === 'project' ? (
-                    <ProjectDashboard />
+                    <div className="flex-1 overflow-hidden" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                        <ProjectDashboard />
+                    </div>
                 ) : currentView === 'settings' ? (
-                    <SettingsPage />
+                    <div className="flex-1 overflow-hidden">
+                        <SettingsPage />
+                    </div>
+                ) : currentView === 'training' ? (
+                    <div className="flex-1 overflow-hidden">
+                        <OllamaTrainingDashboard />
+                    </div>
                 ) : (
                     <>
                         {/* Chat History */}
@@ -635,3 +707,4 @@ const ChatInterface = () => {
 };
 
 export default ChatInterface;
+

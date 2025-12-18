@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './PaymentDashboard.css';
-
-const API_URL = 'http://localhost:3000';
+import { API_URL } from './config';
 
 function PaymentDashboard() {
   const [stats, setStats] = useState({
@@ -10,7 +9,7 @@ function PaymentDashboard() {
     total: { revenue: 0, mrr: 0, customers: 0 }
   });
 
-  const loadPaymentStats = async () => {
+  const loadPaymentStats = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/payment/dashboard-stats`);
       const data = await response.json();
@@ -21,13 +20,30 @@ function PaymentDashboard() {
     } catch (error) {
       console.error('Error loading payment stats:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadPaymentStats();
-    // Refresh every 30 seconds
-    const interval = setInterval(loadPaymentStats, 30000);
-    return () => clearInterval(interval);
+    let isMounted = true;
+    
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/payment/dashboard-stats`);
+        const data = await response.json();
+        if (isMounted && data.success) {
+          setStats(data.stats);
+        }
+      } catch (error) {
+        console.error('Error loading payment stats:', error);
+      }
+    };
+    
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const formatCurrency = (amount) => {

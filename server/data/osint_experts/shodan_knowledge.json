@@ -1,0 +1,14 @@
+{
+  "interactions": 6,
+  "learned": [],
+  "investigations": [],
+  "successfulTechniques": [],
+  "commonQueries": {
+    "analyze 1.1.1.1": 1,
+    "objectif: identify the infrastructure public of go": 1,
+    "objectif: dresser une cartographie des surfaces ex": 1,
+    "objectif: gather information about the target doma": 1,
+    "objectif: gather information about the dartai proj": 1,
+    "objectif: gather information about the target repo": 1
+  }
+}

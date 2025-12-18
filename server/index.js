@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -15,7 +15,14 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Auth Middleware
+// ============================================
+// AUTH ROUTES (Public - No middleware required)
+// Must be BEFORE authMiddleware to allow login/register
+// ============================================
+const authRoutes = require('./auth_routes');
+app.use('/auth', authRoutes);
+
+// Auth Middleware (Applied to all routes AFTER auth routes)
 const { authMiddleware, requireTier, requireFeature } = require('./middleware/auth');
 const userService = require('./user_service');
 app.use(authMiddleware); // Apply to all routes
@@ -42,15 +49,20 @@ app.use('/api/payment', paymentRoutes);
 const paymentDashboardRoutes = require('./payment_dashboard_routes');
 app.use('/api/payment', paymentDashboardRoutes);
 
+// Dart AI Routes (AI-Powered Project Management)
+const dartRoutes = require('./routes/dart');
+app.use('/api/dart', dartRoutes);
+
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
 const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
 const ACCOUNTS = [
+    'mikegauthierguillet@gmail.com',  // Priorité
     'th3thirty3@gmail.com',
-    'mgauthierguillet@gmail.com',
-    'mikegauthierguillet@gmail.com'
+    'mgauthierguillet@gmail.com'
 ];
 
 // Model Configuration
@@ -134,6 +146,11 @@ const styleService = new StyleService();
 const OsintService = require('./osint_service');
 const osintService = new OsintService();
 
+// Initialize Shodan Service (Cybersecurity Training Data)
+const ShodanService = require('./shodan_service');
+const shodanService = new ShodanService();
+console.log('[SYSTEM] Shodan Service initialized (API training integration)');
+
 // Initialize Socket Service
 const SocketService = require('./socket_service');
 const socketService = new SocketService();
@@ -148,6 +165,46 @@ const visionService = new VisionService(llmService);
 const KeelClipAnalyzer = require('./keelclip_analyzer');
 const keelclipAnalyzer = new KeelClipAnalyzer(llmService);
 
+// Initialize Model Metrics Service (Training Dashboard)
+const ModelMetricsService = require('./model_metrics_service');
+const modelMetricsService = new ModelMetricsService();
+modelMetricsService.setMCPService(mcpService);
+llmService.setModelMetricsService(modelMetricsService); // Connect for AnythingLLM metrics tracking
+console.log('[SYSTEM] Model Metrics Service initialized (5s refresh, hourly benchmarks)');
+
+// Initialize Training Commentary Service (LLM real-time analysis)
+const TrainingCommentaryService = require('./training_commentary_service');
+const trainingCommentaryService = new TrainingCommentaryService();
+console.log('[SYSTEM] Training Commentary Service initialized (Mistral, FR, email archive)');
+
+// Initialize Real Training Service (intensive model training)
+const RealTrainingService = require('./real_training_service');
+const realTrainingService = new RealTrainingService(modelMetricsService, llmService, socketService);
+realTrainingService.setShodanService(shodanService); // Connect Shodan for real-world training data
+const realTrainingRoutes = require('./real_training_routes');
+realTrainingRoutes.setRealTrainingService(realTrainingService);
+realTrainingRoutes.setCommentaryService(trainingCommentaryService);
+
+// Initialize Cloud Model Optimizer Service (Cloud to Local optimization)
+const CloudModelOptimizerService = require('./cloud_model_optimizer');
+const cloudOptimizerRoutes = require('./cloud_optimizer_routes');
+const cloudModelOptimizer = new CloudModelOptimizerService(
+    llmService,
+    modelMetricsService,
+    llmService.anythingLLMWrapper
+);
+cloudOptimizerRoutes.setCloudOptimizer(cloudModelOptimizer);
+// Cloud Optimizer - runs every 1 hour (reduced from 30 min)
+cloudModelOptimizer.startAutoOptimization(60);
+
+
+// Initialize Agent Director Service (Th3 Thirty3 Manager)
+const AgentDirectorService = require('./agent_director_service');
+const agentDirectorRoutes = require('./agent_director_routes');
+const agentDirector = new AgentDirectorService(llmService, llmService.anythingLLMWrapper);
+agentDirectorRoutes.setAgentDirector(agentDirector);
+console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersécurité, OSINT, Agent Thirty3');
+console.log('[SYSTEM] Real Training Service initialized (Shodan + model training)');
 
 
 // Helper: Inject File Content (Delegated to ContextService)
@@ -312,6 +369,132 @@ app.get('/models', async (req, res) => {
     }
 });
 
+// Sync all Ollama models with metrics system
+app.post('/models/sync-ollama', async (req, res) => {
+    try {
+        // Fetch all Ollama models
+        const ollamaUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+        const response = await fetch(`${ollamaUrl}/api/tags`);
+        const data = await response.json();
+        const models = (data.models || [])
+            .map(m => m.name)
+            .filter(n => !n.includes('embed'));
+        
+        // Initialize metrics for each model
+        for (const modelName of models) {
+            modelMetricsService.getOrCreateModelMetrics(modelName);
+        }
+        
+        console.log('[METRICS] Synced ' + models.length + ' Ollama models');
+        res.json({ 
+            success: true, 
+            message: 'Models synced with metrics',
+            models: models,
+            count: models.length 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Model Metrics Endpoints (Training Dashboard)
+app.get('/models/metrics', (req, res) => {
+    try {
+        const metrics = modelMetricsService.getAllMetrics();
+        res.json(metrics);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// DELETE model metrics
+app.delete('/models/:name/metrics', (req, res) => {
+    try {
+        const modelName = req.params.name;
+        const result = modelMetricsService.deleteModelMetrics(modelName);
+        if (result) {
+            res.json({ success: true, message: 'Metrics deleted for ' + modelName });
+        } else {
+            res.status(404).json({ success: false, error: 'Model not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.get('/models/:name/metrics', (req, res) => {
+    try {
+        const metrics = modelMetricsService.getModelMetrics(req.params.name);
+        if (metrics) {
+            res.json(metrics);
+        } else {
+            res.status(404).json({ error: 'Model metrics not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/models/:name/benchmark', async (req, res) => {
+    try {
+        const results = await modelMetricsService.runBenchmark(req.params.name, llmService);
+        res.json({ success: true, results });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Track query for metrics (called from chat endpoint)
+app.post('/models/:name/track-query', (req, res) => {
+    try {
+        const { responseTime, tokensGenerated, success, category, qualityScore } = req.body;
+        const model = modelMetricsService.recordQuery(req.params.name, {
+            responseTime,
+            tokensGenerated,
+            success,
+            category,
+            qualityScore
+        });
+        res.json({ success: true, cognitiveScore: model.cognitive.overallScore });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Training Commentary Endpoints (LLM real-time analysis)
+app.get('/training/commentary', (req, res) => {
+    try {
+        const recent = trainingCommentaryService.getRecentCommentaries(10);
+        const last = trainingCommentaryService.getLastCommentary();
+        res.json({ success: true, recent, last });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/training/commentary/trigger', async (req, res) => {
+    try {
+        const { modelName } = req.body;
+        const commentary = await trainingCommentaryService.triggerCommentary(modelName);
+        if (commentary) {
+            res.json({ success: true, commentary });
+        } else {
+            res.status(500).json({ error: 'Failed to generate commentary' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/training/commentary/archive', async (req, res) => {
+    try {
+        const result = await trainingCommentaryService.archiveToEmail();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Ingest Endpoint
 app.post('/ingest', async (req, res) => {
     const vaultPath = process.env.OBSIDIAN_VAULT_PATH;
@@ -373,6 +556,17 @@ app.get('/google/calendar', async (req, res) => {
 });
 
 app.get('/google/emails', async (req, res) => {
+    const email = req.query.email || ACCOUNTS[0];
+    try {
+        const emails = await googleService.getUnreadEmails(email);
+        res.json({ emails });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Alias: /google/mail → /google/emails (for API consistency)
+app.get('/google/mail', async (req, res) => {
     const email = req.query.email || ACCOUNTS[0];
     try {
         const emails = await googleService.getUnreadEmails(email);
@@ -1013,12 +1207,72 @@ app.use('/api/dashboard', kpiDashboardRoutes);
 const torRoutes = require('./tor_routes');
 app.use('/api/tor', torRoutes);
 
+// Real Training Routes (intensive model training sessions)
+app.use('/api/real-training', realTrainingRoutes);
+app.use('/api/cloud-optimizer', cloudOptimizerRoutes);
+app.use('/api/director', agentDirectorRoutes);
+
+// Shodan Routes (Cybersecurity Training & OSINT)
+const shodanRoutes = require('./shodan_routes')(shodanService, modelMetricsService, llmService);
+app.use('/api/shodan', shodanRoutes);
+console.log('[SYSTEM] Shodan routes mounted at /api/shodan');
+
+// VPN Automation Routes (Connection, Rotation, Health Check)
+const vpnRoutes = require('./vpn_routes');
+app.use('/api/vpn', vpnRoutes);
+console.log('[SYSTEM] VPN routes mounted at /api/vpn');
+
+// Network Failover Routes (RISK-006 Mitigation - Cloud/Local failover)
+const networkRoutes = require('./network_routes');
+app.use('/api/network', networkRoutes);
+console.log('[SYSTEM] Network Failover routes mounted at /api/network (RISK-006)');
+
+// Server Logs Routes (RISK-006 - Internal Console Display)
+const logsRoutes = require('./logs_routes');
+app.use('/api/logs', logsRoutes);
+console.log('[SYSTEM] Logs routes mounted at /api/logs (Internal Console)');
+
+
+// Initialize Socket.io with HTTP server
+socketService.initialize(server);
+
+// Connect logs routes to socket service for real-time streaming
+if (logsRoutes.setSocketService) {
+    logsRoutes.setSocketService(socketService);
+    console.log('[SYSTEM] Logs connected to Socket.io for real-time streaming');
+}
 
 // Start Server
-server.listen(port, () => {
+server.listen(port, async () => {
     console.log(`Server running on port ${port}`);
     console.log(`System ready. Identity: ${IDENTITY.name}`);
+    
+    // Automatic Tor Verification at Startup
+    try {
+        const torStartupCheck = require('./tor_startup_check');
+        console.log('\n[SYSTEM] Running automatic Tor verification...');
+        const torResult = await torStartupCheck.performStartupCheck();
+        
+        if (torResult.isTor) {
+            console.log('[SYSTEM] ✅ Tor is ACTIVE and VERIFIED');
+            console.log(`[SYSTEM] 🧅 Exit IP: ${torResult.ip}`);
+        } else if (torResult.portOpen) {
+            console.log('[SYSTEM] ⚠️ Port 9050 active but NOT connected to Tor network');
+            console.log('[SYSTEM] 💡 This may be Tor Browser - for best results use standalone tor.exe');
+        } else {
+            console.log('[SYSTEM] ⚠️ Tor not available - OSINT requests will use direct connection');
+        }
+    } catch (error) {
+        console.log('[SYSTEM] ⚠️ Tor check skipped:', error.message);
+    }
 });
+
+
+
+
+
+
+
 
 
 

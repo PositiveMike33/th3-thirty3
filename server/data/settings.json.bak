@@ -1,0 +1,22 @@
+{
+  "darkMode": true,
+  "autoCorrect": true,
+  "computeMode": "cloud",
+  "reflectionMode": "ultra",
+  "socials": {
+    "facebook": false,
+    "instagram": false,
+    "x": false,
+    "telegram": false
+  },
+  "apiKeys": {
+    "openai": "",
+    "anthropic": "",
+    "perplexity": "",
+    "anythingllm_url": "http://localhost:3001/api/v1",
+    "anythingllm_key": "N1NP3NN-DH3MB05-J9CRN92-27SFYS9",
+    "pieces_host": "http://localhost:39300",
+    "gemini": "AQ.Ab8RN6Kmd-2NTTLugcuZmmL6Kyc8kS0yS3eH8xTiSX20uAfgPw"
+  },
+  "themeMode": "dark"
+}

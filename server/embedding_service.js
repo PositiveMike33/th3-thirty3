@@ -1,8 +1,12 @@
 /**
  * HYBRID EMBEDDING SERVICE
  * Supports multiple embedding providers with automatic fallback
- * - Primary: Gemini (fast, cloud-based)
- * - Fallback: nomic-embed-text via Ollama (local, offline)
+ * 
+ * PRIORITY ORDER FOR LOCAL WORK:
+ * 1. nomic-embed-text via Ollama (LOCAL FIRST for offline capability)
+ * 2. Gemini (cloud fallback when online)
+ * 
+ * When working locally, nomic-embed-text is ALWAYS the first choice
  */
 
 const { Ollama } = require('ollama');
@@ -10,153 +14,194 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 class EmbeddingService {
     constructor() {
-        this.ollama = new Ollama();
-        this.gemini = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
-        this.cache = new Map(); // Simple in-memory cache
+        this.ollama = new Ollama({ host: 'http://localhost:11434' });
+        this.gemini = process.env.GEMINI_API_KEY 
+            ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) 
+            : null;
+        
+        // Cache for embeddings (reduces API calls)
+        this.cache = new Map();
+        this.maxCacheSize = 1000;
+        
+        // Statistics
         this.stats = {
+            ollama_success: 0,
+            ollama_failures: 0,
             gemini_success: 0,
             gemini_failures: 0,
-            ollama_success: 0,
-            ollama_failures: 0
+            cache_hits: 0
         };
+        
+        // Default to local mode
+        this.preferLocal = true;
+        
+        console.log('[EMBEDDING] Service initialized');
+        console.log('[EMBEDDING] Local priority: nomic-embed-text');
+        console.log('[EMBEDDING] Gemini available:', !!this.gemini);
     }
 
     /**
-     * Generate embeddings with automatic provider selection
-     * @param {string|string[]} text - Text or array of texts to embed
-     * @param {string} preferredProvider - 'gemini', 'ollama', or 'auto' (default)
+     * Set preference for local or cloud embeddings
+     */
+    setPreference(preferLocal = true) {
+        this.preferLocal = preferLocal;
+        console.log(`[EMBEDDING] Preference set to: ${preferLocal ? 'LOCAL (nomic)' : 'CLOUD (gemini)'}`);
+    }
+
+    /**
+     * Main embed function with automatic provider selection
+     * @param {string|string[]} texts - Text(s) to embed
+     * @param {string} preferredProvider - 'ollama', 'gemini', or 'auto' (default)
      * @returns {Promise<number[]|number[][]>} Embedding vector(s)
      */
-    async embed(text, preferredProvider = 'auto') {
-        const isArray = Array.isArray(text);
-        const texts = isArray ? text : [text];
-
+    async embed(texts, preferredProvider = 'auto') {
+        const isArray = Array.isArray(texts);
+        const textArray = isArray ? texts : [texts];
+        
         // Check cache first
-        const cacheKey = JSON.stringify({ texts, provider: preferredProvider });
+        const cacheKey = JSON.stringify({ texts: textArray, provider: preferredProvider });
         if (this.cache.has(cacheKey)) {
+            this.stats.cache_hits++;
             console.log('[EMBEDDING] Cache hit');
-            return this.cache.get(cacheKey);
+            const result = this.cache.get(cacheKey);
+            return isArray ? result : result[0];
         }
-
-        let result;
-
-        if (preferredProvider === 'auto') {
-            // Try Gemini first (faster), fallback to Ollama
-            try {
-                result = await this._embedWithGemini(texts);
-                this.stats.gemini_success++;
-            } catch (geminiError) {
-                console.log(`[EMBEDDING] Gemini failed: ${geminiError.message}, falling back to Ollama...`);
-                this.stats.gemini_failures++;
+        
+        let result = null;
+        
+        // Determine provider order based on preference
+        if (preferredProvider === 'ollama') {
+            result = await this._embedWithOllama(textArray);
+        } else if (preferredProvider === 'gemini') {
+            result = await this._embedWithGemini(textArray);
+        } else {
+            // Auto mode: LOCAL FIRST (nomic), then Gemini
+            if (this.preferLocal) {
+                // Try Ollama (nomic) first
                 try {
-                    result = await this._embedWithOllama(texts);
+                    result = await this._embedWithOllama(textArray);
                     this.stats.ollama_success++;
                 } catch (ollamaError) {
+                    console.warn(`[EMBEDDING] Ollama failed: ${ollamaError.message}, trying Gemini...`);
                     this.stats.ollama_failures++;
-                    throw new Error(`All embedding providers failed. Gemini: ${geminiError.message}, Ollama: ${ollamaError.message}`);
+                    
+                    // Fallback to Gemini
+                    if (this.gemini) {
+                        try {
+                            result = await this._embedWithGemini(textArray);
+                            this.stats.gemini_success++;
+                        } catch (geminiError) {
+                            console.error(`[EMBEDDING] Both providers failed. Ollama: ${ollamaError.message}, Gemini: ${geminiError.message}`);
+                            this.stats.gemini_failures++;
+                            throw new Error('All embedding providers failed');
+                        }
+                    } else {
+                        throw ollamaError;
+                    }
+                }
+            } else {
+                // Cloud first (Gemini), then Ollama
+                if (this.gemini) {
+                    try {
+                        result = await this._embedWithGemini(textArray);
+                        this.stats.gemini_success++;
+                    } catch (geminiError) {
+                        console.warn(`[EMBEDDING] Gemini failed: ${geminiError.message}, falling back to Ollama...`);
+                        this.stats.gemini_failures++;
+                        
+                        try {
+                            result = await this._embedWithOllama(textArray);
+                            this.stats.ollama_success++;
+                        } catch (ollamaError) {
+                            this.stats.ollama_failures++;
+                            throw new Error('All embedding providers failed');
+                        }
+                    }
+                } else {
+                    // No Gemini, use Ollama
+                    result = await this._embedWithOllama(textArray);
+                    this.stats.ollama_success++;
                 }
             }
-        } else if (preferredProvider === 'gemini') {
-            result = await this._embedWithGemini(texts);
-            this.stats.gemini_success++;
-        } else if (preferredProvider === 'ollama') {
-            result = await this._embedWithOllama(texts);
-            this.stats.ollama_success++;
-        } else {
-            throw new Error(`Unknown embedding provider: ${preferredProvider}`);
         }
-
+        
         // Cache the result
         this.cache.set(cacheKey, result);
-        if (this.cache.size > 100) {
-            // Simple LRU: delete oldest entry
+        
+        // Manage cache size
+        if (this.cache.size > this.maxCacheSize) {
             const firstKey = this.cache.keys().next().value;
             this.cache.delete(firstKey);
         }
-
+        
         return isArray ? result : result[0];
     }
 
     /**
-     * Generate embeddings using Gemini
-     */
-    async _embedWithGemini(texts) {
-        if (!this.gemini) {
-            throw new Error('Gemini API key not configured');
-        }
-
-        const model = this.gemini.getGenerativeModel({ model: 'text-embedding-004' });
-        const embeddings = [];
-
-        for (const text of texts) {
-            const result = await model.embedContent(text);
-            embeddings.push(result.embedding.values);
-        }
-
-        return embeddings;
-    }
-
-    /**
-     * Generate embeddings using Ollama (nomic-embed-text)
+     * Embed using Ollama with nomic-embed-text (LOCAL)
+     * @private
      */
     async _embedWithOllama(texts) {
+        console.log(`[EMBEDDING] Using nomic-embed-text (local) for ${texts.length} text(s)`);
+        
         const embeddings = [];
-
+        
         for (const text of texts) {
             const response = await this.ollama.embeddings({
-                model: 'nomic-embed-text',
+                model: 'nomic-embed-text:latest',
                 prompt: text
             });
             embeddings.push(response.embedding);
         }
-
+        
+        console.log(`[EMBEDDING] ✅ nomic-embed-text completed (${embeddings.length} embeddings)`);
         return embeddings;
     }
 
     /**
-     * Calculate cosine similarity between two embeddings
+     * Embed using Gemini (CLOUD)
+     * @private
      */
-    cosineSimilarity(embeddingA, embeddingB) {
-        if (embeddingA.length !== embeddingB.length) {
-            throw new Error('Embeddings must have the same dimension');
+    async _embedWithGemini(texts) {
+        if (!this.gemini) {
+            throw new Error('Gemini not configured (missing GEMINI_API_KEY)');
         }
-
-        let dotProduct = 0;
-        let normA = 0;
-        let normB = 0;
-
-        for (let i = 0; i < embeddingA.length; i++) {
-            dotProduct += embeddingA[i] * embeddingB[i];
-            normA += embeddingA[i] * embeddingA[i];
-            normB += embeddingB[i] * embeddingB[i];
+        
+        console.log(`[EMBEDDING] Using Gemini (cloud) for ${texts.length} text(s)`);
+        
+        const model = this.gemini.getGenerativeModel({ model: 'text-embedding-004' });
+        const embeddings = [];
+        
+        for (const text of texts) {
+            const result = await model.embedContent(text);
+            embeddings.push(result.embedding.values);
         }
-
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        
+        console.log(`[EMBEDDING] ✅ Gemini completed (${embeddings.length} embeddings)`);
+        return embeddings;
     }
 
     /**
-     * Find most similar texts from a collection
-     * @param {string} query - Query text
-     * @param {Array<{text: string, metadata?: any}>} documents - Document collection
+     * Semantic search across documents
+     * @param {string} query - Search query
+     * @param {Array<{text: string, ...}>} documents - Documents to search
      * @param {number} topK - Number of results to return
-     * @param {string} provider - Embedding provider to use
+     * @param {string} provider - Embedding provider
      */
-    async findSimilar(query, documents, topK = 5, provider = 'auto') {
-        console.log(`[EMBEDDING] Finding similar documents for query (${documents.length} total)`);
-
+    async semanticSearch(query, documents, topK = 5, provider = 'auto') {
         // Embed query
         const queryEmbedding = await this.embed(query, provider);
-
+        
         // Embed all documents
-        const docTexts = documents.map(d => d.text);
+        const docTexts = documents.map(d => d.text || d.content || String(d));
         const docEmbeddings = await this.embed(docTexts, provider);
-
+        
         // Calculate similarities
         const similarities = docEmbeddings.map((docEmbed, idx) => ({
             ...documents[idx],
             similarity: this.cosineSimilarity(queryEmbedding, docEmbed)
         }));
-
+        
         // Sort and return top K
         return similarities
             .sort((a, b) => b.similarity - a.similarity)
@@ -164,16 +209,40 @@ class EmbeddingService {
     }
 
     /**
+     * Calculate cosine similarity between two vectors
+     */
+    cosineSimilarity(a, b) {
+        if (!a || !b || a.length !== b.length) return 0;
+        
+        let dotProduct = 0;
+        let normA = 0;
+        let normB = 0;
+        
+        for (let i = 0; i < a.length; i++) {
+            dotProduct += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+        
+        const denominator = Math.sqrt(normA) * Math.sqrt(normB);
+        return denominator === 0 ? 0 : dotProduct / denominator;
+    }
+
+    /**
      * Get service statistics
      */
     getStats() {
+        const totalRequests = this.stats.ollama_success + this.stats.ollama_failures +
+                             this.stats.gemini_success + this.stats.gemini_failures;
+        
         return {
             ...this.stats,
             cache_size: this.cache.size,
-            total_requests: this.stats.gemini_success + this.stats.gemini_failures + 
-                           this.stats.ollama_success + this.stats.ollama_failures,
+            total_requests: totalRequests,
+            prefer_local: this.preferLocal,
+            ollama_available: true,  // Always assume Ollama is available locally
             gemini_available: !!this.gemini,
-            fallback_rate: this.stats.ollama_success / (this.stats.gemini_failures || 1)
+            primary_provider: this.preferLocal ? 'nomic-embed-text (local)' : 'Gemini (cloud)'
         };
     }
 
@@ -183,6 +252,30 @@ class EmbeddingService {
     clearCache() {
         this.cache.clear();
         console.log('[EMBEDDING] Cache cleared');
+    }
+
+    /**
+     * Test embedding functionality
+     */
+    async test() {
+        try {
+            console.log('[EMBEDDING] Running self-test...');
+            
+            // Test with nomic (local)
+            const localResult = await this.embed('Test embedding with nomic', 'ollama');
+            console.log(`[EMBEDDING] ✅ nomic-embed-text: ${localResult.length} dimensions`);
+            
+            // Test with Gemini if available
+            if (this.gemini) {
+                const cloudResult = await this.embed('Test embedding with Gemini', 'gemini');
+                console.log(`[EMBEDDING] ✅ Gemini: ${cloudResult.length} dimensions`);
+            }
+            
+            return { success: true, stats: this.getStats() };
+        } catch (error) {
+            console.error('[EMBEDDING] Test failed:', error.message);
+            return { success: false, error: error.message };
+        }
     }
 }
 

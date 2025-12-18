@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  kali-tor:
+    build:
+      context: ./kali-tor
+      dockerfile: Dockerfile
+    container_name: th3_kali_tor
+    restart: unless-stopped
+    ports:
+      # TOR SOCKS5 proxy - accessible from host
+      - "9050:9050"
+      # TOR Control port for circuit changes
+      - "9051:9051"
+    environment:
+      - TZ=America/Montreal
+    volumes:
+      # Persist TOR data
+      - tor_data:/var/lib/tor
+      # Mount scripts for custom tools
+      - ./scripts:/opt/th3thirty3/scripts:ro
+    cap_add:
+      # Required for some network operations
+      - NET_ADMIN
+    networks:
+      - th3_network
+    healthcheck:
+      test: ["CMD", "curl", "-s", "--socks5", "localhost:9050", "https://check.torproject.org/api/ip"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: th3_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - th3_network
+
+  ollama-proxy:
+    build:
+      context: ../server/ollama_proxy_server
+      dockerfile: Dockerfile
+    container_name: th3_ollama_proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PROXY_PORT=8080
+      # Connect to Ollama on host machine
+      - OLLAMA_SERVERS=http://host.docker.internal:11434
+      - DATABASE_URL=sqlite+aiosqlite:///./data/ollama_proxy.db
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=Th3Thirty3!
+      - SECRET_KEY=th3thirty3_secure_proxy_key_2024_production
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOG_LEVEL=info
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW_MINUTES=1
+    volumes:
+      # Persist database outside container
+      - ollama_proxy_data:/home/app/data
+    depends_on:
+      - redis
+    networks:
+      - th3_network
+    extra_hosts:
+      # Allow container to reach host's Ollama
+      - "host.docker.internal:host-gateway"
+
+networks:
+  th3_network:
+    driver: bridge
+
+volumes:
+  tor_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_proxy_data:
+    driver: local

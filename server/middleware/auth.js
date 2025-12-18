@@ -1,43 +1,52 @@
 const userService = require('../user_service');
 const SubscriptionService = require('../subscription_service');
+const authService = require('../auth_service');
 
 const subscriptionService = new SubscriptionService();
 
 const authMiddleware = (req, res, next) => {
-    // 1. Get Key from Header
-    const apiKey = req.headers['x-api-key'];
-
-    // 2. Bypass for Localhost/Dev (Optional - for now we enforce it to test)
-    // If no key provided, assume it's the Admin (for backward compatibility during dev)
-    // BUT for the audit, we want to be strict.
-    // Let's implement a "Dev Mode Fallback" if env var is set, otherwise require key.
-
-    if (!apiKey) {
-        // FALLBACK: If running locally and no key, default to Admin for convenience?
-        // NO. The user wants "SaaS Structure". We must enforce keys.
-        // However, the Frontend doesn't send keys yet.
-        // So for now, we will default to a "Guest/Initiate" tier if no key is present,
-        // OR default to Admin if it's localhost to not break the UI immediately.
-
-        // DECISION: Default to Admin for localhost to keep the app working for the user immediately.
-        // We will test the restrictions using curl/scripts with specific keys.
-        const adminUser = userService.validateKey('sk-ADMIN-TH3-THIRTY3-MASTER-KEY');
-        if (adminUser) {
-            req.user = adminUser;
-            return next();
+    // 1. Try JWT Token first (from Frontend AuthContext)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+            const token = authHeader.split(' ')[1];
+            const user = authService.verifyToken(token);
+            if (user) {
+                // Add tier info if not present (for backward compatibility)
+                req.user = {
+                    ...user,
+                    tier: user.tier || 'initiate'
+                };
+                return next();
+            }
+        } catch (err) {
+            console.warn('[AUTH] JWT verification failed:', err.message);
+            // Continue to try API Key
         }
     }
 
-    // 3. Validate Key
-    const user = userService.validateKey(apiKey);
-
-    if (!user) {
+    // 2. Try API Key (x-api-key header)
+    const apiKey = req.headers['x-api-key'];
+    
+    if (apiKey) {
+        const user = userService.validateKey(apiKey);
+        if (user) {
+            req.user = user;
+            return next();
+        }
         return res.status(401).json({ error: "Unauthorized: Invalid API Key" });
     }
 
-    // 4. Attach User to Request
-    req.user = user;
-    next();
+    // 3. Fallback: Default to Admin for localhost development
+    // This keeps the app working during development without requiring API keys everywhere
+    const adminUser = userService.validateKey('sk-ADMIN-TH3-THIRTY3-MASTER-KEY');
+    if (adminUser) {
+        req.user = adminUser;
+        return next();
+    }
+
+    // 4. No valid authentication found
+    return res.status(401).json({ error: "Unauthorized: No valid authentication provided" });
 };
 
 /**

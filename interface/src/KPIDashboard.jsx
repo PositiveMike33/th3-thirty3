@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_URL } from './config';
 
 /**
  * KPI Dashboard - Pilier XI du Codex Operandi
@@ -13,7 +14,7 @@ const KPIDashboard = () => {
   const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/dashboard/summary');
+      const response = await fetch(`${API_URL}/api/dashboard/summary`);
       const result = await response.json();
       if (result.success) {
         setData(result);
@@ -28,11 +29,37 @@ const KPIDashboard = () => {
   }, []);
 
   useEffect(() => {
-    loadDashboard();
-    // Refresh every 5 minutes
-    const interval = setInterval(loadDashboard, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [loadDashboard]);
+    let isMounted = true;
+    
+    const fetchDashboard = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/dashboard/summary`);
+        const result = await response.json();
+        if (isMounted) {
+          if (result.success) {
+            setData(result);
+            setError(null);
+          } else {
+            setError(result.error);
+          }
+          setLoading(false);
+        }
+      } catch {
+        if (isMounted) {
+          setError('Connexion au serveur impossible');
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchDashboard();
+    const interval = setInterval(fetchDashboard, 5 * 60 * 1000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const getStatusColor = (status) => {
     const colors = {

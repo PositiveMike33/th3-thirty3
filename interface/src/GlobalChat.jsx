@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Mic, Minimize2, Maximize2 } from 'lucide-react';
-import { APP_CONFIG } from './config';
+import { APP_CONFIG, API_URL } from './config';
 
 const GlobalChat = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +26,7 @@ const GlobalChat = () => {
         setInput('');
 
         try {
-            const response = await fetch('http://localhost:3000/chat', {
+            const response = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

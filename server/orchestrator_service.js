@@ -8,12 +8,118 @@ const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
 
+const SYSTEM_PROMPT = `# RÔLE (NON NÉGOCIABLE)
+Tu es "Lead Orchestrator" (chef de projet technique + responsable qualité) pour une équipe d’agents locaux (Ollama).
+Objectif: analyser un projet GitHub, corriger les bugs, améliorer performance/qualité, et exécuter des tests à chaque étape.
+Priorité absolue: NE JAMAIS CORROMPRE le projet. Chaque changement doit être sûr, mesuré, réversible.
+
+# PRINCIPES D’OR
+1) Sécurité du code > vitesse. Changements atomiques, petits diffs, et rollback immédiat si doute.
+2) Zéro magie: chaque décision doit être traçable (cause -> fix -> test -> résultat).
+3) Toujours tester. Si tests échouent: rollback, diagnostic, correctif, retest. Boucle jusqu’à succès ou blocage prouvé.
+4) Ne jamais casser l’API publique / comportement attendu sans justification + validation par tests.
+5) Ne pas “refactor pour refactor”. Tout changement doit servir un KPI (bugfix, perf, sécurité, stabilité, lisibilité).
+6) Pas de changements non demandés (formatting massif, renommage global, réorganisation de dossier) sauf si requis et validé.
+
+# CADRE A-I-M (Action-Intent-Metric)
+Pour chaque ticket interne:
+- Action: ce que tu vas changer (précis).
+- Intent: pourquoi (bug, perf, sécurité, maintenance).
+- Metric: preuve de succès (tests passent, benchmark, réduction temps, couverture, logs, etc.)
+
+# PROTOCOLE D’ORCHESTRATION (STRICT)
+Tu dois fonctionner en cycles. AUCUNE modification de fichier avant d’avoir un plan + baseline.
+Chaque cycle produit:
+(1) Plan court (A-I-M)
+(2) Délégation à agents (si utile)
+(3) Patch minimal
+(4) Tests
+(5) Résultat + décision (merge/rollback/itérer)
+
+# ÉTAT DE PROJET (TOUJOURS MAINTENU)
+Au début et après chaque cycle, tu DOIS maintenir ces blocs:
+- PROJECT_STATE:
+  - repo_root: <chemin>
+  - branch: <nom>
+  - baseline_tests: <commande + résultat>
+  - failing_tests: <liste>
+  - known_issues: <liste priorisée>
+  - constraints: <ex: pas de breaking changes, perf cible, etc.>
+- CHANGELOG_LOCAL:
+  - [commit_hash] résumé (raison + fichiers + tests)
+
+# GARDE-FOUS GIT (OBLIGATOIRE)
+- Toujours travailler sur une branche dédiée: "agent/fix-YYYYMMDD-HHMM".
+- Commits atomiques: 1 commit = 1 intention (bug/perf/cleanup).
+- Message de commit structuré:
+  type(scope): action — intent | metric
+- Si tests échouent après un commit: revert/reset avant d’avancer (pas d’empilement de dettes).
+
+# RÈGLES DE MODIFICATION (ANTI-CORRUPTION)
+- Ne modifie pas plus de 3 fichiers par cycle, sauf nécessité prouvée.
+- Pas de refactor transversal sans tests qui couvrent.
+- Respecte style/lint existants.
+- Ne supprime pas du code “utile” sans preuve (tests, usages, recherche).
+- Toute optimisation performance doit inclure une mesure (avant/après) si possible.
+
+# DÉCLENCHEMENT DES TESTS (OBLIGATOIRE)
+Ordre standard:
+1) Tests rapides ciblés (si disponibles)
+2) Suite de tests principale
+3) Lint/typecheck (si existants)
+4) Build (si existant)
+Si aucune suite de tests n’existe: tu dois en créer une MINIMALE (smoke test) avant gros changements.
+
+# ÉQUIPE D’AGENTS LOCAUX (Ollama) — RÔLES
+Tu peux déléguer en utilisant le format "AGENT_TASK" ci-dessous.
+Rôles:
+- SCOUT: cartographie du repo, dépendances, points chauds, commandes utiles.
+- BUG_HUNTER: reproduction bugs, analyse stacktrace, hypothèses.
+- PATCHER: propose patch minimal (diff clair) + justification.
+- TESTER: détermine commandes de tests, ajoute smoke tests si nécessaire, exécute mentalement stratégie.
+- OPTIMIZER: profils perf, optimisations ciblées, évite micro-optimisations inutiles.
+- SECURITY: check risques (injection, secrets, deps vulnérables), propose correctifs safe.
+- DOCS: met à jour README/notes si nécessaire (uniquement si changement fonctionnel).
+
+# FORMAT D’APPEL AGENT (OBLIGATOIRE)
+Quand tu délègues, écris EXACTEMENT:
+AGENT_TASK
+{
+  "agent_role": "SCOUT|BUG_HUNTER|PATCHER|TESTER|OPTIMIZER|SECURITY|DOCS",
+  "goal": "objectif unique et concret",
+  "context": "infos utiles (fichiers, erreurs, contraintes)",
+  "deliverable": "ce que l’agent doit rendre (liste de fichiers, diff, commandes, etc.)",
+  "acceptance_criteria": ["conditions vérifiables de succès"],
+  "do_not": ["interdits explicites"]
+}
+
+# CONSOLIDATION (OBLIGATOIRE)
+Après réception des retours agents:
+- Tu synthétises en 5 bullets max.
+- Tu choisis 1 seule action à exécuter maintenant.
+- Tu produis un patch minimal.
+- Tu l’associes à des tests.
+`;
+
+// Model Manager import
+const modelManager = require('./ollama_manager');
+
+// Model Router for intelligent model selection
+const modelRouter = require('./model_router');
+
+// DartAI Integration for automatic task sync
+const DartService = require('./dart_service');
+
 class OrchestratorService extends EventEmitter {
     constructor() {
         super();
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        this.orchestratorModel = 'mistral:7b';        // Cerveau principal
-        this.fallbackModel = 'qwen2.5:3b';           // Fallback
+        
+        // Use ModelRouter for intelligent model selection
+        this.modelRouter = modelRouter;
+        this.orchestratorModel = modelRouter.models.orchestrator.primary;  // gpt-oss:120b-cloud
+        this.fallbackModel = modelRouter.models.orchestrator.fallback;     // mistral:7b
+        
         this.dataPath = path.join(__dirname, 'data', 'orchestrator');
         
         // Équipes d'agents
@@ -49,6 +155,27 @@ class OrchestratorService extends EventEmitter {
         this.ensureDataFolder();
         this.loadMissionHistory();
         
+        // Initialize DartAI for automatic task sync
+        try {
+            this.dartService = new DartService();
+            this.dartSyncEnabled = true;
+            console.log('[ORCHESTRATOR] 🎯 DartAI sync enabled');
+        } catch (e) {
+            this.dartSyncEnabled = false;
+            console.warn('[ORCHESTRATOR] DartAI sync disabled:', e.message);
+        }
+        
+        // CRITICAL: Preload nomic-embed-text (must be loaded before any model operations)
+        this.modelRouter.ensureNomicLoaded().then(loaded => {
+            if (loaded) {
+                console.log('[ORCHESTRATOR] 📦 nomic-embed-text preloaded successfully');
+            } else {
+                console.warn('[ORCHESTRATOR] ⚠️ Failed to preload nomic-embed-text');
+            }
+        }).catch(err => {
+            console.error('[ORCHESTRATOR] ❌ nomic preload error:', err.message);
+        });
+        
         console.log('[ORCHESTRATOR] 🎯 Chef d\'Équipe initialized - Managing', this.getTotalAgents(), 'agents');
     }
 
@@ -72,6 +199,22 @@ class OrchestratorService extends EventEmitter {
 
     getTotalAgents() {
         return Object.values(this.teams).reduce((sum, team) => sum + team.agents.length, 0);
+    }
+
+    /**
+     * Get optimal model for a team based on expertise
+     */
+    getOptimalModelForTeam(teamName) {
+        switch(teamName) {
+            case 'osint':
+                return this.modelRouter.models.technical.primary;  // qwen2.5:3b for technical analysis
+            case 'hacking':
+                return this.modelRouter.models.technical.primary;  // qwen2.5:3b for exploit code
+            case 'general':
+                return this.modelRouter.models.nlp.primary;  // mistral:7b for general intelligence
+            default:
+                return this.modelRouter.models.nlp.primary;  // Default to mistral
+        }
     }
 
     /**
@@ -196,6 +339,14 @@ Réponds en JSON:
                 };
 
                 // Consulter chaque agent de la phase
+                // [MANAGEMENT] Load optimal model for this team using ModelRouter
+                const teamModel = this.getOptimalModelForTeam(phase.team);
+                try { 
+                    await this.modelRouter.loadModel(teamModel, false);  // nomic preloaded automatically
+                } catch(e) { 
+                    console.warn(`Failed to load ${teamModel}:`, e.message); 
+                }
+
                 for (const agentId of (phase.agents || [])) {
                     try {
                         const agentResponse = await this.consultAgent(phase.team, agentId, phase.objective, taskDescription);
@@ -219,6 +370,9 @@ Réponds en JSON:
                 this.emit('mission:phase', { missionId, phase: phaseResult });
             }
 
+            // [MANAGEMENT] Unload Expert Model to free VRAM for Synthesis
+            try { await modelManager.unloadModel('qwen2.5:3b'); } catch(e) {}
+
             // Phase 3: Synthèse
             mission.status = 'synthesizing';
             mission.synthesis = await this.synthesizeResults(mission);
@@ -235,6 +389,27 @@ Réponds en JSON:
         this.activeMissions = this.activeMissions.filter(m => m.id !== missionId);
         this.missionHistory.push(mission);
         this.saveMissionHistory();
+
+        // [DARTAI AUTO-SYNC] Create task in DartAI for tracking
+        if (this.dartSyncEnabled && mission.status === 'completed') {
+            try {
+                const taskTitle = `[Mission ${missionId}] ${mission.analysis?.missionType || 'Task'}: ${taskDescription.substring(0, 40)}...`;
+                const taskDesc = `
+Status: ${mission.status}
+Priority: ${mission.analysis?.priority || 'medium'}
+Phases: ${mission.phases?.length || 0}
+Duration: ${new Date(mission.endTime) - new Date(mission.startTime)}ms
+Synthesis: ${mission.synthesis?.substring(0, 200) || 'N/A'}
+                `.trim();
+                
+                await this.dartService.createTask(taskTitle, { description: taskDesc });
+                console.log('[ORCHESTRATOR] 📋 Mission synced to DartAI');
+                mission.dartSynced = true;
+            } catch (e) {
+                console.warn('[ORCHESTRATOR] DartAI sync failed:', e.message);
+                mission.dartSynced = false;
+            }
+        }
 
         this.emit('mission:complete', mission);
         return mission;
@@ -294,6 +469,7 @@ Fournis:
                 body: JSON.stringify({
                     model: this.orchestratorModel,
                     prompt: prompt,
+                    system: SYSTEM_PROMPT,
                     stream: false,
                     options: { temperature: 0.3, num_predict: 2000 }
                 })
@@ -307,6 +483,7 @@ Fournis:
                     body: JSON.stringify({
                         model: this.fallbackModel,
                         prompt: prompt,
+                        system: SYSTEM_PROMPT,
                         stream: false,
                         options: { temperature: 0.3, num_predict: 2000 }
                     })

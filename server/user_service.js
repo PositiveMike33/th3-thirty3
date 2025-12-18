@@ -95,6 +95,33 @@ class UserService {
 
         return allowedTools.includes(toolName);
     }
+    saveUsers() {
+        try {
+            const data = { users: this.users };
+            fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 4));
+            console.log(`[USER] Saved ${this.users.length} users to disk.`);
+            return true;
+        } catch (error) {
+            console.error("[USER] Failed to save users:", error);
+            return false;
+        }
+    }
+
+    updateUserTier(userId, newTier) {
+        const userIndex = this.users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            console.error(`[USER] User not found for update: ${userId}`);
+            return false;
+        }
+
+        const oldTier = this.users[userIndex].tier;
+        this.users[userIndex].tier = newTier;
+        this.users[userIndex].lastUpdated = new Date().toISOString();
+        
+        console.log(`[USER] Upgrading user ${this.users[userIndex].username} (${userId}) from ${oldTier} to ${newTier}`);
+        
+        return this.saveUsers();
+    }
 }
 
 module.exports = new UserService();

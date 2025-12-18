@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from './config';
 
 const CyberTrainingPage = () => {
   const [selectedModule, setSelectedModule] = useState('recon');
@@ -22,14 +23,14 @@ const CyberTrainingPage = () => {
     setAikidoLoading(true);
     setAikidoError(null);
     try {
-      const response = await fetch('http://localhost:3000/api/cyber-training/aikido/summary');
+      const response = await fetch(`${API_URL}/api/cyber-training/aikido/summary`);
       const data = await response.json();
       if (data.error) {
         setAikidoError(data.error);
       } else {
         setAikidoData(data);
       }
-    } catch (error) {
+    } catch {
       setAikidoError('Impossible de se connecter à Aikido. Vérifiez vos credentials.');
     }
     setAikidoLoading(false);
@@ -141,7 +142,7 @@ const CyberTrainingPage = () => {
     setTerminalOutput(prev => prev + `\n> Entraînement module: ${modules[module].title}...\n`);
 
     try {
-      const response = await fetch('http://localhost:3000/api/cyber-training/train', {
+      const response = await fetch(`${API_URL}/api/cyber-training/train`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -166,7 +167,7 @@ const CyberTrainingPage = () => {
     setTerminalOutput(prev => prev + `\n$ ${cmd}\n`);
     
     try {
-      const response = await fetch('http://localhost:3000/api/cyber-training/explain', {
+      const response = await fetch(`${API_URL}/api/cyber-training/explain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command: cmd, workspace: 'team-cybersecurite' })
@@ -176,7 +177,7 @@ const CyberTrainingPage = () => {
       setTerminalOutput(prev => prev + `\n${data.explanation || 'Explication non disponible'}\n`);
       setAgentResponse(data.explanation);
 
-    } catch (error) {
+    } catch {
       setTerminalOutput(prev => prev + `\n[!] Mode offline: ${cmd}\n`);
     }
   };

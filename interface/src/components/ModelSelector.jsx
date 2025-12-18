@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
     const [models, setModels] = useState({ local: [], cloud: [] });
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:3000/models')
+        fetch(`${API_URL}/models`)
             .then(res => res.json())
             .then(data => {
                 setModels(data);

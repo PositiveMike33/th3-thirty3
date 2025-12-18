@@ -3,12 +3,15 @@ const { Ollama } = require('ollama');
 const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
 const AnythingLLMWrapper = require('./anythingllm_wrapper');
+const knowledgeBase = require('./knowledge_base_service');
 
 class LLMService {
     constructor() {
         this.ollama = new Ollama();
         this.socketService = null;
+        this.modelMetricsService = null;
         this.anythingLLMWrapper = new AnythingLLMWrapper();
+        this.knowledgeBase = knowledgeBase; // RAG Knowledge Base
         this.providers = {
             local: { name: 'Local (Ollama)', type: 'local' },
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
@@ -23,16 +26,19 @@ class LLMService {
         this.socketService = socketService;
     }
 
+    setModelMetricsService(modelMetricsService) {
+        this.modelMetricsService = modelMetricsService;
+    }
+
     /**
      * Lists all available models (Local + Cloud + Agents).
      */
     async listModels(computeMode = 'local') {
-        console.log("[LLM] listModels called");
+        // Note: Called frequently by frontend polling, avoid verbose logging
         const models = { local: [], cloud: [] };
 
         // --- LOCAL MODE (Always Available) ---
         // 1. Ollama
-        console.log("[LLM] Checking Ollama...");
         try {
             // Wrap Ollama call in a timeout promise
             const list = await Promise.race([
@@ -73,10 +79,30 @@ class LLMService {
             //     models.cloud.push({ id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'gemini' });
             // }
 
-            // OpenAI
+            // OpenAI - All Available Models
             if (process.env.OPENAI_API_KEY) {
-                models.cloud.push({ id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' });
-                models.cloud.push({ id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' });
+                // GPT-4o Series
+                models.cloud.push({ id: 'gpt-4o', name: '🟢 GPT-4o (Flagship)', provider: 'openai' });
+                models.cloud.push({ id: 'gpt-4o-mini', name: '🟢 GPT-4o Mini', provider: 'openai' });
+                models.cloud.push({ id: 'chatgpt-4o-latest', name: '🟢 ChatGPT-4o Latest', provider: 'openai' });
+                
+                // O1 Reasoning Series
+                models.cloud.push({ id: 'o1', name: '🧠 O1 (Reasoning)', provider: 'openai' });
+                models.cloud.push({ id: 'o1-mini', name: '🧠 O1 Mini', provider: 'openai' });
+                models.cloud.push({ id: 'o1-preview', name: '🧠 O1 Preview', provider: 'openai' });
+                
+                // O3 Series (Latest)
+                models.cloud.push({ id: 'o3-mini', name: '⚡ O3 Mini (Fast)', provider: 'openai' });
+                
+                // GPT-4 Turbo
+                models.cloud.push({ id: 'gpt-4-turbo', name: '🔵 GPT-4 Turbo', provider: 'openai' });
+                models.cloud.push({ id: 'gpt-4-turbo-preview', name: '🔵 GPT-4 Turbo Preview', provider: 'openai' });
+                
+                // GPT-4 Classic
+                models.cloud.push({ id: 'gpt-4', name: '🔵 GPT-4', provider: 'openai' });
+                
+                // GPT-3.5
+                models.cloud.push({ id: 'gpt-3.5-turbo', name: '⚪ GPT-3.5 Turbo', provider: 'openai' });
             }
 
             // Claude (Anthropic)
@@ -94,9 +120,11 @@ class LLMService {
             }
 
             // Perplexity
-            // if (process.env.PERPLEXITY_API_KEY) {
-            //     models.cloud.push({ id: 'llama-3.1-sonar-large-128k-online', name: 'Perplexity Sonar Large', provider: 'perplexity' });
-            // }
+            if (process.env.PERPLEXITY_API_KEY) {
+                models.cloud.push({ id: 'sonar', name: '🔍 Perplexity Sonar', provider: 'perplexity' });
+                models.cloud.push({ id: 'sonar-pro', name: '🔍 Perplexity Sonar Pro', provider: 'perplexity' });
+                models.cloud.push({ id: 'sonar-reasoning', name: '🧠 Perplexity Sonar Reasoning', provider: 'perplexity' });
+            }
 
             // AnythingLLM (Agents)
             if (process.env.ANYTHING_LLM_URL && process.env.ANYTHING_LLM_KEY) {
@@ -175,8 +203,17 @@ class LLMService {
 
     async generateResponse(prompt, imageBase64, providerId, modelId, systemPrompt) {
         console.log(`[LLM] Request: Provider=${providerId}, Model=${modelId}`);
+        
+        // RAG AUGMENTATION: Inject relevant knowledge context
+        let augmentedPrompt = prompt;
+        const ragContext = this.knowledgeBase.buildRAGContext(prompt);
+        if (ragContext) {
+            augmentedPrompt = ragContext + '\n\nUSER QUERY: ' + prompt;
+            console.log('[LLM] RAG context injected (knowledge base hit)');
+        }
+        
         if (this.socketService) {
-            this.socketService.emitAgentStart({ provider: providerId, model: modelId, prompt });
+            this.socketService.emitAgentStart({ provider: providerId, model: modelId, prompt: augmentedPrompt });
             this.socketService.emitAgentStatus("Thinking...");
         }
 
@@ -193,30 +230,30 @@ class LLMService {
             switch (providerId) {
 
                 case 'openai':
-                    response = await this.generateOpenAIResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateOpenAIResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
                 case 'claude':
-                    response = await this.generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateClaudeResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
                 case 'groq':
-                    response = await this.generateGroqResponse(prompt, modelId, systemPrompt);
+                    response = await this.generateGroqResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'perplexity':
-                    response = await this.generatePerplexityResponse(prompt, modelId, systemPrompt);
+                    response = await this.generatePerplexityResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'openrouter':
-                    response = await this.generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateOpenRouterResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
                 case 'anythingllm':
                 case 'cloud': // Force Cloud mode to AnythingLLM
-                    response = await this.generateAnythingLLMResponse(prompt, modelId, systemPrompt);
+                    response = await this.generateAnythingLLMResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'lmstudio':
-                    response = await this.generateLMStudioResponse(prompt, modelId, systemPrompt);
+                    response = await this.generateLMStudioResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'local':
                 default:
-                    response = await this.generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt);
+                    response = await this.generateOllamaResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
             }
 
@@ -283,7 +320,7 @@ class LLMService {
     }
 
     async generatePerplexityResponse(prompt, modelId, systemPrompt) {
-        return this.generateOpenAICompatibleResponse(prompt, null, modelId || "llama-3.1-sonar-large-128k-online", systemPrompt, {
+        return this.generateOpenAICompatibleResponse(prompt, null, modelId || "sonar", systemPrompt, {
             apiKey: process.env.PERPLEXITY_API_KEY,
             baseURL: 'https://api.perplexity.ai',
             providerName: 'perplexity'
@@ -315,9 +352,27 @@ class LLMService {
             this.socketService.emitAgentStatus("Accessing Private Web (AnythingLLM with Hybrid Embeddings)...");
         }
 
+        const startTime = Date.now();
+        const workspaceName = this.anythingLLMWrapper.workspaceSlug || 'th3-thirty3-workspace';
+        const metricsModelName = `[ANYTHINGLLM] ${workspaceName}`;
+
         try {
             // Use the wrapper which handles Gemini → nomic-embed-text fallback automatically
             const response = await this.anythingLLMWrapper.chat(prompt, 'chat');
+            const responseTime = Date.now() - startTime;
+            
+            // Record metrics for Training Dashboard
+            if (this.modelMetricsService) {
+                const tokensEstimate = Math.floor((response?.length || 0) / 4);
+                this.modelMetricsService.recordQuery(metricsModelName, {
+                    responseTime,
+                    tokensGenerated: tokensEstimate,
+                    success: true,
+                    category: 'chat',
+                    qualityScore: Math.min(85, 50 + Math.floor(tokensEstimate / 10)) // Base score + length bonus
+                });
+                console.log(`[ANYTHINGLLM] Metrics recorded: ${metricsModelName} | ${responseTime}ms | ${tokensEstimate} tokens`);
+            }
             
             // Log stats periodically
             const stats = this.anythingLLMWrapper.getStats();
@@ -327,6 +382,19 @@ class LLMService {
             
             return response;
         } catch (error) {
+            const responseTime = Date.now() - startTime;
+            
+            // Record failed query
+            if (this.modelMetricsService) {
+                this.modelMetricsService.recordQuery(metricsModelName, {
+                    responseTime,
+                    tokensGenerated: 0,
+                    success: false,
+                    category: 'chat',
+                    qualityScore: 0
+                });
+            }
+            
             console.error("[ANYTHINGLLM] Error:", error);
             return `⚠️ Erreur AnythingLLM: ${error.message}`;
         }

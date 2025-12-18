@@ -169,12 +169,21 @@ class PaymentService {
                 
                 console.log(`[PAYMENT] Payment successful for user ${userId} - upgrading to ${tier}`);
                 
-                // TODO: Mettre à jour le tier de l'utilisateur dans users.json
+                const userService = require('./user_service');
+                const success = userService.updateUserTier(userId, tier);
+
+                if (success) {
+                    console.log(`[PAYMENT] Fulfillment complete: User ${userId} is now ${tier}`);
+                } else {
+                    console.error(`[PAYMENT] Fulfillment FAILED: Could not update user ${userId}`);
+                }
+
                 return {
                     success: true,
                     action: 'upgrade_user',
                     user_id: userId,
-                    new_tier: tier
+                    new_tier: tier,
+                    fulfillment_status: success ? 'completed' : 'failed'
                 };
 
             case 'customer.subscription.deleted':

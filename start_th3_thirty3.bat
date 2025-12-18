@@ -2,17 +2,13 @@
 title Th3 Thirty3 - System Boot
 color 0a
 cls
-cd /d "%~dp0"
 
 echo [SYSTEM] Initializing Th3 Thirty3...
 
-echo [DEBUG] Running script from: %~dp0
-echo [DEBUG] Script Version: FIXED_PATH_MSI_USER (v2)
-
 echo [SYSTEM] Cleaning up previous sessions...
 taskkill /F /IM node.exe /T >nul 2>&1
-taskkill /F /IM "AnythingLLM.exe" /T >nul 2>&1
-timeout /t 2 /nobreak >nul
+echo [SYSTEM] Waiting for ports to release...
+timeout /t 5 /nobreak >nul
 
 echo [SYSTEM] Starting Neural Core (Server)...
 cd server
@@ -25,15 +21,8 @@ start /B npm run dev
 cd ..
 
 echo [SYSTEM] Launching External Modules...
-echo    - Starting Ollama Server...
 start "Ollama Server" /min ollama serve
-
-echo    - Starting AnythingLLM...
-if exist "C:\Users\MSI-USER\AppData\Local\Programs\AnythingLLM\AnythingLLM.exe" (
-    start "" "C:\Users\MSI-USER\AppData\Local\Programs\AnythingLLM\AnythingLLM.exe"
-) else (
-    echo [WARN] AnythingLLM not found at: C:\Users\MSI-USER\AppData\Local\Programs\AnythingLLM\AnythingLLM.exe
-)
+start "" "C:\Users\th3th\AppData\Local\Programs\AnythingLLM\AnythingLLM.exe"
 
 echo [SYSTEM] Pre-loading AI Models...
 timeout /t 5 /nobreak >nul

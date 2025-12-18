@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Cpu, Cloud, Zap, Brain, Shield, Mail, Calendar, Activity, CheckCircle, XCircle } from 'lucide-react';
+import { API_URL } from './config';
 
 const SettingsPage = () => {
     // State for Settings
@@ -23,7 +24,8 @@ const SettingsPage = () => {
 
     // State for API Keys
     const [apiKeys, setApiKeys] = useState({
-
+        groq: '',
+        gemini: '',
         openai: '',
         anthropic: '',
         perplexity: '',
@@ -35,7 +37,7 @@ const SettingsPage = () => {
     // Load Settings & Status on Mount
     useEffect(() => {
         // 1. Get Settings
-        fetch('http://localhost:3000/settings')
+        fetch(`${API_URL}/settings`)
             .then(res => res.json())
             .then(data => {
                 console.log("Loaded settings:", data);
@@ -51,7 +53,7 @@ const SettingsPage = () => {
             .catch(err => console.error("Failed to load settings", err));
 
         // 2. Get Google Status
-        fetch('http://localhost:3000/google/status')
+        fetch(`${API_URL}/google/status`)
             .then(res => res.json())
             .then(statusMap => {
                 // Map the 3 specific accounts
@@ -99,7 +101,7 @@ const SettingsPage = () => {
     // Backend Save Call
     const saveSettings = (newSettings) => {
         console.log("[FRONTEND] Saving settings payload:", newSettings);
-        fetch('http://localhost:3000/settings', {
+        fetch(`${API_URL}/settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSettings)
@@ -251,7 +253,8 @@ const SettingsPage = () => {
                         </h3>
                         <div className="space-y-3">
                             {[
-
+                                { label: 'Groq API Key (Fast)', name: 'groq', placeholder: 'gsk_...' },
+                                { label: 'Google Gemini Key', name: 'gemini', placeholder: 'AIza...' },
                                 { label: 'OpenAI API Key', name: 'openai', placeholder: 'sk-...' },
                                 { label: 'Anthropic Claude Key', name: 'anthropic', placeholder: 'sk-ant-...' },
                                 { label: 'Perplexity API Key', name: 'perplexity', placeholder: 'pplx-...' },
@@ -365,7 +368,7 @@ const SettingsPage = () => {
                                             </span>
                                             {acc.status !== 'active' && (
                                                 <a
-                                                    href={`http://localhost:3000/auth/google?email=${acc.email}`}
+                                                    href={`${API_URL}/auth/google?email=${acc.email}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-[10px] bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-800 hover:bg-blue-800 transition-colors"

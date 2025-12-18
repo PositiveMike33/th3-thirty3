@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, Server, User, Shield, Terminal, AlertTriangle, Activity } from 'lucide-react';
-
-const API_URL = 'http://localhost:3000';
+import { API_URL } from './config';
 
 const OsintDashboard = () => {
     const [tools, setTools] = useState([]);
@@ -16,8 +15,10 @@ const OsintDashboard = () => {
         fetch(`${API_URL}/osint/tools`)
             .then(res => res.json())
             .then(data => {
-                setTools(data);
-                if (data.length > 0) setSelectedTool(data[0].id);
+                // Ensure data is an array before setting
+                const toolsArray = Array.isArray(data) ? data : (data.tools || []);
+                setTools(toolsArray);
+                if (toolsArray.length > 0) setSelectedTool(toolsArray[0].id);
             })
             .catch(err => console.error("Failed to load tools:", err));
 
@@ -87,7 +88,8 @@ const OsintDashboard = () => {
     return (
         <div className="flex h-full bg-transparent text-green-400 font-mono p-6 gap-6">
 
-            {/* Sidebar / Tool Selection */}
+            {/* Sidebar / Tool Selection - Hidden when viewing framework for full mindmap */}
+            {activeTab !== 'framework' && (
             <div className="w-64 flex flex-col gap-4">
                 <div className="flex items-center gap-2 text-green-500 mb-4 border-b border-green-900 pb-2">
                     <Shield size={24} />
@@ -131,6 +133,7 @@ const OsintDashboard = () => {
                     <p>Authorized use only. All actions are logged.</p>
                 </div>
             </div>
+            )}
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col gap-4">
@@ -214,8 +217,40 @@ const OsintDashboard = () => {
                 )}
 
                 {activeTab === 'framework' && (
-                    <div className="flex-1 bg-white rounded-lg overflow-hidden border border-green-900">
-                        <iframe src="https://osintframework.com/" title="OSINT Framework" className="w-full h-full" />
+                    <div className="flex-1 flex flex-col bg-black rounded-lg overflow-hidden border border-green-500/50 shadow-lg shadow-green-900/20">
+                        {/* Header Bar */}
+                        <div className="flex items-center justify-between bg-gray-900 border-b border-green-900/50 px-4 py-2">
+                            <div className="flex items-center gap-3">
+                                <Server size={18} className="text-green-500" />
+                                <span className="font-bold text-green-400 tracking-wider">OSINT FRAMEWORK MINDMAP</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setActiveTab('tools')}
+                                    className="px-3 py-1 bg-gray-800 border border-gray-600 rounded text-gray-300 text-xs hover:bg-gray-700 transition-colors"
+                                >
+                                    ← Retour
+                                </button>
+                                <a 
+                                    href="https://osintframework.com/" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="px-3 py-1 bg-green-900/30 border border-green-700 rounded text-green-400 text-xs hover:bg-green-800/50 transition-colors"
+                                >
+                                    Ouvrir en plein écran ↗
+                                </a>
+                            </div>
+                        </div>
+                        {/* Full Height iFrame */}
+                        <div className="flex-1 bg-gray-100" style={{ minHeight: 'calc(100vh - 200px)' }}>
+                            <iframe 
+                                src="https://osintframework.com/" 
+                                title="OSINT Framework" 
+                                className="w-full h-full border-none"
+                                style={{ minHeight: '100%', height: 'calc(100vh - 200px)' }}
+                                allow="fullscreen"
+                            />
+                        </div>
                     </div>
                 )}
 

@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import {
     Briefcase, Plus, Trash2, CheckCircle, Circle,
     ArrowRight, Layout, Terminal, Loader, Save,
-    Calendar, Mail, FileText, Map as MapIcon, RefreshCw
+    Calendar, Mail, Folder, Map as MapIcon, RefreshCw, TrendingUp
 } from 'lucide-react';
-
-const API_URL = 'http://localhost:3000';
+import ModelIntelligenceDashboard from './components/ModelIntelligenceDashboard';
+import { API_URL } from './config';
 
 const ProjectDashboard = () => {
     // Project State
-    const [projects, setProjects] = useState([]);
+    const [_projects, setProjects] = useState([]);
     const [activeProject, setActiveProject] = useState(null);
     // const [loading, setLoading] = useState(false); // Unused
     // const [loading, setLoading] = useState(false); // Removed unused state
-    const [showNewProjectInput, setShowNewProjectInput] = useState(false);
-    const [newProjectName, setNewProjectName] = useState("");
+    // Sidebar was removed - these states are kept for potential future use
+     
+    const [_showNewProjectInput, _setShowNewProjectInput] = useState(false);
+     
+    const [_newProjectName, _setNewProjectName] = useState("");
     const [newTaskContent, setNewTaskContent] = useState("");
 
     // Google State
@@ -34,7 +37,7 @@ const ProjectDashboard = () => {
 
     // --- DATA FETCHING ---
 
-    const fetchAgents = async () => {
+    const fetchAgents = React.useCallback(async () => {
         try {
             const res = await fetch(`${API_URL}/models?computeMode=cloud`);
             const data = await res.json();
@@ -50,16 +53,18 @@ const ProjectDashboard = () => {
         } catch (error) {
             console.error("Error fetching agents:", error);
         }
-    };
+    }, [selectedAgent]);
 
     const fetchProjects = React.useCallback(async () => {
         try {
             const res = await fetch(`${API_URL}/projects`);
             const data = await res.json();
-            setProjects(data);
+            // Ensure data is an array before setting
+            const projectsArray = Array.isArray(data) ? data : (data.projects || []);
+            setProjects(projectsArray);
             setActiveProject(current => {
                 if (current) {
-                    const updated = data.find(p => p.id === current.id);
+                    const updated = projectsArray.find(p => p.id === current.id);
                     return updated || current;
                 }
                 return current;
@@ -96,40 +101,56 @@ const ProjectDashboard = () => {
         setGoogleLoading(false);
     }, []);
 
-    useEffect(() => {
-        fetchProjects();
-        fetchGoogleData();
 
-        // Real-time refresh every 10s (was 60s)
-        const interval = setInterval(fetchGoogleData, 10000);
-        return () => clearInterval(interval);
-    }, [fetchProjects, fetchGoogleData]);
+    useEffect(() => {
+        let isMounted = true;
+        
+        const initData = async () => {
+            if (isMounted) {
+                await fetchGoogleData();
+                await fetchAgents();
+            }
+        };
+        
+        initData();
+
+        // Real-time refresh every 30s
+        const interval = setInterval(() => {
+            if (isMounted) fetchGoogleData();
+        }, 30000);
+        
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [fetchGoogleData, fetchAgents]);
 
     // --- PROJECT ACTIONS ---
 
-    const handleCreateProject = async () => {
-        if (!newProjectName.trim()) return;
+    // Project CRUD functions - kept for API but sidebar removed
+     
+    const _handleCreateProject = async (name) => {
+        if (!name?.trim()) return;
         try {
             const res = await fetch(`${API_URL}/projects`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newProjectName, description: "New Project" })
+                body: JSON.stringify({ name, description: "New Project" })
             });
             const project = await res.json();
-            setProjects([...projects, project]);
+            setProjects(prev => [...prev, project]);
             setActiveProject(project);
-            setNewProjectName("");
-            setShowNewProjectInput(false);
         } catch (error) {
             console.error("Error creating project:", error);
         }
     };
 
-    const handleDeleteProject = async (id) => {
+     
+    const _handleDeleteProject = async (id) => {
         if (!confirm("Supprimer ce projet ?")) return;
         try {
             await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
-            setProjects(projects.filter(p => p.id !== id));
+            setProjects(prev => prev.filter(p => p.id !== id));
             if (activeProject?.id === id) setActiveProject(null);
         } catch (error) {
             console.error("Error deleting project:", error);
@@ -239,83 +260,39 @@ const ProjectDashboard = () => {
     };
 
     return (
-        <div className="flex h-full bg-transparent text-cyan-300 overflow-hidden">
-            {/* SIDEBAR */}
-            <div className="w-64 border-r border-gray-800 bg-gray-900/30 flex flex-col p-4 shrink-0">
-                <div className="flex items-center gap-2 mb-8 text-cyan-500">
-                    <Layout size={24} />
-                    <h1 className="font-bold tracking-widest text-lg">DART AI</h1>
+        <div 
+            className="flex flex-col w-full bg-transparent text-cyan-300 overflow-hidden"
+            style={{ height: 'calc(100vh - 130px)' }}
+        >
+            {/* HEADER - Fixed height */}
+            <div className="flex justify-between items-end border-b border-gray-800 p-4 flex-shrink-0">
+                <div>
+                    <h2 className="text-3xl font-bold text-white mb-1">{activeProject ? activeProject.name : "DASHBOARD"}</h2>
+                    <p className="text-gray-500 text-sm font-mono">{activeProject ? activeProject.id : "Vue d'ensemble"}</p>
                 </div>
-
-                <div className="flex-1 overflow-y-auto">
-                    <h2 className="text-xs font-mono text-gray-500 mb-4 uppercase">Projets Actifs</h2>
-                    <div className="flex flex-col gap-2">
-                        {projects.map(p => (
-                            <button
-                                key={p.id}
-                                onClick={() => setActiveProject(p)}
-                                className={`text-left px-3 py-2 rounded text-sm transition-all flex justify-between items-center group ${activeProject?.id === p.id ? 'bg-cyan-900/30 text-cyan-300 border border-cyan-800' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-                            >
-                                <span className="truncate">{p.name}</span>
-                                {activeProject?.id === p.id && (
-                                    <Trash2 size={12} className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400" onClick={(e) => { e.stopPropagation(); handleDeleteProject(p.id); }} />
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-800">
-                    {showNewProjectInput ? (
-                        <div className="flex flex-col gap-2">
-                            <input
-                                autoFocus
-                                type="text"
-                                value={newProjectName}
-                                onChange={(e) => setNewProjectName(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleCreateProject()}
-                                placeholder="Nom du projet..."
-                                className="bg-black border border-gray-700 rounded px-2 py-1 text-sm text-white focus:border-cyan-500 outline-none"
-                            />
-                            <div className="flex gap-2">
-                                <button onClick={handleCreateProject} className="flex-1 bg-cyan-700 text-white text-xs py-1 rounded hover:bg-cyan-600">Créer</button>
-                                <button onClick={() => setShowNewProjectInput(false)} className="flex-1 bg-gray-800 text-gray-400 text-xs py-1 rounded hover:bg-gray-700">Annuler</button>
-                            </div>
-                        </div>
-                    ) : (
-                        <button onClick={() => setShowNewProjectInput(true)} className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 text-gray-500 py-2 rounded hover:border-cyan-500 hover:text-cyan-500 transition-all text-sm">
-                            <Plus size={14} /> Nouveau Projet
-                        </button>
-                    )}
+                <div className="flex gap-2">
+                    <button onClick={fetchGoogleData} className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded text-sm border border-gray-700">
+                        <RefreshCw size={14} className={googleLoading ? "animate-spin" : ""} />
+                        SYNC
+                    </button>
+                    <button
+                        onClick={() => {
+                            fetchAgents();
+                            setShowAgentModal(true);
+                        }}
+                        className="flex items-center gap-2 bg-cyan-900/30 hover:bg-cyan-800 text-cyan-300 px-3 py-1.5 rounded text-sm border border-cyan-800"
+                    >
+                        <Terminal size={14} />
+                        AI ASSISTANT
+                    </button>
                 </div>
             </div>
 
-            {/* MAIN CONTENT GRID */}
-            <div className="flex-1 p-6 overflow-y-auto grid grid-cols-12 gap-6 auto-rows-min">
-
-                {/* HEADER */}
-                <div className="col-span-12 flex justify-between items-end border-b border-gray-800 pb-4 mb-2">
-                    <div>
-                        <h2 className="text-3xl font-bold text-white mb-1">{activeProject ? activeProject.name : "DASHBOARD"}</h2>
-                        <p className="text-gray-500 text-sm font-mono">{activeProject ? activeProject.id : "Vue d'ensemble"}</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <button onClick={fetchGoogleData} className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded text-sm border border-gray-700">
-                            <RefreshCw size={14} className={googleLoading ? "animate-spin" : ""} />
-                            SYNC
-                        </button>
-                        <button
-                            onClick={() => {
-                                fetchAgents();
-                                setShowAgentModal(true);
-                            }}
-                            className="flex items-center gap-2 bg-cyan-900/30 hover:bg-cyan-800 text-cyan-300 px-3 py-1.5 rounded text-sm border border-cyan-800"
-                        >
-                            <Terminal size={14} />
-                            AI ASSISTANT
-                        </button>
-                    </div>
-                </div>
+            {/* MAIN CONTENT - Takes remaining height */}
+            <div 
+                className="flex gap-4 p-4"
+                style={{ height: 'calc(100vh - 200px)' }}
+            >
 
                 {/* AGENT MODAL */}
                 {showAgentModal && (
@@ -392,85 +369,66 @@ const ProjectDashboard = () => {
                     </div>
                 )}
 
-                {/* MAPS (Main Feature - Swapped) */}
-                <div className="col-span-12 lg:col-span-8 bg-gray-900/50 border border-gray-800 rounded-lg p-1 min-h-[500px] relative group">
-                    <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2">
+                {/* MAPS (75% Width) */}
+                <div 
+                    className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black"
+                    style={{ width: '75%', height: '100%' }}
+                >
+                    <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
                         <MapIcon size={12} /> TRAFIC / MAPS
                     </div>
                     <iframe
-                        width="100%"
-                        height="100%"
-                        frameBorder="0"
-                        style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }}
-                        src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d44750.0!2d-73.5673!3d45.5017!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sca!4v1600000000000!5m2!1sen!2sca&layer=t`}
+                        className="absolute inset-0 w-full h-full"
+                        style={{ border: 0 }}
                         allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d178794.6234978716!2d-73.711873!3d45.5576996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a541c64b70d%3A0x654e3138211fefef!2sMontr%C3%A9al%2C%20QC!5e0!3m2!1sen!2sca!4v1709848293000!5m2!1sen!2sca"
                     ></iframe>
                 </div>
 
-                {/* GOOGLE WIDGETS SIDEBAR */}
-                <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+                {/* RIGHT SIDEBAR - Model Progress + Google Widgets (25% Width) */}
+                <div 
+                    className="flex flex-col gap-3 overflow-hidden"
+                    style={{ width: '25%', height: '100%' }}
+                >
 
-                    {/* CALENDAR */}
-                    <div className="bg-gray-900/50 border border-purple-900/50 rounded-lg p-4 backdrop-blur">
-                        <div className="flex items-center gap-2 mb-3 text-purple-400">
-                            <Calendar size={16} />
+                    {/* MODEL INTELLIGENCE DASHBOARD - Main Feature */}
+                    <div className="bg-gray-900/50 border border-cyan-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col min-h-[300px]">
+                        <ModelIntelligenceDashboard />
+                    </div>
+
+                    {/* CALENDAR - Compact */}
+                    <div className="bg-gray-900/50 border border-purple-900/50 rounded-lg p-3 backdrop-blur overflow-hidden flex flex-col max-h-[150px]">
+                        <div className="flex items-center gap-2 mb-2 text-purple-400 shrink-0">
+                            <Calendar size={14} />
                             <h3 className="font-bold text-xs tracking-wider">AGENDA</h3>
+                            <span className="ml-auto text-xs text-gray-500">{googleData.events.length}</span>
                         </div>
-                        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-900">
-                            {googleData.events.length > 0 ? googleData.events.map((e, i) => (
+                        <div className="flex flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-900 flex-1">
+                            {googleData.events.length > 0 ? googleData.events.slice(0, 3).map((e, i) => (
                                 <div key={i} className="text-xs bg-black/40 p-2 rounded border-l-2 border-purple-500">
-                                    <div className="font-bold text-gray-300">{e.summary}</div>
-                                    <div className="text-gray-500">{new Date(e.start.dateTime || e.start.date).toLocaleString()}</div>
+                                    <div className="font-bold text-gray-300 truncate">{e.summary}</div>
+                                    <div className="text-gray-500 text-xs">{new Date(e.start.dateTime || e.start.date).toLocaleDateString()}</div>
                                 </div>
                             )) : <div className="text-xs text-gray-500 italic">Rien de prévu.</div>}
                         </div>
                     </div>
 
-                    {/* TASKS */}
-                    <div className="bg-gray-900/50 border border-blue-900/50 rounded-lg p-4 backdrop-blur">
-                        <div className="flex items-center gap-2 mb-3 text-blue-400">
-                            <CheckCircle size={16} />
-                            <h3 className="font-bold text-xs tracking-wider">GOOGLE TASKS</h3>
+                    {/* EMAILS - Compact */}
+                    <div className="bg-gray-900/50 border border-red-900/50 rounded-lg p-3 backdrop-blur overflow-hidden flex flex-col max-h-[150px]">
+                        <div className="flex items-center gap-2 mb-2 text-red-400 shrink-0">
+                            <Mail size={14} />
+                            <h3 className="font-bold text-xs tracking-wider">GMAIL</h3>
+                            <span className="ml-auto text-xs text-gray-500">{googleData.emails.length}</span>
                         </div>
-                        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-blue-900">
-                            {googleData.tasks.length > 0 ? googleData.tasks.map((t, i) => (
-                                <div key={i} className="text-xs flex items-start gap-2">
-                                    <input type="checkbox" className="mt-0.5" readOnly />
-                                    <span className="text-gray-300">{t.title}</span>
+                        <div className="flex flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-red-900 flex-1">
+                            {googleData.emails.length > 0 ? googleData.emails.slice(0, 3).map((e, i) => (
+                                <div key={i} className="text-xs bg-black/40 p-1.5 rounded border border-gray-800 hover:border-red-900 transition-colors">
+                                    <div className="font-bold text-gray-200 truncate text-xs">{e.from}</div>
+                                    <div className="text-gray-400 truncate text-xs">{e.subject}</div>
                                 </div>
-                            )) : <div className="text-xs text-gray-500 italic">Tout est fait.</div>}
-                        </div>
-                    </div>
-
-                    {/* EMAILS */}
-                    <div className="bg-gray-900/50 border border-red-900/50 rounded-lg p-4 backdrop-blur">
-                        <div className="flex items-center gap-2 mb-3 text-red-400">
-                            <Mail size={16} />
-                            <h3 className="font-bold text-xs tracking-wider">GMAIL (Non lus)</h3>
-                        </div>
-                        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-red-900">
-                            {googleData.emails.length > 0 ? googleData.emails.map((e, i) => (
-                                <div key={i} className="text-xs bg-black/40 p-2 rounded border border-gray-800 hover:border-red-900 transition-colors">
-                                    <div className="font-bold text-gray-200 truncate">{e.from}</div>
-                                    <div className="text-gray-400 truncate">{e.subject}</div>
-                                </div>
-                            )) : <div className="text-xs text-gray-500 italic">Boîte de réception vide.</div>}
-                        </div>
-                    </div>
-
-                    {/* DRIVE */}
-                    <div className="bg-gray-900/50 border border-green-900/50 rounded-lg p-4 backdrop-blur">
-                        <div className="flex items-center gap-2 mb-3 text-green-400">
-                            <FileText size={16} />
-                            <h3 className="font-bold text-xs tracking-wider">DRIVE (Récents)</h3>
-                        </div>
-                        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-green-900">
-                            {googleData.files.length > 0 ? googleData.files.map((f, i) => (
-                                <a key={i} href={f.webViewLink} target="_blank" rel="noopener noreferrer" className="text-xs flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors">
-                                    <FileText size={12} />
-                                    <span className="truncate">{f.name}</span>
-                                </a>
-                            )) : <div className="text-xs text-gray-500 italic">Aucun fichier récent.</div>}
+                            )) : <div className="text-xs text-gray-500 italic">Boîte vide.</div>}
                         </div>
                     </div>
 
