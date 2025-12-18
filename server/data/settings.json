@@ -2,7 +2,7 @@
   "darkMode": true,
   "autoCorrect": true,
   "computeMode": "cloud",
-  "reflectionMode": "think",
+  "reflectionMode": "ultra",
   "socials": {
     "facebook": false,
     "instagram": false,
@@ -15,5 +15,6 @@
     "perplexity": "",
     "anythingllm_url": "",
     "anythingllm_key": ""
-  }
+  },
+  "themeMode": "dark"
 }
