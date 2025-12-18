@@ -320,7 +320,7 @@ app.delete('/sessions/:sessionId/messages/:messageId', (req, res) => {
 // Fabric Patterns Endpoints
 app.get('/patterns', (req, res) => {
     try {
-        const patternsDir = path.join(__dirname, 'fabric', 'data', 'patterns');
+        const patternsDir = path.join(__dirname, 'fabric', 'patterns');
         const patterns = fs.readdirSync(patternsDir)
             .filter(name => {
                 const fullPath = path.join(patternsDir, name);
@@ -337,8 +337,8 @@ app.get('/patterns', (req, res) => {
 app.get('/patterns/:name', (req, res) => {
     try {
         const patternName = req.params.name;
-        const patternDir = path.join(__dirname, 'fabric', 'data', 'patterns', patternName);
-        
+        const patternDir = path.join(__dirname, 'fabric', 'patterns', patternName);
+
         if (!fs.existsSync(patternDir)) {
             return res.status(404).json({ error: "Pattern not found" });
         }
@@ -379,18 +379,18 @@ app.post('/models/sync-ollama', async (req, res) => {
         const models = (data.models || [])
             .map(m => m.name)
             .filter(n => !n.includes('embed'));
-        
+
         // Initialize metrics for each model
         for (const modelName of models) {
             modelMetricsService.getOrCreateModelMetrics(modelName);
         }
-        
+
         console.log('[METRICS] Synced ' + models.length + ' Ollama models');
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: 'Models synced with metrics',
             models: models,
-            count: models.length 
+            count: models.length
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -653,13 +653,13 @@ app.get('/osint/spiderfoot/status', async (req, res) => {
 app.post('/incident/analyze', async (req, res) => {
     try {
         const { media, mediaType = 'image', description = '' } = req.body;
-        
+
         if (!media) {
             return res.status(400).json({ error: 'Media (image or video) required' });
         }
 
         console.log(`[INCIDENT] Analyzing ${mediaType}...`);
-        
+
         // Step 1: Vision Analysis
         const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
         console.log('[INCIDENT] Vision analysis complete');
@@ -687,19 +687,19 @@ app.post('/incident/analyze', async (req, res) => {
 app.post('/incident/generate-5why', async (req, res) => {
     try {
         const { analysis, description = '' } = req.body;
-        
+
         if (!analysis) {
             return res.status(400).json({ error: 'Vision analysis required' });
         }
 
         console.log('[INCIDENT] Generating 5-Why report...');
-        
+
         // Generate complete 5-Why report
         const report = await keelclipAnalyzer.generate5Why(analysis, description);
-        
+
         // Validate report quality
         const validation = keelclipAnalyzer.validate5WhyReport(report);
-        
+
         console.log(`[INCIDENT] Report generated - Score: ${validation.score}/100`);
 
         res.json({
@@ -722,13 +722,13 @@ app.post('/incident/generate-5why', async (req, res) => {
 app.post('/incident/complete', async (req, res) => {
     try {
         const { media, mediaType = 'image', description = '' } = req.body;
-        
+
         if (!media) {
             return res.status(400).json({ error: 'Media (image or video) required' });
         }
 
         console.log(`[INCIDENT] Complete workflow: ${mediaType} → 5-Why`);
-        
+
         // Step 1: Vision Analysis
         const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
         console.log('[INCIDENT] ✓ Vision analysis');
@@ -763,13 +763,13 @@ app.post('/incident/complete', async (req, res) => {
 app.post('/incident/validate', (req, res) => {
     try {
         const { report } = req.body;
-        
+
         if (!report) {
             return res.status(400).json({ error: 'Report text required' });
         }
 
         const validation = keelclipAnalyzer.validate5WhyReport(report);
-        
+
         res.json({
             success: true,
             validation: validation
@@ -1018,7 +1018,7 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
         // 1c. INCIDENT ANALYSIS (Auto-detect VPO context)
         const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'défaut', 'bourrage'];
         const isIncidentContext = vpoKeywords.some(keyword => message.toLowerCase().includes(keyword));
-        
+
         let incidentAnalysis = null;
         if (image && isIncidentContext) {
             console.log("[CHAT] 🔍 VPO INCIDENT DETECTED - Analyzing image...");
@@ -1026,16 +1026,16 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
                 // Analyze incident image
                 incidentAnalysis = await visionService.analyzeKeelClipIncident(image, 'image');
                 const summary = keelclipAnalyzer.generateQuickSummary(incidentAnalysis);
-                
+
                 messageWithContext += `\n\n[ANALYSE VISUELLE INCIDENT]\n${summary}\n[FIN ANALYSE]\n`;
                 console.log("[CHAT] ✓ Incident analysis injected");
-                
+
                 // If user explicitly asks for 5-Why, generate it
                 if (message.toLowerCase().includes('5 why') || message.toLowerCase().includes('5why') || message.toLowerCase().includes('rapport')) {
                     console.log("[CHAT] 📋 Generating 5-Why report...");
                     const report = await keelclipAnalyzer.generate5Why(incidentAnalysis, message);
                     const validation = keelclipAnalyzer.validate5WhyReport(report);
-                    
+
                     messageWithContext += `\n\n[RAPPORT 5-WHY GÉNÉRÉ]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
                     console.log(`[CHAT] ✓ 5-Why report generated (Score: ${validation.score})`);
                 }
@@ -1044,7 +1044,7 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
                 messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle échouée - ${error.message}]\n`;
             }
         }
-        
+
         console.timeEnd("ContextInjection");
 
 
@@ -1246,13 +1246,13 @@ if (logsRoutes.setSocketService) {
 server.listen(port, async () => {
     console.log(`Server running on port ${port}`);
     console.log(`System ready. Identity: ${IDENTITY.name}`);
-    
+
     // Automatic Tor Verification at Startup
     try {
         const torStartupCheck = require('./tor_startup_check');
         console.log('\n[SYSTEM] Running automatic Tor verification...');
         const torResult = await torStartupCheck.performStartupCheck();
-        
+
         if (torResult.isTor) {
             console.log('[SYSTEM] ✅ Tor is ACTIVE and VERIFIED');
             console.log(`[SYSTEM] 🧅 Exit IP: ${torResult.ip}`);

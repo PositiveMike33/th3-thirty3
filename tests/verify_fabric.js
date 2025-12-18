@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FABRIC_PATH = path.join(__dirname, '../server/fabric/data/patterns');
+const FABRIC_PATH = path.join(__dirname, '../server/fabric/patterns');
 
 console.log("[TEST] Verifying Fabric Patterns...");
 console.log(`[TEST] Path: ${FABRIC_PATH}`);

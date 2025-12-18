@@ -69,11 +69,11 @@ const AgentMonitor = () => {
 
     const addLog = useCallback((type, message) => {
         setLogs(prev => {
-            const newLog = { 
+            const newLog = {
                 id: Date.now() + Math.random().toString(36).substr(2, 9),
-                type, 
-                message, 
-                timestamp: new Date() 
+                type,
+                message,
+                timestamp: new Date()
             };
             return [...prev.slice(-50), newLog];
         });
@@ -88,7 +88,14 @@ const AgentMonitor = () => {
 
     // Auto-scroll to bottom of logs
     useEffect(() => {
-        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // Use requestAnimationFrame to ensure DOM is stable before scrolling
+        const scrollToBottom = () => {
+            if (logsEndRef.current && document.body.contains(logsEndRef.current)) {
+                logsEndRef.current.scrollIntoView({ behavior: 'auto', block: 'end' });
+            }
+        };
+        const frameId = requestAnimationFrame(scrollToBottom);
+        return () => cancelAnimationFrame(frameId);
     }, [logs]);
 
     // Socket Connection
@@ -107,12 +114,12 @@ const AgentMonitor = () => {
             addLog('SYSTEM', 'Uplink lost.');
             setStatus('Offline');
         });
-        
+
         // Listen for agent/system logs
         socket.on('log', (data) => {
-             const type = data.type || 'INFO';
-             const msg = data.message || (typeof data === 'string' ? data : JSON.stringify(data));
-             addLog(type, msg);
+            const type = data.type || 'INFO';
+            const msg = data.message || (typeof data === 'string' ? data : JSON.stringify(data));
+            addLog(type, msg);
         });
 
         // Listen for training commentary events
@@ -142,7 +149,7 @@ const AgentMonitor = () => {
         if (!currentSnippet) return;
         let i = 0;
         const speed = 50;
-        
+
         const typeInterval = setInterval(() => {
             setTypedCode(currentSnippet.code.substring(0, i));
             i++;
@@ -155,7 +162,7 @@ const AgentMonitor = () => {
                 }, 2000);
             }
         }, speed);
-        
+
         return () => clearInterval(typeInterval);
     }, [currentSnippet]);
 
@@ -164,10 +171,10 @@ const AgentMonitor = () => {
     // =====================
     const handleMouseDown = (e) => {
         if (e.target.closest('.no-drag')) return;
-        
+
         e.preventDefault();
         setIsDragging(true);
-        
+
         const rect = monitorRef.current?.getBoundingClientRect();
         if (rect) {
             dragOffset.current = {
@@ -183,18 +190,18 @@ const AgentMonitor = () => {
 
             const monitorWidth = monitorRef.current.offsetWidth;
             const monitorHeight = monitorRef.current.offsetHeight;
-            
+
             // Calculate new position
             let newX = e.clientX - dragOffset.current.x;
             let newY = e.clientY - dragOffset.current.y;
-            
+
             // Constrain to viewport
             const maxX = window.innerWidth - monitorWidth;
             const maxY = window.innerHeight - monitorHeight;
-            
+
             newX = Math.max(0, Math.min(newX, maxX));
             newY = Math.max(0, Math.min(newY, maxY));
-            
+
             setPosition({ x: newX, y: newY });
         };
 
@@ -219,13 +226,13 @@ const AgentMonitor = () => {
         : { right: 16, bottom: 16 };
 
     return (
-        <div 
+        <div
             ref={monitorRef}
             className={`fixed w-96 bg-black/90 border border-green-500/30 rounded-lg shadow-2xl backdrop-blur-sm flex flex-col z-[9999] font-mono text-xs overflow-hidden ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             style={positionStyle}
         >
             {/* Header - Draggable handle */}
-            <div 
+            <div
                 className="flex justify-between items-center p-2 border-b border-green-900/50 bg-green-900/10 select-none"
                 onMouseDown={handleMouseDown}
             >
@@ -235,17 +242,17 @@ const AgentMonitor = () => {
                     <span className="font-bold tracking-wider">AGENT_MONITOR</span>
                 </div>
                 <div className="flex items-center gap-2 no-drag">
-                     <span className="text-[10px] text-gray-500">{status}</span>
-                     <RotateCcw size={12} className="text-gray-500 hover:text-white cursor-pointer" onClick={handleReset} />
+                    <span className="text-[10px] text-gray-500">{status}</span>
+                    <RotateCcw size={12} className="text-gray-500 hover:text-white cursor-pointer" onClick={handleReset} />
                 </div>
             </div>
 
             {/* Code Rain Snippet Area */}
             <div className="bg-black/80 p-2 text-green-600/80 border-b border-green-900/30 whitespace-nowrap overflow-hidden text-[10px] h-8 flex items-center">
-                 <Code size={10} className="mr-2 opacity-50" />
-                 {typedCode}<span className="animate-pulse">_</span>
+                <Code size={10} className="mr-2 opacity-50" />
+                <span key="typed-code">{typedCode}</span><span key="cursor" className="animate-pulse">_</span>
             </div>
-            
+
             {/* Logs Area */}
             <div className="h-40 overflow-y-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-cyan-900 no-drag" onMouseDown={(e) => e.stopPropagation()}>
                 {logs.length === 0 ? (
@@ -257,17 +264,16 @@ const AgentMonitor = () => {
                     logs.map((log) => (
                         <div key={log.id} className="flex gap-2 text-gray-300">
                             <span className="text-gray-600 shrink-0">[{log.timestamp.toLocaleTimeString().split(' ')[0]}]</span>
-                            <span className={`font-bold shrink-0 ${
-                                log.type === 'SYSTEM' ? 'text-green-500' :
+                            <span className={`font-bold shrink-0 ${log.type === 'SYSTEM' ? 'text-green-500' :
                                 log.type === 'AGENT' ? 'text-blue-400' :
-                                log.type === 'TOOL' ? 'text-yellow-400' :
-                                log.type === 'EXPERT' ? 'text-purple-400' :
-                                log.type === 'THOUGHT' ? 'text-cyan-400' :
-                                log.type === 'TRAINING' ? 'text-pink-400' :
-                                log.type === 'BENCHMARK' ? 'text-orange-400' :
-                                log.type === 'METRICS' ? 'text-indigo-400' :
-                                'text-gray-400'
-                            }`}>
+                                    log.type === 'TOOL' ? 'text-yellow-400' :
+                                        log.type === 'EXPERT' ? 'text-purple-400' :
+                                            log.type === 'THOUGHT' ? 'text-cyan-400' :
+                                                log.type === 'TRAINING' ? 'text-pink-400' :
+                                                    log.type === 'BENCHMARK' ? 'text-orange-400' :
+                                                        log.type === 'METRICS' ? 'text-indigo-400' :
+                                                            'text-gray-400'
+                                }`}>
                                 {log.type}:
                             </span>
                             <span className="break-words text-gray-300">{log.message}</span>
@@ -278,7 +284,7 @@ const AgentMonitor = () => {
             </div>
 
             {/* Footer */}
-            <div 
+            <div
                 className="bg-gray-900/80 p-1.5 text-[10px] text-gray-500 border-t border-gray-800 flex justify-between items-center select-none"
                 onMouseDown={handleMouseDown}
             >
