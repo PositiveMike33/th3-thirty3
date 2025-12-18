@@ -5,16 +5,23 @@
 
 const fs = require('fs');
 const path = require('path');
+const settingsService = require('./settings_service');
 
 class ExpertAgentsService {
     constructor() {
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+        // Load Ollama URL from settings (proxy or direct)
+        const settings = settingsService.getSettings();
+        const apiKeys = settings.apiKeys || {};
+        this.ollamaUrl = apiKeys.ollama_use_proxy
+            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
+            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
+
         this.dataPath = path.join(__dirname, 'data', 'experts');
-        
+
         this.ensureDataFolder();
         this.loadExperts();
-        
-        console.log('[EXPERTS] Multi-Agent Expert Service initialized');
+
+        console.log(`[EXPERTS] Multi-Agent Expert Service initialized (Ollama: ${this.ollamaUrl})`);
     }
 
     ensureDataFolder() {
@@ -118,15 +125,15 @@ RÈGLE: Toujours mentionner les risques`,
     loadExperts() {
         this.experts = {};
         const configs = this.getExpertConfigs();
-        
+
         for (const [id, config] of Object.entries(configs)) {
             const knowledgePath = path.join(this.dataPath, config.learningFile);
             let knowledge = { interactions: 0, learned: [], patterns: {} };
-            
+
             if (fs.existsSync(knowledgePath)) {
                 knowledge = JSON.parse(fs.readFileSync(knowledgePath, 'utf8'));
             }
-            
+
             this.experts[id] = { ...config, knowledge };
         }
     }
@@ -134,7 +141,7 @@ RÈGLE: Toujours mentionner les risques`,
     saveExpertKnowledge(expertId) {
         const expert = this.experts[expertId];
         if (!expert) return;
-        
+
         const knowledgePath = path.join(this.dataPath, expert.learningFile);
         fs.writeFileSync(knowledgePath, JSON.stringify(expert.knowledge, null, 2));
     }
@@ -200,7 +207,7 @@ RÈGLE: Toujours mentionner les risques`,
         console.log(`[EXPERTS] ${expert.emoji} ${expert.name} responding with ${model}...`);
 
         // Construire le contexte avec les connaissances apprises
-        const learnedContext = expert.knowledge.learned.length > 0 
+        const learnedContext = expert.knowledge.learned.length > 0
             ? `\n\nCONNAISSANCES APPRISES:\n${expert.knowledge.learned.slice(-10).join('\n')}`
             : '';
 
@@ -219,9 +226,9 @@ RÈGLE: Toujours mentionner les risques`,
             });
 
             if (!response.ok) throw new Error(`Ollama error: ${response.status}`);
-            
+
             const data = await response.json();
-            
+
             // Incrémenter les interactions
             expert.knowledge.interactions++;
             this.saveExpertKnowledge(expertId);
@@ -268,9 +275,9 @@ RÈGLE: Toujours mentionner les risques`,
      */
     async consultMultipleExperts(expertIds, question) {
         const results = await Promise.all(
-            expertIds.map(id => this.consultExpert(id, question).catch(e => ({ 
-                expert: id, 
-                error: e.message 
+            expertIds.map(id => this.consultExpert(id, question).catch(e => ({
+                expert: id,
+                error: e.message
             })))
         );
 
@@ -286,10 +293,10 @@ RÈGLE: Toujours mentionner les risques`,
      */
     async expertCollaboration(fromExpertId, toExpertId, topic) {
         console.log(`[EXPERTS] Collaboration: ${fromExpertId} → ${toExpertId}`);
-        
+
         // L'expert source génère une question
         const questionResult = await this.consultExpert(
-            fromExpertId, 
+            fromExpertId,
             `Génère une question technique sur "${topic}" pour un expert en ${this.experts[toExpertId]?.domain}`
         );
 

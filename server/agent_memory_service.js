@@ -5,18 +5,27 @@
 
 const fs = require('fs');
 const path = require('path');
+const settingsService = require('./settings_service');
 
 class AgentMemoryService {
     constructor() {
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+        // Load settings
+        const settings = settingsService.getSettings();
+        const apiKeys = settings.apiKeys || {};
+
+        // Ollama URL from settings (proxy or direct)
+        this.ollamaUrl = apiKeys.ollama_use_proxy
+            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
+            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
+
         this.embeddingModel = 'nomic-embed-text:latest';
         this.dataPath = path.join(__dirname, 'data', 'embeddings');
-        this.piecesUrl = 'http://localhost:39300';
-        
+        this.piecesUrl = apiKeys.pieces_host || 'http://localhost:39300';
+
         this.ensureDataFolder();
         this.loadEmbeddings();
-        
-        console.log('[AGENT-MEMORY] Embedding service initialized');
+
+        console.log(`[AGENT-MEMORY] Embedding service initialized (Ollama: ${this.ollamaUrl})`);
     }
 
     ensureDataFolder() {
@@ -28,7 +37,7 @@ class AgentMemoryService {
     loadEmbeddings() {
         this.embeddings = {};
         const embeddingsFile = path.join(this.dataPath, 'agent_embeddings.json');
-        
+
         if (fs.existsSync(embeddingsFile)) {
             this.embeddings = JSON.parse(fs.readFileSync(embeddingsFile, 'utf8'));
             console.log(`[AGENT-MEMORY] Loaded ${Object.keys(this.embeddings).length} embedding collections`);
@@ -71,17 +80,17 @@ class AgentMemoryService {
      */
     cosineSimilarity(vecA, vecB) {
         if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
-        
+
         let dotProduct = 0;
         let normA = 0;
         let normB = 0;
-        
+
         for (let i = 0; i < vecA.length; i++) {
             dotProduct += vecA[i] * vecB[i];
             normA += vecA[i] * vecA[i];
             normB += vecB[i] * vecB[i];
         }
-        
+
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
@@ -144,7 +153,7 @@ class AgentMemoryService {
         if (!queryEmbedding) return [];
 
         const allResults = [];
-        
+
         for (const [agentId, embeddings] of Object.entries(this.embeddings)) {
             for (const item of embeddings) {
                 allResults.push({
@@ -213,7 +222,7 @@ class AgentMemoryService {
         const crossAgentKnowledge = await this.searchAllAgents(query, 2);
 
         let context = '';
-        
+
         if (relevantKnowledge.length > 0) {
             context += '\n\n📚 CONNAISSANCES MÉMORISÉES:\n';
             context += relevantKnowledge.map(k => `- ${k.content}`).join('\n');
@@ -237,8 +246,8 @@ class AgentMemoryService {
         for (const [agentId, embeddings] of Object.entries(this.embeddings)) {
             stats[agentId] = {
                 totalKnowledge: embeddings.length,
-                lastUpdated: embeddings.length > 0 
-                    ? embeddings[embeddings.length - 1].metadata?.timestamp 
+                lastUpdated: embeddings.length > 0
+                    ? embeddings[embeddings.length - 1].metadata?.timestamp
                     : null
             };
         }

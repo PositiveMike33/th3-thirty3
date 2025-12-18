@@ -1,22 +1,32 @@
 /**
  * Cyber Training Service - Entraînement d'agents cybersécurité
- * Supporte AnythingLLM et Ollama local en fallback
+ * Supporte AnythingLLM et Ollama local/proxy en fallback
  * ENVIRONNEMENT: Kali Linux 2024.1
  */
 
 const KALI_ENVIRONMENT = require('./config/kali_environment');
+const settingsService = require('./settings_service');
 
 class CyberTrainingService {
     constructor() {
-        this.anythingLLMUrl = process.env.ANYTHING_LLM_URL || 'http://localhost:3001/api/v1';
-        this.apiKey = process.env.ANYTHING_LLM_KEY;
+        // Load settings
+        const settings = settingsService.getSettings();
+        const apiKeys = settings.apiKeys || {};
+
+        this.anythingLLMUrl = apiKeys.anythingllm_url || process.env.ANYTHING_LLM_URL || 'http://localhost:3001/api/v1';
+        this.apiKey = apiKeys.anythingllm_key || process.env.ANYTHING_LLM_KEY;
         this.workspace = 'team-cybersecurite';
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+
+        // Ollama URL from settings (proxy or direct)
+        this.ollamaUrl = apiKeys.ollama_use_proxy
+            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
+            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
+
         this.model = 'qwen2.5:3b';
         this.fallbackModel = 'granite3.1-moe:1b';
         this.kaliEnv = KALI_ENVIRONMENT;
-        
-        console.log(`[CYBER-TRAINING] Service initialized on ${this.kaliEnv.os}`);
+
+        console.log(`[CYBER-TRAINING] Service initialized (Ollama: ${this.ollamaUrl})`);
     }
 
     /**
@@ -92,7 +102,7 @@ class CyberTrainingService {
      */
     async trainOnModule(module, commands) {
         const trainingPrompt = this.generateTrainingPrompt(module, commands);
-        
+
         try {
             // Essayer Ollama directement (plus fiable)
             const response = await this.callOllama(trainingPrompt);

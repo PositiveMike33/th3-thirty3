@@ -71,13 +71,13 @@ class AnythingLLMWrapper {
 
             if (!chatRes.ok) {
                 const errorBody = await chatRes.text();
-                
+
                 // Check if it's an embedding error
                 if (errorBody.includes('Failed to embed') || errorBody.includes('Gemini Failed to embed')) {
                     console.log('[ANYTHINGLLM] Embedding error detected, using fallback strategy...');
                     return await this._chatWithLocalEmbeddings(message, mode);
                 }
-                
+
                 throw new Error(`AnythingLLM chat failed: ${chatRes.status} - ${errorBody}`);
             }
 
@@ -99,41 +99,48 @@ class AnythingLLMWrapper {
     async _chatWithLocalEmbeddings(message, mode) {
         console.log('[FALLBACK] Using local embeddings + RAG');
 
+        // Get Ollama URL from settings
+        const settings = settingsService.getSettings();
+        const apiKeys = settings.apiKeys || {};
+        const ollamaUrl = apiKeys.ollama_use_proxy
+            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
+            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
+
         // 1. Get relevant documents using local embeddings
         const documents = await this._getWorkspaceDocuments();
-        
+
         if (documents.length > 0) {
             // 2. Find similar documents
             const relevant = await this.embeddingService.findSimilar(message, documents, 3, 'ollama');
-            
+
             // 3. Build context-enhanced prompt
             const context = relevant.map(doc => doc.text).join('\n\n');
             const enhancedPrompt = `Context from knowledge base:\n${context}\n\nUser question: ${message}`;
-            
+
             console.log(`[FALLBACK] Found ${relevant.length} relevant documents`);
-            
-            // 4. Use local Ollama for response (you could also call LLM service here)
+
+            // 4. Use Ollama for response (via proxy or direct)
             const { Ollama } = require('ollama');
-            const ollama = new Ollama();
-            
+            const ollama = new Ollama({ host: ollamaUrl });
+
             const response = await ollama.chat({
                 model: 'granite3.1-moe:1b',
                 messages: [
-                    { 
-                        role: 'system', 
-                        content: 'You are Th3 Thirty3, a cybersecurity expert. Answer based on the provided context.' 
+                    {
+                        role: 'system',
+                        content: 'You are Th3 Thirty3, a cybersecurity expert. Answer based on the provided context.'
                     },
                     { role: 'user', content: enhancedPrompt }
                 ]
             });
-            
+
             return `[OFFLINE MODE - Local RAG] ${response.message.content}`;
         } else {
             // No documents available, use plain local LLM
             console.log('[FALLBACK] No documents available, using plain local LLM');
             const { Ollama } = require('ollama');
-            const ollama = new Ollama();
-            
+            const ollama = new Ollama({ host: ollamaUrl });
+
             const response = await ollama.chat({
                 model: 'granite3.1-moe:1b',
                 messages: [
@@ -141,7 +148,7 @@ class AnythingLLMWrapper {
                     { role: 'user', content: message }
                 ]
             });
-            
+
             return `[OFFLINE MODE] ${response.message.content}`;
         }
     }
@@ -162,7 +169,7 @@ class AnythingLLMWrapper {
         } catch (e) {
             console.log('[FALLBACK] Could not fetch workspace documents:', e.message);
         }
-        
+
         return [];
     }
 
