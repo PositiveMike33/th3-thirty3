@@ -15737,14 +15737,14 @@
     "modelName": "[ANYTHINGLLM] th3-thirty3-workspace",
     "createdAt": "2025-12-14T19:22:16.833Z",
     "performance": {
-      "totalQueries": 22,
-      "successfulQueries": 22,
+      "totalQueries": 24,
+      "successfulQueries": 24,
       "failedQueries": 0,
-      "avgResponseTime": 41300,
+      "avgResponseTime": 40032.208333333336,
       "minResponseTime": 12382,
       "maxResponseTime": 73472,
-      "tokensPerSecond": 35.212405104183496,
-      "totalTokensGenerated": 12685
+      "tokensPerSecond": 20.82901554404145,
+      "totalTokensGenerated": 13881
     },
     "expertise": {
       "coding": {
@@ -15768,9 +15768,9 @@
         "lastUpdated": null
       },
       "chat": {
-        "score": 76.6102777777778,
-        "samples": 18,
-        "lastUpdated": "2025-12-18T12:44:43.318Z"
+        "score": 77.44925000000002,
+        "samples": 20,
+        "lastUpdated": "2025-12-18T13:10:32.669Z"
       },
       "humanizer": {
         "score": 50,
@@ -15789,9 +15789,9 @@
       }
     },
     "cognitive": {
-      "overallScore": 52.5,
+      "overallScore": 52.6,
       "learningRate": 0,
-      "consistency": 99.2516685226452,
+      "consistency": 99.16933761370818,
       "adaptability": 0
     },
     "learning": {
@@ -16129,12 +16129,40 @@
           "analysis": 50,
           "writing": 50
         }
+      },
+      {
+        "date": "2025-12-18T13:07:42.706Z",
+        "cognitiveScore": 52.6,
+        "expertise": {
+          "coding": 50,
+          "intelligence": 50,
+          "logic": 50,
+          "creativity": 50,
+          "chat": 77.05184210526318,
+          "humanizer": 50,
+          "analysis": 50,
+          "writing": 50
+        }
+      },
+      {
+        "date": "2025-12-18T13:10:32.670Z",
+        "cognitiveScore": 52.6,
+        "expertise": {
+          "coding": 50,
+          "intelligence": 50,
+          "logic": 50,
+          "creativity": 50,
+          "chat": 77.44925000000002,
+          "humanizer": 50,
+          "analysis": 50,
+          "writing": 50
+        }
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
-    "lastUpdated": "2025-12-18T12:44:43.318Z",
-    "lastActivity": "2025-12-18T12:44:43.318Z"
+    "lastUpdated": "2025-12-18T13:10:32.677Z",
+    "lastActivity": "2025-12-18T13:10:32.670Z"
   },
   "[ANYTHINGLLM] gpt-4o": {
     "modelName": "[ANYTHINGLLM] gpt-4o",

@@ -149,8 +149,12 @@ Fournis:
 }
 
 runTest()
-    .then(r => process.exit(r.success ? 0 : 1))
-    .catch(e => {
+    .then(async r => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        process.exit(r.success ? 0 : 1);
+    })
+    .catch(async e => {
         console.error('Test failed:', e);
+        await new Promise(resolve => setTimeout(resolve, 500));
         process.exit(1);
     });
