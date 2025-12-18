@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Wallet, TrendingUp, DollarSign, Activity } from 'lucide-react';
+import { Wallet, TrendingUp, DollarSign, Activity, Camera, Globe, Wifi } from 'lucide-react';
 import PaymentDashboard from './PaymentDashboard';
+import IPLocationWidget from './components/IPLocationWidget';
 import { API_URL } from './config';
 
 const SYMBOLS = ['BTC/CAD', 'ETH/CAD', 'SOL/CAD'];
@@ -59,7 +60,158 @@ const Dashboard = () => {
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
+    // Network Panel Component
+    const NetworkPanel = () => {
+        const [networkStatus, setNetworkStatus] = React.useState({ tor: null, vpn: null, cameras: [] });
+        const [loadingNet, setLoadingNet] = React.useState(true);
+        
+        React.useEffect(() => {
+            const fetchNetworkStatus = async () => {
+                try {
+                    const headers = { 'x-api-key': localStorage.getItem('th3_api_key') || '' };
+                    
+                    // Fetch TOR status
+                    const torRes = await fetch(`${API_URL}/api/tor/status`, { headers });
+                    const torData = await torRes.json();
+                    
+                    // Fetch VPN status
+                    const vpnRes = await fetch(`${API_URL}/api/vpn/status`, { headers });
+                    const vpnData = await vpnRes.json();
+                    
+                    // Fetch Cameras
+                    const camRes = await fetch(`${API_URL}/api/cameras/status`, { headers });
+                    const camData = await camRes.json();
+                    
+                    setNetworkStatus({
+                        tor: torData,
+                        vpn: vpnData,
+                        cameras: camData.cameras || []
+                    });
+                } catch (e) {
+                    console.error('Network status fetch error:', e);
+                } finally {
+                    setLoadingNet(false);
+                }
+            };
+            
+            fetchNetworkStatus();
+        }, []);
+
+        if (loadingNet) return <div className="text-purple-400 p-10">Chargement Network Status...</div>;
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* IP Location Widget */}
+                <div className="bg-gray-800/50 p-6 rounded-lg border border-purple-900/50 shadow-lg backdrop-blur-sm">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-purple-300">
+                        <Globe className="w-5 h-5" />
+                        Géolocalisation IP
+                    </h2>
+                    <IPLocationWidget display="LIPFB" width={300} />
+                </div>
+
+                {/* TOR Status */}
+                <div className="bg-gray-800/50 p-6 rounded-lg border border-purple-900/50 shadow-lg backdrop-blur-sm">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-purple-300">
+                        🧅 Statut TOR
+                    </h2>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-black/30 rounded">
+                            <span>Service Active</span>
+                            <span className={networkStatus.tor?.tor?.running ? 'text-green-400' : 'text-red-400'}>
+                                {networkStatus.tor?.tor?.running ? '✅ Running' : '❌ Stopped'}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-black/30 rounded">
+                            <span>Connexion TOR</span>
+                            <span className={networkStatus.tor?.tor?.isTor ? 'text-green-400' : 'text-yellow-400'}>
+                                {networkStatus.tor?.tor?.isTor ? '🧅 Connected' : '⚠️ Direct'}
+                            </span>
+                        </div>
+                        {networkStatus.tor?.tor?.exitIP && (
+                            <div className="flex items-center justify-between p-3 bg-black/30 rounded">
+                                <span>Exit IP</span>
+                                <span className="text-cyan-400 font-mono text-sm">{networkStatus.tor.tor.exitIP}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* VPN Status */}
+                <div className="bg-gray-800/50 p-6 rounded-lg border border-purple-900/50 shadow-lg backdrop-blur-sm">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-purple-300">
+                        <Wifi className="w-5 h-5" />
+                        Statut VPN
+                    </h2>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-black/30 rounded">
+                            <span>Connected</span>
+                            <span className={networkStatus.vpn?.isConnected ? 'text-green-400' : 'text-yellow-400'}>
+                                {networkStatus.vpn?.isConnected ? '🔒 VPN Active' : '🔓 Direct'}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-black/30 rounded">
+                            <span>Current IP</span>
+                            <span className="text-cyan-400 font-mono text-sm">
+                                {networkStatus.vpn?.currentIP || 'Unknown'}
+                            </span>
+                        </div>
+                        {networkStatus.vpn?.currentServer && (
+                            <div className="flex items-center justify-between p-3 bg-black/30 rounded">
+                                <span>Server</span>
+                                <span className="text-purple-400">{networkStatus.vpn.currentServer}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Cameras Panel */}
+                <div className="bg-gray-800/50 p-6 rounded-lg border border-purple-900/50 shadow-lg backdrop-blur-sm md:col-span-2 lg:col-span-3">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-purple-300">
+                        <Camera className="w-5 h-5" />
+                        Caméras EasyLife ({networkStatus.cameras?.length || 0})
+                    </h2>
+                    {networkStatus.cameras?.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {networkStatus.cameras.map(cam => (
+                                <div key={cam.id} className="p-4 bg-black/40 rounded-lg border border-gray-700">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="font-bold text-white">{cam.name}</span>
+                                        <span className={cam.status === 'online' ? 'text-green-400' : 'text-red-400'}>
+                                            {cam.status === 'online' ? '🟢' : '🔴'} {cam.status}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm text-gray-400">
+                                        <div>IP: {cam.ip}</div>
+                                        <div>PTZ: {cam.hasPTZ ? '✅' : '❌'}</div>
+                                    </div>
+                                    <div className="mt-3 flex gap-2">
+                                        <button className="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-xs transition-colors">
+                                            📸 Snapshot
+                                        </button>
+                                        {cam.hasPTZ && (
+                                            <button className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors">
+                                                🎮 PTZ
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-10 text-gray-500">
+                            <Camera className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                            <p>Aucune caméra configurée</p>
+                            <p className="text-xs mt-2">Utilisez l'API /api/cameras ou /api/tuya pour ajouter vos caméras EasyLife</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     if (loading) return <div className="text-cyan-400 p-10">Chargement du QG Financier...</div>;
+
 
     return (
         <div className="h-full overflow-y-auto p-6 bg-gray-900 text-cyan-300 font-mono">
@@ -69,7 +221,7 @@ const Dashboard = () => {
             </h1>
 
             {/* Tabs */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4 mb-6 flex-wrap">
                 <button 
                     onClick={() => setActiveTab('portfolio')}
                     className={`px-6 py-3 rounded-lg font-bold transition-all ${
@@ -90,11 +242,23 @@ const Dashboard = () => {
                 >
                     💳 Paiements (Stripe/PayPal)
                 </button>
+                <button 
+                    onClick={() => setActiveTab('network')}
+                    className={`px-6 py-3 rounded-lg font-bold transition-all ${
+                        activeTab === 'network' 
+                            ? 'bg-purple-600 text-white' 
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }`}
+                >
+                    🌐 Network & Surveillance
+                </button>
             </div>
 
             {/* Content */}
             {activeTab === 'payments' ? (
                 <PaymentDashboard />
+            ) : activeTab === 'network' ? (
+                <NetworkPanel />
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* PORTFOLIO CARD */}

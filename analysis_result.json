@@ -1,0 +1,101 @@
+﻿{
+    "success":  true,
+    "summary":  {
+                    "ip":  "8.8.8.8",
+                    "country":  "United States",
+                    "city":  "Mountain View",
+                    "organization":  "Google LLC",
+                    "isp":  "Google LLC",
+                    "asn":  "AS15169",
+                    "lastUpdate":  "2025-12-18T06:39:11.921058"
+                },
+    "classification":  {
+                           "type":  "ICS/SCADA",
+                           "protocol":  "EtherNet/IP",
+                           "sector":  "Industrial/Unknown",
+                           "criticality":  "CRITICAL",
+                           "warning":  "⚠️ Industrial Control System detected - DO NOT SCAN ACTIVELY",
+                           "context":  "This system likely controls physical processes. Unauthorized interaction could cause real-world damage.",
+                           "realWorldRisk":  "Multiple documented attacks on this protocol"
+                       },
+    "networkProfile":  {
+                           "openPorts":  [
+                                             443,
+                                             53
+                                         ],
+                           "totalPorts":  2,
+                           "os":  "Unknown",
+                           "hostnames":  [
+                                             "dns.google"
+                                         ],
+                           "domains":  [
+                                           "dns.google"
+                                       ]
+                       },
+    "services":  [
+                     {
+                         "port":  53,
+                         "protocol":  "tcp",
+                         "product":  "Unknown",
+                         "version":  "Unknown",
+                         "banner":  "\nRecursion: enabled",
+                         "cpe":  [
+
+                                 ],
+                         "securityNotes":  [
+                                               "Standard service configuration"
+                                           ]
+                     },
+                     {
+                         "port":  53,
+                         "protocol":  "udp",
+                         "product":  "Unknown",
+                         "version":  "Unknown",
+                         "banner":  "\nRecursion: enabled",
+                         "cpe":  [
+
+                                 ],
+                         "securityNotes":  [
+                                               "Standard service configuration"
+                                           ]
+                     },
+                     {
+                         "port":  443,
+                         "protocol":  "tcp",
+                         "product":  "Unknown",
+                         "version":  "Unknown",
+                         "banner":  "HTTP/1.1 200 OK\r\nContent-Security-Policy: object-src \u0027none\u0027;base-uri \u0027self\u0027;script-src \u0027nonce-k4Kxj8dnUfpA4uYfwQAShg\u0027 \u0027strict-dynamic\u0027 \u0027report-sample\u0027 \u0027unsafe-eval\u0027 \u0027unsafe-inline\u0027 https: http:;report",
+                         "cpe":  [
+
+                                 ],
+                         "securityNotes":  [
+                                               "Standard service configuration"
+                                           ]
+                     }
+                 ],
+    "vulnerabilities":  {
+                            "count":  0,
+                            "critical":  0,
+                            "high":  0,
+                            "medium":  0,
+                            "low":  0,
+                            "list":  [
+
+                                     ]
+                        },
+    "riskAssessment":  {
+                           "score":  0,
+                           "level":  "LOW",
+                           "color":  "🟢",
+                           "factors":  [
+
+                                       ],
+                           "summary":  "🟢 Risk Level: LOW (0/100)"
+                       },
+    "recommendations":  [
+                            "🚨 IMMEDIATE: Verify network segmentation from IT network",
+                            "Implement ICS-specific firewall rules",
+                            "Enable protocol-aware monitoring (Modbus/BACnet inspection)",
+                            "Conduct authorized passive assessment only"
+                        ]
+}

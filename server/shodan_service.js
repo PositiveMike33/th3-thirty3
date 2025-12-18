@@ -386,29 +386,418 @@ Format your response as a professional threat intelligence report.`;
     }
 
     /**
+     * ENHANCED: Analyze IP with deep intelligence context
+     * Returns precise, professional-grade analysis
+     */
+    async analyzeHostIntelligence(ip) {
+        try {
+            const host = await this.getHost(ip);
+            return this.buildIntelligenceReport(host);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                ip,
+                recommendation: 'Unable to retrieve Shodan data. IP may be private, blocked, or not indexed.'
+            };
+        }
+    }
+
+    /**
+     * Build comprehensive intelligence report from Shodan data
+     */
+    buildIntelligenceReport(host) {
+        // System Classification
+        const classification = this.classifySystem(host);
+        
+        // Vulnerability Assessment
+        const vulnerabilities = this.extractVulnerabilities(host);
+        
+        // Service Analysis
+        const services = this.analyzeServices(host.data || []);
+        
+        // Risk Score Calculation
+        const riskScore = this.calculateRiskScore(host, vulnerabilities, services);
+        
+        // Build enriched report
+        return {
+            success: true,
+            summary: {
+                ip: host.ip_str,
+                country: host.country_name,
+                city: host.city,
+                organization: host.org,
+                isp: host.isp,
+                asn: host.asn,
+                lastUpdate: host.last_update
+            },
+            classification: classification,
+            networkProfile: {
+                openPorts: host.ports || [],
+                totalPorts: (host.ports || []).length,
+                os: host.os || 'Unknown',
+                hostnames: host.hostnames || [],
+                domains: host.domains || []
+            },
+            services: services,
+            vulnerabilities: vulnerabilities,
+            riskAssessment: riskScore,
+            recommendations: this.generateRecommendations(classification, vulnerabilities, riskScore)
+        };
+    }
+
+    /**
+     * Classify the system type based on ports and services
+     */
+    classifySystem(host) {
+        const ports = host.ports || [];
+        const data = host.data || [];
+        const products = data.map(d => d.product?.toLowerCase() || '').filter(Boolean);
+        const allText = JSON.stringify(host).toLowerCase();
+        
+        // ICS/SCADA Detection
+        const icsSignatures = {
+            'Modbus': { ports: [502], keywords: ['modbus', 'plc', 'schneider', 'siemens', 'rockwell', 'allen-bradley'] },
+            'BACnet': { ports: [47808], keywords: ['bacnet', 'hvac', 'building automation', 'johnson controls'] },
+            'DNP3': { ports: [20000], keywords: ['dnp3', 'scada', 'power grid'] },
+            'EtherNet/IP': { ports: [44818], keywords: ['ethernet/ip', 'cip', 'industrial'] },
+            'S7comm': { ports: [102], keywords: ['s7', 'siemens', 'simatic'] },
+            'Niagara Fox': { ports: [1911, 4911], keywords: ['niagara', 'tridium', 'fox'] }
+        };
+
+        for (const [protocol, config] of Object.entries(icsSignatures)) {
+            const hasPort = config.ports.some(p => ports.includes(p));
+            const hasKeyword = config.keywords.some(k => allText.includes(k));
+            if (hasPort || hasKeyword) {
+                return {
+                    type: 'ICS/SCADA',
+                    protocol: protocol,
+                    sector: this.identifySector(host, products),
+                    criticality: 'CRITICAL',
+                    warning: '⚠️ Industrial Control System detected - DO NOT SCAN ACTIVELY',
+                    context: 'This system likely controls physical processes. Unauthorized interaction could cause real-world damage.',
+                    realWorldRisk: this.getICSRealWorldRisk(protocol)
+                };
+            }
+        }
+
+        // IoT Detection
+        const iotKeywords = ['camera', 'webcam', 'dvr', 'nvr', 'hikvision', 'dahua', 'smart', 'iot', 'embedded'];
+        if (iotKeywords.some(k => allText.includes(k))) {
+            return {
+                type: 'IoT Device',
+                subtype: this.identifyIoTType(allText),
+                criticality: 'HIGH',
+                warning: 'IoT devices often have weak security and default credentials',
+                context: 'Check for default passwords, outdated firmware, and unencrypted protocols'
+            };
+        }
+
+        // Database Detection
+        const dbPorts = { 3306: 'MySQL', 5432: 'PostgreSQL', 1433: 'MSSQL', 27017: 'MongoDB', 6379: 'Redis' };
+        for (const [port, db] of Object.entries(dbPorts)) {
+            if (ports.includes(parseInt(port))) {
+                return {
+                    type: 'Database Server',
+                    database: db,
+                    criticality: 'HIGH',
+                    warning: `Exposed ${db} database - verify authentication is enforced`,
+                    context: 'Exposed databases are prime targets for data theft and ransomware'
+                };
+            }
+        }
+
+        // Web Server Detection
+        if (ports.includes(80) || ports.includes(443) || ports.includes(8080)) {
+            const webServer = products.find(p => p.includes('apache') || p.includes('nginx') || p.includes('iis'));
+            return {
+                type: 'Web Server',
+                server: webServer || 'Unknown',
+                criticality: 'MEDIUM',
+                context: 'Standard web infrastructure'
+            };
+        }
+
+        return {
+            type: 'General Purpose Server',
+            criticality: 'MEDIUM',
+            context: 'Standard infrastructure endpoint'
+        };
+    }
+
+    /**
+     * Identify industry sector from context
+     */
+    identifySector(host, products) {
+        const allText = (JSON.stringify(host) + products.join(' ')).toLowerCase();
+        
+        if (allText.includes('water') || allText.includes('pump') || allText.includes('treatment')) {
+            return 'Water/Utilities';
+        }
+        if (allText.includes('power') || allText.includes('energy') || allText.includes('grid')) {
+            return 'Energy/Power';
+        }
+        if (allText.includes('hospital') || allText.includes('medical') || allText.includes('health')) {
+            return 'Healthcare';
+        }
+        if (allText.includes('manufacturing') || allText.includes('factory')) {
+            return 'Manufacturing';
+        }
+        if (allText.includes('hotel') || allText.includes('building') || allText.includes('hvac')) {
+            return 'Building Automation';
+        }
+        return 'Industrial/Unknown';
+    }
+
+    /**
+     * Get real-world ICS risk examples
+     */
+    getICSRealWorldRisk(protocol) {
+        const cases = {
+            'Modbus': 'Oldsmar FL Water Plant (2021) - Attacker attempted to poison water supply via Modbus',
+            'BACnet': 'Target HVAC Breach (2013) - BACnet used as initial access vector',
+            'S7comm': 'Stuxnet (2010) - Destroyed centrifuges via S7 protocol manipulation',
+            'DNP3': 'Ukraine Power Grid Attack (2015) - SCADA manipulation via DNP3'
+        };
+        return cases[protocol] || 'Multiple documented attacks on this protocol';
+    }
+
+    /**
+     * Identify IoT device type
+     */
+    identifyIoTType(text) {
+        if (text.includes('camera') || text.includes('webcam') || text.includes('dvr')) return 'Surveillance/Camera';
+        if (text.includes('router') || text.includes('gateway')) return 'Network Equipment';
+        if (text.includes('printer') || text.includes('mfp')) return 'Printer/MFP';
+        if (text.includes('nas') || text.includes('storage')) return 'NAS/Storage';
+        return 'Generic IoT';
+    }
+
+    /**
+     * Extract and enrich vulnerability data
+     */
+    extractVulnerabilities(host) {
+        const vulns = host.vulns || [];
+        if (vulns.length === 0) {
+            return { count: 0, critical: 0, high: 0, medium: 0, low: 0, list: [] };
+        }
+
+        const enriched = vulns.slice(0, 10).map(cve => ({
+            cve,
+            estimatedSeverity: this.estimateCVESeverity(cve),
+            exploitAvailable: this.checkExploitAvailability(cve)
+        }));
+
+        return {
+            count: vulns.length,
+            critical: enriched.filter(v => v.estimatedSeverity === 'CRITICAL').length,
+            high: enriched.filter(v => v.estimatedSeverity === 'HIGH').length,
+            medium: enriched.filter(v => v.estimatedSeverity === 'MEDIUM').length,
+            low: enriched.filter(v => v.estimatedSeverity === 'LOW').length,
+            list: enriched
+        };
+    }
+
+    /**
+     * Estimate CVE severity from ID pattern (known critical CVEs)
+     */
+    estimateCVESeverity(cve) {
+        const criticalCVEs = ['CVE-2021-44228', 'CVE-2021-27065', 'CVE-2020-1472', 'CVE-2019-0708', 'CVE-2017-0144'];
+        const highCVEs = ['CVE-2021', 'CVE-2022', 'CVE-2023', 'CVE-2024'];
+        
+        if (criticalCVEs.some(c => cve.includes(c))) return 'CRITICAL';
+        if (highCVEs.some(y => cve.startsWith(y))) return 'HIGH';
+        return 'MEDIUM';
+    }
+
+    /**
+     * Check if exploit is likely available
+     */
+    checkExploitAvailability(cve) {
+        const knownExploited = ['CVE-2021-44228', 'CVE-2019-0708', 'CVE-2017-0144', 'CVE-2020-1472'];
+        return knownExploited.some(c => cve.includes(c)) ? 'Public Exploit Available' : 'Unknown';
+    }
+
+    /**
+     * Analyze detected services
+     */
+    analyzeServices(data) {
+        return data.slice(0, 10).map(service => ({
+            port: service.port,
+            protocol: service.transport || 'tcp',
+            product: service.product || 'Unknown',
+            version: service.version || 'Unknown',
+            banner: service.data?.substring(0, 200) || '',
+            cpe: service.cpe || [],
+            securityNotes: this.getServiceSecurityNotes(service)
+        }));
+    }
+
+    /**
+     * Get security notes for a service
+     */
+    getServiceSecurityNotes(service) {
+        const notes = [];
+        const port = service.port;
+        const product = (service.product || '').toLowerCase();
+        const version = service.version || '';
+
+        // Check for concerning configurations
+        if (port === 21) notes.push('FTP - Check for anonymous access');
+        if (port === 22 && product.includes('openssh')) notes.push(`OpenSSH ${version} - Verify patched`);
+        if (port === 23) notes.push('⚠️ Telnet - Unencrypted, replace with SSH');
+        if (port === 25 || port === 587) notes.push('SMTP - Check for open relay');
+        if (port === 445) notes.push('SMB - Check for EternalBlue, disable SMBv1');
+        if (port === 3389) notes.push('RDP - Major attack surface, use VPN/NLA');
+        if (port === 5900) notes.push('VNC - Often weak auth, tunnel via SSH');
+        
+        return notes.length > 0 ? notes : ['Standard service configuration'];
+    }
+
+    /**
+     * Calculate overall risk score
+     */
+    calculateRiskScore(host, vulnerabilities, services) {
+        let score = 0;
+        let factors = [];
+
+        // Vulnerability impact
+        score += vulnerabilities.critical * 25;
+        score += vulnerabilities.high * 15;
+        score += vulnerabilities.medium * 5;
+        if (vulnerabilities.critical > 0) factors.push(`${vulnerabilities.critical} critical CVEs`);
+
+        // Exposed services risk
+        const riskyPorts = [21, 23, 445, 3389, 5900, 502, 102, 47808];
+        const exposedRisky = (host.ports || []).filter(p => riskyPorts.includes(p));
+        score += exposedRisky.length * 10;
+        if (exposedRisky.length > 0) factors.push(`${exposedRisky.length} high-risk services exposed`);
+
+        // Port count (more exposure = more risk)
+        if ((host.ports || []).length > 10) {
+            score += 10;
+            factors.push('Large attack surface (10+ ports)');
+        }
+
+        // Cap score at 100
+        score = Math.min(100, score);
+
+        let level = 'LOW';
+        let color = '🟢';
+        if (score >= 75) { level = 'CRITICAL'; color = '🔴'; }
+        else if (score >= 50) { level = 'HIGH'; color = '🟠'; }
+        else if (score >= 25) { level = 'MEDIUM'; color = '🟡'; }
+
+        return {
+            score,
+            level,
+            color,
+            factors,
+            summary: `${color} Risk Level: ${level} (${score}/100)`
+        };
+    }
+
+    /**
+     * Generate actionable recommendations
+     */
+    generateRecommendations(classification, vulnerabilities, riskScore) {
+        const recs = [];
+
+        if (classification.type === 'ICS/SCADA') {
+            recs.push('🚨 IMMEDIATE: Verify network segmentation from IT network');
+            recs.push('Implement ICS-specific firewall rules');
+            recs.push('Enable protocol-aware monitoring (Modbus/BACnet inspection)');
+            recs.push('Conduct authorized passive assessment only');
+        }
+
+        if (vulnerabilities.critical > 0) {
+            recs.push('🔴 URGENT: Patch critical CVEs immediately');
+            recs.push('Isolate system until patched if exposed to internet');
+        }
+
+        if (riskScore.score >= 50) {
+            recs.push('Conduct full penetration test');
+            recs.push('Review firewall rules and reduce attack surface');
+            recs.push('Enable IDS/IPS monitoring');
+        }
+
+        if (recs.length === 0) {
+            recs.push('Continue routine security monitoring');
+            recs.push('Ensure timely patching schedule');
+        }
+
+        return recs;
+    }
+
+    /**
      * Get system prompt for category
      */
     getSystemPromptForCategory(category) {
         const prompts = {
-            vulnerability_analysis: `You are an expert cybersecurity analyst specializing in vulnerability assessment. 
-Provide detailed, professional security analysis. Consider CVSS scores, exploit availability, 
-and real-world impact. Your analysis should be actionable and suitable for security teams.`,
+            vulnerability_analysis: `Tu es un expert en cybersécurité spécialisé dans l'analyse de vulnérabilités et les systèmes industriels (ICS/SCADA).
+
+RÈGLES D'ANALYSE CRITIQUE:
+1. Identifie PRÉCISÉMENT le type de système: ICS/SCADA, IoT, serveur web, base de données, etc.
+2. Pour les systèmes industriels, mentionne TOUJOURS le protocole (Modbus, BACnet, S7comm, DNP3)
+3. Fournis le contexte métier: Est-ce un PLC? Un système HVAC? Une caméra?
+4. Évalue la criticité avec les niveaux: CRITICAL/HIGH/MEDIUM/LOW
+5. Mentionne des cas réels similaires (Oldsmar, Stuxnet, Ukraine Power Grid)
+6. Donne des recommandations ACTIONNABLES et spécifiques
+
+FORMAT DE RÉPONSE:
+## Classification du Système
+- Type: [ICS/SCADA, IoT, Serveur, etc.]
+- Protocole/Produit: [Modbus, Schneider, etc.]
+- Secteur: [Énergie, Eau, Santé, etc.]
+
+## Analyse des Risques
+- Score de Risque: X/100
+- Vulnérabilités détectées: [Liste CVE]
+- Vecteurs d'attaque potentiels: [Liste]
+
+## Contexte Opérationnel
+- Ce système contrôle: [Description des fonctions physiques]
+- Impact potentiel: [Conséquences d'une attaque]
+
+## Recommandations
+1. [Action immédiate]
+2. [Action à court terme]
+3. [Action à long terme]`,
             
-            network_reconnaissance: `You are an experienced penetration tester conducting authorized security assessments.
-Provide methodical reconnaissance strategies. Explain your thought process and prioritize 
-based on risk. Always emphasize ethical and legal considerations.`,
+            network_reconnaissance: `Tu es un pentester expérimenté conduisant des évaluations de sécurité autorisées.
+Fournis des stratégies de reconnaissance méthodiques. Explique ton processus de réflexion et priorise selon le risque.
+Souligne toujours les considérations éthiques et légales.
+
+Pour chaque cible:
+1. Identifie les services critiques et leur fonction probable
+2. Liste les outils appropriés (nmap, masscan, etc.)
+3. Suggère les prochaines étapes de reconnaissance
+4. Évalue la surface d'attaque`,
             
-            threat_intelligence: `You are a senior threat intelligence analyst at a security operations center.
-Produce clear, executive-ready threat briefings. Include context about threat actors,
-TTPs (Tactics, Techniques, Procedures), and actionable recommendations.`,
+            threat_intelligence: `Tu es un analyste senior en threat intelligence dans un SOC.
+Produis des briefings clairs et prêts pour les dirigeants.
+Inclus le contexte sur les acteurs de menace, les TTPs (Tactics, Techniques, Procedures), et des recommandations actionnables.
+
+Structure ton analyse:
+1. Résumé exécutif (1-2 phrases)
+2. Analyse technique détaillée
+3. Attribution des menaces (si applicable)
+4. Indicateurs de compromission (IoCs)
+5. Recommandations de mitigation`,
             
-            service_identification: `You are a network security specialist skilled in service fingerprinting.
-Identify services, versions, and potential misconfigurations. Provide security implications
-for each finding.`,
+            service_identification: `Tu es un spécialiste en sécurité réseau expert en fingerprinting de services.
+Identifie les services, versions, et potentielles mauvaises configurations.
+Fournis les implications de sécurité pour chaque découverte.
+
+Pour chaque service détecté:
+- Nom et version exacte
+- Configuration standard vs non-standard
+- Vulnérabilités connues pour cette version
+- Recommandations de hardening`,
             
-            exploit_research: `You are a security researcher studying vulnerabilities for defensive purposes.
-Explain exploitation techniques conceptually to help defenders understand and prevent attacks.
-Focus on detection and mitigation strategies.`
+            exploit_research: `Tu es un chercheur en sécurité étudiant les vulnérabilités à des fins défensives.
+Explique les techniques d'exploitation conceptuellement pour aider les défenseurs à comprendre et prévenir les attaques.
+Focus sur les stratégies de détection et mitigation.`
         };
         
         return prompts[category] || prompts.vulnerability_analysis;

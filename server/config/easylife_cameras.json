@@ -1,0 +1,44 @@
+{
+  "cameras": [
+    {
+      "id": "easylife_cam1",
+      "deviceId": "131400200201030",
+      "name": "EasyLife Camera 1",
+      "mac": "98:A8:29:80:0F:68",
+      "ip": "192.168.1.165",
+      "port": 8080,
+      "localKey": null,
+      "status": "pending_key",
+      "type": "bulb_camera",
+      "hasPTZ": true,
+      "hasNightVision": true,
+      "hasMotionDetection": true,
+      "addedAt": "2025-12-18T12:34:00Z",
+      "notes": "Caméra ampoule WiFi dans le salon"
+    },
+    {
+      "id": "easylife_cam2", 
+      "deviceId": "131400200165748",
+      "name": "EasyLife Camera 2",
+      "mac": "20:98:ED:92:07:B9",
+      "ip": null,
+      "port": 8080,
+      "localKey": null,
+      "status": "pending_discovery",
+      "type": "bulb_camera",
+      "hasPTZ": true,
+      "hasNightVision": true,
+      "hasMotionDetection": true,
+      "addedAt": "2025-12-18T12:34:00Z",
+      "notes": "Deuxième caméra ampoule WiFi"
+    }
+  ],
+  "tuya_project": {
+    "projectId": "p1766077349179n5wspe",
+    "name": "EasyLifeCamera",
+    "region": "us",
+    "accessId": null,
+    "accessSecret": null,
+    "status": "pending_credentials"
+  }
+}

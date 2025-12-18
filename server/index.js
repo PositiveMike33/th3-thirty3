@@ -1232,6 +1232,16 @@ const logsRoutes = require('./logs_routes');
 app.use('/api/logs', logsRoutes);
 console.log('[SYSTEM] Logs routes mounted at /api/logs (Internal Console)');
 
+// Camera Control Routes (EasyLife IP Cameras)
+const cameraRoutes = require('./camera_routes');
+app.use('/api/cameras', cameraRoutes);
+console.log('[SYSTEM] Camera routes mounted at /api/cameras (EasyLife Integration)');
+
+// Tuya Camera Routes (Local Protocol Control)
+const tuyaRoutes = require('./tuya_routes');
+app.use('/api/tuya', tuyaRoutes);
+console.log('[SYSTEM] Tuya routes mounted at /api/tuya (EasyLife Local Control)');
+
 
 // Initialize Socket.io with HTTP server
 socketService.initialize(server);

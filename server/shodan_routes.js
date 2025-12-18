@@ -87,6 +87,100 @@ module.exports = (shodanService, modelMetricsService, llmService) => {
     });
 
     /**
+     * GET /shodan/analyze/:ip
+     * Get ENRICHED intelligence analysis for an IP
+     * Returns: Classification, vulnerabilities, risk score, recommendations
+     */
+    router.get('/analyze/:ip', async (req, res) => {
+        try {
+            const { ip } = req.params;
+            console.log(`[SHODAN] Analyzing IP with deep intelligence: ${ip}`);
+            
+            const analysis = await shodanService.analyzeHostIntelligence(ip);
+            
+            if (!analysis.success) {
+                return res.status(404).json(analysis);
+            }
+            
+            // Optional: Generate AI commentary on the analysis
+            if (req.query.withAI === 'true' && llmService) {
+                try {
+                    const aiPrompt = `Analyse cette cible basée sur les données Shodan suivantes:
+                    
+**Classification:** ${analysis.classification.type} (${analysis.classification.protocol || 'N/A'})
+**Organisation:** ${analysis.summary.organization}
+**ISP:** ${analysis.summary.isp}
+**Pays:** ${analysis.summary.country}
+**Ports ouverts:** ${analysis.networkProfile.openPorts.join(', ')}
+**Vulnérabilités:** ${analysis.vulnerabilities.count} (${analysis.vulnerabilities.critical} critiques)
+**Score de risque:** ${analysis.riskAssessment.summary}
+
+Fournis une analyse de sécurité professionnelle et détaillée.`;
+
+                    const systemPrompt = shodanService.getSystemPromptForCategory('vulnerability_analysis');
+                    const aiResponse = await llmService.generateResponse(
+                        aiPrompt,
+                        null,
+                        'local',
+                        'granite3.1-flash:latest',
+                        systemPrompt
+                    );
+                    
+                    analysis.aiAnalysis = aiResponse;
+                } catch (aiError) {
+                    analysis.aiAnalysis = `Erreur génération AI: ${aiError.message}`;
+                }
+            }
+            
+            res.json(analysis);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    /**
+     * POST /shodan/analyze/batch
+     * Analyze multiple IPs at once
+     */
+    router.post('/analyze/batch', async (req, res) => {
+        try {
+            const { ips } = req.body;
+            
+            if (!ips || !Array.isArray(ips)) {
+                return res.status(400).json({ error: 'Array of IPs required' });
+            }
+            
+            if (ips.length > 10) {
+                return res.status(400).json({ error: 'Maximum 10 IPs per batch' });
+            }
+            
+            const results = [];
+            for (const ip of ips) {
+                try {
+                    const analysis = await shodanService.analyzeHostIntelligence(ip);
+                    results.push(analysis);
+                } catch (e) {
+                    results.push({ ip, success: false, error: e.message });
+                }
+                // Rate limit: wait 500ms between requests
+                await new Promise(r => setTimeout(r, 500));
+            }
+            
+            // Summary stats
+            const summary = {
+                total: results.length,
+                successful: results.filter(r => r.success).length,
+                criticalRisk: results.filter(r => r.riskAssessment?.level === 'CRITICAL').length,
+                icsDetected: results.filter(r => r.classification?.type === 'ICS/SCADA').length
+            };
+            
+            res.json({ summary, results });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    /**
      * GET /shodan/dns/resolve?hostnames=google.com,facebook.com
      * Resolve hostnames to IPs
      */

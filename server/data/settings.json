@@ -1,21 +1,20 @@
-﻿{
-    "socials":  {
-                    "facebook":  false,
-                    "userApiKey":  "YOUR_USER_API_KEY",
-                    "x":  false,
-                    "instagram":  false,
-                    "anthropic":  "",
-                    "perplexity":  "YOUR_PERPLEXITY_KEY",
-                    "anythingllm_url":  "http://localhost:3001/api/v1",
-                    "anythingllm_key":  "YOUR_ANYTHINGLLM_KEY",
-                    "gemini":  "YOUR_GEMINI_KEY",
-                    "openai":  "YOUR_OPENAI_KEY",
-                    "groq":  "YOUR_GROQ_KEY"
-                },
-    "darkMode":  true,
-    "customWallpaper":  "",
-    "reflectionMode":  "ultra",
-    "themeMode":  "paint",
-    "autoCorrect":  true,
-    "computeMode":  "cloud"
+{
+  "darkMode": true,
+  "autoCorrect": true,
+  "computeMode": "cloud",
+  "reflectionMode": "ultra",
+  "socials": {
+    "facebook": false,
+    "instagram": false,
+    "x": false,
+    "telegram": false
+  },
+  "apiKeys": {
+    "openai": "",
+    "anthropic": "",
+    "perplexity": "",
+    "anythingllm_url": "",
+    "anythingllm_key": ""
+  },
+  "themeMode": "paint"
 }

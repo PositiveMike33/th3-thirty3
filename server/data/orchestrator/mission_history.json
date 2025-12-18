@@ -1160,5 +1160,63 @@
     },
     "synthesis": "### Résumé Exécutif\nLes équipes d'osint, hacking et générale ont été incapables de se connecter. Les tests doivent être réexaminés.\n\n### Conclusions Clés\n1. Équipes spécifiques (osint, hacking, générale) manquent.\n2. Tests nécessitent une revue pour s'assurer qu'ils sont correctement configurés et ciblent les bonnes ressources.\n\n### Recommandations\n1. Revoir et vérifier les commandes de test pour l'équipe d'osint, hacking et générale.\n2. Assurer que toutes les équipes ont accès aux informations nécessaires pour effectuer leurs tâches.\n3. Former ou renforcer l'équipe si nécessaire.\n\n### Risques Identifiés\n1. Risque de non-conformité des tests aux spécifications initiales.\n2. Risque d'erreur dans la configuration des ressources testées.\n3. Risque de manquement à la sécurité des données lors des tests.",
     "endTime": "2025-12-15T06:04:25.673Z"
+  },
+  {
+    "id": "1766071147613",
+    "task": "Simple test mission for integration",
+    "startTime": "2025-12-18T15:19:07.613Z",
+    "status": "completed",
+    "phases": [
+      {
+        "name": "Phase 1",
+        "team": "osint|hacking|general",
+        "agents": [
+          "agent1",
+          "agent2"
+        ],
+        "objective": "Conduct OSINT and hacking analysis to identify potential vulnerabilities for the integration test mission.",
+        "startTime": "2025-12-18T15:20:00.226Z",
+        "responses": [
+          {
+            "agent": "agent1",
+            "success": false,
+            "error": "Team osint|hacking|general not found"
+          },
+          {
+            "agent": "agent2",
+            "success": false,
+            "error": "Team osint|hacking|general not found"
+          }
+        ],
+        "endTime": "2025-12-18T15:20:17.577Z"
+      }
+    ],
+    "results": [],
+    "analysis": {
+      "missionType": "analysis",
+      "priority": "medium",
+      "estimatedTime": "30",
+      "phases": [
+        {
+          "name": "Phase 1",
+          "team": "osint|hacking|general",
+          "agents": [
+            "agent1",
+            "agent2"
+          ],
+          "objective": "Conduct OSINT and hacking analysis to identify potential vulnerabilities for the integration test mission."
+        }
+      ],
+      "risks": [
+        "False positives from extensive OSINT gathering",
+        "Exploitation risks due to active reconnaissance activities"
+      ],
+      "requiredData": [
+        "Network topology",
+        "System configuration details"
+      ]
+    },
+    "synthesis": "### Résumé Exécutive\n\nLes équipes d'agents osint, hacking et générale n'ont pas été trouvées pour cette mission. Il est nécessaire de vérifier les configurations des agents ou la présence de ces rôles dans l'équipe.\n\n### Conclusions Clés\n\n1. Les équipes spécifiques (osint, hacking, générale) ne sont pas disponibles.\n2. Il y a une perte d'efficacité pour cette mission en raison de la non-disponibilité des agents appropriés.\n\n### Recommandations\n\n1. Vérifier les configurations et le déploiement des équipes spécifiques (osint, hacking, générale).\n2. Saisir les responsables concernant la disponibilité des équipes spécifiques.\n3. Adapter l'approche de la mission en fonction des rôles manquants.\n\n### Risques Identifiés\n\n1. La mission ne pourra pas être exécutée correctement sans les agents osint, hacking et générale.\n2. Il y a une perte potentielle d'efficacité dans l'exécution de la mission.",
+    "endTime": "2025-12-18T15:20:51.432Z"
   }
 ]
