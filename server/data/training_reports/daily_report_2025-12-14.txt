@@ -1,0 +1,148 @@
+
+══════════════════════════════════════════════════════════════════════
+   📊 COMPTE-RENDU TEMPS RÉEL - TRAINING DES AGENTS
+   Date: 2025-12-14 01 h 23 min 54 s
+   Seuil latence critique: 20s
+══════════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: OSINT
+   Dernière mise à jour: 2025-12-08T10:07:41.068Z
+
+📈 PERFORMANCE:
+   ⚠️ Aucune requête traitée - Agent en veille
+   → Action: Initier des sessions de calibration
+
+🎓 PROGRESSION TRAINING:
+   • Sessions: 0 (Initialization requise)
+   • Benchmarks effectués: 2
+
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: Cybersécurité
+   Dernière mise à jour: 2025-12-14T04:25:47.341Z
+
+📈 PERFORMANCE:
+   • Requêtes traitées: 2
+   • Taux de succès: 100.0%
+   • Temps moyen: 23.11s
+   🚨 ALERTE CRITIQUE: Latence 23.1s > seuil 20s
+
+🚀 DÉBIT:
+   • 32.7 tokens/seconde
+   ⚡ Débit élevé - Performance optimale
+
+🎓 PROGRESSION TRAINING:
+   • Sessions enregistrées: 2
+   🌱 Phase de démarrage du training
+
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: ChatGPT-4o
+   Dernière mise à jour: 2025-12-13T07:13:21.997Z
+
+📈 PERFORMANCE:
+   • Requêtes traitées: 1
+   • Taux de succès: 100.0%
+   • Temps moyen: 7.01s
+   ✅ Réactivité excellente
+
+🚀 DÉBIT:
+   • 17.1 tokens/seconde
+   📊 Débit standard
+
+🎓 PROGRESSION TRAINING:
+   • Sessions enregistrées: 1
+   🌱 Phase de démarrage du training
+   • Benchmarks effectués: 1
+
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: GPT-4o
+   Dernière mise à jour: 2025-12-08T10:08:35.492Z
+
+📈 PERFORMANCE:
+   ⚠️ Aucune requête traitée - Agent en veille
+   → Action: Initier des sessions de calibration
+
+🎓 PROGRESSION TRAINING:
+   • Sessions: 0 (Initialization requise)
+   • Benchmarks effectués: 1
+
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: GPT-4o-Mini
+   Dernière mise à jour: 2025-12-08T10:08:31.357Z
+
+📈 PERFORMANCE:
+   ⚠️ Aucune requête traitée - Agent en veille
+   → Action: Initier des sessions de calibration
+
+🎓 PROGRESSION TRAINING:
+   • Sessions: 0 (Initialization requise)
+   • Benchmarks effectués: 1
+
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: Sonar-Pro
+   Dernière mise à jour: 2025-12-13T18:38:48.739Z
+
+📈 PERFORMANCE:
+   • Requêtes traitées: 5
+   • Taux de succès: 100.0%
+   • Temps moyen: 5.55s
+   ✅ Réactivité excellente
+
+🚀 DÉBIT:
+   • 44.4 tokens/seconde
+   ⚡ Débit élevé - Performance optimale
+
+🎓 PROGRESSION TRAINING:
+   • Sessions enregistrées: 5
+   ✅ Apprentissage continu actif
+
+
+────────────────────────────────────────────────────────────
+📊 RAPPORT D'ENTRAÎNEMENT: Sonar-Reasoning
+   Dernière mise à jour: 2025-12-13T22:15:54.662Z
+
+📈 PERFORMANCE:
+   • Requêtes traitées: 2
+   • Taux de succès: 100.0%
+   • Temps moyen: 29.18s
+   🚨 ALERTE CRITIQUE: Latence 29.2s > seuil 20s
+
+🚀 DÉBIT:
+   • 58.7 tokens/seconde
+   ✅ Débit exceptionnel - Mode turbo actif
+
+🎓 PROGRESSION TRAINING:
+   • Sessions enregistrées: 2
+   🌱 Phase de démarrage du training
+
+
+🏆 CLASSEMENT PAR PERFORMANCE:
+   🥇 Sonar-Reasoning: 58.7 tok/s | 29.2s 🐢
+   🥈 Sonar-Pro: 44.4 tok/s | 5.5s ✅
+   🥉 Cybersécurité: 32.7 tok/s | 23.1s 🐢
+   4. ChatGPT-4o: 17.1 tok/s | 7.0s ✅
+
+══════════════════════════════════════════════════════════════════════
+   🚨 ALERTES ACTIVES
+══════════════════════════════════════════════════════════════════════
+🔴 [CRITICAL] Cybersécurité: Latence critique: 23.1s
+🔴 [CRITICAL] Sonar-Reasoning: Latence critique: 29.2s
+
+══════════════════════════════════════════════════════════════════════
+   🎯 RECOMMANDATIONS GLOBALES
+══════════════════════════════════════════════════════════════════════
+
+1. 🔍 OSINT: Activer avec des requêtes de reconnaissance ciblées
+2. 🛡️ Cybersécurité: Continuer le training - surveiller latence
+3. 🌐 Sonar-Pro: Leader débit+réactivité - Assigner tâches complexes
+4. 💭 Sonar-Reasoning: Turbo mode - Exploiter pour analyses profondes
+5. 🤖 ChatGPT-4o: Augmenter sessions pour calibration complète
+
+══════════════════════════════════════════════════════════════════════
+
+--- Generated: 2025-12-14T06:23:54.417Z ---

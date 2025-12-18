@@ -1,0 +1,79 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.development
+.env.production
+.DS_Store
+coverage/
+.vscode/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.idea/
+*.swp
+*.swo
+
+# Secrets & Credentials (NEVER COMMIT)
+server/tokens/
+credentials.json
+*.pem
+*.key
+secrets/
+google-credentials.json
+
+# Fabric patterns (cloned separately)
+server/fabric/
+fabric/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Large files
+*.zip
+*.tar.gz
+*.mp4
+*.mkv
+
+# Local data
+*.db
+*.sqlite
+pieces_memory/
+anythingllm-data/
+
+# Runtime
+*.pid
+pids/
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Temporary files (Google Drive sync, etc.)
+.tmp.driveupload/
+.tmp*/
+*.lance
+*.txn
+
+# Large data files
+server/data/*.lance
+server/data/*.json
+!server/data/model_metrics.json
+
+# Session files
+server/sessions/
+
+# VPN configs (may contain secrets)
+server/vpn_configs/auth.txt
+
+# Heavy external repos (clone separately)
+server/ollama_proxy_server/
+server/tools/sherlock/
+
+# Sensitive data files
+server/data/settings.json

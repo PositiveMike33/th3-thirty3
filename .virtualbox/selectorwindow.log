@@ -1,0 +1,4 @@
+11:51:44.335146 Log continuation - Log started 2023-05-19T00:46:39.386426400Z
+11:53:31.059782 GUI: UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized: Screen 0 work area is formally resized to: 0x0 x 1600x852
+11:54:56.962720 GUI: UICommon: Handling aboutToQuit request..
+11:54:57.570037 GUI: UICommon: aboutToQuit request handled!

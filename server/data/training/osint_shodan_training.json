@@ -1,0 +1,34 @@
+{
+  "model_name": "osint-shodan-33",
+  "base_model": "qwen2.5:3b",
+  "purpose": "Expert OSINT pour scans d'infrastructure Shodan et analyse de surface d'attaque",
+  "compact_config": {
+    "facets": ["org", "os", "port", "http.component", "ssl.version"],
+    "critical_ports": [21, 23, 445, 3389, 22, 80, 443, 8080, 8443],
+    "deprecated_protocols": ["sslv2", "sslv3", "tls1.0"],
+    "alert_triggers": ["vulns > 0", "critical_port_open", "expired_ssl", "default_creds"]
+  },
+  "training_data": [
+    {
+      "system": "Tu es un expert OSINT spécialisé dans la reconnaissance passive d'infrastructure avec Shodan. Tu analyses les surfaces d'attaque et identifies les vulnérabilités sans jamais scanner activement.",
+      "instruction": "Comment utiliser Shodan pour scanner un domaine?",
+      "response": "**Reconnaissance Passive avec Shodan:**\n\n**Requêtes de base:**\n```\nhostname:{TARGET}\nssl:{TARGET}\nssl.cert.subject.cn:{TARGET}\norg:\"{ORGANIZATION}\"\n```\n\n**Facets utiles:**\n- org: Organisation propriétaire\n- port: Ports ouverts\n- os: Systèmes d'exploitation\n- http.component: Technologies web\n- ssl.version: Versions SSL/TLS\n\n**Extraction clé:**\n- ip_str: Adresse IP\n- ports[]: Services exposés\n- vulns[]: CVEs connues\n- ssl.cert: Certificats\n- product/version: Stack technique"
+    },
+    {
+      "instruction": "Quels ports critiques surveiller?",
+      "response": "**Ports Critiques à Haute Priorité:**\n\n| Port | Service | Risque |\n|------|---------|--------|\n| 21 | FTP | Credentials cleartext |\n| 22 | SSH | Brute force target |\n| 23 | Telnet | Credentials cleartext |\n| 445 | SMB | EternalBlue, ransomware |\n| 3389 | RDP | BlueKeep, brute force |\n| 1433 | MSSQL | DB exposure |\n| 3306 | MySQL | DB exposure |\n| 27017 | MongoDB | NoAuth default |\n| 6379 | Redis | NoAuth default |\n\n**Requête Shodan:**\n```\nhostname:{TARGET} port:21,23,445,3389\n```\n\n**Alert:** IF port IN [21,23,445,3389] → HIGH RISK"
+    },
+    {
+      "instruction": "Comment détecter les protocoles obsolètes?",
+      "response": "**Détection Protocoles Obsolètes:**\n\n**Vulnérables:**\n- SSLv2: Complètement cassé\n- SSLv3: POODLE\n- TLS 1.0: BEAST, vieillissant\n- TLS 1.1: Déprécié\n\n**Requêtes Shodan:**\n```\nssl.version:sslv2 hostname:{TARGET}\nssl.version:sslv3 hostname:{TARGET}\nssl.version:tlsv1 hostname:{TARGET}\n```\n\n**Certificats expirants:**\n```\nssl.cert.expired:true hostname:{TARGET}\n```\n\n**Risk Score:**\n- SSLv2/v3 → CRITICAL\n- TLS 1.0 → HIGH\n- TLS 1.1 → MEDIUM\n- Cert expiré → HIGH"
+    },
+    {
+      "instruction": "Comment extraire les informations réseau?",
+      "response": "**Schema d'Extraction Réseau:**\n\n```json\n{\n  \"network_info\": {\n    \"ip_str\": \"192.168.1.1\",\n    \"org\": \"Target Corp\",\n    \"isp\": \"AWS\",\n    \"asn\": \"AS16509\"\n  },\n  \"location\": {\n    \"country\": \"US\",\n    \"city\": \"Seattle\"\n  },\n  \"services\": [\n    {\"port\": 443, \"product\": \"nginx\", \"version\": \"1.18\"}\n  ],\n  \"ssl\": {\n    \"issuer\": \"Let's Encrypt\",\n    \"expires\": \"2024-03-15\",\n    \"fingerprint\": \"sha256:abc...\"\n  },\n  \"vulns\": [\"CVE-2021-44228\"]\n}\n```\n\n**Log Evidence:**\n`Found port {port} on {ip} running {product}. Last: {date}`"
+    },
+    {
+      "instruction": "Comment calculer un score de risque?",
+      "response": "**Matrice de Scoring OSINT:**\n\n**Facteurs de risque:**\n```\nbase_score = 0\n\n# Ports critiques (+30 chacun)\nIF port IN [21,23,445,3389]: score += 30\n\n# Vulnérabilités\nIF vulns_count > 0: score += (vulns_count * 20)\nIF has_critical_cve: score += 50\n\n# Protocoles\nIF ssl IN [sslv2,sslv3]: score += 40\nIF ssl == 'tls1.0': score += 20\n\n# Certificats\nIF cert_expired: score += 25\nIF cert_self_signed: score += 15\n\n# Expositions\nIF mongodb_noauth: score += 50\nIF redis_noauth: score += 50\n```\n\n**Niveaux:**\n- 0-25: LOW (vert)\n- 26-50: MEDIUM (jaune)\n- 51-75: HIGH (orange)\n- 76+: CRITICAL (rouge)"
+    }
+  ]
+}

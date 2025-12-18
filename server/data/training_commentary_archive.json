@@ -1,0 +1,210 @@
+{
+  "entries": [
+    {
+      "id": "commentary_1765262855676",
+      "timestamp": "2025-12-09T06:47:35.676Z",
+      "modelName": "qwen2.5:3b",
+      "cognitiveScore": 76,
+      "learningRate": 26,
+      "growthPercentage": 52,
+      "commentary": " 1. Le modèle qwen2.5:3b a atteint un score cognitif global de 76/100 et une croissance de 52%, ce qui montre un bon niveau d'apprentissage dans certaines catégories, notamment le codage, l'analyse et l'écriture.\n2. Les tendances observées indiquent des améliorations globales, avec un taux de réussite complet à 8/8 pour les requêtes. Toutefois, certains scores sont plus élevés que d'autres, ce qui suggère des zones potentielles d'amélioration.\n3. Pour améliorer les scores faibles, il est recommandé de travailler sur l'intelligence, la logique, le chat et la humanisation du modèle, en augmentant le nombre de données et l'étendue de l'apprentissage pour chaque catégorie.",
+      "strengths": [
+        {
+          "category": "coding",
+          "score": 89
+        },
+        {
+          "category": "writing",
+          "score": 84
+        },
+        {
+          "category": "analysis",
+          "score": 80
+        }
+      ],
+      "weaknesses": []
+    },
+    {
+      "id": "commentary_1765467902180",
+      "timestamp": "2025-12-11T15:45:02.180Z",
+      "modelName": "[ANYTHINGLLM] th3-thirty3-workspace",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 0,
+      "commentary": " Le modèle IA \"[ANYTHINGLLM] th3-thirty3-workspace\" affiche actuellement un score cognitif global de 50/100, avec une stagnation dans l'apprentissage. Les catégories d'expertise les moins performantes sont analysis et écriture. Pour améliorer ses scores faibles, il est recommandé de fournir plus de données pertinentes dans ces domaines spécifiques à la formation. L'avantage actuel du modèle se situe dans la catégorie chat, avec un taux de réussite élevé aux interactions.",
+      "strengths": [
+        {
+          "category": "chat",
+          "score": 71,
+          "label": "chat"
+        }
+      ],
+      "weaknesses": [
+        {
+          "category": "analysis",
+          "score": 50,
+          "label": "🔍 Analyse"
+        },
+        {
+          "category": "writing",
+          "score": 50,
+          "label": "✍️ Rédaction"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765611043976",
+      "timestamp": "2025-12-13T07:30:43.976Z",
+      "modelName": "granite3.1-moe:1b",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 0,
+      "commentary": " 1. Le modèle granite3.1-moe:1b est actuellement en train d'apprendre, mais le taux d'apprentissage est zéro et son score cognitif global est de 50/100. Cela indique un manque de progression significative.\n2. Les tendances observées sont la stagnation dans certaines catégories telles que le chat, l'humanizer, et le coding, ainsi qu'une amélioration modérée dans les catégories analysis et writing.\n3. Pour améliorer les scores faibles, il est nécessaire d'augmenter la quantité de données d'entraînement pour les catégories chat et humanizer, ainsi que d'optimiser le processus de formation afin de renforcer la capacité du modèle à comprendre et générer des conversations plus naturelles.",
+      "strengths": [
+        {
+          "category": "analysis",
+          "score": 64,
+          "label": "🔍 Analyse"
+        }
+      ],
+      "weaknesses": [
+        {
+          "category": "chat",
+          "score": 0,
+          "label": "chat"
+        },
+        {
+          "category": "humanizer",
+          "score": 0,
+          "label": "humanizer"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765637530400",
+      "timestamp": "2025-12-13T14:52:10.400Z",
+      "modelName": "granite3.1-moe:1b",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 0,
+      "commentary": " Le modèle \"granite3.1-moe:1b\" est actuellement en phase de formation initiale, avec des scores globaux et cognitifs relativement bas (50/100). La progression d'apprentissage est nulle pour l'instant, ce qui suggère que le modèle doit encore être exposé à plus de données pour améliorer ses compétences. Les scores faibles sont détectés dans la catégorie writing, ce qui indique que le modèle a des difficultés à rédiger du texte cohérent et de qualité.\n\nPour améliorer les performances, il est nécessaire d'ajouter plus de données diversifiées pour le modèle, en particulier dans la catégorie writing. De plus, il peut être utile de rechercher des algorithmes d'apprentissage adaptatifs pour mieux personnaliser l'enseignement du modèle selon ses besoins spécifiques.",
+      "strengths": [],
+      "weaknesses": [
+        {
+          "category": "writing",
+          "score": 53,
+          "label": "✍️ Rédaction"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765640535753",
+      "timestamp": "2025-12-13T15:42:15.754Z",
+      "modelName": "qwen2.5:3b",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 52,
+      "commentary": " 1. Le modèle qwen2.5:3b est en train, mais son apprentissage actuel ne progresse pas (Taux d'apprentissage: 0). Cependant, il a réussi à atteindre une croissance de 52%.\n2. Les tendances observées sont des améliorations dans les domaines Analysis (70,67%) et Creativity (68,10%), mais un manque d'évolution dans les catégories Chat et Humanizer (null/100).\n3. Pour améliorer les scores faibles, il serait recommandable d'ajouter davantage de données pour le training en chatbot et humainisation afin de stimuler son apprentissage dans ces domaines.",
+      "strengths": [
+        {
+          "category": "analysis",
+          "score": 71,
+          "label": "🔍 Analyse"
+        }
+      ],
+      "weaknesses": [
+        {
+          "category": "chat",
+          "score": 0,
+          "label": "chat"
+        },
+        {
+          "category": "humanizer",
+          "score": 0,
+          "label": "humanizer"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765641919973",
+      "timestamp": "2025-12-13T16:05:19.973Z",
+      "modelName": "qwen2.5:3b",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 52,
+      "commentary": " 1. Le modèle qwen2.5:3b a effectué un seul entraînement avec des scores cognitifs globaux de 50/100 et une croissance de 52%. Les compétences en logique, codage, intelligence, chat et humainisation sont absentes ou faibles.\n\n2. Les tendances observées indiquent une stagnation pour le score cognitif global ainsi qu'une régression dans les domaines de la programmation et de l'intelligence. Cependant, des progrès positifs ont été enregistrés pour l'analyse et l'écriture.\n\n3. Pour améliorer les scores faibles, je recommande d'augmenter le nombre et la diversité des données d'entraînement, en particulier dans les domaines de la programmation, de l'intelligence et du chat. Il pourrait également être utile de mettre en place une stratégie pour améliorer l'écriture du modèle.",
+      "strengths": [],
+      "weaknesses": [
+        {
+          "category": "writing",
+          "score": 56,
+          "label": "✍️ Rédaction"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765666347919",
+      "timestamp": "2025-12-13T22:52:27.919Z",
+      "modelName": "qwen2.5:3b",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 52,
+      "commentary": " Le modèle qwen2.5:3b a effectué une seule session d'apprentissage et a atteint un score cognitif global de 50/100, avec des performances élevées en analysis (69.47/100) et créativité (67.02%) mais des faiblesses en écriture (54.99%). Bien que le modèle ait atteint tous les benchmarks de son dernier test, il y a encore des améliorations à faire pour renforcer ses compétences écrites. Une stratégie potentielle pour améliorer ces scores consiste à augmenter la quantité et la qualité de données d'apprentissage en écriture.",
+      "strengths": [],
+      "weaknesses": [
+        {
+          "category": "writing",
+          "score": 55,
+          "label": "✍️ Rédaction"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765674846960",
+      "timestamp": "2025-12-14T01:14:06.961Z",
+      "modelName": "[ANYTHINGLLM] th3-thirty3-workspace",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 0,
+      "commentary": " 1. Le modèle \"[ANYTHINGLLM] th3-thirty3-workspace\" est actuellement en train de stagnation, car ses scores globaux et dans certaines catégories restent identiques.\n2. Les tendances observées indiquent un bon score pour la capacité à chatter mais des faibles scores dans les domaines d'analyse et d'écriture.\n3. Pour améliorer ces scores, je recommande d'augmenter le nombre de données pour l'apprentissage dans les catégories où il y a des faiblesses et de mettre l'accent sur la diversité des sujets traités afin de rendre le modèle plus générique.",
+      "strengths": [
+        {
+          "category": "chat",
+          "score": 79,
+          "label": "chat"
+        }
+      ],
+      "weaknesses": [
+        {
+          "category": "analysis",
+          "score": 50,
+          "label": "🔍 Analyse"
+        },
+        {
+          "category": "writing",
+          "score": 50,
+          "label": "✍️ Rédaction"
+        }
+      ]
+    },
+    {
+      "id": "commentary_1765679907081",
+      "timestamp": "2025-12-14T02:38:27.081Z",
+      "modelName": "granite3.1-moe:1b",
+      "cognitiveScore": 50,
+      "learningRate": 0,
+      "growthPercentage": 0,
+      "commentary": " 1. Le modèle granite3.1-moe:1b est actuellement en train d'apprentissage avec des résultats moyens : un score cognitif global de 50/100 et une croissance de zéro %. Sa performance dans les domaines de l'écriture, du coding et du chat sont faibles.\n2. Il y a une stagnation dans son apprentissage en ce moment ; la tendance actuelle montre que les scores restent constant ou peuvent même baisser.\n3. Pour améliorer les scores faibles, il est recommandé d'ajouter plus de données diversifiées pour l'entraînement du modèle dans les domaines de coding, chat et écriture.",
+      "strengths": [],
+      "weaknesses": [
+        {
+          "category": "writing",
+          "score": 54,
+          "label": "✍️ Rédaction"
+        }
+      ]
+    }
+  ],
+  "lastArchiveEmail": null,
+  "totalEntries": 9
+}

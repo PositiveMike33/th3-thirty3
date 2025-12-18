@@ -1,0 +1,50 @@
+# Th3 Thirty3 - Docker Compose Configuration
+# Connects all services: Server, Frontend, and Training Dashboard
+
+services:
+  # Backend API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: th3-server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # API Keys (loaded from .env or set here)
+      - ANYTHING_LLM_URL=${ANYTHING_LLM_URL:-http://host.docker.internal:3001}
+      - ANYTHING_LLM_KEY=${ANYTHING_LLM_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./server/data:/app/data  # Persist model metrics and settings
+      - ./server/.env:/app/.env:ro  # Mount environment file
+    networks:
+      - th3-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Access host services (Ollama)
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./interface
+      dockerfile: Dockerfile
+    container_name: th3-frontend
+    ports:
+      - "5174:80"
+    depends_on:
+      - server
+    networks:
+      - th3-network
+    restart: unless-stopped
+
+networks:
+  th3-network:
+    driver: bridge
+
+volumes:
+  server-data:

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "TECH-1764950597719",
+    "name": "Jean-François Tremblay",
+    "email": "jf.tremblay@example.com",
+    "role": "mecano",
+    "shift": "day",
+    "department": "packaging",
+    "createdAt": "2025-12-05T16:03:17.719Z",
+    "active": true
+  },
+  {
+    "id": "TECH-1764950597720",
+    "name": "Marc Gagnon",
+    "email": "marc.gagnon@example.com",
+    "role": "mecano",
+    "shift": "evening",
+    "department": "packaging",
+    "createdAt": "2025-12-05T16:03:17.720Z",
+    "active": true
+  },
+  {
+    "id": "TECH-1764950597720",
+    "name": "Sophie Lavoie",
+    "email": "sophie.lavoie@example.com",
+    "role": "electro",
+    "shift": "day",
+    "department": "packaging",
+    "createdAt": "2025-12-05T16:03:17.720Z",
+    "active": true
+  },
+  {
+    "id": "TECH-1764950597721",
+    "name": "Pierre Côté",
+    "email": "pierre.cote@example.com",
+    "role": "supervisor",
+    "shift": "day",
+    "department": "packaging",
+    "createdAt": "2025-12-05T16:03:17.721Z",
+    "active": true
+  }
+]

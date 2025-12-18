@@ -1,0 +1,108 @@
+{
+  "users": [
+    {
+      "id": "admin_000",
+      "username": "th3thirty3",
+      "email": "admin@nexus33.io",
+      "password": "$2b$12$yMUvPIMlJd6uR21z.XUDTO6fXVxAA4QyynsyocsBC8n0WTXeqgXQa",
+      "key": "sk-ADMIN-TH3-THIRTY3-MASTER-KEY",
+      "tier": "architect",
+      "createdAt": "2025-01-01T00:00:00Z",
+      "lastLogin": "2025-12-13T11:13:39.679Z",
+      "profile": {
+        "firstName": "Admin",
+        "lastName": "Nexus33",
+        "avatar": null,
+        "bio": "System Administrator"
+      },
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "fr"
+      },
+      "usage": {
+        "chatCount": 0,
+        "searchCount": 0,
+        "lastActive": "2025-12-13T11:13:39.681Z"
+      }
+    },
+    {
+      "id": "test_initiate",
+      "username": "newbie",
+      "email": "newbie@test.com",
+      "password": "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4Q.j4TtRvZnB/Ovu",
+      "key": "sk-TEST-INITIATE",
+      "tier": "initiate",
+      "createdAt": "2025-12-03T00:00:00Z",
+      "lastLogin": null,
+      "profile": {
+        "firstName": "Test",
+        "lastName": "User",
+        "avatar": null,
+        "bio": ""
+      },
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "en"
+      },
+      "usage": {
+        "chatCount": 0,
+        "searchCount": 0,
+        "lastActive": null
+      }
+    },
+    {
+      "id": "test_operator",
+      "username": "pro_user",
+      "email": "pro@test.com",
+      "password": "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4Q.j4TtRvZnB/Ovu",
+      "key": "sk-TEST-OPERATOR",
+      "tier": "operator",
+      "createdAt": "2025-12-03T00:00:00Z",
+      "lastLogin": null,
+      "profile": {
+        "firstName": "Pro",
+        "lastName": "User",
+        "avatar": null,
+        "bio": ""
+      },
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "en"
+      },
+      "usage": {
+        "chatCount": 0,
+        "searchCount": 0,
+        "lastActive": null
+      }
+    },
+    {
+      "id": "5e147687-63fe-4491-adee-b4b474a20427",
+      "username": "mike",
+      "email": "mike@nexus33.io",
+      "password": "$2b$12$4sdYhk2ipGvRw3xz3zLKVup4xPBrSgc6HqeqM8CA7KK5MiX81l3w2",
+      "tier": "initiate",
+      "key": "sk-1318f5d8f09942d081b4dbea867a0611",
+      "createdAt": "2025-12-11T11:05:51.364Z",
+      "lastLogin": "2025-12-11T11:34:47.343Z",
+      "profile": {
+        "firstName": "",
+        "lastName": "",
+        "avatar": null,
+        "bio": ""
+      },
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "fr"
+      },
+      "usage": {
+        "chatCount": 0,
+        "searchCount": 0,
+        "lastActive": "2025-12-11T11:34:47.343Z"
+      }
+    }
+  ]
+}
