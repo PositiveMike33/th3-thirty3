@@ -77,3 +77,19 @@ server/tools/sherlock/
 
 # Sensitive data files
 server/data/settings.json
+server/data/users.json
+server/data/sessions/
+server/data/corrections-*.json
+
+# Security scripts output
+*.secret
+*.credentials
+
+# Backup files (may contain sensitive data)
+*.bak
+*.backup
+*~
+
+# Production secrets
+.env.production
+.env.staging

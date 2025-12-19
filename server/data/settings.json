@@ -1,25 +1,20 @@
 {
   "darkMode": true,
   "autoCorrect": true,
-  "computeMode": "cloud",
+  "computeMode": "local",
   "reflectionMode": "ultra",
-  "themeMode": "paint",
-  "customWallpaper": "",
   "socials": {
-    "facebook": true,
-    "instagram": true,
-    "x": true
+    "facebook": false,
+    "instagram": false,
+    "x": false,
+    "telegram": false
   },
   "apiKeys": {
     "openai": "",
     "anthropic": "",
     "perplexity": "",
-    "anythingllm_url": "http://localhost:3001/api/v1",
-    "anythingllm_key": "N1NP3NN-DH3MB05-J9CRN92-27SFYS9",
-    "pieces_host": "https://th3thirty3.pieces.cloud",
-    "gemini": "",
-    "ollama_direct_url": "http://localhost:11434",
-    "ollama_proxy_url": "http://localhost:8080",
-    "ollama_use_proxy": true
-  }
+    "anythingllm_url": "",
+    "anythingllm_key": ""
+  },
+  "themeMode": "dark"
 }

@@ -3,6 +3,13 @@
  * Teste tous les systèmes: Director, Agents, Optimizer, Training
  */
 
+// API Key for authentication (Admin key)
+const API_KEY = 'sk-ADMIN-TH3-THIRTY3-MASTER-KEY';
+const HEADERS = {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY
+};
+
 async function runGlobalTest() {
     const results = {
         timestamp: new Date().toISOString(),
@@ -16,7 +23,7 @@ async function runGlobalTest() {
     // Test 1: Director Status
     try {
         console.log('1 Test Director Status...');
-        const res = await fetch('http://localhost:3000/api/director/status');
+        const res = await fetch('http://localhost:3000/api/director/status', { headers: HEADERS });
         const data = await res.json();
         if (data.success && data.agents.length >= 7) {
             console.log('    PASS - 7 agents configurés');
@@ -35,7 +42,7 @@ async function runGlobalTest() {
     // Test 2: Cloud Optimizer
     try {
         console.log('\n2 Test Cloud Optimizer...');
-        const res = await fetch('http://localhost:3000/api/cloud-optimizer/status');
+        const res = await fetch('http://localhost:3000/api/cloud-optimizer/status', { headers: HEADERS });
         const data = await res.json();
         if (data.success && data.isRunning) {
             console.log('    PASS - Optimizer running');
@@ -55,7 +62,7 @@ async function runGlobalTest() {
     // Test 3: Training Commentary
     try {
         console.log('\n3 Test Training Commentary...');
-        const res = await fetch('http://localhost:3000/api/real-training/commentary?limit=3');
+        const res = await fetch('http://localhost:3000/api/real-training/commentary?limit=3', { headers: HEADERS });
         const data = await res.json();
         if (data.success) {
             console.log(`    PASS - ${data.count} commentaires trouvés`);
@@ -75,7 +82,7 @@ async function runGlobalTest() {
         console.log('\n4 Test Director Chat (Security)...');
         const res = await fetch('http://localhost:3000/api/director/chat', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: HEADERS,
             body: JSON.stringify({ message: 'Explique les bases du pentest' })
         });
         const data = await res.json();
@@ -96,7 +103,7 @@ async function runGlobalTest() {
     // Test 5: Model Metrics
     try {
         console.log('\n5 Test Model Metrics...');
-        const res = await fetch('http://localhost:3000/models/metrics');
+        const res = await fetch('http://localhost:3000/models/metrics', { headers: HEADERS });
         const data = await res.json();
         const modelCount = Object.keys(data).length;
         if (modelCount > 0) {
