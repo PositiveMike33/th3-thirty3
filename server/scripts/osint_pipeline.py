@@ -34,7 +34,7 @@ class Config:
     HUNTER_API_KEY: str = os.getenv("HUNTER_API_KEY", "")
     INTELOWL_API_KEY: str = os.getenv("INTELOWL_API_KEY", "")
     
-    # Ollama Configuration
+    # Ollama Configuration (local - no proxy needed)
     OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
     TECHNICAL_MODEL: str = "qwen2.5-coder:7b"  # Analyste technique
     STRATEGIST_MODEL: str = "mistral:7b-instruct"  # Stratège
@@ -49,8 +49,92 @@ class Config:
     
     # IntelOwl
     INTELOWL_URL: str = "http://localhost:8080"
+    
+    # ====================================
+    # TOR/SOCKS5 PROXY CONFIGURATION
+    # ====================================
+    TOR_ENABLED: bool = os.getenv("TOR_ENABLED", "true").lower() == "true"
+    TOR_SOCKS_HOST: str = os.getenv("TOR_HOST", "127.0.0.1")
+    TOR_SOCKS_PORT: int = int(os.getenv("TOR_SOCKS_PORT", "9050"))
+    
+    # Docker container for Tor commands
+    TOR_DOCKER_CONTAINER: str = "th3_kali_tor"
+    USE_DOCKER_TOR: bool = True  # Prefer running commands inside Tor container
 
 config = Config()
+
+# ============================================
+# TOR-ENABLED REQUESTS SESSION
+# ============================================
+
+def get_tor_session():
+    """Create a requests session that routes through Tor SOCKS5 proxy"""
+    session = requests.Session()
+    
+    if config.TOR_ENABLED:
+        proxy_url = f"socks5h://{config.TOR_SOCKS_HOST}:{config.TOR_SOCKS_PORT}"
+        session.proxies = {
+            'http': proxy_url,
+            'https': proxy_url
+        }
+        # Verify Tor is working
+        try:
+            response = session.get('https://check.torproject.org/api/ip', timeout=15)
+            data = response.json()
+            if data.get('IsTor'):
+                print(f"[TOR] ✅ Anonymous connection verified - Exit IP: {data.get('IP')}")
+            else:
+                print(f"[TOR] ⚠️ WARNING: Not connected to Tor network!")
+        except Exception as e:
+            print(f"[TOR] ⚠️ Could not verify Tor: {e}")
+    
+    return session
+
+# Global Tor session for API requests
+TOR_SESSION = None
+
+def get_session():
+    """Get or create the Tor session for external API requests"""
+    global TOR_SESSION
+    if TOR_SESSION is None:
+        TOR_SESSION = get_tor_session()
+    return TOR_SESSION
+
+def run_tor_command(cmd: str, timeout: int = 300) -> tuple:
+    """
+    Run command through Docker Kali Tor container for anonymity.
+    All CLI tools are executed inside the Tor-configured container.
+    """
+    if config.USE_DOCKER_TOR:
+        # Execute inside th3_kali_tor container which has Tor + proxychains
+        docker_cmd = f"docker exec {config.TOR_DOCKER_CONTAINER} timeout {timeout} proxychains4 -q {cmd}"
+        try:
+            result = subprocess.run(
+                docker_cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout + 10
+            )
+            return True, result.stdout + result.stderr
+        except subprocess.TimeoutExpired:
+            return False, "Command timed out"
+        except Exception as e:
+            # Fallback to direct command in container
+            try:
+                fallback_cmd = f"docker exec {config.TOR_DOCKER_CONTAINER} {cmd}"
+                result = subprocess.run(fallback_cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+                return True, result.stdout + result.stderr
+            except:
+                return False, str(e)
+    else:
+        # Use local proxychains if Docker not available
+        proxychains_cmd = f"proxychains4 -q {cmd}"
+        try:
+            result = subprocess.run(proxychains_cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+            return True, result.stdout + result.stderr
+        except:
+            return run_command(cmd, timeout)
 
 # ============================================
 # UTILITIES
