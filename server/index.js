@@ -1248,6 +1248,11 @@ const tuyaRoutes = require('./tuya_routes');
 app.use('/api/tuya', tuyaRoutes);
 console.log('[SYSTEM] Tuya routes mounted at /api/tuya (EasyLife Local Control)');
 
+// Docker Management Routes (Container Auto-Start & Control)
+const dockerRoutes = require('./docker_routes');
+app.use('/api/docker', dockerRoutes);
+console.log('[SYSTEM] Docker routes mounted at /api/docker (Container Management)');
+
 
 // Initialize Socket.io with HTTP server
 socketService.initialize(server);
@@ -1263,10 +1268,32 @@ server.listen(port, async () => {
     console.log(`Server running on port ${port}`);
     console.log(`System ready. Identity: ${IDENTITY.name}`);
     
-    // Automatic Tor Verification at Startup
+    // =========================================
+    // AUTOMATIC DOCKER CONTAINER STARTUP
+    // =========================================
+    try {
+        const dockerAutoStart = require('./docker_autostart_service');
+        console.log('\n[SYSTEM] 🐳 Checking Docker infrastructure...');
+        
+        const dockerResult = await dockerAutoStart.startAllContainers();
+        
+        if (dockerResult.success) {
+            console.log('[SYSTEM] ✅ Docker infrastructure ready');
+        } else {
+            console.log('[SYSTEM] ⚠️ Some Docker containers failed to start');
+            console.log('[SYSTEM] 💡 Run: docker-compose -f docker/docker-compose.yml up -d');
+        }
+    } catch (error) {
+        console.log('[SYSTEM] ⚠️ Docker auto-start skipped:', error.message);
+        console.log('[SYSTEM] 💡 Docker Desktop may not be running');
+    }
+    
+    // =========================================
+    // AUTOMATIC TOR VERIFICATION
+    // =========================================
     try {
         const torStartupCheck = require('./tor_startup_check');
-        console.log('\n[SYSTEM] Running automatic Tor verification...');
+        console.log('\n[SYSTEM] 🧅 Running automatic Tor verification...');
         const torResult = await torStartupCheck.performStartupCheck();
         
         if (torResult.isTor) {
@@ -1281,6 +1308,10 @@ server.listen(port, async () => {
     } catch (error) {
         console.log('[SYSTEM] ⚠️ Tor check skipped:', error.message);
     }
+    
+    console.log('\n[SYSTEM] ═══════════════════════════════════════════════');
+    console.log('[SYSTEM]   TH3 THIRTY3 - FULLY OPERATIONAL');
+    console.log('[SYSTEM] ═══════════════════════════════════════════════\n');
 });
 
 
