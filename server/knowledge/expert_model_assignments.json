@@ -1,202 +1,26 @@
 {
-  "title": "Specialized Expert Model Assignments for Continuous Learning",
-  "version": "1.0.0",
-  "description": "Maps optimal local LLM models to cybersecurity domains for specialized training",
-  "last_updated": "2024-12-19",
-  
-  "recommended_models_to_install": [
-    {
-      "name": "codellama:13b",
-      "size": "7.4GB",
-      "specialization": ["reverse_engineering", "binary_analysis", "exploit_development"],
-      "install_command": "ollama pull codellama:13b",
-      "priority": "HIGH"
-    },
-    {
-      "name": "mistral:7b-instruct",
-      "size": "4.1GB",
-      "specialization": ["offensive_security", "general_cybersec", "report_writing"],
-      "install_command": "ollama pull mistral:7b-instruct",
-      "priority": "HIGH"
-    },
-    {
-      "name": "qwen2.5-coder:7b",
-      "size": "4.7GB",
-      "specialization": ["code_analysis", "vulnerability_detection", "secure_coding"],
-      "install_command": "ollama pull qwen2.5-coder:7b",
-      "priority": "HIGH"
-    },
-    {
-      "name": "deepseek-coder:6.7b",
-      "size": "3.8GB",
-      "specialization": ["code_review", "malware_analysis", "decompilation"],
-      "install_command": "ollama pull deepseek-coder:6.7b",
-      "priority": "MEDIUM"
-    },
-    {
-      "name": "whiterabbitneo:13b",
-      "size": "7.8GB",
-      "specialization": ["offensive_security", "pentesting", "red_team"],
-      "install_command": "ollama pull whiterabbitneo:13b",
-      "priority": "HIGH",
-      "note": "Specialized uncensored cybersecurity model"
-    },
-    {
-      "name": "dolphin-mistral:7b",
-      "size": "4.1GB",
-      "specialization": ["uncensored_analysis", "ctf_challenges", "exploit_research"],
-      "install_command": "ollama pull dolphin-mistral:7b",
-      "priority": "MEDIUM"
-    }
-  ],
-
   "expert_domains": {
-    "wifi_security": {
-      "description": "WiFi penetration testing, WPA/WPA2/WPA3 security, wireless attacks & defense",
-      "primary_model": "mistral:7b-instruct",
-      "secondary_model": "qwen2.5:3b",
-      "fallback_model": "granite3.1-moe:1b",
-      "system_prompt_focus": ["aircrack-ng", "wireshark", "802.11 protocols", "PMF", "KRACK"],
-      "training_dataset": "network_defense_reverse_engineering.json",
-      "learning_objectives": [
-        "Maîtriser les techniques d'attaque WiFi pour mieux les détecter",
-        "Comprendre les mécanismes de défense WPA3-SAE",
-        "Identifier les IOCs d'attaques sans fil"
-      ],
-      "expertise_score_target": 90
+    "network_defense": {
+      "model": "mistral:7b-instruct",
+      "reasoning": "Strong instruction following for analysis and reporting",
+      "tasks": ["log_analysis", "threat_intel", "forensics"]
     },
-    
-    "network_forensics": {
-      "description": "Traffic analysis, PCAP forensics, C2 detection, exfiltration identification",
-      "primary_model": "codellama:13b",
-      "secondary_model": "qwen2.5-coder:7b",
-      "fallback_model": "qwen2.5:3b",
-      "system_prompt_focus": ["zeek", "suricata", "wireshark", "JA3", "DNS tunneling"],
-      "training_dataset": "defense_training_workflows.json",
-      "learning_objectives": [
-        "Analyser des captures réseau complexes",
-        "Identifier les patterns de beaconing C2",
-        "Extraire les IOCs automatiquement"
-      ],
-      "expertise_score_target": 85
-    },
-    
     "reverse_engineering": {
-      "description": "Binary analysis, malware dissection, firmware extraction, protocol RE",
-      "primary_model": "codellama:13b",
-      "secondary_model": "deepseek-coder:6.7b",
-      "fallback_model": "qwen2.5-coder:7b",
-      "system_prompt_focus": ["ghidra", "x64dbg", "PE format", "ELF", "assembly"],
-      "training_dataset": "network_defense_reverse_engineering.json",
-      "learning_objectives": [
-        "Décompiler et comprendre du code malveillant",
-        "Identifier les techniques d'anti-debugging",
-        "Extraire les configurations de malware"
-      ],
-      "expertise_score_target": 88
+      "model": "qwen2.5-coder:7b",
+      "reasoning": "State-of-the-art coding capabilities for disassembly and exploit dev",
+      "tasks": ["malware_analysis", "deobfuscation", "vulnerability_research"]
     },
-    
-    "offensive_security": {
-      "description": "Pentesting, exploit development, red team operations, vulnerability research",
-      "primary_model": "whiterabbitneo:13b",
-      "secondary_model": "mistral:7b-instruct",
-      "fallback_model": "dolphin-mistral:7b",
-      "system_prompt_focus": ["metasploit", "cobalt strike", "MITRE ATT&CK", "lateral movement"],
-      "training_dataset": "defense_training_workflows.json",
-      "learning_objectives": [
-        "Comprendre les TTPs adversaires",
-        "Simuler des attaques pour tester les défenses",
-        "Développer des détections basées sur les comportements"
-      ],
-      "expertise_score_target": 85
-    },
-    
-    "osint_reconnaissance": {
-      "description": "Open source intelligence, target profiling, digital footprinting",
-      "primary_model": "mistral:7b-instruct",
-      "secondary_model": "qwen2.5:3b",
-      "fallback_model": "granite3.1-moe:1b",
-      "system_prompt_focus": ["shodan", "maltego", "theHarvester", "social engineering"],
-      "training_dataset": "osint_tools.json",
-      "learning_objectives": [
-        "Maîtriser les sources OSINT",
-        "Corréler les informations multi-sources",
-        "Identifier les expositions critiques"
-      ],
-      "expertise_score_target": 82
-    },
-    
-    "ics_scada_security": {
-      "description": "Industrial Control Systems, OT security, protocol analysis (Modbus, BACnet)",
-      "primary_model": "codellama:13b",
-      "secondary_model": "mistral:7b-instruct",
-      "fallback_model": "qwen2.5:3b",
-      "system_prompt_focus": ["Modbus", "OPC-UA", "SCADA", "PLCs", "air-gap"],
-      "training_dataset": "cyber_physical_systems.json",
-      "learning_objectives": [
-        "Comprendre les protocoles industriels",
-        "Identifier les vulnérabilités ICS sans disruption",
-        "Implémenter la segmentation OT/IT"
-      ],
-      "expertise_score_target": 80
-    },
-    
-    "secure_coding": {
-      "description": "Vulnerability detection, code review, secure development practices",
-      "primary_model": "qwen2.5-coder:7b",
-      "secondary_model": "codellama:13b",
-      "fallback_model": "qwen2.5:3b",
-      "system_prompt_focus": ["OWASP", "SAST", "code injection", "memory safety"],
-      "training_dataset": null,
-      "learning_objectives": [
-        "Identifier les vulnérabilités dans le code source",
-        "Recommander des corrections sécurisées",
-        "Appliquer les principes de défense en profondeur"
-      ],
-      "expertise_score_target": 90
+    "rapid_response": {
+      "model": "granite3.1-moe:1b",
+      "reasoning": "Ultra-low latency for real-time blocking and monitoring",
+      "tasks": ["ddos_mitigation", "ip_blocking", "traffic_scanning"]
     }
   },
-
-  "continuous_learning_config": {
-    "training_interval_hours": 6,
-    "iterations_per_session": 5,
-    "evaluation_frequency": "after_each_session",
-    "decay_prevention_threshold_days": 3,
-    "skill_decay_rate": 0.02,
-    "minimum_expertise_floor": 40,
-    "progression_rewards": {
-      "correct_response": 2,
-      "detailed_response": 3,
-      "cross_domain_reference": 5
-    },
-    "rotation_strategy": "round_robin_by_weakness",
-    "auto_promote_threshold": 85
-  },
-
-  "training_prompts_library": {
-    "wifi_security": [
-      "Explique comment détecter une attaque de capture de handshake WPA2 en analysant le trafic avec Wireshark",
-      "Quelles sont les différences entre WPA2-PSK et WPA3-SAE du point de vue de la sécurité?",
-      "Comment configurer un WIDS pour détecter les Evil Twin attacks?",
-      "Analyse ce scénario: 50 trames deauth vers un seul client en 30 secondes. Quelle est l'attaque et la réponse?"
-    ],
-    "network_forensics": [
-      "Comment identifier du DNS tunneling dans une capture PCAP avec Zeek?",
-      "Explique la méthode pour extraire les JA3 fingerprints et les utiliser pour la threat detection",
-      "Quels patterns indiquent un C2 beaconing dans les logs réseau?",
-      "Comment reconstruire une session HTTP pour identifier l'exfiltration de données?"
-    ],
-    "reverse_engineering": [
-      "Décris le workflow pour analyser un binaire PE suspect avec Ghidra",
-      "Quels imports Windows indiquent une technique de process injection?",
-      "Comment identifier les mécanismes de persistence d'un malware?",
-      "Explique les techniques d'extraction de configuration de RAT avec memory forensics"
-    ],
-    "offensive_security": [
-      "Mappe les phases d'une attaque APT sur le framework MITRE ATT&CK",
-      "Comment détecter le mouvement latéral avec les Windows Event Logs?",
-      "Quelles techniques de Living off the Land sont les plus difficiles à détecter?",
-      "Explique comment un red team simulerait une attaque de supply chain"
-    ]
+  "model_optimization_plan": {
+    "strategy": "3-Tier Elite System",
+    "tier_1_heavy": "qwen2.5-coder:7b (Deep Technical Work)",
+    "tier_2_medium": "mistral:7b-instruct (Tactical & Strategic)",
+    "tier_3_light": "granite3.1-moe:1b (Speed & Background)",
+    "max_active_models": 3
   }
 }

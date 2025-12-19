@@ -45,16 +45,21 @@ const CONFIG = {
     pauseBetweenCycles: 5000,    // 5 seconds
     totalCycles: 10,
     models: {
+        // LE CERVEAU TECHNIQUE (Code, Exploit, Reverse Security)
         vuln: 'qwen2.5-coder:7b',
-        network: 'mistral:7b-instruct',
-        red_team: 'granite3.1-moe:1b',
         crypto: 'qwen2.5-coder:7b',
-        darkweb: 'mistral:7b-instruct',
-        defense: 'granite3.1-moe:1b',
         reverse: 'qwen2.5-coder:7b',
+        adversary: 'qwen2.5-coder:7b',
+
+        // LE CERVEAU TACTIQUE (Analyse, Stratégie, Psychologie)
+        network: 'mistral:7b-instruct',
+        darkweb: 'mistral:7b-instruct',
         forensic: 'mistral:7b-instruct',
-        threat_intel: 'granite3.1-moe:1b',
-        adversary: 'qwen2.5-coder:7b'
+        threat_intel: 'mistral:7b-instruct',
+
+        // L'ECLAIREUR RAPIDE (Vitesse, Background, Monitoring)
+        red_team: 'granite3.1-moe:1b', // Rapide pour les simulations d'attaques nombreuses
+        defense: 'granite3.1-moe:1b'  // Réactif pour la défense active
     }
 };
 

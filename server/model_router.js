@@ -15,15 +15,16 @@
 
 // Local model configuration
 const LOCAL_MODELS = {
-    code: 'qwen2.5:3b',      // Best for code
-    general: 'qwen2.5:3b',   // General purpose
-    fast: 'granite3.1-moe:1b', // Quick responses
+    code: 'qwen2.5-coder:7b',     // Best for Coding & Reverse Engineering
+    general: 'mistral:7b-instruct', // Best for Instruction Following & Strategy
+    fast: 'granite3.1-moe:1b',      // Best for Speed & Background Tasks
     embedding: 'nomic-embed-text:latest' // Embeddings
 };
 
 // All local trainable models (for rotation)
 const ALL_LOCAL_MODELS = [
-    'qwen2.5:3b',
+    'qwen2.5-coder:7b',
+    'mistral:7b-instruct',
     'granite3.1-moe:1b'
 ];
 
