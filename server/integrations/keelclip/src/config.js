@@ -27,7 +27,7 @@ module.exports = {
         // Ollama (Local)
         ollama: {
             url: process.env.OLLAMA_URL || 'http://localhost:11434',
-            model: process.env.OLLAMA_MODEL || 'llama3.2-vision:11b',
+            model: process.env.OLLAMA_MODEL || 'qwen2.5-coder:7b',
             embeddingModel: process.env.OLLAMA_EMBEDDING || 'nomic-embed-text'
         },
 

@@ -190,7 +190,7 @@ Execute l'analyse et retourne les résultats structurés.`;
     async executeWithAgent(executor, prompt) {
         if (!executor) {
             // Fallback to default model
-            return this.executeWithOllama('qwen2.5:3b', prompt);
+            return this.executeWithOllama('granite3.1-moe:1b', prompt);
         }
 
         const model = executor.model_name;

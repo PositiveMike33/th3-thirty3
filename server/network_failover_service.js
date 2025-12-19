@@ -11,7 +11,7 @@
  * 
  * Architecture:
  * - Primary: Cloud models (Groq, OpenAI, Gemini, Anthropic)
- * - Fallback: Local Ollama models (qwen2.5:3b, granite3.1-moe:1b)
+ * - Fallback: Local Ollama models (granite3.1-moe:1b, granite3.1-moe:1b)
  * - Emergency: Cached responses / offline mode
  */
 
@@ -336,7 +336,7 @@ class NetworkFailoverService extends EventEmitter {
                 return { 
                     provider: 'local', 
                     reason: 'Local only mode',
-                    model: 'qwen2.5:3b'
+                    model: 'granite3.1-moe:1b'
                 };
                 
             case FailoverMode.MANUAL:
@@ -358,7 +358,7 @@ class NetworkFailoverService extends EventEmitter {
                     return { 
                         provider: 'local', 
                         reason: 'Internet offline - failover active',
-                        model: 'qwen2.5:3b',
+                        model: 'granite3.1-moe:1b',
                         fallbackModel: 'granite3.1-moe:1b'
                     };
                 } else if (this.state === NetworkState.DEGRADED) {
@@ -371,7 +371,7 @@ class NetworkFailoverService extends EventEmitter {
                     return { 
                         provider: 'local', 
                         reason: 'Unknown state - defaulting to local',
-                        model: 'qwen2.5:3b'
+                        model: 'granite3.1-moe:1b'
                     };
                 }
         }
@@ -448,8 +448,8 @@ class NetworkFailoverService extends EventEmitter {
         if (provider.provider === 'local') {
             // Local model recommendations
             const localModels = {
-                code: 'qwen2.5:3b',
-                general: 'qwen2.5:3b',
+                code: 'granite3.1-moe:1b',
+                general: 'granite3.1-moe:1b',
                 fast: 'granite3.1-moe:1b',
                 embedding: 'nomic-embed-text:latest'
             };

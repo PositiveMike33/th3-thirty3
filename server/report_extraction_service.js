@@ -1,6 +1,7 @@
 /**
- * Service d'Extraction et Apprentissage 5-Why avec Llama 3.2
+ * Service d'Extraction et Apprentissage 5-Why
  * Retient les patterns, apprend les tags, génère les 5P formatés
+ * Uses: granite3.1-moe:1b (default) or qwen2.5-coder:7b
  */
 
 const fs = require('fs');
@@ -14,13 +15,13 @@ class ReportExtractionService {
         
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         // Utiliser granite3.1-moe:1b par défaut (plus léger, 1.4GB)
-        // Ou llama3.2-vision:11b si assez de RAM (11.7GB requis)
+        // Ou qwen2.5-coder:7b pour plus de précision
         this.model = process.env.OLLAMA_MODEL || 'granite3.1-moe:1b';
         
         this.ensureDataFolder();
         this.loadLearning();
         
-        console.log('[EXTRACTION] Service initialisé avec Llama 3.2');
+        console.log('[EXTRACTION] Service initialisé avec', this.model);
     }
 
     ensureDataFolder() {
@@ -89,7 +90,7 @@ class ReportExtractionService {
         }
 
         try {
-            // Utiliser l'endpoint /api/generate pour llama3.2-vision
+            // Utiliser l'endpoint /api/generate pour Ollama
             const response = await fetch(`${this.ollamaUrl}/api/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

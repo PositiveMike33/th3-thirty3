@@ -64,7 +64,7 @@ async function runTest() {
         console.error('❌ Erreur:', error.message);
         console.log('\n💡 Vérifiez que:');
         console.log('   1. Ollama est démarré (ollama serve)');
-        console.log('   2. Llama 3.2 Vision est installé (ollama pull llama3.2-vision:11b)');
+        console.log('   2. Llama 3.2 Vision est installé (ollama pull qwen2.5-coder:7b)');
     }
 
     console.log('\n✅ Test terminé');

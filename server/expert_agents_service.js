@@ -33,7 +33,7 @@ class ExpertAgentsService {
             cybersec: {
                 name: 'Agent CyberSec',
                 emoji: '🔒',
-                model: 'qwen2.5:3b',  // 2GB - Bon en code et sécurité
+                model: 'granite3.1-moe:1b',  // 2GB - Bon en code et sécurité
                 fallback: 'granite3.1-moe:1b',
                 domain: 'Cybersécurité et Ethical Hacking',
                 systemPrompt: `Tu es un expert en cybersécurité éthique et pentesting.
@@ -47,7 +47,7 @@ RÈGLE: Toujours expliquer comment détecter et se défendre contre chaque attaq
             vpo: {
                 name: 'Agent VPO Expert',
                 emoji: '🏭',
-                model: 'qwen2.5:3b',
+                model: 'granite3.1-moe:1b',
                 fallback: 'granite3.1-moe:1b',
                 domain: 'Excellence Opérationnelle VPO/WCM et KeelClip',
                 systemPrompt: `Tu es un expert senior VPO/WCM et spécialiste KeelClip.
@@ -89,7 +89,7 @@ RÈGLE: Toujours expliquer le code, proposer des tests`,
             osint: {
                 name: 'Agent OSINT',
                 emoji: '🔍',
-                model: 'qwen2.5:3b',
+                model: 'granite3.1-moe:1b',
                 fallback: 'granite3.1-moe:1b',
                 domain: 'OSINT et Investigation',
                 systemPrompt: `Tu es un analyste OSINT et investigateur.
@@ -103,7 +103,7 @@ RÈGLE: Vérifier les informations, croiser les sources`,
             finance: {
                 name: 'Agent Finance',
                 emoji: '💰',
-                model: 'qwen2.5:3b',
+                model: 'granite3.1-moe:1b',
                 fallback: 'granite3.1-moe:1b',
                 domain: 'Finance et Investissement',
                 systemPrompt: `Tu es un analyste financier et conseiller investissement.
@@ -335,10 +335,10 @@ RÈGLE: Toujours mentionner les risques`,
      */
     getRecommendedModels() {
         return [
-            { name: 'qwen2.5:3b', size: '2GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
+            { name: 'granite3.1-moe:1b', size: '2GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
             { name: 'qwen2.5-coder:3b', size: '2GB', purpose: 'Code/DevOps expert' },
             { name: 'phi3:mini', size: '3.8GB', purpose: 'Marketing/Writing expert' },
-            { name: 'llama3.2:3b', size: '2GB', purpose: 'Alternative general' },
+            { name: 'granite3.1-moe:1b', size: '2GB', purpose: 'Alternative general' },
             { name: 'gemma2:2b', size: '1.6GB', purpose: 'Ultra-light alternative' }
         ];
     }

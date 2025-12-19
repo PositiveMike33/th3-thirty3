@@ -12,7 +12,7 @@ class CyberTrainingService {
         this.apiKey = process.env.ANYTHING_LLM_KEY;
         this.workspace = 'team-cybersecurite';
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        this.model = 'qwen2.5:3b';
+        this.model = 'granite3.1-moe:1b';
         this.fallbackModel = 'granite3.1-moe:1b';
         this.kaliEnv = KALI_ENVIRONMENT;
         

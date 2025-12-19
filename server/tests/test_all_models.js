@@ -1,23 +1,21 @@
 /**
  * Model Performance Test Suite
- * Tests all 7 Ollama models for response time, quality, and compatibility
+ * Tests all available Ollama models for response time, quality, and compatibility
  */
 
 const http = require('http');
 
-// All available models
+// All available models (4 models only)
 const MODELS = [
-    'mistral:7b',
-    'qwen2.5:3b', 
-    'granite3.1-moe:1b',
-    'llama3.1:8b-instruct-q4_K_M',
-    'llama3.2-vision:11b',
-    'gpt-oss:120b-cloud'
+    'qwen2.5-coder:7b',        // Code/Technical
+    'mistral:7b-instruct',     // Strategy/General
+    'granite3.1-moe:1b'        // Fast/Fallback
     // nomic-embed-text excluded (embedding model, not generation)
 ];
 
 // Test prompts for different capabilities
 const TEST_PROMPTS = {
+
     coding: "Write a JavaScript function that checks if a string is a palindrome. Keep it short.",
     analysis: "What is SQL injection? Explain in 2 sentences.",
     creative: "Write a haiku about cybersecurity.",

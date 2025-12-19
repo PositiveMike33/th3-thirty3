@@ -187,7 +187,7 @@ class AgentDirectorService extends EventEmitter {
                 const response = await this.llmService.generateOllamaResponse(
                     objective,
                     null,
-                    'qwen2.5:3b',
+                    'granite3.1-moe:1b',
                     agent.systemPrompt
                 );
                 return { agentId, agentName: agent.name, response, source: 'local' };
@@ -221,7 +221,7 @@ class AgentDirectorService extends EventEmitter {
             const response = await this.llmService.generateOllamaResponse(
                 objective,
                 null,
-                'qwen2.5:3b',
+                'granite3.1-moe:1b',
                 agent.systemPrompt
             );
             return { agentId, agentName: agent.name, response, source: 'local_fallback' };
@@ -261,7 +261,7 @@ Ta réponse:`;
                 );
             } else {
                 directorResponse = await this.llmService.generateOllamaResponse(
-                    analysisPrompt, null, 'qwen2.5:3b', DIRECTOR_SYSTEM_PROMPT
+                    analysisPrompt, null, 'granite3.1-moe:1b', DIRECTOR_SYSTEM_PROMPT
                 );
             }
 
@@ -297,7 +297,7 @@ Fournis une réponse consolidée à l'utilisateur.`;
                     );
                 } else {
                     finalResponse = await this.llmService.generateOllamaResponse(
-                        synthesisPrompt, null, 'qwen2.5:3b', DIRECTOR_SYSTEM_PROMPT
+                        synthesisPrompt, null, 'granite3.1-moe:1b', DIRECTOR_SYSTEM_PROMPT
                     );
                 }
 
