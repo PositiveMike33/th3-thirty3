@@ -4,6 +4,7 @@ const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
 const AnythingLLMWrapper = require('./anythingllm_wrapper');
 const knowledgeBase = require('./knowledge_base_service');
+const { SECURITY_RESEARCH_PROMPTS, getSecurityPrompt, buildSecurityQuery } = require('./security_research_prompts');
 
 class LLMService {
     constructor() {
@@ -199,6 +200,46 @@ class LLMService {
         }
 
         return await this.generateResponse(prompt, null, targetProvider, targetModel, systemPrompt);
+    }
+
+    /**
+     * Generate response with SECURITY RESEARCH context.
+     * Uses specialized system prompts for defensive cybersecurity operations.
+     * 
+     * @param {string} query - User's security-related question
+     * @param {string} role - Security role: 'reverseEngineer', 'pentester', 'vulnResearcher', 'networkAnalyst', 'osintInvestigator'
+     * @param {string} provider - 'local' or cloud provider
+     * @param {string} model - Specific model (optional, will use role default)
+     * @returns {string} AI response with security research context
+     */
+    async generateSecurityResponse(query, role = 'pentester', provider = 'local', model = null) {
+        console.log(`[LLM] Security Research Request: Role=${role}`);
+        
+        // Get the security-focused system prompt
+        const securityConfig = getSecurityPrompt(role);
+        const targetModel = model || securityConfig.model;
+        
+        // Add ethics reminder to query
+        const contextualQuery = `[DEFENSIVE SECURITY RESEARCH CONTEXT]
+This is an authorized security research request for defensive purposes only.
+Target systems are owned or have explicit testing authorization.
+
+USER QUERY: ${query}`;
+
+        return await this.generateResponse(
+            contextualQuery, 
+            null, 
+            provider, 
+            targetModel, 
+            securityConfig.systemPrompt
+        );
+    }
+
+    /**
+     * Get available security research roles
+     */
+    getSecurityRoles() {
+        return Object.keys(SECURITY_RESEARCH_PROMPTS);
     }
 
     async generateResponse(prompt, imageBase64, providerId, modelId, systemPrompt) {

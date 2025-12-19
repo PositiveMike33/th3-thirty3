@@ -1,150 +1,174 @@
 /**
- * Routes API pour le service de sécurité
- * Protection des connexions et monitoring
+ * Security Research API Routes
+ * =============================
+ * API endpoints for defensive cybersecurity operations
+ * All queries use professional system prompts with ethical context
  */
 
 const express = require('express');
 const router = express.Router();
-const ConnectionSecurityService = require('./connection_security_service');
+const { SECURITY_RESEARCH_PROMPTS, getSecurityPrompt, buildSecurityQuery } = require('./security_research_prompts');
 
-const securityService = new ConnectionSecurityService();
+let llmService = null;
+
+// Setter for dependency injection
+router.setLLMService = (service) => {
+    llmService = service;
+    console.log('[SECURITY_ROUTES] LLM Service connected');
+};
 
 /**
- * GET /security/status
- * Obtenir le statut de sécurité
+ * GET /api/security/roles
+ * List all available security research roles
  */
-router.get('/status', (req, res) => {
+router.get('/roles', (req, res) => {
     res.json({
         success: true,
-        stats: securityService.getStats()
+        roles: [
+            { 
+                id: 'reverseEngineer', 
+                name: 'Reverse Engineer', 
+                model: 'qwen2.5-coder:7b', 
+                description: 'Analyse de binaires, malware, décompilation, Ghidra/IDA Pro',
+                expertise: ['Binary Analysis', 'Malware Analysis', 'Decompilation', 'Protocol Reverse Engineering']
+            },
+            { 
+                id: 'pentester', 
+                name: 'Penetration Tester', 
+                model: 'qwen2.5-coder:7b', 
+                description: 'Tests de pénétration autorisés, exploitation, post-exploitation',
+                expertise: ['Metasploit', 'Burp Suite', 'Network Pentesting', 'Web Application Testing']
+            },
+            { 
+                id: 'vulnResearcher', 
+                name: 'Vulnerability Researcher', 
+                model: 'qwen2.5-coder:7b', 
+                description: 'Recherche de CVE, fuzzing, bug bounty',
+                expertise: ['CVE Analysis', 'Fuzzing', 'PoC Development', 'Responsible Disclosure']
+            },
+            { 
+                id: 'networkAnalyst', 
+                name: 'Network Security Analyst', 
+                model: 'mistral:7b-instruct', 
+                description: 'Analyse de trafic, forensics réseau, SOC',
+                expertise: ['Wireshark', 'Snort/Suricata', 'Traffic Analysis', 'Incident Response']
+            },
+            { 
+                id: 'osintInvestigator', 
+                name: 'OSINT Investigator', 
+                model: 'mistral:7b-instruct', 
+                description: 'Renseignement en sources ouvertes, reconnaissance',
+                expertise: ['theHarvester', 'Maltego', 'Shodan', 'Social Media Investigation']
+            }
+        ],
+        disclaimer: 'All queries are processed in defensive security research context for authorized systems only.'
     });
 });
 
 /**
- * GET /security/events
- * Obtenir les événements de sécurité récents
+ * POST /api/security/query
+ * Execute a security research query with professional context
+ * 
+ * Body: {
+ *   query: "How do I analyze this suspicious binary?",
+ *   role: "reverseEngineer",        // Optional, defaults to 'pentester'
+ *   provider: "local",              // Optional
+ *   model: "qwen2.5-coder:7b"       // Optional, uses role default
+ * }
  */
-router.get('/events', (req, res) => {
-    const count = parseInt(req.query.count) || 50;
-    res.json({
-        success: true,
-        events: securityService.getRecentEvents(count)
-    });
-});
-
-/**
- * POST /security/block-ip
- * Bloquer une IP
- */
-router.post('/block-ip', async (req, res) => {
-    try {
-        const { ip } = req.body;
-        if (!ip) {
-            return res.status(400).json({
-                success: false,
-                error: 'IP required'
-            });
-        }
-        await securityService.blockIP(ip);
-        res.json({
-            success: true,
-            message: `IP ${ip} bloquée`
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * POST /security/unblock-ip
- * Débloquer une IP
- */
-router.post('/unblock-ip', async (req, res) => {
-    try {
-        const { ip } = req.body;
-        if (!ip) {
-            return res.status(400).json({
-                success: false,
-                error: 'IP required'
-            });
-        }
-        await securityService.unblockIP(ip);
-        res.json({
-            success: true,
-            message: `IP ${ip} débloquée`
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * POST /security/add-trusted-domain
- * Ajouter un domaine de confiance
- */
-router.post('/add-trusted-domain', (req, res) => {
-    const { domain } = req.body;
-    if (!domain) {
-        return res.status(400).json({
-            success: false,
-            error: 'Domain required'
+router.post('/query', async (req, res) => {
+    if (!llmService) {
+        return res.status(503).json({ 
+            error: 'LLM Service not initialized',
+            suggestion: 'Ensure the server is fully started'
         });
     }
-    securityService.addTrustedDomain(domain);
-    res.json({
-        success: true,
-        message: `Domaine ${domain} ajouté aux domaines de confiance`
-    });
-});
-
-/**
- * GET /security/config
- * Obtenir la configuration de sécurité
- */
-router.get('/config', (req, res) => {
-    res.json({
-        success: true,
-        config: securityService.getSecurityConfig()
-    });
-});
-
-/**
- * POST /security/validate-key
- * Valider une clé API
- */
-router.post('/validate-key', (req, res) => {
-    const { key, type } = req.body;
-    const result = securityService.validateAPIKey(key, type);
-    res.json({
-        success: true,
-        validation: result
-    });
-});
-
-/**
- * POST /security/encrypt
- * Chiffrer des données sensibles
- */
-router.post('/encrypt', (req, res) => {
+    
+    const { query, role = 'pentester', provider = 'local', model = null } = req.body;
+    
+    if (!query || query.trim().length === 0) {
+        return res.status(400).json({ error: 'Query is required and cannot be empty' });
+    }
+    
+    // Validate role
+    const validRoles = Object.keys(SECURITY_RESEARCH_PROMPTS);
+    if (!validRoles.includes(role)) {
+        return res.status(400).json({ 
+            error: `Invalid role "${role}"`,
+            validRoles 
+        });
+    }
+    
     try {
-        const { data } = req.body;
-        if (!data) {
-            return res.status(400).json({
-                success: false,
-                error: 'Data required'
-            });
-        }
+        console.log(`[SECURITY_ROUTES] Query received - Role: ${role}, Provider: ${provider}`);
         
-        const encrypted = securityService.encrypt(data);
+        const startTime = Date.now();
+        const response = await llmService.generateSecurityResponse(query, role, provider, model);
+        const responseTime = Date.now() - startTime;
+        
         res.json({
             success: true,
-            encrypted
+            role,
+            context: 'defensive_security_research',
+            provider,
+            model: model || getSecurityPrompt(role).model,
+            responseTime: `${responseTime}ms`,
+            response
+        });
+        
+    } catch (error) {
+        console.error('[SECURITY_ROUTES] Error:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            suggestion: 'Check if Ollama is running and the model is available'
+        });
+    }
+});
+
+/**
+ * POST /api/security/analyze
+ * Analyze a specific artifact (code, log, traffic dump)
+ * 
+ * Body: {
+ *   artifact: "code/log/pcap content...",
+ *   artifactType: "code" | "log" | "network" | "binary",
+ *   question: "What vulnerabilities exist here?",
+ *   role: "vulnResearcher"
+ * }
+ */
+router.post('/analyze', async (req, res) => {
+    if (!llmService) {
+        return res.status(503).json({ error: 'LLM Service not initialized' });
+    }
+    
+    const { artifact, artifactType = 'code', question = 'Analyze this artifact', role = 'vulnResearcher' } = req.body;
+    
+    if (!artifact) {
+        return res.status(400).json({ error: 'Artifact content is required' });
+    }
+    
+    // Build analysis prompt
+    const analysisPrompt = `
+=== ARTIFACT ANALYSIS REQUEST ===
+Type: ${artifactType.toUpperCase()}
+Question: ${question}
+
+--- ARTIFACT START ---
+${artifact.substring(0, 10000)}
+--- ARTIFACT END ---
+
+Provide a detailed security analysis of this artifact. 
+Identify vulnerabilities, suspicious patterns, and recommend mitigations.
+`;
+
+    try {
+        const response = await llmService.generateSecurityResponse(analysisPrompt, role);
+        res.json({
+            success: true,
+            artifactType,
+            role,
+            analysis: response
         });
     } catch (error) {
         res.status(500).json({
@@ -155,37 +179,22 @@ router.post('/encrypt', (req, res) => {
 });
 
 /**
- * GET /security/middleware
- * Obtenir le middleware de sécurité (pour documentation)
+ * GET /api/security/prompts
+ * Get the raw system prompts (for transparency)
  */
-router.get('/middleware-info', (req, res) => {
+router.get('/prompts', (req, res) => {
+    const prompts = {};
+    for (const [role, config] of Object.entries(SECURITY_RESEARCH_PROMPTS)) {
+        prompts[role] = {
+            model: config.model,
+            systemPromptPreview: config.systemPrompt.substring(0, 200) + '...'
+        };
+    }
     res.json({
         success: true,
-        info: {
-            description: 'Middleware de sécurité actif sur toutes les routes',
-            features: [
-                'Blocage IP automatique',
-                'Rate limiting (100 req/min)',
-                'Détection SQL Injection',
-                'Détection XSS',
-                'Détection Path Traversal',
-                'Détection Command Injection',
-                'Détection de scanners (sqlmap, nikto, etc.)',
-                'Headers de sécurité automatiques'
-            ],
-            securityHeaders: [
-                'X-Content-Type-Options: nosniff',
-                'X-Frame-Options: DENY',
-                'X-XSS-Protection: 1; mode=block',
-                'Strict-Transport-Security',
-                'Content-Security-Policy'
-            ]
-        }
+        note: 'These are professional security research prompts for defensive purposes',
+        prompts
     });
 });
-
-// Exporter aussi le service et le middleware pour l'intégration
-router.securityService = securityService;
-router.middleware = securityService.securityMiddleware();
 
 module.exports = router;

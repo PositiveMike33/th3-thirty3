@@ -1258,6 +1258,12 @@ const osintTeamRoutes = require('./osint_team_routes');
 app.use('/api/osint-team', osintTeamRoutes);
 console.log('[SYSTEM] OSINT Team routes mounted at /api/osint-team (Expert Team 2025)');
 
+// Security Research Routes (Defensive Cybersecurity)
+const securityRoutes = require('./security_routes');
+securityRoutes.setLLMService(llmService);
+app.use('/api/security', securityRoutes);
+console.log('[SYSTEM] Security Research routes mounted at /api/security (Defensive Ops)');
+
 
 // Initialize Socket.io with HTTP server
 socketService.initialize(server);
