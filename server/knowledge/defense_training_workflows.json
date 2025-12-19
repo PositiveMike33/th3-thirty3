@@ -1,0 +1,187 @@
+{
+  "title": "Network Defense Training Workflows",
+  "purpose": "Educational training data for AI models to learn network security defense patterns",
+  "workflow_categories": [
+    {
+      "category_id": "WIFI_DEFENSE",
+      "name": "WiFi Network Defense",
+      "learning_objectives": [
+        "Comprendre les vecteurs d'attaque WiFi",
+        "Identifier les indicateurs de compromission",
+        "Implémenter les contre-mesures appropriées"
+      ],
+      "training_scenarios": [
+        {
+          "step": 1,
+          "phase": "Detection Setup",
+          "description": "Configuration du monitoring réseau sans fil pour détecter les attaques",
+          "tool": "wireshark/kismet",
+          "detection_filter": "wlan.fc.type_subtype == 0x0c",
+          "explanation": "Ce filtre Wireshark capture les trames de deauthentication, indicateur clé d'une attaque",
+          "defensive_action": "Alerter sur plus de 5 deauth frames en 10 secondes vers le même client"
+        },
+        {
+          "step": 2,
+          "phase": "Baseline Establishment",
+          "description": "Établir une baseline des AP légitimes du réseau",
+          "tool": "waidps/kismet",
+          "command_template": "kismet -c <interface> --log-types=kismet,pcapng",
+          "explanation": "Collecte des signatures RF de tous les points d'accès autorisés",
+          "defensive_action": "Créer une whitelist de BSSIDs et alerter sur tout nouveau AP"
+        },
+        {
+          "step": 3,
+          "phase": "Rogue AP Detection",
+          "description": "Détection automatique des Evil Twins et Rogue APs",
+          "tool": "waidps/airgeddon",
+          "detection_logic": "Comparer ESSID avec BSSID connu, vérifier cohérence signal/localisation",
+          "ioc_patterns": ["Même ESSID, BSSID différent", "Signal anormalement fort", "Canal inhabituel"],
+          "defensive_action": "Isolation automatique du client, notification SOC, triangulation RF"
+        },
+        {
+          "step": 4,
+          "phase": "Response Protocol",
+          "description": "Procédure de réponse à une attaque WiFi détectée",
+          "tools": [
+            {"name": "Containment", "action": "Bloquer le BSSID malveillant sur les contrôleurs WLAN"},
+            {"name": "Investigation", "action": "Capturer le trafic de l'attaquant pour forensics"},
+            {"name": "Remediation", "action": "Forcer la réauthentification 802.1X des clients affectés"}
+          ],
+          "escalation": "Si attaque persistante, activer le jamming légal temporaire (si autorisé)"
+        }
+      ]
+    },
+    {
+      "category_id": "NETWORK_FORENSICS",
+      "name": "Network Traffic Forensics",
+      "learning_objectives": [
+        "Analyser les captures réseau pour IOCs",
+        "Reconstruire les sessions et extraire les artefacts",
+        "Identifier les patterns de C2 et exfiltration"
+      ],
+      "training_scenarios": [
+        {
+          "step": 1,
+          "phase": "Traffic Acquisition",
+          "description": "Capture sécurisée du trafic réseau pour analyse",
+          "tool": "tcpdump/zeek",
+          "command_template": "tcpdump -i <interface> -w capture_%Y%m%d_%H%M%S.pcap -G 3600 -Z root",
+          "explanation": "Rotation horaire des captures avec timestamp, préservation de la chaîne de custody",
+          "defensive_action": "Stocker les captures sur WORM storage avec hashing SHA256"
+        },
+        {
+          "step": 2,
+          "phase": "Protocol Analysis",
+          "description": "Analyse des protocoles pour détecter les anomalies",
+          "tool": "zeek/suricata",
+          "detection_rules": [
+            "DNS queries > 50 chars: possible tunneling",
+            "HTTP POST without GET: possible C2",
+            "TLS without SNI: suspicious encrypted traffic"
+          ],
+          "explanation": "Règles heuristiques pour identifier le trafic malveillant",
+          "defensive_action": "Générer des alertes SIEM avec contexte enrichi"
+        },
+        {
+          "step": 3,
+          "phase": "Session Reconstruction",
+          "description": "Reconstruction des sessions TCP/HTTP pour analyse de contenu",
+          "tool": "NetworkMiner/tshark",
+          "command_template": "tshark -r capture.pcap -q -z follow,tcp,ascii,0",
+          "explanation": "Extraction des conversations complètes pour analyse de payload",
+          "defensive_action": "Identifier les données exfiltrées et évaluer l'impact"
+        },
+        {
+          "step": 4,
+          "phase": "IOC Extraction",
+          "description": "Extraction automatisée des indicateurs de compromission",
+          "tool": "rita/zeek-cut",
+          "ioc_types": ["IP addresses", "Domain names", "File hashes", "JA3 fingerprints", "User agents"],
+          "explanation": "Création d'une liste d'IOCs pour threat intelligence et blocking",
+          "defensive_action": "Push IOCs vers firewall, proxy, et EDR pour blocking automatique"
+        }
+      ]
+    },
+    {
+      "category_id": "MALWARE_RE",
+      "name": "Malware Reverse Engineering",
+      "learning_objectives": [
+        "Analyser des binaires malveillants en sécurité",
+        "Extraire les configurations et IOCs des malwares",
+        "Comprendre les techniques d'évasion et anti-analysis"
+      ],
+      "training_scenarios": [
+        {
+          "step": 1,
+          "phase": "Sample Triage",
+          "description": "Évaluation initiale et classification du sample",
+          "tool": "file/strings/yara",
+          "command_template": "file sample.exe && strings -n 8 sample.exe | head -100",
+          "explanation": "Identification rapide du type de fichier et extraction des strings lisibles",
+          "ioc_extraction": ["URLs", "IPs", "Registry keys", "Mutex names", "Crypto wallets"]
+        },
+        {
+          "step": 2,
+          "phase": "Static Analysis",
+          "description": "Analyse sans exécution pour comprendre la structure",
+          "tool": "ghidra/cutter",
+          "analysis_focus": [
+            "Import Address Table (IAT)",
+            "Export functions",
+            "Sections permissions (RWX = packed)",
+            "Embedded resources"
+          ],
+          "explanation": "Identification des capabilities via les imports Windows API",
+          "ioc_extraction": "APIs dangereuses: VirtualAlloc, CreateRemoteThread, InternetConnect"
+        },
+        {
+          "step": 3,
+          "phase": "Dynamic Analysis",
+          "description": "Exécution contrôlée en sandbox pour observation comportementale",
+          "tool": "cuckoo/any.run/procmon",
+          "sandbox_config": {
+            "network": "simulated internet with fakenet",
+            "monitoring": ["file system", "registry", "network", "processes"],
+            "snapshot": "clean state Windows 10 x64"
+          },
+          "explanation": "Observer le comportement réel sans risque d'infection réseau",
+          "ioc_extraction": ["C2 domains resolved", "Files dropped", "Persistence mechanisms"]
+        },
+        {
+          "step": 4,
+          "phase": "Config Extraction",
+          "description": "Extraction de la configuration hardcodée du malware",
+          "tool": "malduck/CAPE",
+          "extraction_targets": [
+            "C2 server list",
+            "Encryption keys",
+            "Campaign identifiers",
+            "Module URLs"
+          ],
+          "explanation": "Les configs embarquées révèlent l'infrastructure de l'attaquant",
+          "defensive_action": "Générer rapport IOC pour MISP/OpenCTI et partage threat intel"
+        }
+      ]
+    }
+  ],
+  "training_questions": [
+    {
+      "id": "Q1",
+      "category": "WIFI_DEFENSE",
+      "question": "Un IDS détecte 50 trames deauthentication en 30 secondes ciblant un seul client. Quelle est l'attaque probable et quelle réponse recommandes-tu?",
+      "expected_concepts": ["handshake capture", "WPA2 attack", "client isolation", "PMF", "WPA3 migration"]
+    },
+    {
+      "id": "Q2",
+      "category": "NETWORK_FORENSICS",
+      "question": "Analyse ce log DNS: requêtes vers 'aHR0cHM6Ly9.evil.com' avec des sous-domaines base64. Quel type d'attaque et comment bloquer?",
+      "expected_concepts": ["DNS tunneling", "base64 encoding", "exfiltration", "DNS inspection", "sinkhole"]
+    },
+    {
+      "id": "Q3",
+      "category": "MALWARE_RE",
+      "question": "Un binaire PE importe VirtualAllocEx, WriteProcessMemory, CreateRemoteThread. Quelle technique suspectes-tu?",
+      "expected_concepts": ["process injection", "DLL injection", "code injection", "RunPE", "hollowing"]
+    }
+  ]
+}

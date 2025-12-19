@@ -1,0 +1,470 @@
+{
+  "title": "WiFi Security Advanced Training Scenarios",
+  "version": "1.0.0",
+  "description": "Scénarios aléatoires d'attaque/défense WiFi pour entraînement intensif",
+  "total_scenarios": 50,
+  
+  "attack_scenarios": [
+    {
+      "id": "WIFI_ATK_001",
+      "scenario": "Un attaquant envoie 200 trames deauth vers tous les clients du réseau corporate-wifi",
+      "attack_type": "Broadcast Deauthentication",
+      "tools_used": ["aireplay-ng", "mdk4"],
+      "command_example": "aireplay-ng -0 0 -a <BSSID> wlan0mon",
+      "detection_signature": "Spike de trames 802.11 subtype 0x0c sans association légitime",
+      "defense_response": "Activer PMF (802.11w), isoler les clients affectés",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_002",
+      "scenario": "L'IDS détecte un nouveau BSSID avec le même ESSID que le réseau légitime mais sur un canal différent",
+      "attack_type": "Evil Twin",
+      "tools_used": ["hostapd", "airbase-ng", "fluxion"],
+      "command_example": "airbase-ng -e 'Corporate-WiFi' -c 11 wlan0mon",
+      "detection_signature": "ESSID dupliqué, BSSID inconnu, signal anormalement puissant",
+      "defense_response": "Alerter SOC, triangulation RF, bloquer BSSID sur contrôleur WLAN",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_003",
+      "scenario": "Capture de PMKID sans client connecté sur un réseau WPA2-PSK",
+      "attack_type": "PMKID Attack",
+      "tools_used": ["hcxdumptool", "hcxpcapngtool", "hashcat"],
+      "command_example": "hcxdumptool -i wlan0mon -o capture.pcapng --enable_status=1",
+      "detection_signature": "Requêtes d'association répétées sans complétion du 4-way handshake",
+      "defense_response": "Migrer vers WPA3-SAE, implémenter rate limiting sur AP",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_004",
+      "scenario": "Attaque par dictionnaire réussie sur handshake capturé - mot de passe: Summer2024!",
+      "attack_type": "Offline Dictionary Attack",
+      "tools_used": ["aircrack-ng", "hashcat", "john"],
+      "command_example": "hashcat -m 22000 capture.hc22000 rockyou.txt -r best64.rule",
+      "detection_signature": "N/A (attaque offline)",
+      "defense_response": "Politique de mots de passe forts (16+ chars), rotation régulière, WPA3",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_005",
+      "scenario": "Beacon flooding avec 1000 faux SSIDs pour perturber les clients",
+      "attack_type": "Beacon Flood",
+      "tools_used": ["mdk3", "mdk4"],
+      "command_example": "mdk4 wlan0mon b -f ssid_list.txt -s 1000",
+      "detection_signature": "Nombre anormal de beacons, SSIDs aléatoires, même OUI MAC",
+      "defense_response": "Filtrage beacon côté client, WIDS alerting, jamming légal si autorisé",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_006",
+      "scenario": "Exploitation WPS avec Reaver - PIN bruteforce sur routeur vulnérable",
+      "attack_type": "WPS PIN Attack",
+      "tools_used": ["reaver", "bully", "pixiewps"],
+      "command_example": "reaver -i wlan0mon -b <BSSID> -vv -K 1",
+      "detection_signature": "Multiples tentatives WPS EAP en courte période",
+      "defense_response": "Désactiver WPS, firmware update, rate limiting WPS",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_007",
+      "scenario": "Attaque Pixie Dust réussie en 30 secondes sur AP avec WPS vulnérable",
+      "attack_type": "Pixie Dust (WPS Offline)",
+      "tools_used": ["pixiewps", "reaver"],
+      "command_example": "reaver -i wlan0mon -b <BSSID> -K 1 -vv",
+      "detection_signature": "Single WPS exchange suivi de déconnexion",
+      "defense_response": "Désactiver WPS immédiatement, patcher firmware",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_008",
+      "scenario": "Client spoofing - MAC address d'un appareil autorisé cloné",
+      "attack_type": "MAC Spoofing",
+      "tools_used": ["macchanger", "ifconfig"],
+      "command_example": "macchanger -m AA:BB:CC:DD:EE:FF wlan0",
+      "detection_signature": "Deux appareils avec même MAC, locations différentes",
+      "defense_response": "802.1X avec certificats, fingerprinting device, NAC",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_009",
+      "scenario": "Karma attack - AP malveillant répondant à toutes les probe requests",
+      "attack_type": "Karma/Mana Attack",
+      "tools_used": ["hostapd-mana", "wifiphisher"],
+      "command_example": "hostapd-mana mana.conf",
+      "detection_signature": "AP répondant à SSIDs multiples non-existants",
+      "defense_response": "Désactiver auto-connect, préférer réseaux connus, VPN obligatoire",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_010",
+      "scenario": "Attaque KRACK - réinstallation de clé PTK sur client vulnérable",
+      "attack_type": "Key Reinstallation Attack",
+      "tools_used": ["krackattacks-scripts"],
+      "command_example": "python krack_all_zero_tk.py wlan0",
+      "detection_signature": "Message 3 du 4-way handshake retransmis anormalement",
+      "defense_response": "Patcher tous les clients/APs, migrer vers WPA3",
+      "difficulty": "hard",
+      "cve": "CVE-2017-13077"
+    },
+    {
+      "id": "WIFI_ATK_011",
+      "scenario": "DragonBlood - attaque side-channel sur WPA3-SAE",
+      "attack_type": "DragonBlood",
+      "tools_used": ["dragonblood-scripts"],
+      "command_example": "python dragonblood.py --interface wlan0mon",
+      "detection_signature": "Timing anormal dans échange SAE",
+      "defense_response": "Firmware update WPA3, monitoring timing attacks",
+      "difficulty": "expert",
+      "cve": "CVE-2019-9494"
+    },
+    {
+      "id": "WIFI_ATK_012",
+      "scenario": "Probe request tracking - fingerprinting des appareils par leurs requêtes",
+      "attack_type": "Passive Reconnaissance",
+      "tools_used": ["airodump-ng", "probemon", "kismet"],
+      "command_example": "python probemon.py -i wlan0mon",
+      "detection_signature": "N/A (attaque passive)",
+      "defense_response": "MAC randomization, désactiver probing quand non-connecté",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_013",
+      "scenario": "Injection de trames sur réseau WEP pour accélérer la collecte d'IVs",
+      "attack_type": "WEP IV Injection",
+      "tools_used": ["aireplay-ng", "aircrack-ng"],
+      "command_example": "aireplay-ng -3 -b <BSSID> -h <client_mac> wlan0mon",
+      "detection_signature": "Volume anormal de trafic ARP",
+      "defense_response": "MIGRER IMMÉDIATEMENT vers WPA2/WPA3 - WEP est obsolète",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_014",
+      "scenario": "Fragmentation attack sur réseau WEP pour obtenir un keystream",
+      "attack_type": "WEP Fragmentation",
+      "tools_used": ["aireplay-ng"],
+      "command_example": "aireplay-ng -5 -b <BSSID> wlan0mon",
+      "detection_signature": "Fragments 802.11 anormaux",
+      "defense_response": "Éliminer WEP du réseau",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_015",
+      "scenario": "Café Latte attack - récupération de clé WEP depuis client isolé",
+      "attack_type": "Cafe Latte",
+      "tools_used": ["airbase-ng"],
+      "command_example": "airbase-ng -c 6 -e 'target_ssid' -L -W 1 wlan0mon",
+      "detection_signature": "Client générant trafic vers AP inexistant",
+      "defense_response": "Supprimer profils WEP des clients",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_016",
+      "scenario": "Hole196 - exploitation de GTK partagée pour décrypter trafic broadcast",
+      "attack_type": "Hole196 GTK Attack",
+      "tools_used": ["custom scripts"],
+      "command_example": "N/A - requires authenticated access",
+      "detection_signature": "ARP spoofing intra-WLAN",
+      "defense_response": "Isolation client AP, ARP inspection wireless",
+      "difficulty": "hard"
+    },
+    {
+      "id": "WIFI_ATK_017",
+      "scenario": "Attaque de downgrade - forcer un client WPA3 à utiliser WPA2",
+      "attack_type": "Downgrade Attack",
+      "tools_used": ["hostapd-mana"],
+      "command_example": "hostapd avec wpa=2 uniquement",
+      "detection_signature": "Client supportant WPA3 connecté en WPA2",
+      "defense_response": "Désactiver WPA2 transition mode, WPA3-only",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_018",
+      "scenario": "Channel hopping DoS - forcer l'AP à changer de canal répétitivement",
+      "attack_type": "Channel Switch DoS",
+      "tools_used": ["mdk4"],
+      "command_example": "mdk4 wlan0mon d -c 1,6,11",
+      "detection_signature": "CSA (Channel Switch Announcement) sans source légitime",
+      "defense_response": "Ignorer CSA non-authentifiés, PMF",
+      "difficulty": "medium"
+    },
+    {
+      "id": "WIFI_ATK_019",
+      "scenario": "Authentication flood - épuisement de la table d'association de l'AP",
+      "attack_type": "Auth Flood DoS",
+      "tools_used": ["mdk3", "mdk4"],
+      "command_example": "mdk4 wlan0mon a -a <BSSID>",
+      "detection_signature": "Auth requests massives depuis MACs aléatoires",
+      "defense_response": "Rate limiting auth, MAC filtering (limité), 802.11w",
+      "difficulty": "easy"
+    },
+    {
+      "id": "WIFI_ATK_020",
+      "scenario": "RTS/CTS exploitation - réservation du médium pour DoS",
+      "attack_type": "RTS/CTS DoS",
+      "tools_used": ["scapy", "custom injection"],
+      "command_example": "python rts_flood.py -i wlan0mon -t <BSSID>",
+      "detection_signature": "RTS frames excessifs sans data suivant",
+      "defense_response": "Désactiver RTS/CTS threshold bas, WIDS",
+      "difficulty": "medium"
+    }
+  ],
+
+  "defense_scenarios": [
+    {
+      "id": "WIFI_DEF_001",
+      "scenario": "Configurer le monitoring wireless pour détecter les attaques deauth",
+      "objective": "Mettre en place une détection proactive",
+      "steps": [
+        "Installer Kismet ou similaire sur sensor dédié",
+        "Configurer alertes sur deauth frames > 10/min",
+        "Intégrer avec SIEM pour corrélation",
+        "Tester avec attaque simulée"
+      ],
+      "expected_outcome": "Détection en moins de 30 secondes",
+      "tools_needed": ["kismet", "waidps", "SIEM"]
+    },
+    {
+      "id": "WIFI_DEF_002",
+      "scenario": "Implémenter 802.11w (PMF) sur infrastructure enterprise",
+      "objective": "Protéger contre deauth/disassoc spoofed",
+      "steps": [
+        "Vérifier compatibilité clients",
+        "Activer PMF Required sur SSID corporate",
+        "Tester avec clients legacy",
+        "Monitorer les échecs de connexion"
+      ],
+      "expected_outcome": "Immunité aux attaques deauth basiques",
+      "tools_needed": ["WLC/Controller", "Client compatible"]
+    },
+    {
+      "id": "WIFI_DEF_003",
+      "scenario": "Déployer une solution WIDS/WIPS enterprise",
+      "objective": "Détection et prévention automatisées",
+      "features_required": [
+        "Rogue AP detection",
+        "Evil Twin detection",
+        "Deauth attack detection",
+        "Ad-hoc network detection",
+        "Automated containment"
+      ],
+      "products_suggested": ["Cisco AIR", "Aruba RFProtect", "Extreme AirDefense"],
+      "expected_outcome": "Couverture 24/7 avec réponse automatisée"
+    },
+    {
+      "id": "WIFI_DEF_004",
+      "scenario": "Migration sécurisée de WPA2 vers WPA3",
+      "objective": "Renforcer la sécurité sans disruption",
+      "steps": [
+        "Inventaire des clients supportant WPA3",
+        "Créer SSID de transition WPA2/WPA3",
+        "Migrer les clients par groupe",
+        "Désactiver WPA2 après période de transition"
+      ],
+      "expected_outcome": "Réseau WPA3-only résistant aux attaques offline",
+      "timeline": "3-6 mois selon taille"
+    },
+    {
+      "id": "WIFI_DEF_005",
+      "scenario": "Réponse à incident: Evil Twin détecté sur site",
+      "objective": "Neutraliser la menace rapidement",
+      "playbook": [
+        "Identifier le BSSID malveillant",
+        "Localiser par triangulation RF",
+        "Activer containment sur WIPS",
+        "Alerter la sécurité physique",
+        "Documenter pour forensics"
+      ],
+      "expected_outcome": "Neutralisation en moins de 15 minutes",
+      "escalation": "Si persistance, intervention sécurité physique"
+    }
+  ],
+
+  "quiz_scenarios": [
+    {
+      "id": "QUIZ_001",
+      "question": "Un client se déconnecte de façon répétée toutes les 10 secondes. Les logs AP montrent des 'deauthentication reason code 7'. Quelle est la cause probable?",
+      "options": [
+        "A) Problème de couverture RF",
+        "B) Attaque deauthentication ciblée",
+        "C) Conflit d'adresse IP",
+        "D) Firmware AP corrompu"
+      ],
+      "correct_answer": "B",
+      "explanation": "Le reason code 7 ('Class 3 frame received from nonassociated station') combiné à la régularité suggère une attaque deauth automatisée"
+    },
+    {
+      "id": "QUIZ_002",
+      "question": "Wireshark capture montre: EAPOL Key (Message 1 of 4) suivi de 50 répétitions du Message 3. Quelle attaque?",
+      "options": [
+        "A) Evil Twin",
+        "B) PMKID Attack",
+        "C) KRACK Attack",
+        "D) Beacon Flood"
+      ],
+      "correct_answer": "C",
+      "explanation": "La répétition du Message 3 est la signature de l'attaque KRACK qui force la réinstallation de la clé"
+    },
+    {
+      "id": "QUIZ_003",
+      "question": "Comment différencier un Rogue AP d'un Evil Twin dans les logs WIDS?",
+      "options": [
+        "A) Le Rogue AP a toujours un signal plus faible",
+        "B) L'Evil Twin utilise le même ESSID qu'un AP légitime",
+        "C) Le Rogue AP utilise toujours WEP",
+        "D) L'Evil Twin est toujours sur le même canal"
+      ],
+      "correct_answer": "B",
+      "explanation": "L'Evil Twin imite spécifiquement un réseau légitime (ESSID), tandis qu'un Rogue AP est simplement un AP non-autorisé sur le réseau"
+    },
+    {
+      "id": "QUIZ_004",
+      "question": "Quelle est la meilleure défense contre les attaques PMKID?",
+      "options": [
+        "A) Désactiver le SSID broadcast",
+        "B) Utiliser MAC filtering",
+        "C) Migrer vers WPA3-SAE",
+        "D) Activer le firewall de l'AP"
+      ],
+      "correct_answer": "C",
+      "explanation": "WPA3-SAE utilise Simultaneous Authentication of Equals qui ne divulgue pas le PMKID et résiste aux attaques offline"
+    },
+    {
+      "id": "QUIZ_005",
+      "question": "Un attaquant capture un handshake WPA2. Combien de temps pour cracker 'P@ssw0rd123' avec GPU moderne?",
+      "options": [
+        "A) Quelques secondes (dictionnaire commun)",
+        "B) Plusieurs heures (bruteforce)",
+        "C) Plusieurs jours",
+        "D) Impossible à cracker"
+      ],
+      "correct_answer": "A",
+      "explanation": "Ce mot de passe est dans la plupart des wordlists (rockyou, etc.) - le cracking prend quelques secondes"
+    },
+    {
+      "id": "QUIZ_006",
+      "question": "Quel protocole 802.11 protège contre le spoofing de trames de management?",
+      "options": [
+        "A) 802.11i",
+        "B) 802.11w (PMF)",
+        "C) 802.11r (FT)",
+        "D) 802.11k (RRM)"
+      ],
+      "correct_answer": "B",
+      "explanation": "802.11w (Protected Management Frames) chiffre/authentifie les trames de management critiques comme deauth/disassoc"
+    },
+    {
+      "id": "QUIZ_007",
+      "question": "Lors d'un test de pénétration, vous ne captez aucun handshake malgré des clients connectés. Meilleure approche?",
+      "options": [
+        "A) Attendre plus longtemps",
+        "B) Passer en mode moniteur",
+        "C) Envoyer des deauth ciblés pour forcer reconnexion",
+        "D) Tenter une attaque PMKID"
+      ],
+      "correct_answer": "D",
+      "explanation": "L'attaque PMKID ne nécessite pas de client et capture le PMKID directement de l'AP"
+    },
+    {
+      "id": "QUIZ_008",
+      "question": "Un scan révèle un réseau avec BSSID 00:00:00:00:00:00. Qu'est-ce que cela indique?",
+      "options": [
+        "A) AP en mode invisible",
+        "B) Probe request (pas un AP)",
+        "C) AP défectueux",
+        "D) Attaque en cours"
+      ],
+      "correct_answer": "B",
+      "explanation": "BSSID null (broadcast) est utilisé dans les probe requests des clients cherchant des réseaux"
+    },
+    {
+      "id": "QUIZ_009",
+      "question": "Quel outil est le plus adapté pour détecter automatiquement les Evil Twins en enterprise?",
+      "options": [
+        "A) Wireshark",
+        "B) Aircrack-ng",
+        "C) WIPS (Wireless Intrusion Prevention System)",
+        "D) Nmap"
+      ],
+      "correct_answer": "C",
+      "explanation": "Un WIPS compare continuellement les APs détectés avec la baseline autorisée et alerte/bloque les anomalies"
+    },
+    {
+      "id": "QUIZ_010",
+      "question": "Pourquoi une attaque deauth sur WPA3 avec PMF obligatoire échoue?",
+      "options": [
+        "A) WPA3 utilise un canal différent",
+        "B) Les trames deauth sont chiffrées/authentifiées",
+        "C) WPA3 ignore les trames deauth",
+        "D) WPA3 change de clé automatiquement"
+      ],
+      "correct_answer": "B",
+      "explanation": "Avec PMF (obligatoire en WPA3), les trames de management sont protégées cryptographiquement"
+    }
+  ],
+
+  "practical_challenges": [
+    {
+      "id": "CHALLENGE_001",
+      "title": "Détection de deauth en temps réel",
+      "difficulty": "beginner",
+      "task": "Écrire un script Python avec Scapy qui alerte quand plus de 5 trames deauth sont détectées en 10 secondes",
+      "hints": ["Utiliser sniff() avec filtre", "Counter dict pour tracking"],
+      "expected_code_structure": "from scapy.all import * / counter / threshold / alert"
+    },
+    {
+      "id": "CHALLENGE_002",
+      "title": "Fingerprinting d'AP",
+      "difficulty": "intermediate",
+      "task": "Créer un outil qui identifie le fabricant et le modèle probable d'un AP basé sur ses beacons",
+      "hints": ["OUI lookup", "Information Elements parsing", "Timing analysis"],
+      "expected_code_structure": "beacon parser / OUI database / IE analysis"
+    },
+    {
+      "id": "CHALLENGE_003",
+      "title": "Evil Twin Detector",
+      "difficulty": "intermediate",
+      "task": "Développer un détecteur d'Evil Twin qui compare les BSSIDs pour un même ESSID",
+      "hints": ["Maintenir baseline", "Comparer signaux", "Alerter sur duplicats"],
+      "expected_code_structure": "AP database / ESSID grouping / anomaly detection"
+    },
+    {
+      "id": "CHALLENGE_004",
+      "title": "WPA3 Migration Planner",
+      "difficulty": "advanced",
+      "task": "Créer un script qui scanne le réseau et génère un rapport de compatibilité WPA3 des clients",
+      "hints": ["Probe request analysis", "Capability bits", "Report generation"],
+      "expected_code_structure": "Client enumeration / WPA3 capability check / CSV/PDF report"
+    },
+    {
+      "id": "CHALLENGE_005",
+      "title": "Automated Incident Response",
+      "difficulty": "advanced",
+      "task": "Implémenter un système qui détecte une attaque et active automatiquement le containment WIPS",
+      "hints": ["WIPS API integration", "Detection thresholds", "Automated blocking"],
+      "expected_code_structure": "Detection module / WIPS API client / Action executor / Logging"
+    }
+  ],
+
+  "random_training_prompts": [
+    "Analyse cette capture: un client envoie des probe requests pour 'FreeWifi' mais le réseau légitime s'appelle 'Corporate-Secure'. Risque?",
+    "L'administrateur réseau détecte 3 APs avec le même ESSID sur 3 canaux différents. Normal ou suspect?",
+    "Un laptop d'entreprise se connecte automatiquement à 'attwifi' dans un café. Quels sont les risques et comment les mitiger?",
+    "Compare l'efficacité d'une attaque PMKID vs capture de handshake classique",
+    "Un IoT thermostat utilise WPA2-PSK avec le mot de passe par défaut. Scénario d'attaque et défense?",
+    "Explique pourquoi WEP reste dangereux même avec un mot de passe de 64 caractères",
+    "Un hôtel propose du WiFi gratuit sans mot de passe. Quelles attaques sont possibles pour les guests?",
+    "Décris les étapes pour forensiquer un incident Evil Twin après détection",
+    "Un WIDS génère 1000 alertes/jour pour 'Rogue AP'. Comment réduire les faux positifs?",
+    "Compare WPA2-Enterprise (PEAP) vs WPA3-Enterprise. Avantages sécurité?",
+    "Un pentest client demande de tester le WiFi guest qui est isolé du réseau corporate. Approche?",
+    "Explique comment un attaquant peut exploiter le roaming 802.11r (Fast Transition)",
+    "Un employé utilise un hotspot personnel dans le bureau. Risques pour le réseau corporate?",
+    "Décris une attaque combining Evil Twin + captive portal phishing",
+    "Comment un attaquant peut-il contourner le MAC filtering?",
+    "Qu'est-ce que l'attaque 'AWDL' sur les appareils Apple et comment s'en protéger?",
+    "Un drone survole le bâtiment avec une antenne directionnelle. Quel type de reconnaissance?",
+    "Compare Kismet vs Airodump-ng pour la surveillance passive continue",
+    "Un réseau mesh utilise WPA3-SAE. Points faibles potentiels?",
+    "Explique l'attaque 'FragAttacks' et son impact sur les réseaux WiFi modernes"
+  ]
+}

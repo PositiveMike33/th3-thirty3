@@ -2,10 +2,18 @@
  * Model Metrics Service
  * Tracks performance, expertise, and cognitive progression of Ollama models
  * Integrates with AnythingLLM + Pieces for long-term memory (3 months)
+ * 
+ * GOLDEN RATIO LEARNING SYSTEM (φ = 1.618)
+ * Fundamental methodology for all model learning:
+ * - Growth follows φ (1.618) for natural progression
+ * - Decay follows 1/φ (0.618) for natural forgetting
+ * - Elite memory retains top 61.8% of experiences
+ * - Resource efficiency improves with experience
  */
 
 const fs = require('fs');
 const path = require('path');
+const { GoldenRatioMemorySystem, PHI, INVERSE_PHI, FIBONACCI_INTERVALS } = require('./golden_ratio_memory');
 
 // Local cache file for quick access
 const METRICS_PATH = path.join(__dirname, 'data', 'model_metrics.json');
@@ -33,9 +41,17 @@ class ModelMetricsService {
         this.benchmarkInterval = null;
         this.broadcastInterval = null;
         this.decayInterval = null; // Skill decay checker
+        
+        // GOLDEN RATIO MEMORY SYSTEM - Core methodology for all learning
+        this.goldenMemory = new GoldenRatioMemorySystem();
+        this.phi = PHI;           // 1.618 - growth ratio
+        this.inversePhi = INVERSE_PHI; // 0.618 - decay/retention ratio
+        
         this.ensureDataDir();
         this.loadMetrics();
         this.startSkillDecayChecker(); // Start decay system
+        
+        console.log('[MODEL_METRICS] Golden Ratio Learning System initialized (φ=1.618)');
     }
 
     ensureDataDir() {
@@ -211,18 +227,28 @@ class ModelMetricsService {
     }
 
     /**
-     * Update expertise score for a category
+     * Update expertise score for a category using GOLDEN RATIO methodology
+     * φ (1.618) based growth for natural human-like learning curve
      */
     updateExpertise(modelName, category, score) {
         const model = this.getOrCreateModelMetrics(modelName);
         const exp = model.expertise[category];
         
-        // Weighted average (new samples count more when fewer samples exist)
-        const weight = Math.min(0.3, 1 / (exp.samples + 1));
-        exp.score = exp.score * (1 - weight) + score * weight;
-        exp.score = Math.max(0, Math.min(100, exp.score)); // Clamp 0-100
+        // GOLDEN RATIO LEARNING: Use φ-based growth calculation
+        const newScore = this.goldenMemory.calculateGrowth(
+            exp.score,
+            score,
+            exp.samples
+        );
+        
+        exp.score = Math.max(0, Math.min(100, newScore));
         exp.samples++;
         exp.lastUpdated = new Date().toISOString();
+        
+        // Calculate and store resource efficiency
+        const efficiency = this.goldenMemory.calculateResourceEfficiency(exp.samples);
+        exp.resourceEfficiency = efficiency.efficiencyMultiplier;
+        exp.vramSavings = efficiency.savingsPercent;
     }
 
     /**
@@ -279,9 +305,9 @@ class ModelMetricsService {
     }
 
     /**
-     * SKILL DECAY SYSTEM
-     * After 3 days of inactivity, expertise scores slowly decrease
-     * Like human learning - skills need regular practice to maintain
+     * GOLDEN RATIO SKILL DECAY SYSTEM (1/φ = 0.618)
+     * Uses inverse golden ratio for natural forgetting curve
+     * Like human memory - skills decay naturally without practice
      */
     applySkillDecay(modelName) {
         const model = this.metrics[modelName];
@@ -291,24 +317,29 @@ class ModelMetricsService {
         const lastActivity = model.lastActivity ? new Date(model.lastActivity) : new Date(model.lastUpdated);
         const daysSinceActivity = (now - lastActivity) / (1000 * 60 * 60 * 24);
 
-        // Only apply decay after 3 days of inactivity
-        if (daysSinceActivity < 3) return;
-
-        // Calculate decay amount (0.5% per day after 3 days, max 2% per check)
-        const daysOverThreshold = daysSinceActivity - 3;
-        const decayRate = Math.min(0.02, daysOverThreshold * 0.005);
-
         let decayApplied = false;
+        let totalDecay = 0;
 
-        // Apply decay to each expertise category
+        // Apply GOLDEN RATIO decay to each expertise category
         for (const category of EXPERTISE_CATEGORIES) {
             const exp = model.expertise[category];
             if (exp && exp.score > 30) { // Don't decay below 30 (baseline)
                 const oldScore = exp.score;
-                exp.score = Math.max(30, exp.score * (1 - decayRate));
+                
+                // Use Golden Ratio decay system
+                const decayResult = this.goldenMemory.calculateDecay(
+                    exp.score,
+                    daysSinceActivity,
+                    exp.samples || 1
+                );
+                
+                exp.score = decayResult.newScore;
+                exp.memoryType = decayResult.memoryType;
+                exp.memoryStrength = decayResult.memoryStrength;
                 
                 if (oldScore !== exp.score) {
                     decayApplied = true;
+                    totalDecay += decayResult.decayAmount;
                 }
             }
         }
@@ -317,18 +348,28 @@ class ModelMetricsService {
             // Recalculate cognitive score
             this.recalculateCognitiveScore(modelName);
             
+            // Get memory status
+            const memoryStatus = this.goldenMemory.getMemoryStatus(
+                daysSinceActivity, 
+                model.performance?.totalQueries || 0
+            );
+            
             // Add decay event to history
             model.history.push({
                 date: now.toISOString(),
                 cognitiveScore: model.cognitive.overallScore,
-                event: 'skill_decay',
-                daysSinceActivity: Math.round(daysSinceActivity)
+                event: 'golden_ratio_decay',
+                daysSinceActivity: Math.round(daysSinceActivity * 10) / 10,
+                totalDecay: Math.round(totalDecay * 10) / 10,
+                memoryStatus: memoryStatus.status,
+                phi: this.inversePhi
             });
 
             model.decayAppliedAt = now.toISOString();
+            model.memoryStatus = memoryStatus;
             this.saveMetrics();
 
-            console.log(`[MODEL_METRICS] Skill decay applied to ${modelName} (${Math.round(daysSinceActivity)} days inactive)`);
+            console.log(`[MODEL_METRICS] φ⁻¹ Decay: ${modelName} (-${totalDecay.toFixed(1)}) | ${memoryStatus.status}`);
         }
     }
 
@@ -654,9 +695,124 @@ class ModelMetricsService {
         }
         console.log('[MODEL_METRICS] Service stopped');
     }
+
+    // =========================================================
+    // GOLDEN RATIO ELITE & CYBERNETIC METHODS
+    // =========================================================
+
+    /**
+     * Get elite status for a model
+     * Calculates level, cybernetic power, and elite knowledge retention
+     */
+    getEliteStatus(modelName) {
+        const model = this.metrics[modelName];
+        if (!model) return null;
+
+        const totalInteractions = model.performance?.totalQueries || 0;
+        const successfulInteractions = model.performance?.successfulQueries || 0;
+        
+        // Calculate exponential growth
+        const growth = this.goldenMemory.calculateExponentialGrowth(
+            totalInteractions,
+            successfulInteractions
+        );
+        
+        // Calculate cybernetic enhancement
+        const domains = Object.keys(model.expertise || {});
+        const avgExpertise = domains.reduce((sum, d) => sum + (model.expertise[d]?.score || 0), 0) / domains.length;
+        
+        const cyber = this.goldenMemory.calculateCyberneticEnhancement({
+            expertiseScore: avgExpertise,
+            repetitions: totalInteractions,
+            successRate: totalInteractions > 0 ? successfulInteractions / totalInteractions : 0,
+            domains
+        });
+        
+        // Consolidate elite knowledge
+        const eliteKnowledge = this.goldenMemory.consolidateEliteKnowledge(model.history || []);
+        
+        return {
+            modelName,
+            eliteLevel: growth.eliteLevel,
+            cyberneticPower: cyber.cyberneticPower,
+            enhancementLevel: cyber.enhancementLevel,
+            progressToNextLevel: growth.progressToNextLevel,
+            growth,
+            cybernetic: cyber,
+            eliteKnowledge,
+            goldenRatio: {
+                phi: this.phi,
+                inversePhi: this.inversePhi,
+                eliteRetention: '61.8%'
+            }
+        };
+    }
+
+    /**
+     * Get resource optimization status for a model
+     * Shows VRAM savings and efficiency tier
+     */
+    getResourceOptimization(modelName) {
+        const model = this.metrics[modelName];
+        if (!model) return null;
+
+        const totalSamples = Object.values(model.expertise || {})
+            .reduce((sum, exp) => sum + (exp.samples || 0), 0);
+        
+        const optimization = this.goldenMemory.calculateTotalOptimization(
+            totalSamples,
+            { vram: 4.0, batchSize: 1, tokens: 500 }
+        );
+        
+        return {
+            modelName,
+            optimization,
+            totalExperience: totalSamples,
+            philosophy: 'φ⁻¹ decay: More experience → Less resources → Ultra power'
+        };
+    }
+
+    /**
+     * Get complete Golden Ratio status for a model
+     */
+    getGoldenRatioStatus(modelName) {
+        const model = this.metrics[modelName];
+        if (!model) return null;
+
+        const elite = this.getEliteStatus(modelName);
+        const optimization = this.getResourceOptimization(modelName);
+        
+        const now = new Date();
+        const lastActivity = model.lastActivity ? new Date(model.lastActivity) : new Date(model.lastUpdated);
+        const daysSinceActivity = (now - lastActivity) / (1000 * 60 * 60 * 24);
+        
+        const memoryStatus = this.goldenMemory.getMemoryStatus(
+            daysSinceActivity,
+            model.performance?.totalQueries || 0
+        );
+        
+        return {
+            modelName,
+            goldenRatio: {
+                phi: this.phi,
+                inversePhi: this.inversePhi,
+                description: 'Natural learning growth and decay'
+            },
+            elite: elite?.eliteLevel,
+            cyberneticPower: elite?.cyberneticPower,
+            enhancementLevel: elite?.enhancementLevel,
+            memoryStatus,
+            optimization: optimization?.optimization,
+            cognitiveScore: model.cognitive?.overallScore,
+            lastActivity: model.lastActivity,
+            philosophy: {
+                growth: 'Knowledge grows following φ (1.618)',
+                decay: 'Memory fades following 1/φ (0.618)', 
+                elite: 'Top 61.8% experiences retained',
+                efficiency: 'Resource cost decreases with experience'
+            }
+        };
+    }
 }
 
 module.exports = ModelMetricsService;
-
-
-

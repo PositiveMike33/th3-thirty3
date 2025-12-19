@@ -206,6 +206,12 @@ agentDirectorRoutes.setAgentDirector(agentDirector);
 console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersécurité, OSINT, Agent Thirty3');
 console.log('[SYSTEM] Real Training Service initialized (Shodan + model training)');
 
+// Initialize WiFi Security Training Service (Specialized WiFi attack/defense training)
+const { router: wifiTrainingRouter, initializeRoutes: initWifiTraining } = require('./wifi_training_routes');
+const wifiTrainingRoutes = initWifiTraining(llmService, modelMetricsService);
+app.use('/api/wifi-training', wifiTrainingRoutes);
+console.log('[WIFI-TRAINING] WiFi Security Training Service initialized (50+ scenarios)');
+
 
 // Helper: Inject File Content (Delegated to ContextService)
 const injectFileContent = async (message) => {

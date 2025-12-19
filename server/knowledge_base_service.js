@@ -19,7 +19,12 @@ class KnowledgeBaseService {
             'security_trends_2025.json',
             'opsec_scenarios.json',
             'cyber_physical_systems.json',
-            'kinetic_osint.json'
+            'kinetic_osint.json',
+            'network_defense_reverse_engineering.json',  // WiFi, network, RE defense
+            'defense_training_workflows.json',           // Structured training workflows
+            'expert_model_assignments.json',             // Model specialization config
+            'wifi_security_training_scenarios.json',     // 50+ WiFi attack/defense scenarios
+            'pentestgpt_methodology.json'                // PentestGPT (USENIX 2024) pentest methodology
         ];
 
         files.forEach(file => {
@@ -54,7 +59,10 @@ class KnowledgeBaseService {
         for (const [datasetName, entries] of Object.entries(datasetsToSearch)) {
             if (!entries) continue;
             
-            entries.forEach(entry => {
+            // Handle array entries
+            const entryArray = Array.isArray(entries) ? entries : [entries];
+            
+            entryArray.forEach(entry => {
                 // Original fields
                 const instruction = entry.instruction?.toLowerCase() || '';
                 const challenge = entry.challenge?.toLowerCase() || '';
@@ -71,6 +79,15 @@ class KnowledgeBaseService {
                 const toolRef = entry.tool_ref?.toLowerCase() || '';
                 const physicalRisk = entry.physical_risk?.toLowerCase() || '';
                 
+                // Network Defense / Reverse Engineering fields (NEW)
+                const attackType = entry.attack_type?.toLowerCase() || '';
+                const categoryField = entry.category?.toLowerCase() || '';
+                const detectionMethod = entry.detection_method?.toLowerCase() || '';
+                const defenseProtocol = entry.defense_protocol?.toLowerCase() || '';
+                const trainingPrompt = entry.training_prompt?.toLowerCase() || '';
+                const toolChain = entry.tool_chain?.join(' ').toLowerCase() || '';
+                const iocIndicators = entry.ioc_indicators?.join(' ').toLowerCase() || '';
+                
                 // Match against all fields
                 if (instruction.includes(queryLower) || 
                     challenge.includes(queryLower) || 
@@ -81,7 +98,14 @@ class KnowledgeBaseService {
                     protocolPort.includes(queryLower) ||
                     technique.includes(queryLower) ||
                     toolRef.includes(queryLower) ||
-                    physicalRisk.includes(queryLower)) {
+                    physicalRisk.includes(queryLower) ||
+                    attackType.includes(queryLower) ||
+                    categoryField.includes(queryLower) ||
+                    detectionMethod.includes(queryLower) ||
+                    defenseProtocol.includes(queryLower) ||
+                    trainingPrompt.includes(queryLower) ||
+                    toolChain.includes(queryLower) ||
+                    iocIndicators.includes(queryLower)) {
                     results.push({
                         source: datasetName,
                         ...entry
@@ -151,7 +175,7 @@ class KnowledgeBaseService {
         }
 
         let context = '\n--- BASE DE CONNAISSANCES PERTINENTE ---\n';
-        relevant.slice(0, 3).forEach((entry, i) => {
+        relevant.slice(0, 5).forEach((entry, i) => {
             context += `\n[${i + 1}] Source: ${entry.source}\n`;
             
             // Handle different entry types
@@ -171,6 +195,27 @@ class KnowledgeBaseService {
                 context += `Outil: ${entry.tool_ref}\n`;
                 context += `Risque Physique: ${entry.physical_risk}\n`;
                 context += `Contre-mesure: ${entry.counter_measure || 'N/A'}\n`;
+            } else if (entry.attack_type) {
+                // Network Defense / Reverse Engineering entry (NEW)
+                context += `Catégorie: ${entry.category}\n`;
+                context += `Type d'attaque: ${entry.attack_type}\n`;
+                context += `Outils: ${entry.tool_chain?.join(', ') || 'N/A'}\n`;
+                context += `Détection: ${entry.detection_method}\n`;
+                context += `Défense: ${entry.defense_protocol}\n`;
+                context += `IOCs: ${entry.ioc_indicators?.join(', ') || 'N/A'}\n`;
+                if (entry.training_prompt) {
+                    context += `Prompt d'entraînement: ${entry.training_prompt}\n`;
+                }
+            } else if (entry.category_id) {
+                // Training Workflow category (NEW)
+                context += `Workflow: ${entry.name}\n`;
+                context += `Objectifs: ${entry.learning_objectives?.join('; ') || 'N/A'}\n`;
+                if (entry.training_scenarios?.length) {
+                    context += `Phases: ${entry.training_scenarios.map(s => s.phase).join(' → ')}\n`;
+                }
+            } else if (entry.expert_domains) {
+                // Expert Model Assignments (NEW) - skip detailed output, just note availability
+                context += `Configuration d'experts disponible pour ${Object.keys(entry.expert_domains).length} domaines\n`;
             } else if (entry.challenge) {
                 context += `Scénario: ${entry.challenge}\n`;
                 context += `Solution: ${JSON.stringify(entry.solution, null, 2)}\n`;
