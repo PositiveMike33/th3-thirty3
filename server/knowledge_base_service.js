@@ -24,7 +24,8 @@ class KnowledgeBaseService {
             'defense_training_workflows.json',           // Structured training workflows
             'expert_model_assignments.json',             // Model specialization config
             'wifi_security_training_scenarios.json',     // 50+ WiFi attack/defense scenarios
-            'pentestgpt_methodology.json'                // PentestGPT (USENIX 2024) pentest methodology
+            'pentestgpt_methodology.json',               // PentestGPT (USENIX 2024) pentest methodology
+            'financial_markets_scenarios.json'           // Financial Cyber-Warfare (HFT, SWIFT, DeFi) scenarios
         ];
 
         files.forEach(file => {
@@ -216,6 +217,14 @@ class KnowledgeBaseService {
             } else if (entry.expert_domains) {
                 // Expert Model Assignments (NEW) - skip detailed output, just note availability
                 context += `Configuration d'experts disponible pour ${Object.keys(entry.expert_domains).length} domaines\n`;
+            } else if (entry.ideal_agent) {
+                // Financial Cyber-Warfare entry (NEW)
+                context += `Scénario Financier: ${entry.title} (${entry.category})\n`;
+                context += `Difficulté: ${entry.difficulty}\n`;
+                context += `Contexte: ${entry.context}\n`;
+                context += `Objectifs: ${entry.objectives?.join(', ') || 'N/A'}\n`;
+                context += `Agent Idéal: ${entry.ideal_agent} (${entry.ideal_model})\n`;
+                context += `Points Clés: ${entry.golden_answer_points?.join('; ') || 'N/A'}\n`;
             } else if (entry.challenge) {
                 context += `Scénario: ${entry.challenge}\n`;
                 context += `Solution: ${JSON.stringify(entry.solution, null, 2)}\n`;

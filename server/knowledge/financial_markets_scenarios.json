@@ -1,0 +1,115 @@
+{
+  "dataset_info": {
+    "name": "Financial Cyber-Warfare Scenarios",
+    "version": "1.0",
+    "description": "High-complexity attack/defense scenarios focused on financial infrastructure (HFT, SWIFT, DeFi, Banking)",
+    "golden_ratio_compliant": true
+  },
+  "scenarios": [
+    {
+      "id": "FIN-001",
+      "category": "High-Frequency Trading",
+      "title": "Microsecond Latency Injection (Time-jacking)",
+      "difficulty": "Elite",
+      "ideal_model": "mistral:7b-instruct",
+      "ideal_agent": "NetPsyche",
+      "context": "An HFT firm reports a consistent 4-millisecond discrepancy between their internal clock and the exchange execution report timestamps, correlating with a 15% loss in arbitrage opportunities. Network logs show sporadic ICMP anomalies.",
+      "objectives": [
+        "Detect if the latency is artificial (attack) or structural",
+        "Identify the network hop responsible for the delay",
+        "Propose a mitigation strategy for time-synchronization (PTP/NTP) security"
+      ],
+      "system_prompt": "You are NetPsyche, specializing in UEBA and Network anomalies. Analyze this micro-latency issue in an HFT environment. Focus on PTP (Precision Time Protocol) attacks and Front-Running detection.",
+      "golden_answer_points": [
+        "PTP (IEEE 1588) delay attack identification",
+        "Analysis of 'Delay_Req' and 'Delay_Resp' message manipulation",
+        "Differentiation between network congestion and malicious queuing",
+        "Recommendation for separate physical synchronization network"
+      ]
+    },
+    {
+      "id": "FIN-002",
+      "category": "Banking Infrastructure",
+      "title": "SWIFT Alliance Access Malware Injection",
+      "difficulty": "Legendary",
+      "ideal_model": "qwen2.5-coder:7b",
+      "ideal_agent": "RE-Automata",
+      "context": "Forensics reveals a suspicious binary 'libor_update.dll' injected into the SWIFT Alliance Access memory space. The binary hooks the 'mt103_validate' function but only activates during weekends.",
+      "objectives": [
+        "Reverse engineer the DLL to understand the hooking mechanism",
+        "Determine how it modifies MT103 (Single Customer Credit Transfer) fields",
+        "Identify the exfiltration channel for the modified transaction logs"
+      ],
+      "system_prompt": "You are RE-Automata, the Reverse Engineering Expert. Perform a static and dynamic analysis of this banking trojan via the provided pseudocode/assembly snippets. Identify the logic flow specifically targeting SWIFT message fields.",
+      "golden_answer_points": [
+        "Identification of API Hooking (e.g., Detours or inline patching)",
+        "Modification of 'Beneficiary Account' field in MT103",
+        "Analysis of the specific date/time trigger (weekend execution)",
+        "Identification of steganographic exfiltration in PDF reports"
+      ]
+    },
+    {
+      "id": "FIN-003",
+      "category": "DeFi / Blockchain",
+      "title": "Flash Loan Reentrancy Attack",
+      "difficulty": "Expert",
+      "ideal_model": "qwen2.5-coder:7b",
+      "ideal_agent": "VulnScout",
+      "context": "A lending protocol on Ethereum has just lost $50M. The attacker used a Flash Loan to borrow assets, manipulated the internal price oracle, and drained the pool before repaying the loan in the same transaction.",
+      "objectives": [
+        "Analyze the Solidity smart contract code for reentrancy vulnerabilities",
+        "Explain the sequence of calls (Borrow -> Attack -> Repay)",
+        "Write a patch to prevent the reentrancy or price manipulation"
+      ],
+      "system_prompt": "You are VulnScout, specialized in Smart Contract auditing. Review the provided Solidity snippet. Trace the state changes and external calls. Propose a 'Checks-Effects-Interactions' pattern fix.",
+      "golden_answer_points": [
+        "Use of 'nonReentrant' modifier",
+        "Implementation of Checks-Effects-Interactions pattern",
+        "Reliance on decentralized manipulat-resistant oracles (e.g., Chainlink) instead of internal spot price",
+        "Identification of logic error allowing withdraw before state update"
+      ]
+    },
+    {
+      "id": "FIN-004",
+      "category": "Market Integrity",
+      "title": "Dark Pool Insider Leak via Steganography",
+      "difficulty": "Master",
+      "ideal_model": "granite3.1-moe:1b",
+      "ideal_agent": "ForensicLens",
+      "context": "A competitor consistently trades ahead of large block orders placed in your Dark Pool. No network leaks detected, but an employee posts daily 'motivational quotes' images on a public forum just before market open.",
+      "objectives": [
+        "Analyze the image files for LSB (Least Significant Bit) steganography",
+        "Correlate image posting timestamps with block trade execution",
+        "Decrypt the hidden payload containing ticker symbols and volumes"
+      ],
+      "system_prompt": "You are ForensicLens. Investigate this potential data exfiltration channel. Focus on Steganalysis techniques and correlation of non-technical signals (social media) with technical events (trades).",
+      "golden_answer_points": [
+        "Application of StegExpose or similar LSB analysis tools",
+        "Extraction of hidden ASCII data from image noise",
+        "Statistical correlation between post times and trade volumes",
+        "Evidence preservation for legal (SEC/AMF) proceedings"
+      ]
+    },
+    {
+      "id": "FIN-005",
+      "category": "Central Banking",
+      "title": "CBDC Consensus Sybil Attack",
+      "difficulty": "Transcendent",
+      "ideal_model": "mistral:7b-instruct",
+      "ideal_agent": "AdversarySim",
+      "context": "A pilot CBDC (Central Bank Digital Currency) running on a permissioned ledger experiences a ledger fork. 35% of the validator nodes are rejecting valid transactions from specific commercial banks.",
+      "objectives": [
+        "Simulate a Sybil attack on the consensus mechanism (PBFT/Raft)",
+        "Determine if the malicious nodes are colluding (Byzantine Fault)",
+        "Propose a hard-fork strategy to slash the malicious validators"
+      ],
+      "system_prompt": "You are AdversarySim. Model this threat against a sovereign digital currency system. Evaluate the consensus resilience against a 33%+ attack vector. Design a recovery protocol.",
+      "golden_answer_points": [
+        "Identification of Byzantine Fault Tolerance limits (usually 33% nodes)",
+        "Proof of collusion via signature timing analysis",
+        "Implementation of a 'Slashing Condition' in the protocol",
+        "Emergency fallback to centralized sequencer temporarily"
+      ]
+    }
+  ]
+}

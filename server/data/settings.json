@@ -2,7 +2,7 @@
   "darkMode": true,
   "autoCorrect": true,
   "computeMode": "cloud",
-  "reflectionMode": "ultra",
+  "reflectionMode": "think",
   "socials": {
     "facebook": false,
     "instagram": false,
@@ -16,5 +16,7 @@
     "anythingllm_url": "",
     "anythingllm_key": ""
   },
-  "themeMode": "paint"
+  "themeMode": "light",
+  "customWallpaper": "",
+  "language": "fr-QC"
 }
