@@ -1253,6 +1253,11 @@ const dockerRoutes = require('./docker_routes');
 app.use('/api/docker', dockerRoutes);
 console.log('[SYSTEM] Docker routes mounted at /api/docker (Container Management)');
 
+// OSINT Expert Team Routes (Multi-Agent OSINT Investigation)
+const osintTeamRoutes = require('./osint_team_routes');
+app.use('/api/osint-team', osintTeamRoutes);
+console.log('[SYSTEM] OSINT Team routes mounted at /api/osint-team (Expert Team 2025)');
+
 
 // Initialize Socket.io with HTTP server
 socketService.initialize(server);
