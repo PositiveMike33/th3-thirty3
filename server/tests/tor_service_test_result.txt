@@ -1,0 +1,43 @@
+﻿
+============================================================
+  TEST DU SERVICE TOR MIS ├Ç JOUR
+============================================================
+
+[TOR] Service initialized
+[TEST 1] V├®rification du statut Tor...
+  Port SOCKS: ACTIF
+
+[TEST 2] Test de torFetch (via SOCKS5)...
+[TOR] Docker fetch successful: https://check.torproject.org/api/ip...
+  IP de sortie Tor: 172.104.186.73
+  V├®rifi├® par Tor: OUI Ô£à
+  Via SOCKS5: NON
+
+  Ô£à CONNEXION ANONYME CONFIRM├ëE!
+
+[TEST 3] V├®rification multi-services...
+[TOR] Docker fetch successful: https://api.ipify.org?format=json...
+  IPify: 172.104.186.73
+[TOR] Docker fetch successful: https://httpbin.org/ip...
+  HTTPBin: 172.104.186.73
+
+[TEST 4] V├®rification compl├¿te de la connexion...
+[TOR] Docker fetch successful: https://check.torproject.org/api/ip...
+  Utilise Tor: OUI Ô£à
+  IP: 172.104.186.73
+  Message: Connect├® via Tor
+
+[TEST 5] Statistiques du service...
+  Requ├¬tes effectu├®es: 4
+  Changements d'IP: 0
+  Erreurs: 0
+
+============================================================
+  R├ëSUM├ë
+============================================================
+
+  ­ƒÄë SERVICE TOR OP├ëRATIONNEL ET ANONYME
+  - Toutes les requ├¬tes via torFetch sont rout├®es par Tor
+  - Votre vraie IP est masqu├®e
+  - Le backend est pr├¬t pour les op├®rations OSINT
+

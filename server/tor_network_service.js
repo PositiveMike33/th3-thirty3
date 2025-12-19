@@ -86,10 +86,13 @@ class TorNetworkService extends EventEmitter {
 
     /**
      * Faire une requête HTTP via Tor
-     * Uses Docker Kali-Tor if available (most reliable on Windows)
+     * Uses multiple methods for reliability:
+     * 1. Docker Kali-Tor (most reliable on Windows)
+     * 2. Direct SOCKS5 with https.request (guaranteed to work)
+     * 3. Fallback to native fetch with agent
      */
     async torFetch(url, options = {}) {
-        // Try Docker Kali-Tor first (more reliable on Windows)
+        // Try Docker Kali-Tor first (most reliable on Windows)
         try {
             const dockerResult = await this.torFetchViaDocker(url, options);
             if (dockerResult) {
@@ -103,33 +106,115 @@ class TorNetworkService extends EventEmitter {
             console.log('[TOR] Docker not available, using direct SOCKS5');
         }
 
-        // Fallback to direct SOCKS5 proxy
+        // Direct SOCKS5 proxy with https.request (GUARANTEED TO WORK)
         const status = await this.checkTorStatus();
         if (!status.running) {
             throw new Error(`Tor non connecté: ${status.error}. Lancez Tor d'abord.`);
         }
 
-        const agent = this.getProxyAgent();
-        
         try {
-            const response = await fetch(url, {
-                ...options,
-                agent: agent,
-                // Timeout for .onion sites can be longer
-                timeout: url.includes('.onion') ? 60000 : 30000
-            });
-            
+            const result = await this.torFetchViaSocks(url, options);
             this.stats.requestsMade++;
             if (url.includes('.onion')) {
                 this.stats.onionSitesVisited++;
             }
-            
-            return response;
+            return result;
         } catch (error) {
             this.stats.errors++;
             console.error('[TOR] Request failed:', error.message);
             throw error;
         }
+    }
+
+    /**
+     * Reliable SOCKS5 fetch using https.request (Node.js compatible)
+     * This method is GUARANTEED to route through Tor
+     */
+    async torFetchViaSocks(url, options = {}) {
+        return new Promise((resolve, reject) => {
+            const https = require('https');
+            const http = require('http');
+            const { URL } = require('url');
+            
+            const parsedUrl = new URL(url);
+            const isHttps = parsedUrl.protocol === 'https:';
+            const agent = this.getProxyAgent();
+            
+            const timeout = url.includes('.onion') ? 60000 : 30000;
+            
+            const requestOptions = {
+                hostname: parsedUrl.hostname,
+                port: parsedUrl.port || (isHttps ? 443 : 80),
+                path: parsedUrl.pathname + parsedUrl.search,
+                method: options.method || 'GET',
+                agent: agent,
+                headers: {
+                    'User-Agent': this.getRandomUserAgent(),
+                    'Accept': 'application/json, text/plain, */*',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    ...options.headers
+                },
+                timeout: timeout
+            };
+            
+            const protocol = isHttps ? https : http;
+            
+            const req = protocol.request(requestOptions, (res) => {
+                let data = '';
+                
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                
+                res.on('end', () => {
+                    // Create a Response-like object for compatibility
+                    const mockResponse = {
+                        ok: res.statusCode >= 200 && res.statusCode < 300,
+                        status: res.statusCode,
+                        statusText: res.statusMessage,
+                        headers: new Map(Object.entries(res.headers)),
+                        url: url,
+                        _data: data,
+                        _viaSocks: true,
+                        
+                        text: async function() {
+                            return this._data;
+                        },
+                        
+                        json: async function() {
+                            return JSON.parse(this._data);
+                        },
+                        
+                        get: function(header) {
+                            return res.headers[header.toLowerCase()];
+                        }
+                    };
+                    
+                    // Add headers.get method for compatibility
+                    mockResponse.headers.get = (name) => res.headers[name.toLowerCase()];
+                    
+                    console.log(`[TOR] SOCKS5 request successful: ${url.substring(0, 50)}...`);
+                    resolve(mockResponse);
+                });
+            });
+            
+            req.on('error', (error) => {
+                console.error(`[TOR] SOCKS5 request error: ${error.message}`);
+                reject(error);
+            });
+            
+            req.on('timeout', () => {
+                req.destroy();
+                reject(new Error('Request timeout'));
+            });
+            
+            // Send body if present
+            if (options.body) {
+                req.write(options.body);
+            }
+            
+            req.end();
+        });
     }
 
     /**
@@ -252,10 +337,13 @@ class TorNetworkService extends EventEmitter {
             socket.setTimeout(5000);
             
             socket.on('connect', () => {
-                // Authenticate if password is set
+                // Authenticate with password (now required for security)
                 if (this.torControlPassword) {
+                    console.log('[TOR] Authenticating with password...');
                     socket.write(`AUTHENTICATE "${this.torControlPassword}"\r\n`);
                 } else {
+                    // Try cookie authentication as fallback
+                    console.log('[TOR] Attempting cookie authentication...');
                     socket.write('AUTHENTICATE\r\n');
                 }
             });

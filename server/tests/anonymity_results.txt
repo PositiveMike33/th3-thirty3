@@ -1,0 +1,39 @@
+============================================================
+          ANONYMITY VERIFICATION TEST (FIXED)
+============================================================
+Time: 2025-12-19T16:32:35.152Z
+
+[1] DIRECT IP (without Tor):
+    IP: 104.163.163.34
+
+[2] TOR STATUS:
+    Port 9050: OPEN
+
+[3] TOR EXIT IP (via SOCKS5):
+    IP: 192.159.99.38
+    IsTor: YES
+
+[4] ANONYMITY CHECK:
+----------------------------------------
+    [PASS] IPs are DIFFERENT
+           Direct: 104.163.163.34
+           Tor:    192.159.99.38
+    [PASS] Tor Project confirms: USING TOR
+----------------------------------------
+
+[5] CURL VERIFICATION (system level):
+    CURL IP: 192.159.99.38
+    CURL IsTor: YES
+    [PASS] CURL confirms Tor is working!
+
+============================================================
+                    FINAL VERDICT
+============================================================
+
+    STATUS: ANONYMOUS CONNECTION CONFIRMED
+
+    - Your real IP is HIDDEN
+    - Tor network connection VERIFIED
+    - Backend connections through SOCKS5 are ANONYMOUS
+
+============================================================
