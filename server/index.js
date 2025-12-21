@@ -685,6 +685,110 @@ app.get('/curriculum/:model/status', (req, res) => {
     }
 });
 
+// ========================
+// NOTEBOOKLM API
+// ========================
+const NotebookLMService = require('./notebooklm_service');
+let notebookLMService = null;
+
+const getNotebookLMService = () => {
+    if (!notebookLMService) {
+        notebookLMService = new NotebookLMService(llmService);
+    }
+    return notebookLMService;
+};
+
+// List all NotebookLM domains
+app.get('/notebooklm/domains', (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        res.json({ success: true, domains: service.listDomains() });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get content from a domain
+app.get('/notebooklm/:domain', (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const result = service.getDomainContent(req.params.domain);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Add content to a domain
+app.post('/notebooklm/:domain', (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const { title, content, metadata } = req.body;
+        const result = service.addContent(req.params.domain, title, content, metadata);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Import text from NotebookLM (copy-paste)
+app.post('/notebooklm/:domain/import', (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const { title, text } = req.body;
+        const result = service.importFromText(req.params.domain, title, text);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Generate a lesson from NotebookLM content using Gemini
+app.post('/notebooklm/:domain/generate-lesson', async (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const { topic } = req.body;
+        const result = await service.generateLesson(req.params.domain, topic);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Teach a model using NotebookLM content
+app.post('/notebooklm/teach/:model', async (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const { domain, exerciseCount } = req.body;
+        const result = await service.teachModel(req.params.model, domain, { exerciseCount });
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Generate podcast-style summary
+app.post('/notebooklm/:domain/podcast', async (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const result = await service.generatePodcastSummary(req.params.domain);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get cached lessons
+app.get('/notebooklm/lessons/:domain', (req, res) => {
+    try {
+        const service = getNotebookLMService();
+        const lessons = service.getCachedLessons(req.params.domain);
+        res.json({ success: true, lessons });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Track query for metrics (called from chat endpoint)
 app.post('/models/:name/track-query', (req, res) => {
     try {
