@@ -434,3 +434,105 @@ div[class*='actions'] {
   max-width: 100% !important;
   width: 100% !important;
 }
+
+/* =====================================
+   VIEWPORT CONSTRAINT - FIT ALL PAGES
+   ===================================== */
+/* Ensure all pages fit within the viewport */
+.App {
+  max-height: 100vh !important;
+  max-width: 100vw !important;
+  overflow: hidden !important;
+}
+
+/* Main content area - must fit within remaining space after nav */
+.flex-grow.flex.overflow-hidden,
+[class*="flex-grow"][class*="overflow-hidden"] {
+  max-height: calc(100vh - 60px) !important; /* 60px = nav height */
+  overflow: hidden !important;
+}
+
+/* Individual page containers */
+.flex-grow.h-full.overflow-hidden,
+[class*="flex-grow"][class*="h-full"] {
+  max-height: 100% !important;
+  overflow: auto !important;
+}
+
+/* Dashboard pages - constrain to viewport */
+[class*="Dashboard"],
+[class*="Page"],
+[class*="Interface"] {
+  max-height: calc(100vh - 70px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Grid and flex containers - prevent overflow */
+.grid, .flex {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Cards and panels - compact sizing */
+.glass-panel,
+[class*="bg-gray-900"],
+[class*="bg-gray-800"] {
+  max-height: 100%;
+  overflow: auto;
+}
+
+/* Scrollable content areas */
+[class*="overflow-y-auto"],
+[class*="overflow-auto"] {
+  max-height: 100%;
+}
+
+/* Fix for tall components */
+[class*="h-screen"],
+[class*="min-h-screen"] {
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: calc(100vh - 70px) !important;
+}
+
+/* Tables - scrollable within container */
+table {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Large text areas - limit height */
+textarea {
+  max-height: 200px;
+}
+
+/* Padding adjustments for compact display */
+@media (max-height: 800px) {
+  .p-6 { padding: 1rem !important; }
+  .p-8 { padding: 1.5rem !important; }
+  .py-6 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+  .gap-6 { gap: 1rem !important; }
+  .gap-8 { gap: 1.5rem !important; }
+  .mb-6 { margin-bottom: 1rem !important; }
+  .mt-6 { margin-top: 1rem !important; }
+  
+  /* Smaller headings on small screens */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.1rem !important; }
+}
+
+/* Ensure no horizontal scroll */
+html, body, #root, .App {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+/* Fix for nested flex containers */
+.flex > .flex-1,
+.flex > [class*="flex-1"] {
+  min-height: 0;
+  max-height: 100%;
+}
