@@ -25,89 +25,72 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 bg-[#111] border border-gray-700 hover:border-gray-500 text-xs px-3 py-1.5 rounded-md transition-all text-gray-300 max-w-[200px]"
+                className="flex items-center gap-2 bg-[#111] border border-gray-700 hover:border-gray-500 text-xs px-2 py-1 rounded-md transition-all text-gray-300 max-w-[180px]"
             >
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${currentProvider === 'local' ? 'bg-green-500' : 'bg-blue-500'}`}></span>
-                <span className="font-mono uppercase truncate">{currentModel || 'SELECT MODEL'}</span>
-                <span className="text-[10px] opacity-50 flex-shrink-0">▼</span>
+                <span className="font-mono uppercase truncate text-[10px]">{currentModel || 'MODEL'}</span>
+                <span className="text-[8px] opacity-50 flex-shrink-0">▼</span>
             </button>
 
             {isOpen && (
                 <>
-                    {/* Backdrop to close dropdown */}
-                    <div 
-                        className="fixed inset-0 z-[99]" 
-                        onClick={() => setIsOpen(false)}
-                    />
+                    {/* Backdrop */}
+                    <div className="fixed inset-0 z-[99]" onClick={() => setIsOpen(false)} />
                     
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-[#1e1f20] border border-gray-700 rounded-lg shadow-xl z-[100]"
-                         style={{ maxHeight: '250px' }}>
-                        <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
-                            {/* LOCAL MODELS */}
-                            <div className="p-2">
-                                <div className="text-[10px] font-bold text-green-500 uppercase tracking-wider mb-1 px-2 sticky top-0 bg-[#1e1f20]">
-                                    🖥️ Local (Privé) - {models.local.length} modèles
-                                </div>
-                                <div className="max-h-[80px] overflow-y-auto">
-                                    {models.local.map(model => (
-                                        <button
-                                            key={model}
-                                            onClick={() => handleSelect(model, 'local')}
-                                            className={`w-full text-left px-2 py-1 rounded text-xs font-mono mb-0.5 transition-colors truncate ${currentModel === model ? 'bg-green-900/30 text-green-400' : 'text-gray-300 hover:bg-[#28292a]'}`}
-                                        >
-                                            {model}
-                                        </button>
-                                    ))}
-                                </div>
+                    {/* Dropdown - Fixed small height with single scroll */}
+                    <div 
+                        className="absolute top-full left-0 mt-1 w-56 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-2xl z-[100] overflow-hidden"
+                        style={{ maxHeight: '200px' }}
+                    >
+                        <div className="overflow-y-auto" style={{ maxHeight: '200px' }}>
+                            {/* LOCAL */}
+                            <div className="px-2 py-1 bg-[#111] border-b border-gray-800 sticky top-0">
+                                <span className="text-[9px] text-green-500 font-bold">🖥️ LOCAL ({models.local.length})</span>
                             </div>
+                            {models.local.slice(0, 5).map(model => (
+                                <button
+                                    key={model}
+                                    onClick={() => handleSelect(model, 'local')}
+                                    className={`w-full text-left px-2 py-0.5 text-[10px] font-mono truncate ${currentModel === model ? 'bg-green-900/40 text-green-400' : 'text-gray-400 hover:bg-gray-800'}`}
+                                >
+                                    {model}
+                                </button>
+                            ))}
+                            {models.local.length > 5 && (
+                                <div className="text-[8px] text-gray-600 px-2">+{models.local.length - 5} autres...</div>
+                            )}
 
-                            <div className="h-px bg-gray-700 mx-2"></div>
+                            {/* CLOUD */}
+                            <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0">
+                                <span className="text-[9px] text-blue-500 font-bold">☁️ CLOUD</span>
+                            </div>
+                            {models.cloud.filter(m => m.provider !== 'anythingllm').slice(0, 4).map(model => (
+                                <button
+                                    key={model.id}
+                                    onClick={() => handleSelect(model.id, model.provider)}
+                                    className={`w-full text-left px-2 py-0.5 text-[10px] font-mono truncate flex justify-between ${currentModel === model.id ? 'bg-blue-900/40 text-blue-400' : 'text-gray-400 hover:bg-gray-800'}`}
+                                >
+                                    <span className="truncate">{model.name}</span>
+                                    <span className="text-[7px] text-gray-600 ml-1">{model.provider}</span>
+                                </button>
+                            ))}
 
-                            {/* CLOUD MODELS */}
-                            <div className="p-2">
-                                <div className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1 px-2 sticky top-0 bg-[#1e1f20]">
-                                    ☁️ Cloud (Public)
-                                </div>
-                                {models.cloud.length === 0 && (
-                                    <div className="text-[10px] text-gray-600 px-2 italic">Aucun modèle (Vérifiez API Keys)</div>
-                                )}
-                                <div className="max-h-[60px] overflow-y-auto">
-                                    {models.cloud.filter(m => m.provider !== 'anythingllm').map(model => (
+                            {/* AGENTS */}
+                            {models.cloud.some(m => m.provider === 'anythingllm') && (
+                                <>
+                                    <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0">
+                                        <span className="text-[9px] text-purple-500 font-bold">🤖 AGENTS</span>
+                                    </div>
+                                    {models.cloud.filter(m => m.provider === 'anythingllm').slice(0, 3).map(model => (
                                         <button
                                             key={model.id}
                                             onClick={() => handleSelect(model.id, model.provider)}
-                                            className={`w-full text-left px-3 py-1.5 rounded text-xs font-mono mb-0.5 transition-colors ${currentModel === model.id ? 'bg-blue-900/30 text-blue-400' : 'text-gray-300 hover:bg-[#28292a]'}`}
+                                            className={`w-full text-left px-2 py-0.5 text-[10px] font-mono truncate ${currentModel === model.id ? 'bg-purple-900/40 text-purple-400' : 'text-gray-400 hover:bg-gray-800'}`}
                                         >
-                                            <div className="flex justify-between items-center">
-                                                <span className="truncate">{model.name}</span>
-                                                <span className="text-[8px] bg-gray-800 px-1 rounded text-gray-500 flex-shrink-0 ml-1">{model.provider}</span>
-                                            </div>
+                                            {model.name}
                                         </button>
                                     ))}
-                                </div>
-                            </div>
-
-                            {/* AGENTS (AnythingLLM) */}
-                            {models.cloud.some(m => m.provider === 'anythingllm') && (
-                                <div className="p-2 border-t border-gray-700">
-                                    <div className="text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-1 px-2 sticky top-0 bg-[#1e1f20]">
-                                        🤖 Agents (AnythingLLM)
-                                    </div>
-                                    <div className="max-h-[60px] overflow-y-auto">
-                                        {models.cloud.filter(m => m.provider === 'anythingllm').map(model => (
-                                            <button
-                                                key={model.id}
-                                                onClick={() => handleSelect(model.id, model.provider)}
-                                                className={`w-full text-left px-3 py-1.5 rounded text-xs font-mono mb-0.5 transition-colors ${currentModel === model.id ? 'bg-purple-900/30 text-purple-400' : 'text-gray-300 hover:bg-[#28292a]'}`}
-                                            >
-                                                <div className="flex justify-between items-center">
-                                                    <span className="truncate">{model.name}</span>
-                                                    <span className="text-[8px] bg-gray-800 px-1 rounded text-gray-500 flex-shrink-0 ml-1">AGENT</span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                                </>
                             )}
                         </div>
                     </div>
