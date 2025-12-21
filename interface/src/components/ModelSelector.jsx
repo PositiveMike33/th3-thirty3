@@ -37,17 +37,20 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                     {/* Backdrop */}
                     <div className="fixed inset-0 z-[99]" onClick={() => setIsOpen(false)} />
                     
-                    {/* Dropdown - Fixed small height with single scroll */}
+                    {/* Dropdown - 250px with scroll to access ALL models */}
                     <div 
-                        className="absolute top-full left-0 mt-1 w-56 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-2xl z-[100] overflow-hidden"
-                        style={{ maxHeight: '200px' }}
+                        className="absolute top-full left-0 mt-1 w-60 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-2xl z-[100] overflow-hidden"
+                        style={{ maxHeight: '250px' }}
                     >
-                        <div className="overflow-y-auto" style={{ maxHeight: '200px' }}>
-                            {/* LOCAL */}
-                            <div className="px-2 py-1 bg-[#111] border-b border-gray-800 sticky top-0">
+                        <div 
+                            className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-900" 
+                            style={{ maxHeight: '250px' }}
+                        >
+                            {/* LOCAL - All models */}
+                            <div className="px-2 py-1 bg-[#111] border-b border-gray-800 sticky top-0 z-10">
                                 <span className="text-[9px] text-green-500 font-bold">🖥️ LOCAL ({models.local.length})</span>
                             </div>
-                            {models.local.slice(0, 5).map(model => (
+                            {models.local.map(model => (
                                 <button
                                     key={model}
                                     onClick={() => handleSelect(model, 'local')}
@@ -56,15 +59,12 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                                     {model}
                                 </button>
                             ))}
-                            {models.local.length > 5 && (
-                                <div className="text-[8px] text-gray-600 px-2">+{models.local.length - 5} autres...</div>
-                            )}
 
-                            {/* CLOUD */}
-                            <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0">
-                                <span className="text-[9px] text-blue-500 font-bold">☁️ CLOUD</span>
+                            {/* CLOUD - All models */}
+                            <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0 z-10">
+                                <span className="text-[9px] text-blue-500 font-bold">☁️ CLOUD ({models.cloud.filter(m => m.provider !== 'anythingllm').length})</span>
                             </div>
-                            {models.cloud.filter(m => m.provider !== 'anythingllm').slice(0, 4).map(model => (
+                            {models.cloud.filter(m => m.provider !== 'anythingllm').map(model => (
                                 <button
                                     key={model.id}
                                     onClick={() => handleSelect(model.id, model.provider)}
@@ -75,13 +75,13 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                                 </button>
                             ))}
 
-                            {/* AGENTS */}
+                            {/* AGENTS - All agents */}
                             {models.cloud.some(m => m.provider === 'anythingllm') && (
                                 <>
-                                    <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0">
-                                        <span className="text-[9px] text-purple-500 font-bold">🤖 AGENTS</span>
+                                    <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0 z-10">
+                                        <span className="text-[9px] text-purple-500 font-bold">🤖 AGENTS ({models.cloud.filter(m => m.provider === 'anythingllm').length})</span>
                                     </div>
-                                    {models.cloud.filter(m => m.provider === 'anythingllm').slice(0, 3).map(model => (
+                                    {models.cloud.filter(m => m.provider === 'anythingllm').map(model => (
                                         <button
                                             key={model.id}
                                             onClick={() => handleSelect(model.id, model.provider)}
