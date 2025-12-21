@@ -1,0 +1,204 @@
+{
+  "metadata": {
+    "name": "Advanced Camera Reconnaissance Training",
+    "version": "1.1.0",
+    "created": "2025-12-20",
+    "category": "network_security",
+    "description": "Extended training scenarios for advanced camera discovery techniques"
+  },
+  "advanced_scenarios": [
+    {
+      "id": "adv_001",
+      "scenario": "hidden_camera_detection",
+      "difficulty": "expert",
+      "context": "Detecting cameras that don't respond to standard scans",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Il y a peut-être des caméras cachées sur le réseau qui ne répondent pas aux scans. Comment les trouver?"
+        },
+        {
+          "role": "assistant",
+          "content": "Pour détecter les caméras 'invisibles', je vais utiliser des techniques passives:\n\n**1. Analyse du trafic réseau passif:**\n```bash\ntcpdump -i eth0 -n 'udp' | grep -E ':(554|3702|37777)'\n```\n\n**2. Détection via IGMP (multicast):**\nLes caméras utilisent souvent le multicast pour le streaming:\n```bash\ntcpdump -i eth0 igmp\n```\n\n**3. Analyse DNS passif:**\n```bash\ntcpdump -i eth0 port 53 | grep -i 'camera\\|nvr\\|dvr\\|ipc'\n```\n\n**4. Détection UPnP:**\n```bash\ngssdp-discover --timeout=5\n```\n\n**5. Analyse des patterns de trafic:**\n- Flux constants UDP = streaming vidéo\n- Connexions périodiques HTTPS = cloud cameras\n- Trafic vers ports 37777, 34567 = Dahua/Hi3510\n\nJe lance la capture passive...",
+          "mcp_actions": [
+            {
+              "tool": "packet_capture",
+              "action": "passive_discovery",
+              "params": {"duration": 120, "filter": "camera_patterns"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_002",
+      "scenario": "cloud_camera_identification",
+      "difficulty": "advanced",
+      "context": "Identifying cloud-connected cameras (Tuya, Wyze, etc.)",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment identifier les caméras cloud comme Tuya ou Wyze?"
+        },
+        {
+          "role": "assistant",
+          "content": "Les caméras cloud utilisent des protocoles P2P propriétaires. Voici comment les identifier:\n\n**1. Domaines cloud connus:**\n| Fabricant | Domaines |\n|-----------|----------|\n| Tuya | m2.tuyaeu.com, a2.tuyaeu.com |\n| Wyze | api.wyze.com, *.wyzecam.com |\n| Reolink | p2p.reolink.com |\n| Ezviz | dev.ezviz.com |\n| YI | api.xiaoyi.com |\n\n**2. Capture DNS:**\n```bash\ntcpdump -i eth0 port 53 -l | grep -E 'tuya|wyze|reolink|ezviz'\n```\n\n**3. Ports P2P typiques:**\n- Tuya: 6668, 6669 (UDP)\n- TP-Link Tapo: 20002 (UDP)\n- Reolink: 9000 (TCP)\n\n**4. Fingerprint par MAC:**\n```python\nTUYA_MACS = ['7C:F6:66', 'D8:F3:BC', '10:D5:61']\n```\n\n**5. Extraction Local Key (Tuya):**\nNécessite un accès au compte Tuya IoT Platform pour contrôle local.\n\nJe recherche les caméras cloud...",
+          "mcp_actions": [
+            {
+              "tool": "cloud_camera_detector",
+              "action": "identify",
+              "params": {"vendors": ["tuya", "wyze", "reolink"]}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_003",
+      "scenario": "nvr_dvr_discovery",
+      "difficulty": "intermediate",
+      "context": "Finding Network Video Recorders and their connected cameras",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment trouver les NVR/DVR et leurs caméras connectées?"
+        },
+        {
+          "role": "assistant",
+          "content": "Les NVR/DVR centralisent plusieurs flux caméras. Voici comment les découvrir:\n\n**1. Ports caractéristiques:**\n| Type | Ports |\n|------|-------|\n| Hikvision NVR | 8000, 8443, 554 |\n| Dahua NVR | 37777, 37778, 554 |\n| QNAP QVR | 8080, 443, 554 |\n| Synology Surveillance | 9900, 9901 |\n| Ubiquiti Protect | 7443, 7080 |\n\n**2. Scan ciblé:**\n```bash\nnmap -sV -p 8000,37777,9900,7443 192.168.1.0/24\n```\n\n**3. Énumération des canaux (Hikvision):**\n```bash\nfor i in {1..16}; do\n  ffprobe rtsp://admin:pass@NVR_IP:554/Streaming/Channels/${i}01 2>/dev/null && echo \"Channel $i active\"\ndone\n```\n\n**4. API Discovery (Dahua):**\n```bash\ncurl http://NVR_IP:37777/RPC2_Login\n```\n\n**5. Interface web:**\nLa plupart exposent une interface de gestion web avec liste des caméras.\n\nJe scanne les ports NVR...",
+          "mcp_actions": [
+            {
+              "tool": "network_scanner",
+              "action": "port_scan",
+              "params": {"ports": [8000, 37777, 9900, 7443, 37778], "subnet": "192.168.1.0/24"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_004",
+      "scenario": "firmware_extraction",
+      "difficulty": "expert",
+      "context": "Extracting and analyzing camera firmware",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment extraire le firmware d'une caméra pour analyse?"
+        },
+        {
+          "role": "assistant",
+          "content": "⚠️ **Avertissement:** Uniquement sur vos propres équipements.\n\n**1. Téléchargement via interface web:**\nCertaines caméras permettent le backup de config/firmware:\n```bash\ncurl -u admin:pass http://IP/cgi-bin/firmware_backup.cgi -o firmware.bin\n```\n\n**2. Extraction via TFTP (mode recovery):**\n```bash\n# Mettre la caméra en mode recovery (bouton reset)\ntftp -g -r firmware.bin CAMERA_IP\n```\n\n**3. Dump via connexion série:**\n- Identifier UART (TX, RX, GND)\n- Connexion à 115200 baud\n- Accès U-Boot ou shell Linux\n\n**4. Analyse du firmware:**\n```bash\nbinwalk -e firmware.bin\n# Extraction du filesystem\nunsquashfs filesystem.squashfs\n```\n\n**5. Recherche de credentials:**\n```bash\ngrep -r 'password\\|passwd\\|admin' extracted_fs/\nstrings firmware.bin | grep -i 'pass\\|key\\|secret'\n```\n\n**6. Outils recommandés:**\n- Binwalk, Ghidra, radare2\n- firmware-mod-kit\n- Jefferson (JFFS2)\n\nJe vérifie les endpoints de backup...",
+          "mcp_actions": [
+            {
+              "tool": "http_prober",
+              "action": "check_backup_endpoints",
+              "params": {"target": "192.168.1.108"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_005",
+      "scenario": "ptz_control",
+      "difficulty": "intermediate",
+      "context": "Controlling PTZ (Pan-Tilt-Zoom) cameras",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "La caméra a des fonctions PTZ. Comment les contrôler?"
+        },
+        {
+          "role": "assistant",
+          "content": "Le contrôle PTZ peut se faire via plusieurs protocoles:\n\n**1. Via ONVIF PTZ Service:**\n```python\nfrom onvif import ONVIFCamera\n\ncam = ONVIFCamera('192.168.1.108', 80, 'admin', 'password')\nptz = cam.create_ptz_service()\nmedia = cam.create_media_service()\n\nprofile = media.GetProfiles()[0]\n\n# Mouvement continu\nptz.ContinuousMove({\n    'ProfileToken': profile.token,\n    'Velocity': {'PanTilt': {'x': 0.5, 'y': 0}, 'Zoom': {'x': 0}}\n})\n\n# Arrêt\nptz.Stop({'ProfileToken': profile.token})\n```\n\n**2. Via CGI HTTP (Hikvision):**\n```bash\ncurl \"http://IP/ISAPI/PTZCtrl/channels/1/momentary\" \\\n  -u admin:pass -X PUT \\\n  -d '<PTZData><pan>50</pan><tilt>0</tilt></PTZData>'\n```\n\n**3. Via RTSP (commandes intégrées):**\nCertaines caméras supportent les commandes PTZ dans l'URL RTSP.\n\n**4. Presets et patrouilles:**\n```python\n# Aller au preset 1\nptz.GotoPreset({'ProfileToken': profile.token, 'PresetToken': '1'})\n\n# Lister les presets\npresets = ptz.GetPresets({'ProfileToken': profile.token})\n```\n\nJe teste les capacités PTZ...",
+          "mcp_actions": [
+            {
+              "tool": "onvif_scanner",
+              "action": "check_ptz",
+              "params": {"target": "192.168.1.108"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_006",
+      "scenario": "motion_detection_events",
+      "difficulty": "advanced",
+      "context": "Subscribing to camera motion detection events",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment recevoir les alertes de détection de mouvement?"
+        },
+        {
+          "role": "assistant",
+          "content": "Les caméras peuvent envoyer des événements via plusieurs méthodes:\n\n**1. ONVIF Event Service:**\n```python\nfrom onvif import ONVIFCamera\n\ncam = ONVIFCamera('192.168.1.108', 80, 'admin', 'pass')\nevent_service = cam.create_events_service()\npullpoint = cam.create_pullpoint_subscription()\n\n# Boucle de réception\nwhile True:\n    messages = pullpoint.PullMessages({'Timeout': 'PT60S', 'MessageLimit': 10})\n    for msg in messages.NotificationMessage:\n        print(f\"Event: {msg.Topic._value_1}\")\n```\n\n**2. Webhook HTTP:**\n```bash\n# Configuration sur la caméra pour envoyer vers:\nhttp://VOTRE_IP:8080/motion_alert\n\n# Serveur de réception\npython -m http.server 8080\n```\n\n**3. MQTT (caméras modernes):**\n```python\nimport paho.mqtt.client as mqtt\n\nclient = mqtt.Client()\nclient.connect('192.168.1.108', 1883)\nclient.subscribe('camera/motion/#')\nclient.loop_forever()\n```\n\n**4. Email/FTP alerts:**\nConfigurables via l'interface web de la caméra.\n\n**5. CGI polling (fallback):**\n```bash\nwhile true; do\n  curl -s http://IP/cgi-bin/motion_status.cgi\n  sleep 1\ndone\n```\n\nJe vérifie les capacités d'événements...",
+          "mcp_actions": [
+            {
+              "tool": "onvif_scanner",
+              "action": "check_events",
+              "params": {"target": "192.168.1.108"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_007",
+      "scenario": "multi_stream_recording",
+      "difficulty": "intermediate",
+      "context": "Recording multiple camera streams simultaneously",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment enregistrer plusieurs flux caméras simultanément?"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici plusieurs approches pour l'enregistrement multi-caméras:\n\n**1. FFmpeg multi-instance:**\n```bash\n#!/bin/bash\nCAMERAS=(\n  \"rtsp://admin:pass@192.168.1.101:554/stream1\"\n  \"rtsp://admin:pass@192.168.1.102:554/stream1\"\n  \"rtsp://admin:pass@192.168.1.108:554/stream1\"\n)\n\nfor i in \"${!CAMERAS[@]}\"; do\n  ffmpeg -rtsp_transport tcp -i \"${CAMERAS[$i]}\" \\\n    -c copy -f segment -segment_time 3600 \\\n    \"cam${i}_%Y%m%d_%H%M%S.mp4\" &\ndone\nwait\n```\n\n**2. Python avec OpenCV:**\n```python\nimport cv2\nimport threading\n\ndef record_camera(url, name):\n    cap = cv2.VideoCapture(url)\n    fourcc = cv2.VideoWriter_fourcc(*'mp4v')\n    out = cv2.VideoWriter(f'{name}.mp4', fourcc, 25, (1920,1080))\n    \n    while True:\n        ret, frame = cap.read()\n        if ret:\n            out.write(frame)\n\n# Lancer en threads parallèles\nfor url, name in cameras:\n    threading.Thread(target=record_camera, args=(url, name)).start()\n```\n\n**3. Solutions NVR logicielles:**\n- Frigate (avec détection AI)\n- Shinobi\n- ZoneMinder\n- Blue Iris (Windows)\n\n**4. Script de rotation automatique:**\nGestion de l'espace disque avec suppression des anciens fichiers.\n\nJe prépare le script d'enregistrement...",
+          "mcp_actions": [
+            {
+              "tool": "recording_manager",
+              "action": "setup_multi_record",
+              "params": {"cameras": ["192.168.1.101", "192.168.1.102", "192.168.1.108"]}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv_008",
+      "scenario": "network_segmentation_bypass",
+      "difficulty": "expert",
+      "context": "Accessing cameras on segregated VLANs (authorized testing only)",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Les caméras sont sur un VLAN séparé. Comment les atteindre légitimement?"
+        },
+        {
+          "role": "assistant",
+          "content": "⚠️ **Important:** Ceci doit être fait avec autorisation dans le cadre d'un audit de sécurité.\n\n**1. Méthodes légitimes d'accès:**\n\n**a) Via le routeur/firewall:**\n- Demander une règle NAT ou route inter-VLAN\n- Accès VPN au VLAN caméra\n\n**b) Via jumper host:**\nSi un serveur a accès aux deux VLANs:\n```bash\nssh -L 8080:CAMERA_IP:80 jumphost\n# Puis accéder via localhost:8080\n```\n\n**2. Découverte des routes existantes:**\n```bash\n# Vérifier les routes\nip route show\ntraceroute CAMERA_VLAN_GATEWAY\n\n# Scanner le gateway inter-VLAN\nnmap -sn GATEWAY_IP\n```\n\n**3. Identification VLAN via CDP/LLDP:**\n```bash\ntcpdump -i eth0 -nn 'ether[12:2] = 0x88cc' | head -20\n```\n\n**4. Configuration recommandée (sécurité):**\n- Isoler les caméras sur VLAN dédié ✓\n- Accès uniquement via VPN ou serveur dédié\n- Pas de route directe depuis réseau utilisateurs\n\nJe vérifie la topologie réseau...",
+          "mcp_actions": [
+            {
+              "tool": "network_topology",
+              "action": "discover_vlans",
+              "params": {}
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "bash_scripts": {
+    "quick_scan": "#!/bin/bash\n# Quick camera port scan\nnmap -sS -p 554,80,8080,8000 --open $1 | grep -E 'open|Nmap scan'",
+    "rtsp_test": "#!/bin/bash\n# Test RTSP stream\nffprobe -v error -rtsp_transport tcp -i \"rtsp://$1:554/stream1\" && echo 'RTSP OK' || echo 'RTSP Failed'",
+    "mac_lookup": "#!/bin/bash\n# Lookup MAC manufacturer\narp -a | grep $1 | awk '{print $4}' | xargs -I{} curl -s \"https://api.macvendors.com/{}\""
+  },
+  "python_snippets": {
+    "socket_scan": "import socket\ndef scan(ip, port):\n    s = socket.socket()\n    s.settimeout(0.5)\n    return s.connect_ex((ip, port)) == 0",
+    "rtsp_check": "import subprocess\ndef check_rtsp(url):\n    r = subprocess.run(['ffprobe', '-v', 'error', '-i', url], capture_output=True)\n    return r.returncode == 0"
+  }
+}

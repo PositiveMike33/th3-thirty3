@@ -17,6 +17,15 @@ router.setLLMService = (service) => {
     console.log('[SECURITY_ROUTES] LLM Service connected');
 };
 
+// Security middleware (passthrough - actual security handled in auth middleware)
+router.middleware = (req, res, next) => {
+    // Security headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+};
+
 /**
  * GET /api/security/roles
  * List all available security research roles

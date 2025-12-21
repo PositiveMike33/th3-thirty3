@@ -5,6 +5,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const AnythingLLMWrapper = require('./anythingllm_wrapper');
 const knowledgeBase = require('./knowledge_base_service');
 const { SECURITY_RESEARCH_PROMPTS, getSecurityPrompt, buildSecurityQuery } = require('./security_research_prompts');
+const FibonacciCognitiveOptimizer = require('./fibonacci_cognitive_optimizer');
 
 class LLMService {
     constructor() {
@@ -13,6 +14,7 @@ class LLMService {
         this.modelMetricsService = null;
         this.anythingLLMWrapper = new AnythingLLMWrapper();
         this.knowledgeBase = knowledgeBase; // RAG Knowledge Base
+        this.cognitiveOptimizer = new FibonacciCognitiveOptimizer(); // Fibonacci Learning
         this.providers = {
             local: { name: 'Local (Ollama)', type: 'local' },
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
@@ -74,11 +76,12 @@ class LLMService {
 
         // --- CLOUD MODE ---
         if (computeMode === 'cloud') {
-            // Gemini
-            // if (process.env.GEMINI_API_KEY) {
-            //     models.cloud.push({ id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' });
-            //     models.cloud.push({ id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'gemini' });
-            // }
+            // Gemini (Google AI)
+            if (process.env.GEMINI_API_KEY) {
+                models.cloud.push({ id: 'gemini-2.0-flash-exp', name: '🧠 Gemini 2.0 Flash (Teacher)', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-1.5-flash', name: '⚡ Gemini 1.5 Flash', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-1.5-pro', name: '🔵 Gemini 1.5 Pro', provider: 'gemini' });
+            }
 
             // OpenAI - All Available Models
             if (process.env.OPENAI_API_KEY) {
@@ -253,6 +256,21 @@ USER QUERY: ${query}`;
             console.log('[LLM] RAG context injected (knowledge base hit)');
         }
         
+        // FIBONACCI COGNITIVE OPTIMIZATION
+        // Get recommendations based on model's learning history
+        const cognitiveRec = this.cognitiveOptimizer.getOptimizationRecommendations(modelId, 'general');
+        
+        // Augment system prompt with cognitive level
+        let optimizedSystemPrompt = systemPrompt;
+        if (cognitiveRec.fibonacciLevel > 1) {
+            optimizedSystemPrompt = `${cognitiveRec.systemPromptAddition}\n\n${systemPrompt}`;
+        }
+        
+        // Log cognitive state
+        if (cognitiveRec.fibonacciLevel > 2) {
+            console.log(`[FIBONACCI] ${modelId} - Level ${cognitiveRec.fibonacciLevel} | Thinking: ${cognitiveRec.thinkingReduction} reduced | Accuracy: ${(cognitiveRec.directToGoalProbability * 100).toFixed(0)}%`);
+        }
+
         if (this.socketService) {
             this.socketService.emitAgentStart({ provider: providerId, model: modelId, prompt: augmentedPrompt });
             this.socketService.emitAgentStatus("Thinking...");
@@ -275,6 +293,9 @@ USER QUERY: ${query}`;
                     break;
                 case 'claude':
                     response = await this.generateClaudeResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
+                    break;
+                case 'gemini':
+                    response = await this.generateGeminiResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'groq':
                     response = await this.generateGroqResponse(augmentedPrompt, modelId, systemPrompt);
@@ -302,10 +323,27 @@ USER QUERY: ${query}`;
                 this.socketService.emitAgentEnd(response);
                 this.socketService.emitAgentStatus("Idle");
             }
+            
+            // FIBONACCI: Record successful interaction
+            this.cognitiveOptimizer.recordInteraction(modelId, {
+                success: true,
+                domain: 'general',
+                prompt: augmentedPrompt.substring(0, 100)
+            });
+            
             return response;
         } catch (error) {
             console.error(`[LLM] Error with ${providerId}:`, error);
             if (this.socketService) this.socketService.emitAgentStatus("Error");
+            
+            // FIBONACCI: Record error for learning
+            this.cognitiveOptimizer.recordInteraction(modelId, {
+                success: false,
+                errorType: error.name || 'UnknownError',
+                domain: 'general',
+                prompt: augmentedPrompt.substring(0, 100)
+            });
+            
             return `⚠️ Erreur (${providerId}): ${error.message}`;
         }
     }
@@ -366,6 +404,59 @@ USER QUERY: ${query}`;
             baseURL: 'https://api.perplexity.ai',
             providerName: 'perplexity'
         });
+    }
+
+    /**
+     * Generate response using Google Gemini API
+     * Used as the primary TEACHER model for AutoTeacher system
+     */
+    async generateGeminiResponse(prompt, modelId, systemPrompt) {
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error('GEMINI_API_KEY missing - Required for teacher model');
+        }
+
+        const model = modelId || 'gemini-2.0-flash-exp';
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+        const requestBody = {
+            contents: [
+                {
+                    parts: [
+                        { text: `${systemPrompt}\n\n${prompt}` }
+                    ]
+                }
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 2048,
+                topP: 0.95,
+                topK: 40
+            }
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                return data.candidates[0].content.parts[0].text;
+            }
+
+            throw new Error('Invalid Gemini response structure');
+        } catch (error) {
+            console.error('[GEMINI] Error:', error.message);
+            throw error;
+        }
     }
 
     async generateGroqResponse(prompt, modelId, systemPrompt) {

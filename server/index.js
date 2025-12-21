@@ -53,6 +53,31 @@ app.use('/api/payment', paymentDashboardRoutes);
 const dartRoutes = require('./routes/dart');
 app.use('/api/dart', dartRoutes);
 
+// Astronomy Routes (IPGeolocation Space Data)
+const astronomyRoutes = require('./astronomy_routes');
+app.use('/api/astronomy', astronomyRoutes);
+console.log('[SYSTEM] Astronomy Service initialized (IPGeolocation API)');
+
+// IP Location Routes (Free IP Geolocation - No API Key)
+const iplocationRoutes = require('./iplocation_routes');
+app.use('/api/iplocation', iplocationRoutes);
+console.log('[SYSTEM] IP Location Service initialized (iplocation.net - FREE)');
+
+// IP2Location Routes (Comprehensive Geolocation with API Key)
+const ip2locationRoutes = require('./ip2location_routes');
+app.use('/api/ip2location', ip2locationRoutes);
+console.log('[SYSTEM] IP2Location Service initialized (City, Coords, Proxy Detection)');
+
+// WHOIS Routes (Domain Lookup)
+const whoisRoutes = require('./whois_routes');
+app.use('/api/whois', whoisRoutes);
+console.log('[SYSTEM] WHOIS Service initialized (Domain, Registrar, Expiration)');
+
+// Network Scanner Routes (Nmap + TShark via WSL Ubuntu)
+const networkScannerRoutes = require('./network_scanner_routes');
+app.use('/api/network', networkScannerRoutes);
+console.log('[SYSTEM] Network Scanner initialized (Nmap + TShark via WSL Ubuntu)');
+
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
@@ -447,6 +472,216 @@ app.post('/models/:name/benchmark', async (req, res) => {
         res.json({ success: true, results });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Cleanup orphaned model metrics (models that no longer exist in Ollama)
+app.post('/models/cleanup', async (req, res) => {
+    try {
+        // Fetch current Ollama models
+        const ollamaUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+        const response = await fetch(`${ollamaUrl}/api/tags`);
+        const data = await response.json();
+        const availableModels = (data.models || []).map(m => m.name);
+        
+        // Run cleanup
+        const result = modelMetricsService.cleanupOrphanedModels(availableModels);
+        
+        res.json({ 
+            success: true, 
+            message: `Cleaned up ${result.removed.length} orphaned models`,
+            removed: result.removed,
+            kept: result.kept,
+            availableOllama: availableModels
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========================
+// FIBONACCI COGNITIVE OPTIMIZATION API
+// ========================
+const FibonacciCognitiveOptimizer = require('./fibonacci_cognitive_optimizer');
+const cognitiveOptimizer = new FibonacciCognitiveOptimizer();
+
+// Get cognitive status for all models
+app.get('/models/cognitive/status', (req, res) => {
+    try {
+        const status = cognitiveOptimizer.getAllModelsStatus();
+        res.json({ success: true, models: status });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get cognitive status for specific model
+app.get('/models/cognitive/:model', (req, res) => {
+    try {
+        const modelName = req.params.model;
+        const status = cognitiveOptimizer.getFullStatus(modelName);
+        res.json({ success: true, ...status });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get optimization recommendations for a model
+app.get('/models/cognitive/:model/recommendations', (req, res) => {
+    try {
+        const modelName = req.params.model;
+        const domain = req.query.domain || 'general';
+        const recommendations = cognitiveOptimizer.getOptimizationRecommendations(modelName, domain);
+        res.json({ success: true, ...recommendations });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========================
+// AUTO-TEACHER API
+// ========================
+const AutoTeacher = require('./auto_teacher');
+let autoTeacher = null;
+
+// Initialize AutoTeacher (lazy load)
+const getAutoTeacher = () => {
+    if (!autoTeacher) {
+        autoTeacher = new AutoTeacher(llmService);
+    }
+    return autoTeacher;
+};
+
+// Train a model with a single session
+app.post('/models/train/:model', async (req, res) => {
+    try {
+        const teacher = getAutoTeacher();
+        const { domains, exerciseCount, teacherModel } = req.body;
+        
+        const result = await teacher.trainModel(req.params.model, {
+            domains: domains || ['math', 'logic', 'coding'],
+            exerciseCount: exerciseCount || 5,
+            teacherModel: teacherModel || 'groq'
+        });
+        
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Start autonomous training
+app.post('/models/train/:model/auto', async (req, res) => {
+    try {
+        const teacher = getAutoTeacher();
+        const { interval, exercisesPerSession, maxSessions, domains } = req.body;
+        
+        const result = await teacher.startAutoTraining(req.params.model, {
+            interval: interval || 60000,
+            exercisesPerSession: exercisesPerSession || 3,
+            maxSessions: maxSessions || 10,
+            domains: domains || ['math', 'logic', 'coding', 'osint']
+        });
+        
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get training stats
+app.get('/models/train/stats', (req, res) => {
+    try {
+        const teacher = getAutoTeacher();
+        res.json({ success: true, ...teacher.getStats() });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========================
+// CURRICULUM AGENT API
+// ========================
+const { CurriculumAgent } = require('./curriculum_agent');
+let curriculumAgent = null;
+
+const getCurriculumAgent = () => {
+    if (!curriculumAgent) {
+        curriculumAgent = new CurriculumAgent();
+    }
+    return curriculumAgent;
+};
+
+// Get all available domains
+app.get('/curriculum/domains', (req, res) => {
+    try {
+        const agent = getCurriculumAgent();
+        res.json({ success: true, domains: agent.getAllDomains() });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get curriculum for a domain
+app.get('/curriculum/:domain', (req, res) => {
+    try {
+        const agent = getCurriculumAgent();
+        const curriculum = agent.getDomainCurriculum(req.params.domain);
+        if (!curriculum) {
+            return res.status(404).json({ success: false, error: 'Domain not found' });
+        }
+        res.json({ success: true, ...curriculum });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create learning agenda for a model
+app.post('/curriculum/:model/agenda', (req, res) => {
+    try {
+        const agent = getCurriculumAgent();
+        const { domain, hoursPerDay, daysPerWeek } = req.body;
+        const result = agent.createLearningAgenda(req.params.model, domain, {
+            hoursPerDay,
+            daysPerWeek
+        });
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get next exercise for a model
+app.get('/curriculum/:model/next/:domain', (req, res) => {
+    try {
+        const agent = getCurriculumAgent();
+        const result = agent.getNextExercise(req.params.model, req.params.domain);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Complete an exercise
+app.post('/curriculum/:model/complete/:domain', (req, res) => {
+    try {
+        const agent = getCurriculumAgent();
+        const { score } = req.body;
+        const result = agent.completeExercise(req.params.model, req.params.domain, score || 0);
+        res.json({ success: true, progress: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get model curriculum status
+app.get('/curriculum/:model/status', (req, res) => {
+    try {
+        const agent = getCurriculumAgent();
+        const status = agent.getModelStatus(req.params.model);
+        res.json({ success: true, ...status });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -1258,11 +1493,9 @@ const osintTeamRoutes = require('./osint_team_routes');
 app.use('/api/osint-team', osintTeamRoutes);
 console.log('[SYSTEM] OSINT Team routes mounted at /api/osint-team (Expert Team 2025)');
 
-// Security Research Routes (Defensive Cybersecurity)
-const securityRoutes = require('./security_routes');
+// Security Research Routes - Set LLM Service (routes already mounted at line ~33)
 securityRoutes.setLLMService(llmService);
-app.use('/api/security', securityRoutes);
-console.log('[SYSTEM] Security Research routes mounted at /api/security (Defensive Ops)');
+console.log('[SYSTEM] Security Research LLM Service connected (Defensive Ops)');
 
 
 // Initialize Socket.io with HTTP server

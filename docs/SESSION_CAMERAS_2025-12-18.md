@@ -98,6 +98,7 @@ GET /api/tuya/help/local-key         - Instructions Local Key
 ## 📁 Fichiers Créés/Modifiés
 
 ### Nouveaux Fichiers
+
 - `server/camera_service.js`
 - `server/camera_routes.js`
 - `server/tuya_camera_service.js`
@@ -116,4 +117,166 @@ GET /api/tuya/help/local-key         - Instructions Local Key
 
 ---
 
-*Créé le 18/12/2025 - Session sauvegardée*
+## 📅 Session du 20 Décembre 2025 - Scan Réseau & MCP Training
+
+### 🔍 Scan Réseau Effectué
+
+**Commande:** `nmap -sV -O -p 554,80,8080,8000 192.168.1.0/24`
+
+**Résultats du scan (PowerShell alternative):**
+
+| IP | MAC | Ports Ouverts | Type |
+|----|-----|---------------|------|
+| 192.168.1.1 | E8:2C:6D:D5:DE:81 | 80, 8080 | Router/Gateway |
+| 192.168.1.108 | N/A | 80, 8080 | **Caméra potentielle** |
+| 192.168.1.165 | A0:D0:5B:B6:8E:E2 | 8080 | **EasyLife Camera 1** |
+
+### ✅ Fichiers MCP Training Créés
+
+#### JSON Training Datasets
+
+- `data/training/camera_discovery_training.json` - 8 scénarios de base
+- `data/training/camera_discovery_advanced.json` - 8 scénarios avancés
+
+#### Scripts Python MCP
+- `scripts/mcp_camera_scanner.py` - Scanner complet avec intégration MCP
+- `scripts/mcp_camera_server.py` - Serveur MCP pour LLM
+- `scripts/quick_camera_finder.py` - Script rapide standalone
+
+### 📚 Scénarios d'Entraînement Couverts
+
+| ID | Scénario | Difficulté |
+|----|----------|------------|
+| cam_001 | Découverte réseau basique | Beginner |
+| cam_002 | Découverte flux RTSP | Intermediate |
+| cam_003 | Identification fabricant | Intermediate |
+| cam_004 | Découverte ONVIF | Advanced |
+| cam_005 | Test credentials par défaut | Advanced |
+| cam_006 | Analyse de trafic | Expert |
+| cam_007 | Évaluation vulnérabilités | Expert |
+| cam_008 | Audit complet réseau | Expert |
+| adv_001 | Détection caméras cachées | Expert |
+| adv_002 | Identification caméras cloud | Advanced |
+| adv_003 | Découverte NVR/DVR | Intermediate |
+| adv_004 | Extraction firmware | Expert |
+| adv_005 | Contrôle PTZ | Intermediate |
+| adv_006 | Événements détection mouvement | Advanced |
+| adv_007 | Enregistrement multi-streams | Intermediate |
+| adv_008 | Bypass segmentation VLAN | Expert |
+
+### 🛠️ Outils MCP Disponibles
+
+```python
+scanner = MCPCameraScanner()
+
+# Scan réseau
+scanner.mcp_network_scan("192.168.1.0/24")
+
+# Scan ARP
+scanner.mcp_arp_scan()
+
+# Scan RTSP
+scanner.mcp_rtsp_scan("192.168.1.108")
+
+# Fingerprint HTTP
+scanner.mcp_http_fingerprint("192.168.1.108")
+
+# Découverte ONVIF
+scanner.mcp_onvif_discover()
+
+# Audit complet
+scanner.mcp_full_audit("192.168.1.0/24")
+```
+
+### ⏭️ Prochaine Étape
+
+1. Installer nmap en mode Administrateur: `choco install nmap -y`
+2. Obtenir les Local Keys Tuya pour 192.168.1.165
+3. Tester les endpoints RTSP sur 192.168.1.108
+
+---
+
+## 📅 Session 2025-12-20 - Intégration OSINT & Layout Fix
+
+### 🔧 Corrections Layout Project Dashboard
+
+**Problèmes résolus:**
+- Map affichée comme "bande en haut" - corrigé avec hauteur fixe (280px)
+- CSS global `iframe { height: auto; }` écrasait la hauteur - exclu les iframes de map
+- Container parent avec `overflow-y-auto` causait problèmes de calcul hauteur - remplacé par `overflow-hidden`
+- Utilisation de `flex-1` et `min-h-0` pour layouts flex corrects
+
+**Fichiers modifiés:**
+- `interface/src/index.css` - Exception iframe pour maps
+- `interface/src/App.jsx` - Fix overflow container principal  
+- `interface/src/ProjectDashboard.jsx` - Refonte layout complet
+
+### 🌐 APIs OSINT Intégrées
+
+| Service | Route | Clé API |
+|---------|-------|---------|
+| IP2Location | `/api/ip2location/*` | ✅ Configurée |
+| IP2WHOIS | `/api/whois/*` | ✅ Configurée |
+| iplocation.net | `/api/iplocation/*` | Gratuite |
+| IPGeolocation Astronomy | `/api/astronomy/*` | À configurer |
+
+### 🧩 Nouveaux Composants
+
+**IPLookupPanel** (`interface/src/components/IPLookupPanel.jsx`)
+- Lookup IP avec géolocalisation complète
+- WHOIS domain avec registrar, dates, nameservers
+- Mode compact pour sidebar
+- Callback `onLocationFound` pour intégration map
+
+**OSINTAgentChat** (`interface/src/components/OSINTAgentChat.jsx`)
+- Chat dédié investigations OSINT
+- Connexion AnythingLLM agents
+- Auto-détection IP/domaines dans messages
+- Quick actions (Mon IP, WHOIS, Géoloc, Username)
+- Résultats outils affichés dans chat
+
+### 📊 Structure Finale Project Dashboard
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ HEADER - DASHBOARD / AI ASSISTANT Button                      │
+├──────────────────────────────────┬───────────────────────────┤
+│                                  │ OSINT Agent Chat (flex-1) │
+│ Google Maps (280px fixe)         │ ─────────────────────────│
+│                                  │ IP Lookup Panel           │
+├──────────────────────────────────┤                           │
+│                                  │──────────────────────────│
+│ Camera Panel (flex-1)            │ Calendar │ Email (mini)  │
+│                                  │                           │
+└──────────────────────────────────┴───────────────────────────┘
+      75% width                          25% width
+```
+
+### ✅ Tests Effectués - CONFIRMÉS VISUELLEMENT
+- [x] Build production réussi
+- [x] Lint errors corrigés
+- [x] Layout responsive vérifié
+- [x] **Test visuel navigateur - CONFIRMÉ**
+  - Map correctement dimensionnée à 280px (plus de bande fine!)
+  - Camera panel visible sous la map
+  - OSINT Agent Chat intégré dans sidebar
+- [x] **IP Lookup testé - FONCTIONNEL**
+  - Test avec 8.8.8.8 → Mountain View, California, US
+- [x] **OSINT Chat testé - FONCTIONNEL**
+  - Quick actions fonctionnelles
+  - Messages envoyés correctement
+
+### 🎯 Identifiants de Test
+- **Email**: `admin@nexus33.io`
+- **Password**: `admin123`
+
+### 📹 Enregistrements
+- Layout Dashboard: `projects_layout_clear.png`
+- IP Lookup Results: `ip_lookup_results.png`
+- OSINT Chat Response: `osint_chat_response.png`
+- Video Complète: `full_osint_test.webp`
+
+---
+
+*Session terminée le 20/12/2025 20:20 - ✅ Integration OSINT 100% Complete*
+

@@ -2,22 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
     Briefcase, Plus, Trash2, CheckCircle, Circle,
     ArrowRight, Layout, Terminal, Loader, Save,
-    Calendar, Mail, Folder, Map as MapIcon, RefreshCw, TrendingUp
+    Calendar, Mail, Folder, Map as MapIcon, RefreshCw, TrendingUp,
+    Camera, Video, Eye, EyeOff, Wifi, WifiOff, Play, Pause, Bot
 } from 'lucide-react';
 import ModelIntelligenceDashboard from './components/ModelIntelligenceDashboard';
+import IPLookupPanel from './components/IPLookupPanel';
+import OSINTAgentChat from './components/OSINTAgentChat';
 import { API_URL } from './config';
 
 const ProjectDashboard = () => {
     // Project State
-    const [_projects, setProjects] = useState([]);
+    const [, setProjects] = useState([]);
     const [activeProject, setActiveProject] = useState(null);
-    // const [loading, setLoading] = useState(false); // Unused
-    // const [loading, setLoading] = useState(false); // Removed unused state
-    // Sidebar was removed - these states are kept for potential future use
-     
-    const [_showNewProjectInput, _setShowNewProjectInput] = useState(false);
-     
-    const [_newProjectName, _setNewProjectName] = useState("");
     const [newTaskContent, setNewTaskContent] = useState("");
 
     // Google State
@@ -34,6 +30,14 @@ const ProjectDashboard = () => {
     const [showAgentModal, setShowAgentModal] = useState(false);
     const [selectedAgent, setSelectedAgent] = useState("");
     const [agentTask, setAgentTask] = useState("");
+
+    // Camera State
+    const [cameras, setCameras] = useState([
+        { id: 1, name: 'EasyLife Camera 1', ip: '192.168.1.165', port: 8080, status: 'online', streaming: false },
+        { id: 2, name: 'Potential Camera', ip: '192.168.1.108', port: 80, status: 'online', streaming: false },
+        { id: 3, name: 'Router Gateway', ip: '192.168.1.1', port: 80, status: 'online', streaming: false }
+    ]);
+    const [selectedCamera, setSelectedCamera] = useState(null);
 
     // --- DATA FETCHING ---
 
@@ -198,7 +202,7 @@ const ProjectDashboard = () => {
 
     // --- RENDER HELPERS ---
 
-    const renderColumn = (title, status, icon) => {
+    const _renderColumn = (title, status, icon) => {
         const tasks = activeProject?.tasks.filter(t => t.status === status) || [];
         return (
             <div className="flex-1 bg-gray-900/50 border border-gray-800 rounded-lg p-4 flex flex-col min-h-[300px]">
@@ -260,15 +264,12 @@ const ProjectDashboard = () => {
     };
 
     return (
-        <div 
-            className="flex flex-col w-full bg-transparent text-cyan-300 overflow-hidden"
-            style={{ height: 'calc(100vh - 130px)' }}
-        >
-            {/* HEADER - Fixed height */}
-            <div className="flex justify-between items-end border-b border-gray-800 p-4 flex-shrink-0">
+        <div className="project-dashboard h-full w-full flex flex-col bg-transparent text-cyan-300 overflow-hidden">
+            {/* HEADER - Fixed height (approx 70px) */}
+            <div className="flex justify-between items-end border-b border-gray-800 px-4 py-3 flex-shrink-0">
                 <div>
-                    <h2 className="text-3xl font-bold text-white mb-1">{activeProject ? activeProject.name : "DASHBOARD"}</h2>
-                    <p className="text-gray-500 text-sm font-mono">{activeProject ? activeProject.id : "Vue d'ensemble"}</p>
+                    <h2 className="text-2xl font-bold text-white mb-0.5">{activeProject ? activeProject.name : "DASHBOARD"}</h2>
+                    <p className="text-gray-500 text-xs font-mono">{activeProject ? activeProject.id : "Vue d'ensemble"}</p>
                 </div>
                 <div className="flex gap-2">
                     <button onClick={fetchGoogleData} className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded text-sm border border-gray-700">
@@ -288,11 +289,8 @@ const ProjectDashboard = () => {
                 </div>
             </div>
 
-            {/* MAIN CONTENT - Takes remaining height */}
-            <div 
-                className="flex gap-4 p-4"
-                style={{ height: 'calc(100vh - 200px)' }}
-            >
+            {/* MAIN CONTENT - Fills remaining height */}
+            <div className="flex-1 flex gap-4 p-4 min-h-0 overflow-hidden">
 
                 {/* AGENT MODAL */}
                 {showAgentModal && (
@@ -369,86 +367,216 @@ const ProjectDashboard = () => {
                     </div>
                 )}
 
-                {/* MAPS (75% Width) */}
-                <div 
-                    className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black"
-                    style={{ width: '75%', height: '100%' }}
-                >
-                    <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
-                        <MapIcon size={12} /> TRAFIC / MAPS
+                {/* MAPS & CAMERAS (75% Width) */}
+                <div className="flex flex-col gap-3 h-full" style={{ width: '75%' }}>
+                    {/* Google Maps - Fixed Height */}
+                    <div 
+                        className="project-map-container bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black flex-shrink-0"
+                        data-map-embed="true"
+                        style={{ height: '280px' }}
+                    >
+                        <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
+                            <MapIcon size={12} /> TRAFIC / MAPS
+                        </div>
+                        <iframe
+                            className="absolute inset-0 w-full h-full"
+                            style={{ border: 0, height: '100%', width: '100%' }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d178794.6234978716!2d-73.711873!3d45.5576996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a541c64b70d%3A0x654e3138211fefef!2sMontr%C3%A9al%2C%20QC!5e0!3m2!1sen!2sca!4v1709848293000!5m2!1sen!2sca"
+                        ></iframe>
                     </div>
-                    <iframe
-                        className="absolute inset-0 w-full h-full"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d178794.6234978716!2d-73.711873!3d45.5576996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a541c64b70d%3A0x654e3138211fefef!2sMontr%C3%A9al%2C%20QC!5e0!3m2!1sen!2sca!4v1709848293000!5m2!1sen!2sca"
-                    ></iframe>
+
+                    {/* CAMERA PANEL - Fills remaining space */}
+                    <div className="bg-gray-900/50 border border-cyan-800/50 rounded-lg overflow-hidden shadow-2xl shadow-black flex-1 flex flex-col min-h-0">
+                        {/* Camera Header */}
+                        <div className="flex items-center justify-between px-4 py-2 bg-black/50 border-b border-cyan-900/50">
+                            <div className="flex items-center gap-2 text-cyan-400">
+                                <Camera size={16} />
+                                <h3 className="font-bold text-sm tracking-wider">SURVEILLANCE CAMERAS</h3>
+                                <span className="ml-2 text-xs bg-cyan-900/50 px-2 py-0.5 rounded-full border border-cyan-700">
+                                    {cameras.filter(c => c.status === 'online').length} / {cameras.length} online
+                                </span>
+                            </div>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => {
+                                        // Scan for new cameras
+                                        fetch(`${API_URL}/cameras/scan`).catch(() => {});
+                                    }}
+                                    className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 flex items-center gap-1"
+                                >
+                                    <RefreshCw size={12} /> Scan
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Camera Grid */}
+                        <div className="flex h-[calc(100%-40px)]">
+                            {/* Camera List - Left Side */}
+                            <div className="w-1/4 border-r border-gray-800 p-2 overflow-y-auto bg-black/30">
+                                {cameras.map(cam => (
+                                    <div 
+                                        key={cam.id}
+                                        onClick={() => setSelectedCamera(cam)}
+                                        className={`p-2 rounded cursor-pointer mb-1 transition-all ${
+                                            selectedCamera?.id === cam.id 
+                                                ? 'bg-cyan-900/50 border border-cyan-500' 
+                                                : 'bg-gray-800/50 border border-gray-700 hover:border-cyan-700'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {cam.status === 'online' ? (
+                                                <Wifi size={12} className="text-green-400" />
+                                            ) : (
+                                                <WifiOff size={12} className="text-red-400" />
+                                            )}
+                                            <span className="text-xs text-white font-medium truncate">{cam.name}</span>
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-1 font-mono">{cam.ip}:{cam.port}</div>
+                                    </div>
+                                ))}
+                                
+                                {/* Add Camera Button */}
+                                <button className="w-full mt-2 p-2 border border-dashed border-gray-600 rounded text-gray-500 hover:text-cyan-400 hover:border-cyan-600 transition-all flex items-center justify-center gap-1 text-xs">
+                                    <Plus size={12} /> Add Camera
+                                </button>
+                            </div>
+
+                            {/* Camera Viewer - Right Side */}
+                            <div className="flex-1 p-3 flex flex-col">
+                                {selectedCamera ? (
+                                    <>
+                                        {/* Video Feed */}
+                                        <div className="flex-1 bg-black rounded-lg overflow-hidden relative border border-gray-700 flex items-center justify-center">
+                                            {selectedCamera.streaming ? (
+                                                <img 
+                                                    src={`http://${selectedCamera.ip}:${selectedCamera.port}/snapshot`}
+                                                    alt="Camera Feed"
+                                                    className="w-full h-full object-contain"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div className={`absolute inset-0 flex flex-col items-center justify-center ${selectedCamera.streaming ? 'hidden' : ''}`}>
+                                                <Video size={48} className="text-gray-600 mb-2" />
+                                                <p className="text-gray-500 text-sm">Click Play to start stream</p>
+                                                <p className="text-gray-600 text-xs mt-1 font-mono">{selectedCamera.ip}:{selectedCamera.port}</p>
+                                            </div>
+                                            
+                                            {/* Camera Name Overlay */}
+                                            <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-2">
+                                                <div className={`w-2 h-2 rounded-full ${selectedCamera.status === 'online' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                                                {selectedCamera.name}
+                                            </div>
+                                        </div>
+
+                                        {/* Camera Controls */}
+                                        <div className="flex items-center justify-between mt-3 bg-black/50 rounded-lg p-2 border border-gray-800">
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        setCameras(prev => prev.map(c => 
+                                                            c.id === selectedCamera.id 
+                                                                ? {...c, streaming: !c.streaming} 
+                                                                : c
+                                                        ));
+                                                        setSelectedCamera(prev => ({...prev, streaming: !prev.streaming}));
+                                                    }}
+                                                    className={`p-2 rounded border ${selectedCamera.streaming 
+                                                        ? 'bg-red-900/50 border-red-700 text-red-400 hover:bg-red-800' 
+                                                        : 'bg-green-900/50 border-green-700 text-green-400 hover:bg-green-800'
+                                                    }`}
+                                                >
+                                                    {selectedCamera.streaming ? <Pause size={16} /> : <Play size={16} />}
+                                                </button>
+                                                <button className="p-2 bg-gray-800 rounded border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700">
+                                                    <Camera size={16} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => window.open(`http://${selectedCamera.ip}:${selectedCamera.port}`, '_blank')}
+                                                    className="p-2 bg-gray-800 rounded border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                <span className="font-mono">rtsp://{selectedCamera.ip}:554/stream1</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-gray-600">
+                                        <Video size={48} className="mb-3 opacity-30" />
+                                        <p className="text-sm">Select a camera to view</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* RIGHT SIDEBAR - Model Progress + Google Widgets (25% Width) */}
-                <div 
-                    className="flex flex-col gap-3 overflow-hidden"
-                    style={{ width: '25%', height: '100%' }}
-                >
+                {/* RIGHT SIDEBAR - Model Progress + IP Lookup + Widgets (25% Width) */}
+                <div className="flex flex-col gap-2 h-full" style={{ width: '25%' }}>
 
-                    {/* MODEL INTELLIGENCE DASHBOARD - Main Feature */}
-                    <div className="bg-gray-900/50 border border-cyan-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col min-h-[300px]">
-                        <ModelIntelligenceDashboard />
+                    {/* OSINT AGENT CHAT - Main Feature (takes most space) */}
+                    <div className="flex-1 min-h-0">
+                        <OSINTAgentChat 
+                            compact={false}
+                            onLocationFound={(location) => {
+                                console.log('[PROJECT] Agent found location:', location);
+                                // TODO: Add marker to map
+                            }}
+                        />
                     </div>
 
-                    {/* CALENDAR - Compact */}
-                    <div className="bg-gray-900/50 border border-purple-900/50 rounded-lg p-3 backdrop-blur overflow-hidden flex flex-col max-h-[150px]">
-                        <div className="flex items-center gap-2 mb-2 text-purple-400 shrink-0">
-                            <Calendar size={14} />
-                            <h3 className="font-bold text-xs tracking-wider">AGENDA</h3>
-                            <span className="ml-auto text-xs text-gray-500">{googleData.events.length}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-900 flex-1">
-                            {googleData.events.length > 0 ? googleData.events.slice(0, 3).map((e, i) => (
-                                <div key={i} className="text-xs bg-black/40 p-2 rounded border-l-2 border-purple-500">
-                                    <div className="font-bold text-gray-300 truncate">{e.summary}</div>
-                                    <div className="text-gray-500 text-xs">{new Date(e.start.dateTime || e.start.date).toLocaleDateString()}</div>
-                                </div>
-                            )) : <div className="text-xs text-gray-500 italic">Rien de prévu.</div>}
-                        </div>
+                    {/* IP LOOKUP PANEL - Compact Mode */}
+                    <div className="flex-shrink-0">
+                        <IPLookupPanel 
+                            compact={true}
+                            onLocationFound={(location) => {
+                                console.log('[PROJECT] IP Location:', location);
+                            }}
+                        />
                     </div>
 
-                    {/* EMAILS - Compact */}
-                    <div className="bg-gray-900/50 border border-red-900/50 rounded-lg p-3 backdrop-blur overflow-hidden flex flex-col max-h-[150px]">
-                        <div className="flex items-center gap-2 mb-2 text-red-400 shrink-0">
-                            <Mail size={14} />
-                            <h3 className="font-bold text-xs tracking-wider">GMAIL</h3>
-                            <span className="ml-auto text-xs text-gray-500">{googleData.emails.length}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-red-900 flex-1">
-                            {googleData.emails.length > 0 ? googleData.emails.slice(0, 3).map((e, i) => (
-                                <div key={i} className="text-xs bg-black/40 p-1.5 rounded border border-gray-800 hover:border-red-900 transition-colors">
-                                    <div className="font-bold text-gray-200 truncate text-xs">{e.from}</div>
-                                    <div className="text-gray-400 truncate text-xs">{e.subject}</div>
+                    {/* QUICK INFO ROW - Calendar & Emails Side by Side */}
+                    <div className="flex gap-2 flex-shrink-0">
+                        {/* CALENDAR - Mini */}
+                        <div className="flex-1 bg-gray-900/50 border border-purple-900/50 rounded-lg p-2 backdrop-blur overflow-hidden">
+                            <div className="flex items-center gap-1 mb-1 text-purple-400">
+                                <Calendar size={12} />
+                                <span className="font-bold text-xs">{googleData.events.length}</span>
+                            </div>
+                            {googleData.events.length > 0 ? (
+                                <div className="text-xs text-gray-400 truncate">
+                                    {googleData.events[0]?.summary || 'Event'}
                                 </div>
-                            )) : <div className="text-xs text-gray-500 italic">Boîte vide.</div>}
+                            ) : (
+                                <div className="text-xs text-gray-600">Aucun</div>
+                            )}
+                        </div>
+
+                        {/* EMAILS - Mini */}
+                        <div className="flex-1 bg-gray-900/50 border border-red-900/50 rounded-lg p-2 backdrop-blur overflow-hidden">
+                            <div className="flex items-center gap-1 mb-1 text-red-400">
+                                <Mail size={12} />
+                                <span className="font-bold text-xs">{googleData.emails.length}</span>
+                            </div>
+                            {googleData.emails.length > 0 ? (
+                                <div className="text-xs text-gray-400 truncate">
+                                    {googleData.emails[0]?.from?.split('<')[0] || 'Email'}
+                                </div>
+                            ) : (
+                                <div className="text-xs text-gray-600">Aucun</div>
+                            )}
                         </div>
                     </div>
 
                 </div>
-
-                {/* KANBAN BOARD (Bottom Full Width) */}
-                {
-                    activeProject ? (
-                        <div className="col-span-12 grid grid-cols-3 gap-4 h-fit">
-                            {renderColumn("À FAIRE", 'todo', <Circle size={16} className="text-gray-500" />)}
-                            {renderColumn("EN COURS", 'in-progress', <Loader size={16} className="text-blue-500 animate-spin-slow" />)}
-                            {renderColumn("TERMINÉ", 'done', <CheckCircle size={16} className="text-green-500" />)}
-                        </div>
-                    ) : (
-                        <div className="col-span-12 flex flex-col items-center justify-center text-gray-600 border border-dashed border-gray-800 rounded-lg min-h-[200px]">
-                            <Briefcase size={48} className="mb-4 opacity-20" />
-                            <p>Sélectionnez un projet pour voir les tâches.</p>
-                        </div>
-                    )
-                }
 
             </div >
         </div >

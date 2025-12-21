@@ -356,10 +356,14 @@ button {
 
 /* Contain layout shifts */
 img,
-video,
-iframe {
+video {
   max-width: 100%;
   height: auto;
+}
+
+/* Iframes - Don't override height for map/embedded content */
+iframe {
+  max-width: 100%;
 }
 
 /* Improve scrolling performance */
@@ -368,6 +372,24 @@ iframe {
     content-visibility: auto;
     contain-intrinsic-size: 0 500px;
   }
+}
+
+/* =====================================
+   PROJECT DASHBOARD LAYOUT FIX
+   ===================================== */
+/* Force proper height for map containers */
+.project-map-container iframe,
+[data-map-embed] iframe {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Ensure flex containers fill height */
+.project-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 /* =====================================
    TRAINING DASHBOARD LAYOUT FIX

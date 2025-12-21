@@ -84,7 +84,7 @@ function App() {
                   </nav>
 
                   <div className="flex-grow flex overflow-hidden relative">
-                    <div className="flex-grow h-full overflow-y-auto overflow-x-hidden">
+                    <div className="flex-grow h-full overflow-hidden">
                       <Routes>
                         <Route path="/" element={<ChatInterface />} />
                         <Route path="/professional" element={<ProfessionalPage />} />

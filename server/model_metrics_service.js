@@ -620,6 +620,47 @@ class ModelMetricsService {
     }
 
     /**
+     * Cleanup metrics for models that no longer exist in Ollama
+     * @param {Array<string>} availableModels - List of model names from ollama list
+     * @returns {Object} - { removed: string[], kept: string[] }
+     */
+    cleanupOrphanedModels(availableModels) {
+        const removed = [];
+        const kept = [];
+        
+        // Normalize available models (some may have :latest suffix missing)
+        const normalizedAvailable = new Set();
+        for (const m of availableModels) {
+            normalizedAvailable.add(m);
+            normalizedAvailable.add(m.split(':')[0] + ':latest');
+        }
+        
+        for (const modelName of Object.keys(this.metrics)) {
+            // Keep cloud-based models (AnythingLLM, Groq, Perplexity, etc.)
+            if (modelName.startsWith('[')) {
+                kept.push(modelName);
+                continue;
+            }
+            
+            // Check if local model exists
+            if (normalizedAvailable.has(modelName)) {
+                kept.push(modelName);
+            } else {
+                // Model no longer exists - remove its metrics
+                removed.push(modelName);
+                delete this.metrics[modelName];
+            }
+        }
+        
+        if (removed.length > 0) {
+            this.saveMetrics();
+            console.log(`[MODEL_METRICS] Cleaned up ${removed.length} orphaned models:`, removed);
+        }
+        
+        return { removed, kept };
+    }
+
+    /**
      * Start automatic broadcasting every 5 seconds
      */
     startBroadcast() {

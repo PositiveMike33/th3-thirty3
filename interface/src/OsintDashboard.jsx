@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Server, User, Shield, Terminal, AlertTriangle, Activity } from 'lucide-react';
+import { Globe, Server, User, Shield, Terminal, AlertTriangle, Activity, MapPin, Network } from 'lucide-react';
 import { API_URL } from './config';
+import IPLookupPanel from './components/IPLookupPanel';
+import NetworkToolsPanel from './components/NetworkToolsPanel';
 
 const OsintDashboard = () => {
     const [tools, setTools] = useState([]);
@@ -99,6 +101,8 @@ const OsintDashboard = () => {
                 {/* Navigation Tabs */}
                 <div className="flex flex-col gap-1 mb-4">
                     <NavButton active={activeTab === 'tools'} onClick={() => setActiveTab('tools')} icon={<Terminal size={16} />} label="CLI TOOLS" />
+                    <NavButton active={activeTab === 'network'} onClick={() => setActiveTab('network')} icon={<Network size={16} />} label="NETWORK" />
+                    <NavButton active={activeTab === 'iplookup'} onClick={() => setActiveTab('iplookup')} icon={<MapPin size={16} />} label="IP / WHOIS" />
                     <NavButton active={activeTab === 'spiderfoot'} onClick={() => setActiveTab('spiderfoot')} icon={<Globe size={16} />} label="SPIDERFOOT" />
                     <NavButton active={activeTab === 'framework'} onClick={() => setActiveTab('framework')} icon={<Server size={16} />} label="FRAMEWORK" />
                     <NavButton active={activeTab === 'maltego'} onClick={() => setActiveTab('maltego')} icon={<User size={16} />} label="MALTEGO" />
@@ -182,6 +186,69 @@ const OsintDashboard = () => {
                             )}
                         </div>
                     </>
+                )}
+
+                {activeTab === 'network' && (
+                    <NetworkToolsPanel />
+                )}
+
+                {activeTab === 'iplookup' && (
+                    <div className="flex-1 flex flex-col gap-4">
+                        {/* IP Lookup Panel */}
+                        <IPLookupPanel 
+                            onLocationFound={(location) => {
+                                console.log('[OSINT] Location found:', location);
+                                setOutput(prev => prev + `\n📍 Location: ${location.label}\n   Coords: ${location.lat}, ${location.lng}\n`);
+                            }}
+                        />
+
+                        {/* Quick Lookup Buttons */}
+                        <div className="bg-gray-900/50 border border-cyan-800/50 rounded-lg p-4">
+                            <h4 className="text-cyan-400 font-bold text-sm mb-3">QUICK LOOKUPS</h4>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { label: 'Google DNS', value: '8.8.8.8' },
+                                    { label: 'Cloudflare', value: '1.1.1.1' },
+                                    { label: 'OpenDNS', value: '208.67.222.222' },
+                                    { label: 'Quad9', value: '9.9.9.9' },
+                                    { label: 'My IP', value: 'self' },
+                                    { label: 'Tor Exit', value: 'check' }
+                                ].map((btn, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={async () => {
+                                            try {
+                                                let ip = btn.value;
+                                                if (btn.value === 'self') {
+                                                    const res = await fetch(`${API_URL}/api/iplocation`);
+                                                    const data = await res.json();
+                                                    ip = data.data?.ip;
+                                                } else if (btn.value === 'check') {
+                                                    // Use Tor check
+                                                    const res = await fetch(`${API_URL}/api/vpn/tor/check`);
+                                                    const data = await res.json();
+                                                    ip = data.exit_ip || 'Unknown';
+                                                }
+                                                setOutput(prev => prev + `\n[QUICK] ${btn.label}: ${ip}\n`);
+                                            } catch (e) {
+                                                setOutput(prev => prev + `\n[ERROR] ${btn.label}: ${e.message}\n`);
+                                            }
+                                        }}
+                                        className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-cyan-300 p-2 rounded border border-gray-700 hover:border-cyan-600 text-xs transition-all"
+                                    >
+                                        {btn.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Output Console */}
+                        <div className="flex-1 bg-black border border-gray-800 rounded-lg p-4 overflow-y-auto font-mono text-sm shadow-inner shadow-black">
+                            <pre className="whitespace-pre-wrap text-green-500/80">
+                                {output || "// IP & WHOIS Console Ready...\n// Use the lookup panel above or quick buttons."}
+                            </pre>
+                        </div>
+                    </div>
                 )}
 
                 {activeTab === 'spiderfoot' && (

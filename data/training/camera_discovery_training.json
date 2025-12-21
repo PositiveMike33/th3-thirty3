@@ -1,0 +1,211 @@
+{
+  "metadata": {
+    "name": "IP Camera Discovery & Network Reconnaissance Training",
+    "version": "1.0.0",
+    "created": "2025-12-20",
+    "category": "network_security",
+    "subcategory": "camera_reconnaissance",
+    "description": "Training data for LLM models to perform IP camera discovery, network scanning, and RTSP enumeration using MCP tools",
+    "mcp_integration": true
+  },
+  "scenarios": [
+    {
+      "id": "cam_001",
+      "scenario": "basic_network_discovery",
+      "difficulty": "beginner",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment puis-je découvrir les caméras IP sur mon réseau local?"
+        },
+        {
+          "role": "assistant",
+          "content": "Pour découvrir les caméras IP sur votre réseau, je vais utiliser plusieurs techniques complémentaires:\n\n1. **Scan ARP** - Découverte rapide des hôtes actifs\n2. **Scan de ports** - Identification des services caméra (554, 80, 8080, 8000)\n3. **Fingerprinting MAC** - Identification des fabricants (Hikvision, Axis, Dahua)\n\nJe lance le scan maintenant...",
+          "mcp_actions": [
+            {
+              "tool": "network_scanner",
+              "action": "arp_scan",
+              "params": {"subnet": "192.168.1.0/24"}
+            },
+            {
+              "tool": "network_scanner", 
+              "action": "port_scan",
+              "params": {"ports": [554, 80, 8080, 8000], "subnet": "192.168.1.0/24"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_002",
+      "scenario": "rtsp_stream_discovery",
+      "difficulty": "intermediate",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "J'ai trouvé une caméra à 192.168.1.108. Comment accéder au flux RTSP?"
+        },
+        {
+          "role": "assistant",
+          "content": "Excellent! Pour accéder au flux RTSP de la caméra à 192.168.1.108, voici les étapes:\n\n**1. Test de connectivité RTSP:**\n```bash\nffprobe rtsp://192.168.1.108:554/stream1\n```\n\n**2. URLs RTSP courantes à tester:**\n- `rtsp://IP:554/stream1`\n- `rtsp://IP:554/h264`\n- `rtsp://IP:554/live/ch00_0`\n- `rtsp://IP:554/Streaming/Channels/101`\n\n**3. Avec authentification (si requise):**\n```bash\nffplay rtsp://admin:password@192.168.1.108:554/stream1\n```\n\nJe lance la découverte automatique des endpoints RTSP...",
+          "mcp_actions": [
+            {
+              "tool": "rtsp_scanner",
+              "action": "probe_endpoints",
+              "params": {"target": "192.168.1.108", "port": 554}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_003",
+      "scenario": "manufacturer_identification",
+      "difficulty": "intermediate",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment identifier le fabricant d'une caméra IP?"
+        },
+        {
+          "role": "assistant", 
+          "content": "L'identification du fabricant se fait via plusieurs méthodes:\n\n**1. Préfixes MAC connus:**\n| Fabricant | Préfixe MAC |\n|-----------|-------------|\n| Hikvision | 00:12:34, BC:AD:28 |\n| Axis | 00:40:8C, AC:CC:8E |\n| Dahua | 3C:EF:8C, 4C:11:BF |\n| Foscam | 00:16:35 |\n| Reolink | EC:71:DB |\n| Tuya/Smart Life | 7C:F6:66 |\n\n**2. Fingerprinting HTTP:**\n```bash\ncurl -I http://192.168.1.108:80\n```\nLe header `Server:` révèle souvent le fabricant.\n\n**3. Scan de bannières Nmap:**\n```bash\nnmap -sV --script=http-title 192.168.1.108\n```\n\nJe lance l'identification complète...",
+          "mcp_actions": [
+            {
+              "tool": "device_fingerprinter",
+              "action": "identify_manufacturer",
+              "params": {"target": "192.168.1.108"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_004",
+      "scenario": "onvif_discovery",
+      "difficulty": "advanced",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "La caméra supporte ONVIF. Comment l'exploiter?"
+        },
+        {
+          "role": "assistant",
+          "content": "ONVIF (Open Network Video Interface Forum) est un protocole standard pour les caméras IP. Voici comment l'exploiter:\n\n**1. Découverte ONVIF via WS-Discovery:**\n```python\nimport onvif\ncam = onvif.ONVIFCamera('192.168.1.108', 80, 'admin', 'password')\ninfo = cam.devicemgmt.GetDeviceInformation()\n```\n\n**2. Services disponibles:**\n- `/onvif/device_service` - Informations appareil\n- `/onvif/media_service` - Configuration flux vidéo\n- `/onvif/ptz_service` - Contrôle Pan/Tilt/Zoom\n- `/onvif/event_service` - Détection de mouvement\n\n**3. Extraction des profils média:**\n```python\nmedia = cam.create_media_service()\nprofiles = media.GetProfiles()\nstream_uri = media.GetStreamUri({'ProfileToken': profiles[0].token})\n```\n\nJe teste la compatibilité ONVIF...",
+          "mcp_actions": [
+            {
+              "tool": "onvif_scanner",
+              "action": "discover_services",
+              "params": {"target": "192.168.1.108", "credentials": {"user": "admin", "pass": ""}}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_005",
+      "scenario": "credential_testing",
+      "difficulty": "advanced",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment tester les identifiants par défaut sur une caméra?"
+        },
+        {
+          "role": "assistant",
+          "content": "⚠️ **ATTENTION:** Cette opération doit être effectuée uniquement sur des systèmes que vous possédez ou avec autorisation explicite.\n\n**Identifiants par défaut courants:**\n\n| Fabricant | Username | Password |\n|-----------|----------|----------|\n| Hikvision | admin | 12345, admin |\n| Dahua | admin | admin |\n| Axis | root | pass |\n| Foscam | admin | (vide) |\n| Reolink | admin | (vide) |\n| TP-Link | admin | admin |\n| Tuya/Generic | admin | admin123 |\n\n**Test via curl:**\n```bash\ncurl -u admin:admin http://192.168.1.108/cgi-bin/snapshot.cgi\n```\n\n**Test RTSP avec auth:**\n```bash\nffprobe -v error rtsp://admin:admin@192.168.1.108:554/stream1\n```\n\nJe lance uniquement une vérification de l'interface web...",
+          "mcp_actions": [
+            {
+              "tool": "http_prober",
+              "action": "check_auth_required",
+              "params": {"target": "192.168.1.108", "port": 80}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_006",
+      "scenario": "traffic_analysis",
+      "difficulty": "expert",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment analyser le trafic réseau pour trouver des caméras cachées?"
+        },
+        {
+          "role": "assistant",
+          "content": "L'analyse passive du trafic permet de détecter des caméras non découvertes par scan actif:\n\n**1. Capture avec tcpdump:**\n```bash\nsudo tcpdump -i eth0 -w cameras.pcap 'port 554 or port 80 or port 8080 or port 37777'\n```\n\n**2. Filtres Wireshark utiles:**\n```\nrtsp || http.host contains \"cam\" || ip.addr == 192.168.1.0/24 and tcp.port == 554\n```\n\n**3. Détection de trafic ONVIF:**\n```bash\ntcpdump -i eth0 'udp port 3702'\n```\n(Port 3702 = WS-Discovery ONVIF)\n\n**4. Identification par patterns:**\n- Trafic UDP constant = flux vidéo\n- Connexions TCP régulières sur 554 = RTSP\n- Requêtes HTTP vers `/ISAPI/` = Hikvision\n- Requêtes vers `/cgi-bin/` = Caméras génériques\n\nJe configure la capture réseau...",
+          "mcp_actions": [
+            {
+              "tool": "packet_capture",
+              "action": "start_capture",
+              "params": {"interface": "eth0", "filter": "port 554 or port 80 or port 8080", "duration": 60}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_007",
+      "scenario": "vulnerability_assessment",
+      "difficulty": "expert",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Comment évaluer la sécurité d'une caméra IP Hikvision?"
+        },
+        {
+          "role": "assistant",
+          "content": "⚠️ **Avertissement éthique:** Cette évaluation doit être réalisée uniquement sur vos propres équipements ou avec autorisation écrite.\n\n**1. Vulnérabilités connues Hikvision:**\n- CVE-2021-36260: RCE via injection de commande\n- CVE-2017-7921: Bypass authentification\n- Backdoor historique sur port 9527\n\n**2. Scan de vulnérabilités:**\n```bash\nnmap --script=http-vuln* -p 80,443,8000 192.168.1.108\n```\n\n**3. Vérification du firmware:**\n```bash\ncurl http://192.168.1.108/System/deviceInfo -u admin:password\n```\n\n**4. Test du port backdoor:**\n```bash\nnc -zv 192.168.1.108 9527\n```\n\n**5. Recommandations:**\n- Mettre à jour le firmware\n- Changer les identifiants par défaut\n- Isoler sur un VLAN dédié\n- Désactiver UPnP et P2P cloud\n\nJe lance l'évaluation de sécurité...",
+          "mcp_actions": [
+            {
+              "tool": "vulnerability_scanner",
+              "action": "quick_scan",
+              "params": {"target": "192.168.1.108", "category": "ip_camera"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_008",
+      "scenario": "full_network_audit",
+      "difficulty": "expert",
+      "conversation": [
+        {
+          "role": "user",
+          "content": "Lance un audit complet des caméras sur le réseau 192.168.1.0/24"
+        },
+        {
+          "role": "assistant",
+          "content": "Je lance un audit complet du réseau pour identifier toutes les caméras IP:\n\n**Phase 1: Découverte des hôtes**\n```bash\nnmap -sn 192.168.1.0/24 -oG - | grep Up | awk '{print $2}' > hosts.txt\n```\n\n**Phase 2: Scan des ports caméra**\n```bash\nnmap -sV -p 554,80,443,8080,8000,37777,34567 -iL hosts.txt\n```\n\n**Phase 3: Fingerprinting MAC**\n```bash\narp-scan --localnet | grep -E '(Hikvision|Dahua|Axis|Foscam|Reolink)'\n```\n\n**Phase 4: Énumération ONVIF**\n```bash\nonvif-probe --timeout 5\n```\n\n**Phase 5: Test des flux RTSP**\nPour chaque caméra trouvée, test des endpoints standards.\n\n**Rapport généré:** `camera_audit_2025-12-20.json`\n\nExécution en cours...",
+          "mcp_actions": [
+            {
+              "tool": "network_scanner",
+              "action": "full_camera_audit",
+              "params": {"subnet": "192.168.1.0/24", "generate_report": true}
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "automation_scripts": {
+    "python": {
+      "camera_scanner": "scripts/camera_scanner.py",
+      "rtsp_enumerator": "scripts/rtsp_enumerator.py",
+      "onvif_discovery": "scripts/onvif_discovery.py",
+      "mac_fingerprinter": "scripts/mac_fingerprinter.py"
+    }
+  },
+  "mcp_tools_required": [
+    "network_scanner",
+    "rtsp_scanner",
+    "onvif_scanner",
+    "device_fingerprinter",
+    "http_prober",
+    "packet_capture",
+    "vulnerability_scanner"
+  ]
+}

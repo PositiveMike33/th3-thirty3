@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import { 
     Activity, Brain, TrendingUp, RefreshCw, 
-    Zap, Clock, Target, Award, AlertTriangle, Cloud, Monitor, MessageCircle, Send
+    Zap, Clock, Target, Award, AlertTriangle, Cloud, Monitor, MessageCircle, Send, Trash2
 } from 'lucide-react';
 import { 
     RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -87,6 +87,10 @@ const OllamaTrainingDashboard = () => {
     const [commentary, setCommentary] = useState(null);
     const [recentCommentaries, setRecentCommentaries] = useState([]);
     const [generatingCommentary, setGeneratingCommentary] = useState(false);
+    
+    // Cleanup state
+    const [cleanupResult, setCleanupResult] = useState(null);
+    const [cleaningUp, setCleaningUp] = useState(false);
 
     // Fetch metrics
     const fetchMetrics = useCallback(async () => {
@@ -185,6 +189,28 @@ const OllamaTrainingDashboard = () => {
         );
     };
 
+    // Cleanup orphaned models
+    const cleanupOrphanedModels = async () => {
+        if (cleaningUp) return;
+        setCleaningUp(true);
+        try {
+            const res = await fetch(`${API_URL}/models/cleanup`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            setCleanupResult(data);
+            // Refresh metrics after cleanup
+            await fetchMetrics();
+            // Clear notification after 5 seconds
+            setTimeout(() => setCleanupResult(null), 5000);
+        } catch (error) {
+            console.error('Cleanup failed:', error);
+            setCleanupResult({ success: false, error: error.message });
+        } finally {
+            setCleaningUp(false);
+        }
+    };
+
     const modelNames = Object.keys(metrics).filter(name => !isEmbeddingModel(name));
     const currentModel = selectedModel ? metrics[selectedModel] : null;
 
@@ -244,6 +270,15 @@ const OllamaTrainingDashboard = () => {
                         {compareMode ? ' Comparaison' : ' Comparer'}
                     </button>
                     <button 
+                        onClick={cleanupOrphanedModels}
+                        disabled={cleaningUp}
+                        className="px-3 py-1.5 text-xs rounded border transition-colors bg-red-900/50 border-red-700 text-red-300 hover:bg-red-800 disabled:opacity-50 flex items-center gap-1"
+                        title="Supprimer les modèles qui n'existent plus dans Ollama"
+                    >
+                        <Trash2 size={14} />
+                        {cleaningUp ? 'Nettoyage...' : 'Nettoyer'}
+                    </button>
+                    <button 
                         onClick={fetchMetrics}
                         className="p-2 bg-gray-800 border border-gray-700 rounded hover:border-cyan-500 transition-colors"
                     >
@@ -251,6 +286,22 @@ const OllamaTrainingDashboard = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Cleanup Notification */}
+            {cleanupResult && (
+                <div className={`mb-4 p-3 rounded-lg border ${cleanupResult.success ? 'bg-green-900/30 border-green-700' : 'bg-red-900/30 border-red-700'}`}>
+                    <p className={`text-sm ${cleanupResult.success ? 'text-green-300' : 'text-red-300'}`}>
+                        {cleanupResult.success 
+                            ? `✅ ${cleanupResult.removed?.length || 0} modèles orphelins supprimés`
+                            : `❌ Erreur: ${cleanupResult.error}`}
+                    </p>
+                    {cleanupResult.removed?.length > 0 && (
+                        <p className="text-xs text-gray-400 mt-1">
+                            Supprimés: {cleanupResult.removed.join(', ')}
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* Benchmark Any Model Section */}
             <div className="mb-6 p-4 bg-gray-900/50 border border-yellow-800 rounded-xl">
