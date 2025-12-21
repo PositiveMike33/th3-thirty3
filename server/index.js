@@ -197,10 +197,10 @@ modelMetricsService.setMCPService(mcpService);
 llmService.setModelMetricsService(modelMetricsService); // Connect for AnythingLLM metrics tracking
 console.log('[SYSTEM] Model Metrics Service initialized (5s refresh, hourly benchmarks)');
 
-// Initialize Training Commentary Service (LLM real-time analysis)
+// Initialize Training Commentary Service (LLM real-time analysis with Gemini/NotebookLM)
 const TrainingCommentaryService = require('./training_commentary_service');
-const trainingCommentaryService = new TrainingCommentaryService();
-console.log('[SYSTEM] Training Commentary Service initialized (Mistral, FR, email archive)');
+const trainingCommentaryService = new TrainingCommentaryService(llmService);
+console.log('[SYSTEM] Training Commentary Service initialized (Gemini/NotebookLM, FR, email archive)');
 
 // Initialize Real Training Service (intensive model training)
 const RealTrainingService = require('./real_training_service');

@@ -22,11 +22,15 @@ const SMTP_USER = process.env.EMAIL_USER;
 const SMTP_PASS = process.env.EMAIL_APP_PASSWORD;
 
 class TrainingCommentaryService {
-    constructor() {
+    constructor(llmService = null) {
         this.archive = this.loadArchive();
         this.lastCommentaryByModel = {};  // Track last commentary time per model
         this.cachedModels = [];           // Cached list of available models
         this.lastModelRefresh = 0;        // Last time we refreshed model list
+        this.llmService = llmService;     // LLM Service for Gemini/NotebookLM integration
+        this.useGemini = true;            // Use Gemini (NotebookLM) by default
+        
+        console.log(`[COMMENTARY] Service initialized (Gemini: ${this.useGemini ? 'enabled' : 'disabled'})`);
     }
 
     /**
@@ -81,8 +85,8 @@ class TrainingCommentaryService {
     }
 
     /**
-     * Generate SELF-COMMENTARY: A model comments on ITS OWN learning process
-     * @param {string} modelName - The model generating commentary about itself
+     * Generate SELF-COMMENTARY using Gemini/NotebookLM
+     * @param {string} modelName - The model being analyzed
      * @param {Object} metrics - Current training metrics
      */
     async generateSelfCommentary(modelName, metrics) {
@@ -96,29 +100,30 @@ class TrainingCommentaryService {
             // Build self-reflection prompt
             const prompt = this.buildSelfReflectionPrompt(modelName, modelMetrics);
             
-            console.log(`[COMMENTARY] ${modelName} generating self-reflection...`);
+            let commentary = 'Je continue mon apprentissage...';
             
-            // Model generates commentary about ITSELF
-            const response = await fetch('http://localhost:11434/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: modelName,
-                    prompt: prompt,
-                    stream: false,
-                    options: {
-                        temperature: 0.8,  // Slightly more creative for self-reflection
-                        num_predict: 400
-                    }
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Ollama HTTP ${response.status}`);
+            // Use Gemini (NotebookLM) if enabled and LLM service available
+            if (this.useGemini && this.llmService) {
+                console.log(`[COMMENTARY] 📓 Gemini/NotebookLM analyzing ${modelName}...`);
+                
+                try {
+                    commentary = await this.llmService.generateResponse(
+                        prompt,
+                        null,
+                        'gemini',
+                        'gemini-2.0-flash-exp',
+                        'Tu es un expert pédagogue qui analyse les progrès des modèles IA. Réponds en français.'
+                    );
+                } catch (geminiError) {
+                    console.error(`[COMMENTARY] Gemini failed, falling back to local:`, geminiError.message);
+                    // Fallback to local model
+                    commentary = await this.generateLocalCommentary(modelName, prompt);
+                }
+            } else {
+                // Use local Ollama model
+                console.log(`[COMMENTARY] ${modelName} generating self-reflection (local)...`);
+                commentary = await this.generateLocalCommentary(modelName, prompt);
             }
-            
-            const data = await response.json();
-            const commentary = data.response || 'Je continue mon apprentissage...';
             
             // Create entry
             const entry = {
@@ -126,6 +131,7 @@ class TrainingCommentaryService {
                 timestamp: new Date().toISOString(),
                 modelName: modelName,
                 type: 'self_reflection',
+                source: this.useGemini ? 'gemini/notebooklm' : 'local',
                 commentary: commentary.trim(),
                 score: modelMetrics?.cognitive?.overallScore || 50,
                 expertise: modelMetrics?.expertise || null,
@@ -150,13 +156,45 @@ class TrainingCommentaryService {
             
             this.saveArchive();
             
-            console.log(`[COMMENTARY]  ${modelName} self-reflection complete (Score: ${entry.score})`);
+            const sourceLabel = this.useGemini ? '📓 NotebookLM' : '🤖 Local';
+            console.log(`[COMMENTARY] ✅ ${modelName} reflection complete via ${sourceLabel} (Score: ${entry.score})`);
             
             return entry;
             
         } catch (error) {
             console.error(`[COMMENTARY] Self-commentary error for ${modelName}:`, error.message);
             return null;
+        }
+    }
+
+    /**
+     * Generate commentary using local Ollama model
+     */
+    async generateLocalCommentary(modelName, prompt) {
+        try {
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: modelName,
+                    prompt: prompt,
+                    stream: false,
+                    options: {
+                        temperature: 0.8,
+                        num_predict: 400
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Ollama HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.response || 'Apprentissage en cours...';
+        } catch (error) {
+            console.error(`[COMMENTARY] Local generation error:`, error.message);
+            return 'Réflexion en cours...';
         }
     }
 
