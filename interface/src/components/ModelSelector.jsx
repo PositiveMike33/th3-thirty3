@@ -40,20 +40,20 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                         onClick={() => setIsOpen(false)}
                     />
                     
-                    <div className="absolute top-full left-0 mt-2 w-72 bg-[#1e1f20] border border-gray-700 rounded-lg shadow-xl z-[100]"
-                         style={{ maxHeight: 'calc(100vh - 200px)' }}>
-                        <div className="max-h-[350px] overflow-y-auto custom-scrollbar">
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-[#1e1f20] border border-gray-700 rounded-lg shadow-xl z-[100]"
+                         style={{ maxHeight: '250px' }}>
+                        <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
                             {/* LOCAL MODELS */}
                             <div className="p-2">
                                 <div className="text-[10px] font-bold text-green-500 uppercase tracking-wider mb-1 px-2 sticky top-0 bg-[#1e1f20]">
                                     🖥️ Local (Privé) - {models.local.length} modèles
                                 </div>
-                                <div className="max-h-[150px] overflow-y-auto">
+                                <div className="max-h-[80px] overflow-y-auto">
                                     {models.local.map(model => (
                                         <button
                                             key={model}
                                             onClick={() => handleSelect(model, 'local')}
-                                            className={`w-full text-left px-3 py-1.5 rounded text-xs font-mono mb-0.5 transition-colors truncate ${currentModel === model ? 'bg-green-900/30 text-green-400' : 'text-gray-300 hover:bg-[#28292a]'}`}
+                                            className={`w-full text-left px-2 py-1 rounded text-xs font-mono mb-0.5 transition-colors truncate ${currentModel === model ? 'bg-green-900/30 text-green-400' : 'text-gray-300 hover:bg-[#28292a]'}`}
                                         >
                                             {model}
                                         </button>
@@ -71,7 +71,7 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                                 {models.cloud.length === 0 && (
                                     <div className="text-[10px] text-gray-600 px-2 italic">Aucun modèle (Vérifiez API Keys)</div>
                                 )}
-                                <div className="max-h-[120px] overflow-y-auto">
+                                <div className="max-h-[60px] overflow-y-auto">
                                     {models.cloud.filter(m => m.provider !== 'anythingllm').map(model => (
                                         <button
                                             key={model.id}
@@ -93,7 +93,7 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                                     <div className="text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-1 px-2 sticky top-0 bg-[#1e1f20]">
                                         🤖 Agents (AnythingLLM)
                                     </div>
-                                    <div className="max-h-[100px] overflow-y-auto">
+                                    <div className="max-h-[60px] overflow-y-auto">
                                         {models.cloud.filter(m => m.provider === 'anythingllm').map(model => (
                                             <button
                                                 key={model.id}

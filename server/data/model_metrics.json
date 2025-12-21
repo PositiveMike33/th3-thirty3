@@ -3,14 +3,14 @@
     "modelName": "granite3.1-moe:1b",
     "createdAt": "2025-12-14T18:08:26.272Z",
     "performance": {
-      "totalQueries": 215,
-      "successfulQueries": 214,
+      "totalQueries": 217,
+      "successfulQueries": 216,
       "failedQueries": 1,
-      "avgResponseTime": 90938.2790697674,
+      "avgResponseTime": 91981.5437788018,
       "minResponseTime": 230,
       "maxResponseTime": 12177813,
-      "tokensPerSecond": 230.13816925734025,
-      "totalTokensGenerated": 296521
+      "tokensPerSecond": 1.7597037064335137,
+      "totalTokensGenerated": 297169
     },
     "expertise": {
       "coding": {
@@ -43,19 +43,19 @@
         "vramSavings": 78.8
       },
       "chat": {
-        "score": 5.672135954999579,
-        "samples": 61,
-        "lastUpdated": "2025-12-21T18:43:21.133Z",
+        "score": null,
+        "samples": 62,
+        "lastUpdated": "2025-12-21T19:28:12.202Z",
         "resourceEfficiency": 0.2,
         "vramSavings": 80,
         "memoryType": "working"
       },
       "humanizer": {
         "score": null,
-        "samples": 12,
-        "lastUpdated": "2025-12-20T07:41:30.814Z",
-        "resourceEfficiency": 0.223,
-        "vramSavings": 77.7
+        "samples": 13,
+        "lastUpdated": "2025-12-21T19:30:00.748Z",
+        "resourceEfficiency": 0.217,
+        "vramSavings": 78.3
       },
       "analysis": {
         "score": 73.1949710984916,
@@ -91,14 +91,9 @@
     "strengths": [],
     "weaknesses": [
       {
-        "category": "chat",
-        "score": 6,
-        "label": "chat"
-      },
-      {
-        "category": "humanizer",
-        "score": 0,
-        "label": "humanizer"
+        "category": "writing",
+        "score": 51,
+        "label": "✍️ Rédaction"
       }
     ],
     "history": [
@@ -3111,6 +3106,34 @@
           "analysis": 73.1949710984916,
           "writing": 50.91101831691334
         }
+      },
+      {
+        "date": "2025-12-21T19:28:12.202Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 51.528889876328705,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 73.1949710984916,
+          "writing": 50.91101831691334
+        }
+      },
+      {
+        "date": "2025-12-21T19:30:00.748Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 51.528889876328705,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 73.1949710984916,
+          "writing": 50.91101831691334
+        }
       }
     ],
     "benchmarks": [
@@ -3668,8 +3691,8 @@
       }
     ],
     "lastBenchmark": "2025-12-20T07:41:34.442Z",
-    "lastUpdated": "2025-12-21T19:23:12.473Z",
-    "lastActivity": "2025-12-21T19:23:12.473Z"
+    "lastUpdated": "2025-12-21T19:30:00.748Z",
+    "lastActivity": "2025-12-21T19:30:00.748Z"
   },
   "[ANYTHINGLLM] th3-thirty3-workspace": {
     "modelName": "[ANYTHINGLLM] th3-thirty3-workspace",
@@ -9227,14 +9250,14 @@
     "modelName": "olmo-3:latest",
     "createdAt": "2025-12-21T03:25:54.319Z",
     "performance": {
-      "totalQueries": 7,
-      "successfulQueries": 7,
+      "totalQueries": 8,
+      "successfulQueries": 8,
       "failedQueries": 0,
-      "avgResponseTime": 2507944.4285714286,
-      "minResponseTime": 118243,
+      "avgResponseTime": 2207777.625,
+      "minResponseTime": 106610,
       "maxResponseTime": 16468404,
-      "tokensPerSecond": 0.6652758311103647,
-      "totalTokensGenerated": 2162
+      "tokensPerSecond": 1.4914173154488322,
+      "totalTokensGenerated": 2321
     },
     "expertise": {
       "coding": {
@@ -9265,11 +9288,11 @@
       },
       "chat": {
         "score": null,
-        "samples": 1,
-        "lastUpdated": "2025-12-21T18:32:30.360Z",
+        "samples": 2,
+        "lastUpdated": "2025-12-21T19:29:54.524Z",
         "memoryType": "working",
-        "resourceEfficiency": 0.794,
-        "vramSavings": 20.6
+        "resourceEfficiency": 0.641,
+        "vramSavings": 35.9
       },
       "humanizer": {
         "score": 50,
@@ -9307,14 +9330,14 @@
     "strengths": [],
     "weaknesses": [
       {
+        "category": "analysis",
+        "score": 50,
+        "label": "🔍 Analyse"
+      },
+      {
         "category": "writing",
         "score": 50,
         "label": "✍️ Rédaction"
-      },
-      {
-        "category": "chat",
-        "score": 0,
-        "label": "chat"
       }
     ],
     "history": [
@@ -9415,11 +9438,25 @@
           "analysis": 50,
           "writing": 50
         }
+      },
+      {
+        "date": "2025-12-21T19:29:54.525Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": 50,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 50,
+          "chat": null,
+          "humanizer": 50,
+          "analysis": 50,
+          "writing": 50
+        }
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
-    "lastUpdated": "2025-12-21T19:23:03.631Z",
-    "lastActivity": "2025-12-21T19:23:03.631Z"
+    "lastUpdated": "2025-12-21T19:29:54.525Z",
+    "lastActivity": "2025-12-21T19:29:54.525Z"
   }
 }
