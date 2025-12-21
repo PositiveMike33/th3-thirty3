@@ -1,0 +1,85 @@
+{
+  "title": "OSINT Fundamentals - NotebookLM Course",
+  "description": "Comprehensive OSINT training material from NotebookLM",
+  "modules": [
+    {
+      "name": "Introduction to OSINT",
+      "content": "OSINT (Open Source Intelligence) is the collection and analysis of information from publicly available sources. These sources include websites, social media, public records, news articles, academic publications, and more. OSINT is used by intelligence agencies, law enforcement, cybersecurity professionals, journalists, and researchers.\n\nThe OSINT cycle consists of 5 phases:\n1. Planning and Direction - Define objectives and requirements\n2. Collection - Gather information from open sources\n3. Processing - Organize and format collected data\n4. Analysis - Evaluate and interpret the information\n5. Dissemination - Share findings with stakeholders",
+      "keyPoints": [
+        "OSINT uses publicly available information",
+        "The 5-phase intelligence cycle",
+        "Legal and ethical considerations",
+        "Tools vs methodology importance"
+      ]
+    },
+    {
+      "name": "Google Dorking",
+      "content": "Google Dorking (also known as Google Hacking) uses advanced search operators to find specific information that is not easily visible through regular searches.\n\nKey operators:\n- site: - Limits results to a specific domain (site:example.com)\n- filetype: - Finds specific file types (filetype:pdf)\n- intitle: - Searches for words in page titles (intitle:password)\n- inurl: - Searches for words in URLs (inurl:admin)\n- intext: - Searches for words in page content\n- cache: - Shows cached version of a page\n- link: - Finds pages linking to a URL\n\nExamples:\n- site:gov filetype:pdf confidential\n- intitle:index.of passwords\n- inurl:admin login",
+      "keyPoints": [
+        "Advanced search operators",
+        "Finding exposed documents",
+        "Discovering admin panels",
+        "Combining operators for precision"
+      ]
+    },
+    {
+      "name": "Username Enumeration with Sherlock",
+      "content": "Sherlock is a powerful OSINT tool that finds usernames across 300+ social networks and websites.\n\nUsage:\n```bash\nsherlock username\nsherlock username --timeout 10\nsherlock username --print-found\nsherlock username -o results.txt\n```\n\nThe tool helps create a digital footprint by identifying where a target has accounts. This information can reveal:\n- Social media presence\n- Professional profiles (LinkedIn, GitHub)\n- Forum memberships\n- Dating profiles\n- Gaming accounts\n\nBest practices:\n1. Always verify findings manually\n2. Consider username variations\n3. Cross-reference with other tools\n4. Document all findings",
+      "keyPoints": [
+        "Multi-platform username search",
+        "Building digital footprints",
+        "Verification importance",
+        "Documentation best practices"
+      ]
+    },
+    {
+      "name": "WHOIS and DNS Analysis",
+      "content": "WHOIS provides registration information about domain names and IP addresses. DNS (Domain Name System) translates domain names to IP addresses.\n\nWHOIS reveals:\n- Registrant name and organization\n- Registration and expiration dates\n- Nameservers\n- Registrar information\n- Contact details (when not privacy-protected)\n\nDNS Record Types:\n- A Record: Maps domain to IPv4 address\n- AAAA Record: Maps domain to IPv6 address\n- MX Record: Mail server information\n- TXT Record: Text information (SPF, DKIM)\n- CNAME: Canonical name (aliases)\n- NS Record: Nameserver information\n\nTools:\n- whois domain.com\n- nslookup domain.com\n- dig domain.com ANY\n- host domain.com",
+      "keyPoints": [
+        "Domain registration information",
+        "DNS record analysis",
+        "Infrastructure mapping",
+        "Historical data importance"
+      ]
+    },
+    {
+      "name": "Social Media Intelligence",
+      "content": "Social Media Intelligence (SOCMINT) involves collecting and analyzing data from social media platforms.\n\nKey platforms:\n- Twitter/X: Real-time updates, hashtag analysis\n- Facebook: Personal networks, groups, events\n- LinkedIn: Professional connections, company info\n- Instagram: Visual content, location data\n- Reddit: Community discussions, interests\n- TikTok: Video content, trends\n\nAnalysis techniques:\n1. Profile analysis - Bio, posts, connections\n2. Network mapping - Who they interact with\n3. Geolocation - Location from posts/photos\n4. Temporal analysis - Activity patterns\n5. Sentiment analysis - Opinions and attitudes\n6. EXIF data extraction from images\n\nEthical considerations:\n- Respect privacy settings\n- Don't create fake accounts\n- Document your methodology\n- Stay within legal boundaries",
+      "keyPoints": [
+        "Platform-specific techniques",
+        "Network and relationship mapping",
+        "Geolocation from content",
+        "Ethical boundaries"
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "type": "theory",
+      "question": "What are the 5 phases of the OSINT intelligence cycle?",
+      "difficulty": 1
+    },
+    {
+      "type": "practice",
+      "question": "Write a Google dork to find PDF files containing 'confidential' on .gov websites",
+      "difficulty": 2
+    },
+    {
+      "type": "practice",
+      "question": "How would you use Sherlock to find all accounts for username 'johndoe' and save results?",
+      "difficulty": 2
+    },
+    {
+      "type": "theory",
+      "question": "What information can a WHOIS lookup reveal about a domain?",
+      "difficulty": 1
+    },
+    {
+      "type": "analysis",
+      "question": "Explain how to extract geolocation data from social media posts",
+      "difficulty": 3
+    }
+  ],
+  "source": "NotebookLM Export",
+  "createdAt": "2025-12-20T22:40:00Z"
+}
