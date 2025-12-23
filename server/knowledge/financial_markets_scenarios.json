@@ -74,7 +74,7 @@
       "category": "Market Integrity",
       "title": "Dark Pool Insider Leak via Steganography",
       "difficulty": "Master",
-      "ideal_model": "granite3.1-moe:1b",
+      "ideal_model": "uandinotai/dolphin-uncensored:latest",
       "ideal_agent": "ForensicLens",
       "context": "A competitor consistently trades ahead of large block orders placed in your Dark Pool. No network leaks detected, but an employee posts daily 'motivational quotes' images on a public forum just before market open.",
       "objectives": [

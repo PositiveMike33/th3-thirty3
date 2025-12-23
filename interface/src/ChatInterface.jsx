@@ -1,4 +1,4 @@
-ï»¿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import Avatar from './Avatar';
 import GoogleAuthPanel from './components/GoogleAuthPanel';
@@ -32,7 +32,7 @@ const ChatInterface = () => {
 
     // Model Selection State
     const [selectedProvider, setSelectedProvider] = useState('local');
-    const [selectedModel, setSelectedModel] = useState('granite3.1-moe:1b');
+    const [selectedModel, setSelectedModel] = useState('uandinotai/dolphin-uncensored:latest');
 
     // Feedback State
     const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -341,7 +341,7 @@ const ChatInterface = () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ originalQuery, wrongResponse, correction: correctionText })
                 });
-                alert("Correction envoyÃ©e !");
+                alert("Correction envoyée !");
                 setFeedbackModalOpen(false);
                 setCorrectionText('');
             } catch {
@@ -380,7 +380,7 @@ const ChatInterface = () => {
         const systemMsg = {
             id: messages.length + 1,
             sender: 'agent',
-            text: `[SYSTEM] Module activÃ© : ${model} (${provider.toUpperCase()})`
+            text: `[SYSTEM] Module activé : ${model} (${provider.toUpperCase()})`
         };
         setMessages(prev => [...prev, systemMsg]);
     };
@@ -398,7 +398,7 @@ const ChatInterface = () => {
                 {/* Social Psychology Training - Social Media Links */}
                 <div className="p-2 space-y-1">
                     <div className="text-xs uppercase tracking-widest text-gray-500 px-3 py-2 mb-2">
-                        RÃ©seaux Sociaux
+                        Réseaux Sociaux
                     </div>
                     <a
                         href="https://www.facebook.com/mike.g.guillet"
@@ -469,7 +469,7 @@ const ChatInterface = () => {
                                         onClick={(e) => deleteSession(session.id, e)}
                                         className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400"
                                     >
-                                        Ã—
+                                        ×
                                     </button>
                                 </div>
                             </div>
@@ -519,14 +519,14 @@ const ChatInterface = () => {
                                     : 'bg-black border-cyan-900 text-gray-400 hover:text-cyan-400 hover:border-cyan-700'}`}
                             >
                                 <BookOpen size={14} />
-                                <span>{selectedPattern || "BibliothÃ¨que Fabric"}</span>
+                                <span>{selectedPattern || "Bibliothèque Fabric"}</span>
                             </button>
 
                             {selectedPattern && (
                                 <button
                                     onClick={() => setSelectedPattern('')}
                                     className="text-gray-500 hover:text-red-400"
-                                    title="DÃ©sactiver le pattern"
+                                    title="Désactiver le pattern"
                                 >
                                     <X size={14} />
                                 </button>
@@ -545,7 +545,7 @@ const ChatInterface = () => {
                             onClick={() => setIsMuted(!isMuted)}
                             className={`p-2 rounded-full border ${isMuted ? 'border-red-500 text-red-500' : 'border-cyan-500 text-cyan-500'} hover:bg-gray-800 transition-all`}
                         >
-                            {isMuted ? 'ðŸ”‡' : 'ðŸ”Š'}
+                            {isMuted ? '??' : '??'}
                         </button>
                     </div>
                 </div>
@@ -611,7 +611,7 @@ const ChatInterface = () => {
                                                     className="text-gray-600 hover:text-red-400 text-xs flex items-center gap-1 transition-colors"
                                                     title="Signaler une erreur"
                                                 >
-                                                    ðŸ‘Ž Corriger
+                                                    ?? Corriger
                                                 </button>
                                             </div>
                                         )}
@@ -636,31 +636,31 @@ const ChatInterface = () => {
                                     onClick={toggleListening}
                                     className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'text-cyan-600 hover:text-cyan-400'}`}
                                 >
-                                    {isListening ? 'ðŸ›‘' : 'ðŸŽ¤'}
+                                    {isListening ? '??' : '??'}
                                 </button>
                                 <button
                                     onClick={() => setShowWebcam(true)}
                                     className={`absolute right-12 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${capturedImage ? 'text-green-500' : 'text-cyan-600 hover:text-cyan-400'}`}
                                     title="Activer la Vision"
                                 >
-                                    ðŸ“·
+                                    ??
                                 </button>
                                 <button
                                     onClick={() => setIsMuted(!isMuted)}
                                     className={`absolute right-20 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${isMuted ? 'text-red-500' : 'text-cyan-600 hover:text-cyan-400'}`}
                                     title={isMuted ? "Activer le son" : "Couper le son"}
                                 >
-                                    {isMuted ? 'ðŸ”‡' : 'ðŸ”Š'}
+                                    {isMuted ? '??' : '??'}
                                 </button>
                             </div>
                             {capturedImage && (
                                 <div className="mt-2 flex items-center gap-2">
-                                    <span className="text-xs text-green-500 font-mono">Image capturÃ©e</span>
+                                    <span className="text-xs text-green-500 font-mono">Image capturée</span>
                                     <button onClick={() => setCapturedImage(null)} className="text-red-500 text-xs hover:underline">Supprimer</button>
                                 </div>
                             )}
                             <div className="text-center mt-2 text-[10px] text-gray-600 uppercase tracking-widest">
-                                SystÃ¨me SÃ©curisÃ© â€¢ Chiffrage End-to-End â€¢ {APP_CONFIG.version}
+                                Système Sécurisé • Chiffrage End-to-End • {APP_CONFIG.version}
                             </div>
                         </div>
                     </>
@@ -698,7 +698,7 @@ const ChatInterface = () => {
                     setMessages(prev => [...prev, {
                         id: Date.now(),
                         sender: 'agent',
-                        text: `[SYSTEM] Pattern FABRIC activÃ© : ${pattern}`
+                        text: `[SYSTEM] Pattern FABRIC activé : ${pattern}`
                     }]);
                 }}
             />

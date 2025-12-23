@@ -11,7 +11,7 @@
       "tasks": ["malware_analysis", "deobfuscation", "vulnerability_research"]
     },
     "rapid_response": {
-      "model": "granite3.1-moe:1b",
+      "model": "uandinotai/dolphin-uncensored:latest",
       "reasoning": "Ultra-low latency for real-time blocking and monitoring",
       "tasks": ["ddos_mitigation", "ip_blocking", "traffic_scanning"]
     }
@@ -20,7 +20,7 @@
     "strategy": "3-Tier Elite System",
     "tier_1_heavy": "qwen2.5-coder:7b (Deep Technical Work)",
     "tier_2_medium": "mistral:7b-instruct (Tactical & Strategic)",
-    "tier_3_light": "granite3.1-moe:1b (Speed & Background)",
+    "tier_3_light": "uandinotai/dolphin-uncensored:latest (Speed & Background)",
     "max_active_models": 3
   }
 }

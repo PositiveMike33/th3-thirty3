@@ -8,10 +8,10 @@ const path = require('path');
 
 // Mapping old models to new available models
 const MODEL_MAPPING = {
-    'granite3.1-moe:1b': 'granite3.1-moe:1b',
+    'uandinotai/dolphin-uncensored:latest': 'uandinotai/dolphin-uncensored:latest',
     'mistral:7b-instruct': 'mistral:7b-instruct',
     'qwen2.5-coder:7b': 'qwen2.5-coder:7b',
-    'granite3.1-moe:1b': 'granite3.1-moe:1b',
+    'uandinotai/dolphin-uncensored:latest': 'uandinotai/dolphin-uncensored:latest',
     "'mistral:7b-instruct'": "'mistral:7b-instruct'",
     '"mistral:7b-instruct"': '"mistral:7b-instruct"'
 };
@@ -47,7 +47,7 @@ function cleanupModels() {
     console.log('Available models:');
     console.log('  - qwen2.5-coder:7b (code/technical)');
     console.log('  - mistral:7b-instruct (strategy/general)');
-    console.log('  - granite3.1-moe:1b (fast/fallback)');
+    console.log('  - uandinotai/dolphin-uncensored:latest (fast/fallback)');
     console.log('  - nomic-embed-text:latest (embeddings)\n');
     
     console.log('Mapping deprecated models:');

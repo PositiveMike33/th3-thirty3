@@ -22,7 +22,7 @@ const MODEL_PROFILES = {
         bestFor: ['Chat général', 'Créativité', 'Résumés'],
         speed: 'fast', creativity: 5, accuracy: 4, context: 4
     },
-    'granite': {
+    'dolphin': {
         icon: '⚡', category: 'Rapide', color: '#10b981',
         strengths: ['Extrêmement rapide', 'Faible ressources', 'Concis'],
         weaknesses: ['Contexte limité', 'Tâches simples'],
@@ -119,7 +119,7 @@ const ModelIntelligenceDashboard = () => {
         const preds = [];
 
         if (hour >= 6 && hour < 12) {
-            preds.push({ icon: '☀️', type: 'time', message: 'Matin - Modèles rapides pour productivité', model: 'granite', confidence: 0.8 });
+            preds.push({ icon: '☀️', type: 'time', message: 'Matin - Modèles rapides pour productivité', model: 'dolphin', confidence: 0.8 });
         } else if (hour >= 12 && hour < 18) {
             preds.push({ icon: '🏢', type: 'time', message: 'Travail - Modèles équilibrés', model: 'qwen2.5', confidence: 0.75 });
         } else {
@@ -127,7 +127,7 @@ const ModelIntelligenceDashboard = () => {
         }
 
         if (profile.preferences.speedVsQuality === 'speed') {
-            preds.push({ icon: '⚡', type: 'pref', message: 'Vitesse préférée → granite', model: 'granite', confidence: 0.9 });
+            preds.push({ icon: '⚡', type: 'pref', message: 'Vitesse préférée → granite', model: 'dolphin', confidence: 0.9 });
         } else if (profile.preferences.speedVsQuality === 'quality') {
             preds.push({ icon: '🎯', type: 'pref', message: 'Qualité préférée → qwen2.5', model: 'qwen2.5', confidence: 0.9 });
         }

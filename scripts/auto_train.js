@@ -12,7 +12,7 @@ const AUTH_HEADER = { 'Authorization': 'Bearer admin', 'Content-Type': 'applicat
 
 // Configuration
 const CONFIG = {
-    models: ['granite3.1-moe:1b', 'mistral:7b-instruct', 'qwen2.5-coder:7b'],
+    models: ['uandinotai/dolphin-uncensored:latest', 'mistral:7b-instruct', 'qwen2.5-coder:7b'],
     iterationsPerSession: 5,
     pauseBetweenSessions: 60000, // 1 minute
     pauseBetweenModels: 30000,   // 30 seconds

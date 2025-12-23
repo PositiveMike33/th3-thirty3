@@ -5,7 +5,7 @@
  * AVAILABLE MODELS (4 only):
  * - qwen2.5-coder:7b (4.7GB) - Code & Technical Analysis
  * - mistral:7b-instruct (4.1GB) - Strategy & Instruction Following
- * - granite3.1-moe:1b (1.4GB) - Fast responses & Fallback
+ * - uandinotai/dolphin-uncensored:latest (1.4GB) - Fast responses & Fallback
  * - nomic-embed-text:latest (274MB) - Embeddings
  * 
  * CLOUD MODELS (via API):
@@ -20,7 +20,7 @@
 const LOCAL_MODELS = {
     code: 'qwen2.5-coder:7b',         // Best for Coding, Reverse Engineering, Technical
     general: 'mistral:7b-instruct',   // Best for Instruction Following, Strategy, OSINT
-    fast: 'granite3.1-moe:1b',        // Best for Speed, Background Tasks, Fallback
+    fast: 'uandinotai/dolphin-uncensored:latest',        // Best for Speed, Background Tasks, Fallback
     embedding: 'nomic-embed-text:latest' // Embeddings only
 };
 
@@ -28,7 +28,7 @@ const LOCAL_MODELS = {
 const ALL_LOCAL_MODELS = [
     'qwen2.5-coder:7b',
     'mistral:7b-instruct',
-    'granite3.1-moe:1b'
+    'uandinotai/dolphin-uncensored:latest'
 ];
 
 // Primary model for each use case
@@ -49,10 +49,10 @@ const MODEL_FOR_TASK = {
     nlp: 'mistral:7b-instruct',
     
     // Fast/Fallback tasks -> granite
-    fast: 'granite3.1-moe:1b',
-    quick: 'granite3.1-moe:1b',
-    simple: 'granite3.1-moe:1b',
-    fallback: 'granite3.1-moe:1b',
+    fast: 'uandinotai/dolphin-uncensored:latest',
+    quick: 'uandinotai/dolphin-uncensored:latest',
+    simple: 'uandinotai/dolphin-uncensored:latest',
+    fallback: 'uandinotai/dolphin-uncensored:latest',
     
     // Embeddings
     embedding: 'nomic-embed-text:latest',
@@ -93,7 +93,7 @@ class ModelRouter {
         if (this.initialized) return true;
         
         console.log('[MODEL_ROUTER] Initializing with 4 optimized models...');
-        console.log('[MODEL_ROUTER] Models: qwen2.5-coder:7b, mistral:7b-instruct, granite3.1-moe:1b, nomic-embed-text');
+        console.log('[MODEL_ROUTER] Models: qwen2.5-coder:7b, mistral:7b-instruct, uandinotai/dolphin-uncensored:latest, nomic-embed-text');
         
         try {
             await this.ensureNomicLoaded();
@@ -287,27 +287,27 @@ const modelRouter = new ModelRouter();
 modelRouter.models = {
     orchestrator: {
         primary: 'mistral:7b-instruct',
-        fallback: 'granite3.1-moe:1b'
+        fallback: 'uandinotai/dolphin-uncensored:latest'
     },
     technical: {
         primary: 'qwen2.5-coder:7b',
-        fallback: 'granite3.1-moe:1b'
+        fallback: 'uandinotai/dolphin-uncensored:latest'
     },
     nlp: {
         primary: 'mistral:7b-instruct',
-        fallback: 'granite3.1-moe:1b'
+        fallback: 'uandinotai/dolphin-uncensored:latest'
     },
     vision: {
         primary: 'qwen2.5-coder:7b',
-        fallback: 'granite3.1-moe:1b'
+        fallback: 'uandinotai/dolphin-uncensored:latest'
     },
     code: {
         primary: 'qwen2.5-coder:7b',
-        fallback: 'granite3.1-moe:1b'
+        fallback: 'uandinotai/dolphin-uncensored:latest'
     },
     osint: {
         primary: 'mistral:7b-instruct',
-        fallback: 'granite3.1-moe:1b'
+        fallback: 'uandinotai/dolphin-uncensored:latest'
     },
     embedding: {
         primary: 'nomic-embed-text:latest',

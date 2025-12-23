@@ -122,7 +122,7 @@ Fournis une analyse de sécurité professionnelle et détaillée.`;
                         aiPrompt,
                         null,
                         'local',
-                        'granite3.1-flash:latest',
+                        'uandinotai/dolphin-uncensored:latest',
                         systemPrompt
                     );
                     

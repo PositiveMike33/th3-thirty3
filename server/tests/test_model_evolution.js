@@ -61,7 +61,7 @@ async function runComparison() {
     console.log('========================================\n');
     
     const models = [
-        'granite3.1-moe:1b',
+        'uandinotai/dolphin-uncensored:latest',
         'mistral:7b-instruct',
         'qwen2.5-coder:7b'
     ];

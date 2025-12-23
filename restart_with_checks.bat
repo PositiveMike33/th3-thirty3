@@ -16,11 +16,11 @@ if errorlevel 1 (
 
 echo.
 echo [2/4] Verifying Ollama models...
-ollama list | findstr /C:"granite3.1-moe" >nul
+ollama list | findstr /C:"dolphin-uncensored" >nul
 if errorlevel 1 (
-    echo    ⚠️  granite3.1-moe not found (optional)
+    echo    ⚠️  dolphin-uncensored not found (optional)
 ) else (
-    echo    ✅ granite3.1-moe ready
+    echo    ✅ dolphin-uncensored ready
 )
 
 echo.

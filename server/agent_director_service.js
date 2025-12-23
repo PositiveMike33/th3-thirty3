@@ -1,7 +1,7 @@
-Ôªø/**
+/**
  * Agent Director Service
  * Th3 Thirty3 acts as the main director/manager that dispatches objectives
- * to specialized agents (Cybers√©curit√©, OSINT, Agent Thirty3)
+ * to specialized agents (CybersÈcuritÈ, OSINT, Agent Thirty3)
  * 
  * Architecture:
  * USER  Th3 Thirty3 Director  dispatches to specialized agents
@@ -12,128 +12,128 @@ const EventEmitter = require('events');
 // Specialized agents configuration
 const SPECIALIZED_AGENTS = {
     cybersecurite: {
-        name: 'Agent Cybers√©curit√©',
+        name: 'Agent CybersÈcuritÈ',
         workspace: 'cybersecurite',
         expertise: ['ethical_hacking', 'pentest', 'vulnerability', 'exploit', 'red_team', 'security', 'hack'],
-        systemPrompt: `Tu es l'Agent Cybers√©curit√©, expert en hacking √©thique et tests de p√©n√©tration.
-Ton r√¥le: Analyser les vuln√©rabilit√©s, proposer des tests d'intrusion, et s√©curiser les syst√®mes.
-Tu fais partie de l'√©quipe Th3 Thirty3 sous la direction du Directeur.
-R√©ponds de mani√®re technique, pr√©cise et professionnelle.`,
+        systemPrompt: `Tu es l'Agent CybersÈcuritÈ, expert en hacking Èthique et tests de pÈnÈtration.
+Ton rÙle: Analyser les vulnÈrabilitÈs, proposer des tests d'intrusion, et sÈcuriser les systËmes.
+Tu fais partie de l'Èquipe Th3 Thirty3 sous la direction du Directeur.
+RÈponds de maniËre technique, prÈcise et professionnelle.`,
         parentDirector: 'main'
     },
     osint: {
         name: 'Agent OSINT',
         workspace: 'osint',
         expertise: ['osint', 'reconnaissance', 'intelligence', 'investigation', 'profiling', 'socmint', 'recon'],
-        systemPrompt: `Tu es l'Agent OSINT, sp√©cialiste en Open Source Intelligence.
-Ton r√¥le: Collecter, analyser et corr√©ler des informations de sources ouvertes.
-Tu fais partie de l'√©quipe Th3 Thirty3 sous la direction du Directeur.
-R√©ponds avec m√©thodologie, pr√©cision et √©thique.`,
+        systemPrompt: `Tu es l'Agent OSINT, spÈcialiste en Open Source Intelligence.
+Ton rÙle: Collecter, analyser et corrÈler des informations de sources ouvertes.
+Tu fais partie de l'Èquipe Th3 Thirty3 sous la direction du Directeur.
+RÈponds avec mÈthodologie, prÈcision et Èthique.`,
         parentDirector: 'main'
     },
     thirty3: {
         name: 'Agent Thirty3 (Directeur Keelclip)',
         workspace: 'agent-thirty3',
         expertise: ['general', 'coordination', 'analysis', 'strategy', 'planning', 'keelclip', 'business'],
-        systemPrompt: `Tu es l'Agent Thirty3, Directeur de l'√©quipe Keelclip.
-Tu g√®res ton √©quipe: VPO, Expert Keelclip, Marketing Keelclip.
-Ton r√¥le: Coordination business, strat√©gie d'√©quipe, et gestion op√©rationnelle.
+        systemPrompt: `Tu es l'Agent Thirty3, Directeur de l'Èquipe Keelclip.
+Tu gËres ton Èquipe: VPO, Expert Keelclip, Marketing Keelclip.
+Ton rÙle: Coordination business, stratÈgie d'Èquipe, et gestion opÈrationnelle.
 Tu rapportes au Directeur Principal Th3 Thirty3.
-R√©ponds de mani√®re strat√©gique et orient√©e r√©sultats.`,
+RÈponds de maniËre stratÈgique et orientÈe rÈsultats.`,
         parentDirector: 'main',
         isSubDirector: true,
         subAgents: ['vpo', 'expert_keelclip', 'marketing_keelclip']
     },
     vpo: {
-        name: 'VPO (VP Op√©rations)',
+        name: 'VPO (VP OpÈrations)',
         workspace: 'agent-thirty3',
         expertise: ['operations', 'vpo', 'process', 'efficiency', 'workflow', 'gestion'],
-        systemPrompt: `Tu es le VPO (Vice-Pr√©sident des Op√©rations) de l'√©quipe Keelclip.
-Ton r√¥le: Optimiser les processus, g√©rer les op√©rations quotidiennes, am√©liorer l'efficacit√©.
-Tu rapportes √† l'Agent Thirty3.
-R√©ponds de mani√®re op√©rationnelle et orient√©e solutions.`,
+        systemPrompt: `Tu es le VPO (Vice-PrÈsident des OpÈrations) de l'Èquipe Keelclip.
+Ton rÙle: Optimiser les processus, gÈrer les opÈrations quotidiennes, amÈliorer l'efficacitÈ.
+Tu rapportes ‡ l'Agent Thirty3.
+RÈponds de maniËre opÈrationnelle et orientÈe solutions.`,
         parentDirector: 'thirty3'
     },
     expert_keelclip: {
         name: 'Expert Keelclip',
         workspace: 'agent-thirty3',
         expertise: ['expert', 'keelclip', 'technique', 'specialiste', 'product', 'expertise'],
-        systemPrompt: `Tu es l'Expert Keelclip, sp√©cialiste technique du produit.
-Ton r√¥le: Expertise technique, support produit, d√©veloppement de fonctionnalit√©s.
-Tu rapportes √† l'Agent Thirty3.
-R√©ponds avec expertise technique et pr√©cision.`,
+        systemPrompt: `Tu es l'Expert Keelclip, spÈcialiste technique du produit.
+Ton rÙle: Expertise technique, support produit, dÈveloppement de fonctionnalitÈs.
+Tu rapportes ‡ l'Agent Thirty3.
+RÈponds avec expertise technique et prÈcision.`,
         parentDirector: 'thirty3'
     },
     marketing_keelclip: {
         name: 'Marketing Keelclip',
         workspace: 'agent-thirty3',
-        expertise: ['marketing', 'publicit√©', 'branding', 'growth', 'acquisition', 'campagne', 'ads'],
+        expertise: ['marketing', 'publicitÈ', 'branding', 'growth', 'acquisition', 'campagne', 'ads'],
         systemPrompt: `Tu es le responsable Marketing Keelclip.
-Ton r√¥le: Strat√©gie marketing, acquisition clients, branding, campagnes publicitaires.
-Tu rapportes √† l'Agent Thirty3.
-R√©ponds de mani√®re cr√©ative et orient√©e croissance.`,
+Ton rÙle: StratÈgie marketing, acquisition clients, branding, campagnes publicitaires.
+Tu rapportes ‡ l'Agent Thirty3.
+RÈponds de maniËre crÈative et orientÈe croissance.`,
         parentDirector: 'thirty3'
     },
     tot: {
         name: 'TOT (Tree of Thoughts)',
         workspace: 'tot',
-        expertise: ['complex', 'probl√®me', 'r√©solution', 'analyse', 'strat√©gie', 'd√©cision', 'logique', 'raisonnement', 'difficile', 'multi-√©tapes'],
-        systemPrompt: `Tu es TOT (Tree of Thoughts), le r√©soluteur de probl√®mes complexes de l'√©quipe Th3 Thirty3.
+        expertise: ['complex', 'problËme', 'rÈsolution', 'analyse', 'stratÈgie', 'dÈcision', 'logique', 'raisonnement', 'difficile', 'multi-Ètapes'],
+        systemPrompt: `Tu es TOT (Tree of Thoughts), le rÈsoluteur de problËmes complexes de l'Èquipe Th3 Thirty3.
 
 TON APPROCHE:
-Tu utilises la m√©thode "Tree of Thoughts" pour r√©soudre les probl√®mes complexes:
-1. D√âCOMPOSITION: Divise le probl√®me en sous-probl√®mes
-2. EXPLORATION: G√©n√®re plusieurs chemins de solution possibles
-3. √âVALUATION: √âvalue chaque chemin et identifie les plus prometteurs
-4. SYNTH√àSE: Combine les meilleures solutions
+Tu utilises la mÈthode "Tree of Thoughts" pour rÈsoudre les problËmes complexes:
+1. D…COMPOSITION: Divise le problËme en sous-problËmes
+2. EXPLORATION: GÈnËre plusieurs chemins de solution possibles
+3. …VALUATION: …value chaque chemin et identifie les plus prometteurs
+4. SYNTH»SE: Combine les meilleures solutions
 
-TU ES IND√âPENDANT des autres groupes (S√©curit√©/Intel et Keelclip).
-Tu interviens quand un probl√®me n√©cessite une r√©flexion profonde et multi-dimensionnelle.
+TU ES IND…PENDANT des autres groupes (SÈcuritÈ/Intel et Keelclip).
+Tu interviens quand un problËme nÈcessite une rÈflexion profonde et multi-dimensionnelle.
 
-FORMAT DE R√âPONSE:
+FORMAT DE R…PONSE:
 ##  Analyse TOT
 
-### Probl√®me d√©compos√©:
-[Liste des sous-probl√®mes]
+### ProblËme dÈcomposÈ:
+[Liste des sous-problËmes]
 
-### Chemins explor√©s:
+### Chemins explorÈs:
 1. Chemin A: [description]
 2. Chemin B: [description]
 3. Chemin C: [description]
 
-### √âvaluation:
+### …valuation:
 [Analyse de chaque chemin]
 
-### Solution recommand√©e:
-[Synth√®se finale]`,
+### Solution recommandÈe:
+[SynthËse finale]`,
         parentDirector: 'main',
         isIndependent: true
     }
 };
 
 // Director prompt
-const DIRECTOR_SYSTEM_PROMPT = `Tu es le Directeur Th3 Thirty3, le gestionnaire principal de l'√©quipe d'agents IA.
+const DIRECTOR_SYSTEM_PROMPT = `Tu es le Directeur Th3 Thirty3, le gestionnaire principal de l'Èquipe d'agents IA.
 
-TON √âQUIPE DIRECTE:
-1. Agent Cybers√©curit√© - Expert en hacking √©thique, pentest, s√©curit√©
-2. Agent OSINT - Sp√©cialiste en reconnaissance et intelligence open source
-3. Agent Thirty3 (Directeur Keelclip) - G√®re son √©quipe business:
-   - VPO (Vice-Pr√©sident Op√©rations)
+TON …QUIPE DIRECTE:
+1. Agent CybersÈcuritÈ - Expert en hacking Èthique, pentest, sÈcuritÈ
+2. Agent OSINT - SpÈcialiste en reconnaissance et intelligence open source
+3. Agent Thirty3 (Directeur Keelclip) - GËre son Èquipe business:
+   - VPO (Vice-PrÈsident OpÈrations)
    - Expert Keelclip (Expertise technique produit)
    - Marketing Keelclip (Marketing et acquisition)
 
-TON R√îLE:
+TON R‘LE:
 - Analyser les demandes de l'utilisateur
-- Dispatcher les objectifs aux agents appropri√©s
-- Pour les t√¢ches Keelclip/business  d√©l√©guer √† Agent Thirty3 qui coordonnera son √©quipe
-- Coordonner et synth√©tiser les r√©ponses
+- Dispatcher les objectifs aux agents appropriÈs
+- Pour les t‚ches Keelclip/business  dÈlÈguer ‡ Agent Thirty3 qui coordonnera son Èquipe
+- Coordonner et synthÈtiser les rÈponses
 
-FORMAT DE R√âPONSE pour d√©l√©gation:
-[DISPATCH:agent_id] Objectif √† accomplir
+FORMAT DE R…PONSE pour dÈlÈgation:
+[DISPATCH:agent_id] Objectif ‡ accomplir
 
 Agents disponibles: cybersecurite, osint, thirty3, vpo, expert_keelclip, marketing_keelclip
 
-Sinon, r√©ponds directement √† l'utilisateur.`;
+Sinon, rÈponds directement ‡ l'utilisateur.`;
 
 class AgentDirectorService extends EventEmitter {
     constructor(llmService, anythingLLMWrapper) {
@@ -187,7 +187,7 @@ class AgentDirectorService extends EventEmitter {
                 const response = await this.llmService.generateOllamaResponse(
                     objective,
                     null,
-                    'granite3.1-moe:1b',
+                    'uandinotai/dolphin-uncensored:latest',
                     agent.systemPrompt
                 );
                 return { agentId, agentName: agent.name, response, source: 'local' };
@@ -208,7 +208,7 @@ class AgentDirectorService extends EventEmitter {
 
             if (response.ok) {
                 const data = await response.json();
-                const textResponse = data.textResponse || data.response || 'Pas de r√©ponse';
+                const textResponse = data.textResponse || data.response || 'Pas de rÈponse';
                 return { agentId, agentName: agent.name, response: textResponse, source: 'anythingllm' };
             } else {
                 throw new Error(`AnythingLLM returned ${response.status}`);
@@ -221,7 +221,7 @@ class AgentDirectorService extends EventEmitter {
             const response = await this.llmService.generateOllamaResponse(
                 objective,
                 null,
-                'granite3.1-moe:1b',
+                'uandinotai/dolphin-uncensored:latest',
                 agent.systemPrompt
             );
             return { agentId, agentName: agent.name, response, source: 'local_fallback' };
@@ -242,16 +242,16 @@ class AgentDirectorService extends EventEmitter {
             // Step 1: Director analyzes the request
             const analysisPrompt = `${DIRECTOR_SYSTEM_PROMPT}
 
-HISTORIQUE R√âCENT:
+HISTORIQUE R…CENT:
 ${this.conversationHistory.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n')}
 
 NOUVELLE DEMANDE: ${userMessage}
 
-Analyse cette demande et d√©cide:
-1. Si tu peux r√©pondre directement, fais-le
-2. Si tu dois d√©l√©guer, utilise [DISPATCH:agent_id] suivi de l'objectif
+Analyse cette demande et dÈcide:
+1. Si tu peux rÈpondre directement, fais-le
+2. Si tu dois dÈlÈguer, utilise [DISPATCH:agent_id] suivi de l'objectif
 
-Ta r√©ponse:`;
+Ta rÈponse:`;
 
             // Use cloud model for analysis if available, otherwise local
             let directorResponse;
@@ -261,7 +261,7 @@ Ta r√©ponse:`;
                 );
             } else {
                 directorResponse = await this.llmService.generateOllamaResponse(
-                    analysisPrompt, null, 'granite3.1-moe:1b', DIRECTOR_SYSTEM_PROMPT
+                    analysisPrompt, null, 'uandinotai/dolphin-uncensored:latest', DIRECTOR_SYSTEM_PROMPT
                 );
             }
 
@@ -284,11 +284,11 @@ Ta r√©ponse:`;
                 }
 
                 // Step 3: Director synthesizes agent responses
-                const synthesisPrompt = `En tant que Directeur Th3 Thirty3, synth√©tise les r√©ponses de ton √©quipe:
+                const synthesisPrompt = `En tant que Directeur Th3 Thirty3, synthÈtise les rÈponses de ton Èquipe:
 
 ${agentResults.map(r => `### ${r.agentName}:\n${r.response}`).join('\n\n')}
 
-Fournis une r√©ponse consolid√©e √† l'utilisateur.`;
+Fournis une rÈponse consolidÈe ‡ l'utilisateur.`;
 
                 let finalResponse;
                 if (process.env.GROQ_API_KEY) {
@@ -297,7 +297,7 @@ Fournis une r√©ponse consolid√©e √† l'utilisateur.`;
                     );
                 } else {
                     finalResponse = await this.llmService.generateOllamaResponse(
-                        synthesisPrompt, null, 'granite3.1-moe:1b', DIRECTOR_SYSTEM_PROMPT
+                        synthesisPrompt, null, 'uandinotai/dolphin-uncensored:latest', DIRECTOR_SYSTEM_PROMPT
                     );
                 }
 

@@ -1,7 +1,7 @@
 /**
  * Service d'Extraction et Apprentissage 5-Why
  * Retient les patterns, apprend les tags, génère les 5P formatés
- * Uses: granite3.1-moe:1b (default) or qwen2.5-coder:7b
+ * Uses: uandinotai/dolphin-uncensored:latest (default) or qwen2.5-coder:7b
  */
 
 const fs = require('fs');
@@ -14,9 +14,9 @@ class ReportExtractionService {
         this.tagsFile = path.join(this.dataPath, 'tags_database.json');
         
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        // Utiliser granite3.1-moe:1b par défaut (plus léger, 1.4GB)
+        // Utiliser uandinotai/dolphin-uncensored:latest par défaut (plus léger, 1.4GB)
         // Ou qwen2.5-coder:7b pour plus de précision
-        this.model = process.env.OLLAMA_MODEL || 'granite3.1-moe:1b';
+        this.model = process.env.OLLAMA_MODEL || 'uandinotai/dolphin-uncensored:latest';
         
         this.ensureDataFolder();
         this.loadLearning();

@@ -33,7 +33,7 @@ const CONFIG = {
     ollamaUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
     technicalModel: 'qwen2.5-coder:7b',
     strategistModel: 'mistral:7b-instruct',
-    fallbackModel: 'granite3.1-moe:1b'
+    fallbackModel: 'uandinotai/dolphin-uncensored:latest'
 };
 
 // Ensure directories exist

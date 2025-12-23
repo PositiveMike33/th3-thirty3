@@ -11,7 +11,7 @@
  * 
  * Architecture:
  * - Primary: Cloud models (Groq, OpenAI, Gemini, Anthropic)
- * - Fallback: Local Ollama models (granite3.1-moe:1b, granite3.1-moe:1b)
+ * - Fallback: Local Ollama models (uandinotai/dolphin-uncensored:latest, uandinotai/dolphin-uncensored:latest)
  * - Emergency: Cached responses / offline mode
  */
 
@@ -336,7 +336,7 @@ class NetworkFailoverService extends EventEmitter {
                 return { 
                     provider: 'local', 
                     reason: 'Local only mode',
-                    model: 'granite3.1-moe:1b'
+                    model: 'uandinotai/dolphin-uncensored:latest'
                 };
                 
             case FailoverMode.MANUAL:
@@ -358,8 +358,8 @@ class NetworkFailoverService extends EventEmitter {
                     return { 
                         provider: 'local', 
                         reason: 'Internet offline - failover active',
-                        model: 'granite3.1-moe:1b',
-                        fallbackModel: 'granite3.1-moe:1b'
+                        model: 'uandinotai/dolphin-uncensored:latest',
+                        fallbackModel: 'uandinotai/dolphin-uncensored:latest'
                     };
                 } else if (this.state === NetworkState.DEGRADED) {
                     return { 
@@ -371,7 +371,7 @@ class NetworkFailoverService extends EventEmitter {
                     return { 
                         provider: 'local', 
                         reason: 'Unknown state - defaulting to local',
-                        model: 'granite3.1-moe:1b'
+                        model: 'uandinotai/dolphin-uncensored:latest'
                     };
                 }
         }
@@ -448,9 +448,9 @@ class NetworkFailoverService extends EventEmitter {
         if (provider.provider === 'local') {
             // Local model recommendations
             const localModels = {
-                code: 'granite3.1-moe:1b',
-                general: 'granite3.1-moe:1b',
-                fast: 'granite3.1-moe:1b',
+                code: 'uandinotai/dolphin-uncensored:latest',
+                general: 'uandinotai/dolphin-uncensored:latest',
+                fast: 'uandinotai/dolphin-uncensored:latest',
                 embedding: 'nomic-embed-text:latest'
             };
             return {

@@ -38,7 +38,7 @@ class Config:
     OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
     TECHNICAL_MODEL: str = "qwen2.5-coder:7b"  # Analyste technique
     STRATEGIST_MODEL: str = "mistral:7b-instruct"  # Stratège
-    FALLBACK_MODEL: str = "granite3.1-moe:1b"  # Fallback léger
+    FALLBACK_MODEL: str = "uandinotai/dolphin-uncensored:latest"  # Fallback léger
     
     # Paths
     OUTPUT_DIR: str = "osint_results"

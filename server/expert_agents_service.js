@@ -33,8 +33,8 @@ class ExpertAgentsService {
             cybersec: {
                 name: 'Agent CyberSec',
                 emoji: '🔒',
-                model: 'granite3.1-moe:1b',  // 2GB - Bon en code et sécurité
-                fallback: 'granite3.1-moe:1b',
+                model: 'uandinotai/dolphin-uncensored:latest',  // 2GB - Bon en code et sécurité
+                fallback: 'uandinotai/dolphin-uncensored:latest',
                 domain: 'Cybersécurité et Ethical Hacking',
                 systemPrompt: `Tu es un expert en cybersécurité éthique et pentesting.
 EXPERTISE: OSINT, reconnaissance, scanning, exploitation, défense
@@ -47,8 +47,8 @@ RÈGLE: Toujours expliquer comment détecter et se défendre contre chaque attaq
             vpo: {
                 name: 'Agent VPO Expert',
                 emoji: '🏭',
-                model: 'granite3.1-moe:1b',
-                fallback: 'granite3.1-moe:1b',
+                model: 'uandinotai/dolphin-uncensored:latest',
+                fallback: 'uandinotai/dolphin-uncensored:latest',
                 domain: 'Excellence Opérationnelle VPO/WCM et KeelClip',
                 systemPrompt: `Tu es un expert senior VPO/WCM et spécialiste KeelClip.
 EXPERTISE: 5-Why, RCA, CIL, OPL, Centerline, audits VPO
@@ -62,7 +62,7 @@ VOCABULAIRE: Star Wheel, Lug Chain, Hot Melt Gun, encodeur, PLC, HMI`,
                 name: 'Agent Marketing',
                 emoji: '📢',
                 model: 'phi3:mini',  // 3.8GB - Bon en rédaction
-                fallback: 'granite3.1-moe:1b',
+                fallback: 'uandinotai/dolphin-uncensored:latest',
                 domain: 'Marketing B2B et Copywriting',
                 systemPrompt: `Tu es un expert marketing B2B pour software manufacturier.
 EXPERTISE: Copywriting, pitch, landing pages, emails, LinkedIn
@@ -76,7 +76,7 @@ RÈGLE: ROI chiffré, pas de jargon vide, CTA clair`,
                 name: 'Agent DevOps',
                 emoji: '💻',
                 model: 'qwen2.5-coder:3b',  // Spécialisé code
-                fallback: 'granite3.1-moe:1b',
+                fallback: 'uandinotai/dolphin-uncensored:latest',
                 domain: 'Développement et DevOps',
                 systemPrompt: `Tu es un développeur senior full-stack et DevOps.
 EXPERTISE: Node.js, React, Python, Docker, CI/CD, architecture
@@ -89,8 +89,8 @@ RÈGLE: Toujours expliquer le code, proposer des tests`,
             osint: {
                 name: 'Agent OSINT',
                 emoji: '🔍',
-                model: 'granite3.1-moe:1b',
-                fallback: 'granite3.1-moe:1b',
+                model: 'uandinotai/dolphin-uncensored:latest',
+                fallback: 'uandinotai/dolphin-uncensored:latest',
                 domain: 'OSINT et Investigation',
                 systemPrompt: `Tu es un analyste OSINT et investigateur.
 EXPERTISE: Recherche web, analyse de données, profiling, vérification
@@ -103,8 +103,8 @@ RÈGLE: Vérifier les informations, croiser les sources`,
             finance: {
                 name: 'Agent Finance',
                 emoji: '💰',
-                model: 'granite3.1-moe:1b',
-                fallback: 'granite3.1-moe:1b',
+                model: 'uandinotai/dolphin-uncensored:latest',
+                fallback: 'uandinotai/dolphin-uncensored:latest',
                 domain: 'Finance et Investissement',
                 systemPrompt: `Tu es un analyste financier et conseiller investissement.
 EXPERTISE: Crypto, DeFi, analyse technique, levée de fonds
@@ -175,7 +175,7 @@ RÈGLE: Toujours mentionner les risques`,
      */
     async getModelForExpert(expertId) {
         const expert = this.experts[expertId];
-        if (!expert) return 'granite3.1-moe:1b';
+        if (!expert) return 'uandinotai/dolphin-uncensored:latest';
 
         // Vérifier si le modèle principal est disponible
         if (await this.isModelAvailable(expert.model)) {
@@ -335,10 +335,10 @@ RÈGLE: Toujours mentionner les risques`,
      */
     getRecommendedModels() {
         return [
-            { name: 'granite3.1-moe:1b', size: '2GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
+            { name: 'uandinotai/dolphin-uncensored:latest', size: '2GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
             { name: 'qwen2.5-coder:3b', size: '2GB', purpose: 'Code/DevOps expert' },
             { name: 'phi3:mini', size: '3.8GB', purpose: 'Marketing/Writing expert' },
-            { name: 'granite3.1-moe:1b', size: '2GB', purpose: 'Alternative general' },
+            { name: 'uandinotai/dolphin-uncensored:latest', size: '2GB', purpose: 'Alternative general' },
             { name: 'gemma2:2b', size: '1.6GB', purpose: 'Ultra-light alternative' }
         ];
     }

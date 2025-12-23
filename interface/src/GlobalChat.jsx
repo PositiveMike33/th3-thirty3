@@ -33,7 +33,7 @@ const GlobalChat = () => {
                     message: msgToSend,
                     sessionId: sessionId,
                     provider: 'local', // Default to local for speed in global chat
-                    model: 'granite3.1-moe:1b'
+                    model: 'uandinotai/dolphin-uncensored:latest'
                 }),
             });
             const data = await response.json();

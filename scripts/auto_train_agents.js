@@ -58,8 +58,8 @@ const CONFIG = {
         threat_intel: 'mistral:7b-instruct',
 
         // L'ECLAIREUR RAPIDE (Vitesse, Background, Monitoring)
-        red_team: 'granite3.1-moe:1b', // Rapide pour les simulations d'attaques nombreuses
-        defense: 'granite3.1-moe:1b'  // Réactif pour la défense active
+        red_team: 'uandinotai/dolphin-uncensored:latest', // Rapide pour les simulations d'attaques nombreuses
+        defense: 'uandinotai/dolphin-uncensored:latest'  // Réactif pour la défense active
     }
 };
 

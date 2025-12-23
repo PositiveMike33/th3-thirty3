@@ -33,7 +33,7 @@ const ModelProgressChart = () => {
             { date: '12-14', score: 74, responseTime: 2500, queries: 58 },
             { date: '12-15', score: 75, responseTime: 2400, queries: 62 }
         ],
-        'granite-flash:latest': [
+        'dolphin-uncensored:latest': [
             { date: '12-09', score: 82, responseTime: 2200, queries: 120 },
             { date: '12-10', score: 83, responseTime: 2100, queries: 135 },
             { date: '12-11', score: 85, responseTime: 2000, queries: 142 },

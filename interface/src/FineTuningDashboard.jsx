@@ -62,7 +62,7 @@ const FineTuningDashboard = () => {
         if (n.includes('embed')) return 'Embedding';
         if (n.includes('instruct')) return 'Instruct';
         if (n.includes('code') || n.includes('qwen')) return 'Code';
-        if (n.includes('granite')) return 'MoE';
+        if (n.includes('dolphin')) return 'MoE';
         return 'General';
     };
 
@@ -303,7 +303,7 @@ const FineTuningDashboard = () => {
                                             <div className="bg-black/30 rounded-xl p-4">
                                                 <div className="text-xs text-gray-500 mb-1">Modèles Flash</div>
                                                 <div className="text-xl font-bold text-green-400">3</div>
-                                                <div className="text-xs text-gray-600">qwen-flash, granite-flash, brain-7b</div>
+                                                <div className="text-xs text-gray-600">qwen-flash, dolphin-uncensored, brain-7b</div>
                                             </div>
                                             <div className="bg-black/30 rounded-xl p-4">
                                                 <div className="text-xs text-gray-500 mb-1">Speedup</div>

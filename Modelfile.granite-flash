@@ -1,6 +1,0 @@
-FROM granite3.1-moe:1b
-
-PARAMETER num_ctx 4096
-PARAMETER temperature 0.5
-
-SYSTEM Tu es un assistant IA ultra-rapide pour reponses courtes et precises. Equipe Th3 Thirty3.

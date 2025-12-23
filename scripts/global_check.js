@@ -76,7 +76,7 @@ async function runGlobalCheck() {
         const models = routerStatus.localModels || [];
         assert(models.includes('qwen2.5-coder:7b'), 'Elite Coder Model Verified');
         assert(models.includes('mistral:7b-instruct'), 'Elite Tactician Model Verified');
-        assert(models.includes('granite3.1-moe:1b'), 'Elite Scout Model Verified');
+        assert(models.includes('uandinotai/dolphin-uncensored:latest'), 'Elite Scout Model Verified');
     } else {
         // Fallback check if getStatus not ready
         console.log('[WARN] Router status not available directly, checking singleton props');
@@ -94,8 +94,8 @@ async function runGlobalCheck() {
         const tacticianAgent = new NetPsycheAgent(llm, 'mistral:7b-instruct');
         assert(tacticianAgent.modelName === 'mistral:7b-instruct', 'NetPsyche mapped to Mistral-Instruct');
         
-        const scoutAgent = new CyberShieldAgent(llm, 'granite3.1-moe:1b');
-        assert(scoutAgent.modelName === 'granite3.1-moe:1b', 'CyberShield mapped to Granite-MoE');
+        const scoutAgent = new CyberShieldAgent(llm, 'uandinotai/dolphin-uncensored:latest');
+        assert(scoutAgent.modelName === 'uandinotai/dolphin-uncensored:latest', 'CyberShield mapped to Granite-MoE');
         
     } catch (e) {
         console.error('[CRITICAL] Agent instantiation failed:', e.message);

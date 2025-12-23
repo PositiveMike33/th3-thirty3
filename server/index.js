@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -58,7 +58,7 @@ app.use('/api/subscription', subscriptionRoutes);
 const paymentRoutes = require('./payment_routes');
 app.use('/api/payment', paymentRoutes);
 
-// Payment Dashboard Routes (Stats temps réel)
+// Payment Dashboard Routes (Stats temps r�el)
 const paymentDashboardRoutes = require('./payment_dashboard_routes');
 app.use('/api/payment', paymentDashboardRoutes);
 
@@ -98,14 +98,14 @@ const IDENTITY = require('./config/identity');
 const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
 const ACCOUNTS = [
-    'mikegauthierguillet@gmail.com',  // Priorité
+    'mikegauthierguillet@gmail.com',  // Priorit�
     'th3thirty3@gmail.com',
     'mgauthierguillet@gmail.com'
 ];
 
 // Model Configuration
 const modelName = IDENTITY.default_model;
-console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connecté : ${modelName}`);
+console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connect� : ${modelName}`);
 
 // Initialize Memory Service
 const memoryService = new MemoryService();
@@ -241,7 +241,7 @@ const AgentDirectorService = require('./agent_director_service');
 const agentDirectorRoutes = require('./agent_director_routes');
 const agentDirector = new AgentDirectorService(llmService, llmService.anythingLLMWrapper);
 agentDirectorRoutes.setAgentDirector(agentDirector);
-console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersécurité, OSINT, Agent Thirty3');
+console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybers�curit�, OSINT, Agent Thirty3');
 console.log('[SYSTEM] Real Training Service initialized (Shodan + model training)');
 
 // Initialize WiFi Security Training Service (Specialized WiFi attack/defense training)
@@ -277,14 +277,14 @@ const fetchGoogleContext = async (message) => {
                 .then(res => "\n\n[AGENDA]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
         }
 
-        if (msg.includes('tâche') || msg.includes('todo')) {
+        if (msg.includes('t�che') || msg.includes('todo')) {
             checks.push(Promise.all(ACCOUNTS.map(email => googleService.listTasks(email).catch(e => `Error: ${e.message}`)))
                 .then(res => "\n\n[GOOGLE TASKS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
         }
 
         if (msg.includes('drive') || msg.includes('fichiers')) {
             checks.push(Promise.all(ACCOUNTS.map(email => googleService.listDriveFiles(email).catch(e => `Error: ${e.message}`)))
-                .then(res => "\n\n[GOOGLE DRIVE (Récents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
+                .then(res => "\n\n[GOOGLE DRIVE (R�cents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
         }
 
         const results = await Promise.all(checks);
@@ -886,7 +886,7 @@ app.get('/auth/google/callback', async (req, res) => {
     const { code, state } = req.query; // state is the email
     if (code && state) {
         await googleService.handleCallback(code, state);
-        res.send("Connexion réussie ! Vous pouvez fermer cette fenêtre.");
+        res.send("Connexion r�ussie ! Vous pouvez fermer cette fen�tre.");
     } else {
         res.status(400).send("Erreur d'authentification.");
     }
@@ -923,7 +923,7 @@ app.get('/google/emails', async (req, res) => {
     }
 });
 
-// Alias: /google/mail → /google/emails (for API consistency)
+// Alias: /google/mail ? /google/emails (for API consistency)
 app.get('/google/mail', async (req, res) => {
     const email = req.query.email || ACCOUNTS[0];
     try {
@@ -1098,19 +1098,19 @@ app.post('/incident/complete', async (req, res) => {
             return res.status(400).json({ error: 'Media (image or video) required' });
         }
 
-        console.log(`[INCIDENT] Complete workflow: ${mediaType} → 5-Why`);
+        console.log(`[INCIDENT] Complete workflow: ${mediaType} ? 5-Why`);
         
         // Step 1: Vision Analysis
         const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
-        console.log('[INCIDENT] ✓ Vision analysis');
+        console.log('[INCIDENT] ? Vision analysis');
 
         // Step 2: Generate 5-Why
         const report = await keelclipAnalyzer.generate5Why(visionAnalysis, description);
-        console.log('[INCIDENT] ✓ 5-Why generated');
+        console.log('[INCIDENT] ? 5-Why generated');
 
         // Step 3: Validate
         const validation = keelclipAnalyzer.validate5WhyReport(report);
-        console.log(`[INCIDENT] ✓ Validation: ${validation.score}/100`);
+        console.log(`[INCIDENT] ? Validation: ${validation.score}/100`);
 
         res.json({
             success: true,
@@ -1235,7 +1235,7 @@ app.post('/feedback', async (req, res) => {
         console.log(`[FEEDBACK] Received correction for: "${originalQuery}"`);
         await memoryService.addCorrection(originalQuery, wrongResponse, correction);
 
-        res.json({ success: true, message: "Correction mémorisée. Je ne ferai plus cette erreur." });
+        res.json({ success: true, message: "Correction m�moris�e. Je ne ferai plus cette erreur." });
     } catch (error) {
         console.error("Feedback error:", error);
         res.status(500).json({ error: error.message });
@@ -1276,7 +1276,7 @@ app.post('/chat', async (req, res) => {
         // PERMISSION CHECK: Model
         if (!userService.canUseModel(user, provider || 'local', model || '')) {
             return res.status(403).json({
-                reply: `⛔ ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser le modèle ${model} (${provider}).`,
+                reply: `? ACC�S REFUS� : Votre niveau (${user.tier}) ne permet pas d'utiliser le mod�le ${model} (${provider}).`,
                 error: "Insufficient Permissions"
             });
         }
@@ -1284,7 +1284,7 @@ app.post('/chat', async (req, res) => {
         // PERMISSION CHECK: Fabric Pattern
         if (pattern && !userService.canUseTool(user, `fabric_basic`)) {
             return res.status(403).json({
-                reply: `⛔ ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser la bibliothèque Fabric.`,
+                reply: `? ACC�S REFUS� : Votre niveau (${user.tier}) ne permet pas d'utiliser la biblioth�que Fabric.`,
                 error: "Insufficient Permissions"
             });
         }
@@ -1307,19 +1307,19 @@ app.post('/chat', async (req, res) => {
 
         // Handle Commands
         if (message.trim().toLowerCase() === '/clear') {
-            currentSession.messages = [{ role: "assistant", content: "Mémoire effacée. On repart à neuf." }];
+            currentSession.messages = [{ role: "assistant", content: "M�moire effac�e. On repart � neuf." }];
             sessionManager.saveSession(currentSession.id, currentSession);
-            return res.json({ reply: "Mémoire effacée.", sessionId: currentSession.id });
+            return res.json({ reply: "M�moire effac�e.", sessionId: currentSession.id });
         }
 
         // Handle Ingest Command via Chat
         if (message.trim().toLowerCase() === '/ingest') {
             const vaultPath = process.env.OBSIDIAN_VAULT_PATH;
-            if (!vaultPath) return res.json({ reply: "Erreur: OBSIDIAN_VAULT_PATH non configuré." });
+            if (!vaultPath) return res.json({ reply: "Erreur: OBSIDIAN_VAULT_PATH non configur�." });
 
             // Trigger async ingestion
             const count = await memoryService.ingestVault(vaultPath);
-            return res.json({ reply: `Ingestion terminée.J'ai digéré ${count} notes.` });
+            return res.json({ reply: `Ingestion termin�e.J'ai dig�r� ${count} notes.` });
         }
 
         // Handle Feedback (Correction)
@@ -1339,24 +1339,24 @@ app.post('/chat', async (req, res) => {
                     console.log("[BYE] System Integrity Verified.");
                 } catch (err) {
                     console.error("[BYE] System Integrity Check Failed:", err.message);
-                    return res.json({ reply: "⚠️ ATTENTION : Les tests de sécurité ont échoué. Vérifiez les logs avant de fermer." });
+                    return res.json({ reply: "?? ATTENTION : Les tests de s�curit� ont �chou�. V�rifiez les logs avant de fermer." });
                 }
 
-                await llmService.unloadModel(model || "granite3.1-moe:1b");
+                await llmService.unloadModel(model || "uandinotai/dolphin-uncensored:latest");
 
-                const byeResponse = `### SYSTÈME TH3 THIRTY3
+                const byeResponse = `### SYST�ME TH3 THIRTY3
 
-**PROTOCOLE DE SAUVEGARDE ACTIVÉ.**
+**PROTOCOLE DE SAUVEGARDE ACTIV�.**
 
-Données enregistrées :
-*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arrêt Hémorragie.
-*   **Objectif Actuel (LOCK) :** Logistique de déploiement & Exécution du shift de travail (Cible : 484$).
-*   **Statut :** EN ATTENTE D'EXÉCUTION.
+Donn�es enregistr�es :
+*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arr�t H�morragie.
+*   **Objectif Actuel (LOCK) :** Logistique de d�ploiement & Ex�cution du shift de travail (Cible : 484$).
+*   **Statut :** EN ATTENTE D'EX�CUTION.
 
-Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
+Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la structure.
 
-À ton retour, la première chose que tu verras sera :
-> **RAPPEL OBJECTIF :** Shift Travail terminé ?
+� ton retour, la premi�re chose que tu verras sera :
+> **RAPPEL OBJECTIF :** Shift Travail termin� ?
 > **STATUS :** [YES/NO]
 
 **SERVER SHUTDOWN...**
@@ -1366,7 +1366,7 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
                 return res.json({ reply: byeResponse });
             } catch (e) {
                 console.error("Error unloading model:", e);
-                return res.json({ reply: "Erreur lors de la déconnexion du cerveau. Check la console." });
+                return res.json({ reply: "Erreur lors de la d�connexion du cerveau. Check la console." });
             }
         }
 
@@ -1382,37 +1382,37 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
         const memoryResults = await memoryService.search(message, 3); // Top 3 relevant memories
         if (memoryResults.length > 0) {
             const memoryContext = memoryResults.map(m => m.text).join('\n---\n');
-            messageWithContext += `\n\n[MÉMOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tirées de ta mémoire (notes ou conversations passées) :\n${memoryContext}\n[FIN MÉMOIRE]\n`;
+            messageWithContext += `\n\n[M�MOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tir�es de ta m�moire (notes ou conversations pass�es) :\n${memoryContext}\n[FIN M�MOIRE]\n`;
             console.log(`[RAG] Injected ${memoryResults.length} memories.`);
         }
 
         // 1c. INCIDENT ANALYSIS (Auto-detect VPO context)
-        const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'défaut', 'bourrage'];
+        const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'd�faut', 'bourrage'];
         const isIncidentContext = vpoKeywords.some(keyword => message.toLowerCase().includes(keyword));
         
         let incidentAnalysis = null;
         if (image && isIncidentContext) {
-            console.log("[CHAT] 🔍 VPO INCIDENT DETECTED - Analyzing image...");
+            console.log("[CHAT] ?? VPO INCIDENT DETECTED - Analyzing image...");
             try {
                 // Analyze incident image
                 incidentAnalysis = await visionService.analyzeKeelClipIncident(image, 'image');
                 const summary = keelclipAnalyzer.generateQuickSummary(incidentAnalysis);
                 
                 messageWithContext += `\n\n[ANALYSE VISUELLE INCIDENT]\n${summary}\n[FIN ANALYSE]\n`;
-                console.log("[CHAT] ✓ Incident analysis injected");
+                console.log("[CHAT] ? Incident analysis injected");
                 
                 // If user explicitly asks for 5-Why, generate it
                 if (message.toLowerCase().includes('5 why') || message.toLowerCase().includes('5why') || message.toLowerCase().includes('rapport')) {
-                    console.log("[CHAT] 📋 Generating 5-Why report...");
+                    console.log("[CHAT] ?? Generating 5-Why report...");
                     const report = await keelclipAnalyzer.generate5Why(incidentAnalysis, message);
                     const validation = keelclipAnalyzer.validate5WhyReport(report);
                     
-                    messageWithContext += `\n\n[RAPPORT 5-WHY GÉNÉRÉ]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
-                    console.log(`[CHAT] ✓ 5-Why report generated (Score: ${validation.score})`);
+                    messageWithContext += `\n\n[RAPPORT 5-WHY G�N�R�]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
+                    console.log(`[CHAT] ? 5-Why report generated (Score: ${validation.score})`);
                 }
             } catch (error) {
                 console.error("[CHAT] Incident analysis failed:", error.message);
-                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle échouée - ${error.message}]\n`;
+                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle �chou�e - ${error.message}]\n`;
             }
         }
         
@@ -1454,10 +1454,10 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
             if (pattern) {
                 // MODE FABRIC
                 finalSystemPrompt += `
-\n[MODE EXPERT ACTIVÉ]
-1. **STYLE** : Français standard PROFESSIONNEL et TECHNIQUE.
-2. **FORMAT** : Réponse directe. Juste le résultat.
-3. **TON** : Efficacité maximale.
+\n[MODE EXPERT ACTIV�]
+1. **STYLE** : Fran�ais standard PROFESSIONNEL et TECHNIQUE.
+2. **FORMAT** : R�ponse directe. Juste le r�sultat.
+3. **TON** : Efficacit� maximale.
 \n[PATTERN: ${pattern.toUpperCase()}]\n${getPatternContent(pattern)}`;
             } else {
                 // MODE CHAT
@@ -1465,10 +1465,10 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structur
                 const styleInstructions = styleService.generateStylePrompt(styleProfile);
 
                 finalSystemPrompt += `
-\n[MODE APPRENTISSAGE ACTIVÉ]
+\n[MODE APPRENTISSAGE ACTIV�]
 1. **OBJECTIF** : Analyse le style de l'utilisateur dans l'historique (vocabulaire, structure de phrase, jargon).
 2. **ADAPTATION** : Imite son style. Deviens son miroir.
-3. **ÉVOLUTION** : Plus tu parles avec lui, plus tu dois lui ressembler. Utilise ses expressions. Sois son extension numérique.
+3. **�VOLUTION** : Plus tu parles avec lui, plus tu dois lui ressembler. Utilise ses expressions. Sois son extension num�rique.
 ${styleInstructions}`;
             }
         }
@@ -1508,7 +1508,7 @@ ${styleInstructions}`;
         console.error('CRITICAL ERROR:', error);
         require('fs').writeFileSync('server_error.log', `[${new Date().toISOString()}] ${error.stack}\n`, { flag: 'a' });
         res.status(500).json({
-            reply: "Erreur système critique.",
+            reply: "Erreur syst�me critique.",
             error: error.message
         });
     }
@@ -1560,10 +1560,10 @@ app.use('/api/offline-mode', offlineModeRoutes);
 const OfflineModeService = require('./offline_mode_service');
 const offlineService = new OfflineModeService();
 offlineService.on('offline', (data) => {
-    console.log('[SYSTEM] 🔴 OFFLINE MODE ACTIVATED - Using local agents');
+    console.log('[SYSTEM] ?? OFFLINE MODE ACTIVATED - Using local agents');
 });
 offlineService.on('online', (data) => {
-    console.log('[SYSTEM] 🟢 ONLINE MODE RESTORED - Cloud services available');
+    console.log('[SYSTEM] ?? ONLINE MODE RESTORED - Cloud services available');
 });
 
 // Orchestrator Routes (Multi-Agent Team Leader)
@@ -1654,19 +1654,19 @@ server.listen(port, async () => {
     // =========================================
     try {
         const dockerAutoStart = require('./docker_autostart_service');
-        console.log('\n[SYSTEM] 🐳 Checking Docker infrastructure...');
+        console.log('\n[SYSTEM] ?? Checking Docker infrastructure...');
         
         const dockerResult = await dockerAutoStart.startAllContainers();
         
         if (dockerResult.success) {
-            console.log('[SYSTEM] ✅ Docker infrastructure ready');
+            console.log('[SYSTEM] ? Docker infrastructure ready');
         } else {
-            console.log('[SYSTEM] ⚠️ Some Docker containers failed to start');
-            console.log('[SYSTEM] 💡 Run: docker-compose -f docker/docker-compose.yml up -d');
+            console.log('[SYSTEM] ?? Some Docker containers failed to start');
+            console.log('[SYSTEM] ?? Run: docker-compose -f docker/docker-compose.yml up -d');
         }
     } catch (error) {
-        console.log('[SYSTEM] ⚠️ Docker auto-start skipped:', error.message);
-        console.log('[SYSTEM] 💡 Docker Desktop may not be running');
+        console.log('[SYSTEM] ?? Docker auto-start skipped:', error.message);
+        console.log('[SYSTEM] ?? Docker Desktop may not be running');
     }
     
     // =========================================
@@ -1674,20 +1674,20 @@ server.listen(port, async () => {
     // =========================================
     try {
         const torStartupCheck = require('./tor_startup_check');
-        console.log('\n[SYSTEM] 🧅 Running automatic Tor verification...');
+        console.log('\n[SYSTEM] ?? Running automatic Tor verification...');
         const torResult = await torStartupCheck.performStartupCheck();
         
         if (torResult.isTor) {
-            console.log('[SYSTEM] ✅ Tor is ACTIVE and VERIFIED');
-            console.log(`[SYSTEM] 🧅 Exit IP: ${torResult.ip}`);
+            console.log('[SYSTEM] ? Tor is ACTIVE and VERIFIED');
+            console.log(`[SYSTEM] ?? Exit IP: ${torResult.ip}`);
         } else if (torResult.portOpen) {
-            console.log('[SYSTEM] ⚠️ Port 9050 active but NOT connected to Tor network');
-            console.log('[SYSTEM] 💡 This may be Tor Browser - for best results use standalone tor.exe');
+            console.log('[SYSTEM] ?? Port 9050 active but NOT connected to Tor network');
+            console.log('[SYSTEM] ?? This may be Tor Browser - for best results use standalone tor.exe');
         } else {
-            console.log('[SYSTEM] ⚠️ Tor not available - OSINT requests will use direct connection');
+            console.log('[SYSTEM] ?? Tor not available - OSINT requests will use direct connection');
         }
     } catch (error) {
-        console.log('[SYSTEM] ⚠️ Tor check skipped:', error.message);
+        console.log('[SYSTEM] ?? Tor check skipped:', error.message);
     }
     
     // =========================================
@@ -1699,13 +1699,13 @@ server.listen(port, async () => {
             const osintChecker = new OsintStartupCheck(`http://localhost:${port}`);
             await osintChecker.runAllTests();
         } catch (error) {
-            console.log('[SYSTEM] ⚠️ OSINT check skipped:', error.message);
+            console.log('[SYSTEM] ?? OSINT check skipped:', error.message);
         }
     }, 2000); // Wait 2 seconds for all routes to be ready
     
-    console.log('\n[SYSTEM] ═══════════════════════════════════════════════');
+    console.log('\n[SYSTEM] -----------------------------------------------');
     console.log('[SYSTEM]   TH3 THIRTY3 - FULLY OPERATIONAL');
-    console.log('[SYSTEM] ═══════════════════════════════════════════════\n');
+    console.log('[SYSTEM] -----------------------------------------------\n');
 });
 
 

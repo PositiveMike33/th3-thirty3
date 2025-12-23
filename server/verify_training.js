@@ -27,7 +27,7 @@ const BENCHMARK_PROMPTS = {
 const EXPERTISE_CATEGORIES = ['coding', 'intelligence', 'logic', 'creativity', 'chat', 'humanizer', 'analysis', 'writing'];
 
 // Modèle à tester (le plus rapide)
-const TEST_MODEL = 'granite3.1-moe:1b';
+const TEST_MODEL = 'uandinotai/dolphin-uncensored:latest';
 
 async function callOllama(model, prompt, systemPrompt = '') {
     const response = await fetch(`${OLLAMA_API}/api/generate`, {

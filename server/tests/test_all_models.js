@@ -9,7 +9,7 @@ const http = require('http');
 const MODELS = [
     'qwen2.5-coder:7b',        // Code/Technical
     'mistral:7b-instruct',     // Strategy/General
-    'granite3.1-moe:1b'        // Fast/Fallback
+    'uandinotai/dolphin-uncensored:latest'        // Fast/Fallback
     // nomic-embed-text excluded (embedding model, not generation)
 ];
 

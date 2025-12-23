@@ -207,9 +207,9 @@ class OrchestratorService extends EventEmitter {
     getOptimalModelForTeam(teamName) {
         switch(teamName) {
             case 'osint':
-                return this.modelRouter.models.technical.primary;  // granite3.1-moe:1b for technical analysis
+                return this.modelRouter.models.technical.primary;  // uandinotai/dolphin-uncensored:latest for technical analysis
             case 'hacking':
-                return this.modelRouter.models.technical.primary;  // granite3.1-moe:1b for exploit code
+                return this.modelRouter.models.technical.primary;  // uandinotai/dolphin-uncensored:latest for exploit code
             case 'general':
                 return this.modelRouter.models.nlp.primary;  // mistral:7b for general intelligence
             default:
@@ -371,7 +371,7 @@ Réponds en JSON:
             }
 
             // [MANAGEMENT] Unload Expert Model to free VRAM for Synthesis
-            try { await modelManager.unloadModel('granite3.1-moe:1b'); } catch(e) {}
+            try { await modelManager.unloadModel('uandinotai/dolphin-uncensored:latest'); } catch(e) {}
 
             // Phase 3: Synthèse
             mission.status = 'synthesizing';
