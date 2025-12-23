@@ -13,18 +13,18 @@
  * - OpenAI
  */
 
-// Local model configuration - OPTIMIZED FOR RTX 3060 (12GB VRAM)
+// Local model configuration - UNCENSORED MODEL (dolphin-mistral)
+// Optimized for minimal resource usage with single model
 const LOCAL_MODELS = {
-    code: 'qwen2.5:7b',      // Best for code - high quality
-    general: 'qwen2.5:7b',   // General purpose - optimal for 12GB VRAM
-    fast: 'qwen2.5:3b',      // Quick responses (fallback)
+    code: 'dolphin-mistral:7b',      // Uncensored - for all code tasks
+    general: 'dolphin-mistral:7b',   // Uncensored - general purpose
+    fast: 'dolphin-mistral:7b',      // Single model for simplicity
     embedding: 'nomic-embed-text:latest' // Embeddings
 };
 
-// All local trainable models (for rotation)
+// Single uncensored model for training
 const ALL_LOCAL_MODELS = [
-    'qwen2.5:7b',
-    'qwen2.5:3b'
+    'dolphin-mistral:7b'
 ];
 
 // Cloud providers for heavy tasks
@@ -319,24 +319,23 @@ class ModelRouter {
 const modelRouter = new ModelRouter();
 
 // BACKWARD COMPATIBILITY: Add 'models' property for orchestrator_service.js
-// Maps old model references to new lightweight models + cloud fallback
-// OPTIMIZED FOR RTX 3060 (12GB VRAM)
+// Single uncensored model (dolphin-mistral) for all tasks
 modelRouter.models = {
     orchestrator: {
-        primary: 'qwen2.5:7b',      // High quality for orchestration
-        fallback: 'qwen2.5:3b'      // Fast fallback
+        primary: 'dolphin-mistral:7b',      // Uncensored
+        fallback: 'dolphin-mistral:7b'
     },
     technical: {
-        primary: 'qwen2.5:7b',      // Best for code/technical
-        fallback: 'qwen2.5:3b'
+        primary: 'dolphin-mistral:7b',
+        fallback: 'dolphin-mistral:7b'
     },
     nlp: {
-        primary: 'qwen2.5:7b',      // Good for NLP tasks
-        fallback: 'qwen2.5:3b'
+        primary: 'dolphin-mistral:7b',
+        fallback: 'dolphin-mistral:7b'
     },
     vision: {
-        primary: 'qwen2.5:7b',      // Vision model removed, fallback to general
-        fallback: 'qwen2.5:3b'
+        primary: 'dolphin-mistral:7b',
+        fallback: 'dolphin-mistral:7b'
     },
     embedding: {
         primary: 'nomic-embed-text:latest',
