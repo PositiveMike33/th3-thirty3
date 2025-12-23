@@ -36,6 +36,8 @@ const DartAI = () => {
         labels: [],
         assignee: 'Me'
     });
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [isUpdating, setIsUpdating] = useState(null); // Track which task is being updated
 
     // Projects for sidebar
     const projects = [
@@ -104,7 +106,17 @@ const DartAI = () => {
     };
 
     const toggleTaskStatus = async (taskId, currentStatus) => {
-        const newStatus = currentStatus === 'completed' ? 'todo' : 'completed';
+        // Cycle through: todo -> in_progress -> completed -> todo
+        const statusCycle = {
+            'todo': 'in_progress',
+            'in_progress': 'completed',
+            'completed': 'todo',
+            undefined: 'in_progress'
+        };
+        const newStatus = statusCycle[currentStatus] || 'in_progress';
+        
+        setIsUpdating(taskId);
+        
         try {
             const res = await fetch(`${API_URL}/api/dart/tasks/${taskId}`, {
                 method: 'PUT',
@@ -121,6 +133,33 @@ const DartAI = () => {
             }
         } catch (error) {
             console.error('Failed to toggle task status:', error);
+        } finally {
+            setTimeout(() => setIsUpdating(null), 300);
+        }
+    };
+
+    // Set specific status directly
+    const setTaskStatus = async (taskId, newStatus) => {
+        setIsUpdating(taskId);
+        try {
+            const res = await fetch(`${API_URL}/api/dart/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTasks(prev => prev.map(t => 
+                    (t.id === taskId || t.dart_id === taskId)
+                        ? { ...t, status: newStatus }
+                        : t
+                ));
+                setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);
+            }
+        } catch (error) {
+            console.error('Failed to set task status:', error);
+        } finally {
+            setTimeout(() => setIsUpdating(null), 300);
         }
     };
 
@@ -176,53 +215,92 @@ const DartAI = () => {
         }
     };
 
-    // Task Card Component
-    const TaskCard = ({ task, compact = false }) => (
-        <div 
-            className={`group bg-gray-900/80 hover:bg-gray-800/90 border border-gray-700/50 hover:border-purple-500/40 rounded-xl transition-all cursor-pointer ${compact ? 'p-3' : 'p-4'}`}
-            onClick={() => toggleTaskStatus(task.id || task.dart_id, task.status)}
-        >
-            <div className="flex items-start gap-3">
-                <button 
-                    className="mt-0.5 flex-shrink-0"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        toggleTaskStatus(task.id || task.dart_id, task.status);
-                    }}
-                >
-                    {task.status === 'completed' ? (
-                        <CheckCircle size={18} className="text-green-400" />
-                    ) : task.status === 'in_progress' ? (
-                        <Play size={18} className="text-blue-400" />
-                    ) : (
-                        <Circle size={18} className="text-gray-500 group-hover:text-purple-400 transition-colors" />
-                    )}
-                </button>
-                <div className="flex-1 min-w-0">
-                    <h4 className={`font-medium text-sm leading-tight ${task.status === 'completed' ? 'text-gray-500 line-through' : 'text-white'}`}>
-                        {task.title}
-                    </h4>
-                    {!compact && task.description && (
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${getPriorityColor(task.priority)}`}>
-                            {(task.priority || 'MEDIUM').toUpperCase()}
-                        </span>
-                        {task.dueDate && (
-                            <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                                <Calendar size={10} />
-                                {new Date(task.dueDate).toLocaleDateString()}
-                            </span>
+    // Task Card Component with enhanced interactivity
+    const TaskCard = ({ task, compact = false }) => {
+        const taskId = task.id || task.dart_id;
+        const isBeingUpdated = isUpdating === taskId;
+        
+        return (
+            <div 
+                className={`
+                    group bg-gray-900/80 hover:bg-gray-800/90 border rounded-xl cursor-pointer
+                    transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/10
+                    ${compact ? 'p-3' : 'p-4'}
+                    ${isBeingUpdated ? 'scale-95 opacity-70' : ''}
+                    ${task.status === 'completed' 
+                        ? 'border-green-500/30 hover:border-green-500/50' 
+                        : task.status === 'in_progress'
+                        ? 'border-blue-500/30 hover:border-blue-500/50'
+                        : 'border-gray-700/50 hover:border-purple-500/50'
+                    }
+                `}
+                onClick={() => setSelectedTask(task)}
+            >
+                <div className="flex items-start gap-3">
+                    <button 
+                        className={`
+                            mt-0.5 flex-shrink-0 p-1 rounded-lg transition-all duration-200
+                            hover:bg-gray-700 hover:scale-110 active:scale-95
+                            ${isBeingUpdated ? 'animate-pulse' : ''}
+                        `}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTaskStatus(taskId, task.status);
+                        }}
+                    >
+                        {task.status === 'completed' ? (
+                            <CheckCircle size={20} className="text-green-400 drop-shadow-[0_0_4px_rgba(74,222,128,0.5)]" />
+                        ) : task.status === 'in_progress' ? (
+                            <Play size={20} className="text-blue-400 drop-shadow-[0_0_4px_rgba(96,165,250,0.5)] animate-pulse" />
+                        ) : (
+                            <Circle size={20} className="text-gray-500 group-hover:text-purple-400 transition-colors" />
                         )}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                        <h4 className={`font-medium text-sm leading-tight transition-all ${
+                            task.status === 'completed' ? 'text-gray-500 line-through' : 'text-white group-hover:text-purple-200'
+                        }`}>
+                            {task.title}
+                        </h4>
+                        {!compact && task.description && (
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2 group-hover:text-gray-400 transition-colors">
+                                {task.description}
+                            </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium transition-all ${getPriorityColor(task.priority)}`}>
+                                {(task.priority || 'MEDIUM').toUpperCase()}
+                            </span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                task.status === 'completed' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
+                                task.status === 'in_progress' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                                'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                            }`}>
+                                {(task.status || 'TODO').toUpperCase().replace('_', ' ')}
+                            </span>
+                            {task.dueDate && (
+                                <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                                    <Calendar size={10} />
+                                    {new Date(task.dueDate).toLocaleDateString()}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1">
+                        <button 
+                            className="p-1.5 hover:bg-purple-500/20 rounded-lg transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedTask(task);
+                            }}
+                        >
+                            <Eye size={14} className="text-purple-400" />
+                        </button>
                     </div>
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <button className="p-1 hover:bg-gray-700 rounded"><MoreVertical size={14} /></button>
-                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     // Kanban Column Component
     const KanbanColumn = ({ title, tasks, color, icon: Icon }) => (
@@ -604,6 +682,100 @@ const DartAI = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Task Detail Modal */}
+            {selectedTask && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+                    <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl transform animate-slideUp">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${
+                                    selectedTask.status === 'completed' ? 'bg-green-500' :
+                                    selectedTask.status === 'in_progress' ? 'bg-blue-500 animate-pulse' :
+                                    'bg-gray-500'
+                                }`} />
+                                <h2 className="text-xl font-bold">{selectedTask.title}</h2>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedTask(null)} 
+                                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Status Buttons */}
+                        <div className="flex gap-2 mb-6">
+                            {[
+                                { status: 'todo', label: 'To Do', icon: Circle, color: 'gray' },
+                                { status: 'in_progress', label: 'In Progress', icon: Play, color: 'blue' },
+                                { status: 'completed', label: 'Completed', icon: CheckCircle, color: 'green' }
+                            ].map(({ status, label, icon: StatusIcon, color }) => (
+                                <button
+                                    key={status}
+                                    onClick={() => setTaskStatus(selectedTask.id || selectedTask.dart_id, status)}
+                                    className={`
+                                        flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium
+                                        transition-all duration-200 transform hover:scale-[1.02] active:scale-95
+                                        ${selectedTask.status === status 
+                                            ? `bg-${color}-500/30 border-2 border-${color}-500 text-${color}-300 shadow-lg shadow-${color}-500/20` 
+                                            : 'bg-gray-800 border-2 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
+                                        }
+                                        ${isUpdating === (selectedTask.id || selectedTask.dart_id) ? 'animate-pulse' : ''}
+                                    `}
+                                >
+                                    <StatusIcon size={18} />
+                                    <span className="text-sm">{label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Task Details */}
+                        <div className="space-y-4 mb-6">
+                            {selectedTask.description && (
+                                <div>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1">Description</label>
+                                    <p className="text-gray-300 bg-gray-800/50 rounded-lg p-3">{selectedTask.description}</p>
+                                </div>
+                            )}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1">Priority</label>
+                                    <span className={`inline-block px-3 py-1.5 rounded-lg font-medium text-sm ${getPriorityColor(selectedTask.priority)}`}>
+                                        {selectedTask.priority === 'high' ? '🔴 High' : 
+                                         selectedTask.priority === 'medium' ? '🟡 Medium' : 
+                                         '🟢 Low'}
+                                    </span>
+                                </div>
+                                {selectedTask.dueDate && (
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1">Due Date</label>
+                                        <span className="text-gray-300 flex items-center gap-2">
+                                            <Calendar size={16} />
+                                            {new Date(selectedTask.dueDate).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-800">
+                            <span className="text-xs text-gray-600">
+                                ID: {(selectedTask.id || selectedTask.dart_id || 'N/A').slice(0, 12)}
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setSelectedTask(null)}
+                                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
