@@ -19,10 +19,10 @@ class EmbeddingService {
             ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) 
             : null;
         
-        // Embedding model priority (MoE v2 is primary, v1 removed)
+        // Embedding model priority (MoE v2 primary, v1 fallback)
         this.localModels = [
             'nomic-embed-text-v2-moe:latest',
-            'nomic-embed-text-v2-moe'  // Alternative tag
+            'nomic-embed-text:latest'  // v1 fallback
         ];
         this.activeLocalModel = this.localModels[0];
         
