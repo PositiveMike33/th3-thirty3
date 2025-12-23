@@ -1230,6 +1230,10 @@ console.log('[SYSTEM] Network Failover routes mounted at /api/network (RISK-006)
 // Server Logs Routes (RISK-006 - Internal Console Display)
 const logsRoutes = require('./logs_routes');
 app.use('/api/logs', logsRoutes);
+// HackerGPT Routes - Offensive Security Companion
+const hackerGPTRoutes = require('./routes/hackergpt_routes');
+app.use('/api/hackergpt', hackerGPTRoutes);
+console.log('[HACKERGPT] Routes registered at /api/hackergpt');
 console.log('[SYSTEM] Logs routes mounted at /api/logs (Internal Console)');
 
 
