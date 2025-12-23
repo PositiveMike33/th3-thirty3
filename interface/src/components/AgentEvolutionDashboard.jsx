@@ -160,6 +160,23 @@ const AgentEvolutionDashboard = () => {
                     </div>
                 </div>
 
+                {/* XP Progress Bar */}
+                <div className="xp-progress-container">
+                    <div className="xp-progress-header">
+                        <span className="xp-label">⚡ XP Progress</span>
+                        <span className="xp-value">{agent.stats?.xp || 0} / 1000</span>
+                    </div>
+                    <div className="xp-progress-track">
+                        <div 
+                            className="xp-progress-fill"
+                            style={{ 
+                                width: `${Math.min(100, ((agent.stats?.xp || 0) / 1000) * 100)}%`,
+                                backgroundColor: theme.color
+                            }}
+                        />
+                    </div>
+                </div>
+
                 {isSelected && agent.domainExpertise && (
                     <div className="agent-expertise">
                         <h4>Domain Expertise</h4>

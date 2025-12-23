@@ -32,6 +32,7 @@ class LLMService {
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
             groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
+            deepseek: { name: 'DeepSeek (Fast & Cheap)', type: 'cloud' },
             runpod: { name: 'RunPod (GPU Cloud)', type: 'cloud' },
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
@@ -144,6 +145,12 @@ class LLMService {
                 models.cloud.push({ id: 'llama-3.1-8b-instant', name: '⚡ Llama 3.1 8B Instant', provider: 'groq' });
                 models.cloud.push({ id: 'qwen/qwen3-32b', name: '⚡ Qwen 3 32B', provider: 'groq' });
                 models.cloud.push({ id: 'groq/compound', name: '⚡ Groq Compound', provider: 'groq' });
+            }
+
+            // DeepSeek (Fast & Affordable)
+            if (process.env.DEEPSEEK_API_KEY) {
+                models.cloud.push({ id: 'deepseek-chat', name: '🔷 DeepSeek Chat', provider: 'deepseek' });
+                models.cloud.push({ id: 'deepseek-reasoner', name: '🧠 DeepSeek Reasoner (R1)', provider: 'deepseek' });
             }
 
             // Perplexity
@@ -327,6 +334,9 @@ USER QUERY: ${query}`;
                 case 'groq':
                     response = await this.generateGroqResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
+                case 'deepseek':
+                    response = await this.generateDeepSeekResponse(augmentedPrompt, modelId, systemPrompt);
+                    break;
                 case 'runpod':
                     response = await this.generateRunPodResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
@@ -494,6 +504,19 @@ USER QUERY: ${query}`;
             apiKey: process.env.GROQ_API_KEY,
             baseURL: 'https://api.groq.com/openai/v1',
             providerName: 'groq'
+        });
+    }
+
+    /**
+     * Generate response using DeepSeek API
+     * Fast and affordable alternative to OpenAI
+     * Models: deepseek-chat, deepseek-reasoner (R1)
+     */
+    async generateDeepSeekResponse(prompt, modelId, systemPrompt) {
+        return this.generateOpenAICompatibleResponse(prompt, null, modelId || "deepseek-chat", systemPrompt, {
+            apiKey: process.env.DEEPSEEK_API_KEY,
+            baseURL: 'https://api.deepseek.com/v1',
+            providerName: 'deepseek'
         });
     }
 
