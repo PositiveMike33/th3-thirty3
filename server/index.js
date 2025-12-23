@@ -16,6 +16,19 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // ============================================
+// HEALTH CHECK (Public - No auth required)
+// ============================================
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        version: '1.2.0'
+    });
+});
+
+// ============================================
 // AUTH ROUTES (Public - No middleware required)
 // Must be BEFORE authMiddleware to allow login/register
 // ============================================
@@ -1676,6 +1689,19 @@ server.listen(port, async () => {
     } catch (error) {
         console.log('[SYSTEM] ⚠️ Tor check skipped:', error.message);
     }
+    
+    // =========================================
+    // OSINT SERVICES STARTUP CHECK
+    // =========================================
+    setTimeout(async () => {
+        try {
+            const OsintStartupCheck = require('./osint_startup_check');
+            const osintChecker = new OsintStartupCheck(`http://localhost:${port}`);
+            await osintChecker.runAllTests();
+        } catch (error) {
+            console.log('[SYSTEM] ⚠️ OSINT check skipped:', error.message);
+        }
+    }, 2000); // Wait 2 seconds for all routes to be ready
     
     console.log('\n[SYSTEM] ═══════════════════════════════════════════════');
     console.log('[SYSTEM]   TH3 THIRTY3 - FULLY OPERATIONAL');
