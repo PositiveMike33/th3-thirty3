@@ -13,18 +13,18 @@
  * - OpenAI
  */
 
-// Local model configuration
+// Local model configuration - OPTIMIZED FOR RTX 3060 (12GB VRAM)
 const LOCAL_MODELS = {
-    code: 'qwen2.5:3b',      // Best for code
-    general: 'qwen2.5:3b',   // General purpose
-    fast: 'granite3.1-moe:1b', // Quick responses
+    code: 'qwen2.5:7b',      // Best for code - high quality
+    general: 'qwen2.5:7b',   // General purpose - optimal for 12GB VRAM
+    fast: 'qwen2.5:3b',      // Quick responses (fallback)
     embedding: 'nomic-embed-text:latest' // Embeddings
 };
 
 // All local trainable models (for rotation)
 const ALL_LOCAL_MODELS = [
-    'qwen2.5:3b',
-    'granite3.1-moe:1b'
+    'qwen2.5:7b',
+    'qwen2.5:3b'
 ];
 
 // Cloud providers for heavy tasks
@@ -63,11 +63,11 @@ class ModelRouter {
      */
     async initialize() {
         if (this.initialized) return true;
-        
+
         console.log('[MODEL_ROUTER] Initializing (optimized local config)...');
         console.log('[MODEL_ROUTER] Local models: qwen2.5:3b, granite3.1-moe:1b, nomic-embed-text');
         console.log('[MODEL_ROUTER] Cloud fallback: Groq, Gemini');
-        
+
         try {
             // Preload embedding model
             await this.ensureNomicLoaded();
@@ -92,7 +92,7 @@ class ModelRouter {
                     prompt: 'init'
                 })
             });
-            
+
             if (response.ok) {
                 console.log('[MODEL_ROUTER] ✅ nomic-embed-text ready');
                 this.currentlyLoaded.add('nomic-embed-text:latest');
@@ -115,7 +115,7 @@ class ModelRouter {
      */
     async routeToModel(domain = 'general', forceLocal = false, forceCloud = false) {
         const normalizedDomain = domain.toLowerCase();
-        
+
         // Map domains to appropriate models
         let localModel;
         switch (normalizedDomain) {
@@ -135,23 +135,23 @@ class ModelRouter {
             default:
                 localModel = LOCAL_MODELS.general;
         }
-        
+
         // === NETWORK FAILOVER INTEGRATION (RISK-006) ===
         // Check network state before routing
         let failoverActive = false;
         let networkState = 'UNKNOWN';
-        
+
         if (networkFailoverService && !forceCloud) {
             const status = networkFailoverService.getStatus();
             networkState = status.state;
-            
+
             // If network is OFFLINE, force local models
             if (status.state === 'OFFLINE' || !status.isOnline) {
                 console.log('[MODEL_ROUTER] 🔴 FAILOVER ACTIVE: Internet offline, using local models');
                 forceLocal = true;
                 failoverActive = true;
             }
-            
+
             // If network is DEGRADED, prefer local for reliability
             if (status.state === 'DEGRADED') {
                 console.log('[MODEL_ROUTER] 🟡 DEGRADED: Preferring local models for reliability');
@@ -159,16 +159,16 @@ class ModelRouter {
             }
         }
         // === END FAILOVER INTEGRATION ===
-        
+
         // Try local first if preferred, forced, or failover active
         if (this.preferLocal || forceLocal || failoverActive) {
             try {
                 const loaded = await this.loadModel(localModel);
                 if (loaded) {
                     this.lastUsedModel = localModel;
-                    return { 
-                        model: localModel, 
-                        isLocal: true, 
+                    return {
+                        model: localModel,
+                        isLocal: true,
                         provider: 'ollama',
                         failoverActive,
                         networkState
@@ -178,46 +178,46 @@ class ModelRouter {
                 console.warn(`[MODEL_ROUTER] Local ${localModel} failed:`, error.message);
             }
         }
-        
+
         // If failover is active, don't try cloud
         if (failoverActive) {
             console.log('[MODEL_ROUTER] ⚠️ Failover active, skipping cloud providers');
-            return { 
-                model: localModel, 
-                isLocal: true, 
+            return {
+                model: localModel,
+                isLocal: true,
                 provider: 'ollama',
                 failoverActive: true,
                 networkState,
                 warning: 'Cloud unavailable, using local fallback'
             };
         }
-        
+
         // Fallback to cloud (Groq is fastest)
         if (process.env.GROQ_API_KEY) {
-            return { 
-                model: 'llama3-8b-8192', 
-                isLocal: false, 
+            return {
+                model: 'llama3-8b-8192',
+                isLocal: false,
                 provider: 'groq',
                 failoverActive: false,
                 networkState
             };
         }
-        
+
         // Fallback to Gemini
         if (process.env.GEMINI_API_KEY) {
-            return { 
-                model: 'gemini-1.5-flash', 
-                isLocal: false, 
+            return {
+                model: 'gemini-1.5-flash',
+                isLocal: false,
                 provider: 'gemini',
                 failoverActive: false,
                 networkState
             };
         }
-        
+
         // Last resort: try any local model
-        return { 
-            model: localModel, 
-            isLocal: true, 
+        return {
+            model: localModel,
+            isLocal: true,
             provider: 'ollama',
             failoverActive: false,
             networkState
@@ -232,9 +232,9 @@ class ModelRouter {
             if (this.currentlyLoaded.has(modelName)) {
                 return true;
             }
-            
+
             console.log(`[MODEL_ROUTER] Loading: ${modelName}`);
-            
+
             const response = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -245,13 +245,13 @@ class ModelRouter {
                     options: { num_predict: 1 }
                 })
             });
-            
+
             if (response.ok) {
                 this.currentlyLoaded.add(modelName);
                 console.log(`[MODEL_ROUTER] ✅ ${modelName} loaded`);
                 return true;
             }
-            
+
             return false;
         } catch (error) {
             console.error(`[MODEL_ROUTER] ❌ Failed to load ${modelName}:`, error.message);
@@ -320,22 +320,23 @@ const modelRouter = new ModelRouter();
 
 // BACKWARD COMPATIBILITY: Add 'models' property for orchestrator_service.js
 // Maps old model references to new lightweight models + cloud fallback
+// OPTIMIZED FOR RTX 3060 (12GB VRAM)
 modelRouter.models = {
     orchestrator: {
-        primary: 'qwen2.5:3b',      // Was gpt-oss:120b-cloud
-        fallback: 'granite3.1-moe:1b'  // Was mistral:7b
+        primary: 'qwen2.5:7b',      // High quality for orchestration
+        fallback: 'qwen2.5:3b'      // Fast fallback
     },
     technical: {
-        primary: 'qwen2.5:3b',      // Best for code/technical
-        fallback: 'granite3.1-moe:1b'
+        primary: 'qwen2.5:7b',      // Best for code/technical
+        fallback: 'qwen2.5:3b'
     },
     nlp: {
-        primary: 'qwen2.5:3b',      // Was mistral:7b
-        fallback: 'granite3.1-moe:1b'
+        primary: 'qwen2.5:7b',      // Good for NLP tasks
+        fallback: 'qwen2.5:3b'
     },
     vision: {
-        primary: 'qwen2.5:3b',      // Vision model removed, fallback to general
-        fallback: 'granite3.1-moe:1b'
+        primary: 'qwen2.5:7b',      // Vision model removed, fallback to general
+        fallback: 'qwen2.5:3b'
     },
     embedding: {
         primary: 'nomic-embed-text:latest',

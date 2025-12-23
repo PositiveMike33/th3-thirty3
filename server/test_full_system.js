@@ -14,9 +14,14 @@ async function runTests() {
     console.log("\n[1] Checking Settings...");
     try {
         const settings = settingsService.getSettings();
-        if (!settings.apiKeys.anythingllm_key) throw new Error("AnythingLLM Key missing");
-        if (settings.apiKeys.anythingllm_url.includes('|')) throw new Error("AnythingLLM URL corrupted");
-        console.log("✅ Settings loaded correctly.");
+        // AnythingLLM is only required in cloud mode
+        if (settings.computeMode === 'cloud' && !settings.apiKeys.anythingllm_key) {
+            throw new Error("AnythingLLM Key missing (required for cloud mode)");
+        }
+        if (settings.apiKeys.anythingllm_url && settings.apiKeys.anythingllm_url.includes('|')) {
+            throw new Error("AnythingLLM URL corrupted");
+        }
+        console.log(`✅ Settings loaded correctly. Mode: ${settings.computeMode || 'local'}`);
     } catch (e) {
         console.error("❌ Settings Error:", e.message);
         errors++;

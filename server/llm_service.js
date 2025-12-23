@@ -85,22 +85,22 @@ class LLMService {
                 models.cloud.push({ id: 'gpt-4o', name: '🟢 GPT-4o (Flagship)', provider: 'openai' });
                 models.cloud.push({ id: 'gpt-4o-mini', name: '🟢 GPT-4o Mini', provider: 'openai' });
                 models.cloud.push({ id: 'chatgpt-4o-latest', name: '🟢 ChatGPT-4o Latest', provider: 'openai' });
-                
+
                 // O1 Reasoning Series
                 models.cloud.push({ id: 'o1', name: '🧠 O1 (Reasoning)', provider: 'openai' });
                 models.cloud.push({ id: 'o1-mini', name: '🧠 O1 Mini', provider: 'openai' });
                 models.cloud.push({ id: 'o1-preview', name: '🧠 O1 Preview', provider: 'openai' });
-                
+
                 // O3 Series (Latest)
                 models.cloud.push({ id: 'o3-mini', name: '⚡ O3 Mini (Fast)', provider: 'openai' });
-                
+
                 // GPT-4 Turbo
                 models.cloud.push({ id: 'gpt-4-turbo', name: '🔵 GPT-4 Turbo', provider: 'openai' });
                 models.cloud.push({ id: 'gpt-4-turbo-preview', name: '🔵 GPT-4 Turbo Preview', provider: 'openai' });
-                
+
                 // GPT-4 Classic
                 models.cloud.push({ id: 'gpt-4', name: '🔵 GPT-4', provider: 'openai' });
-                
+
                 // GPT-3.5
                 models.cloud.push({ id: 'gpt-3.5-turbo', name: '⚪ GPT-3.5 Turbo', provider: 'openai' });
             }
@@ -161,7 +161,7 @@ class LLMService {
     /**
      * Analyzes OSINT tool output using a specific Expert Persona.
      */
-    async analyzeOsintResult(toolId, output, provider = 'local', model = 'granite3.1-moe:1b') {
+    async analyzeOsintResult(toolId, output, provider = 'local', model = 'qwen2.5:7b') {
         const personas = {
             sherlock: `You are 'Ghost', an Elite Social Engineer and Profiler with 20+ years of experience in tracking targets across the digital footprint. 
             Analyze the provided Sherlock username search results. 
@@ -203,7 +203,7 @@ class LLMService {
 
     async generateResponse(prompt, imageBase64, providerId, modelId, systemPrompt) {
         console.log(`[LLM] Request: Provider=${providerId}, Model=${modelId}`);
-        
+
         // RAG AUGMENTATION: Inject relevant knowledge context
         let augmentedPrompt = prompt;
         const ragContext = this.knowledgeBase.buildRAGContext(prompt);
@@ -211,7 +211,7 @@ class LLMService {
             augmentedPrompt = ragContext + '\n\nUSER QUERY: ' + prompt;
             console.log('[LLM] RAG context injected (knowledge base hit)');
         }
-        
+
         if (this.socketService) {
             this.socketService.emitAgentStart({ provider: providerId, model: modelId, prompt: augmentedPrompt });
             this.socketService.emitAgentStatus("Thinking...");
@@ -360,7 +360,7 @@ class LLMService {
             // Use the wrapper which handles Gemini → nomic-embed-text fallback automatically
             const response = await this.anythingLLMWrapper.chat(prompt, 'chat');
             const responseTime = Date.now() - startTime;
-            
+
             // Record metrics for Training Dashboard
             if (this.modelMetricsService) {
                 const tokensEstimate = Math.floor((response?.length || 0) / 4);
@@ -373,17 +373,17 @@ class LLMService {
                 });
                 console.log(`[ANYTHINGLLM] Metrics recorded: ${metricsModelName} | ${responseTime}ms | ${tokensEstimate} tokens`);
             }
-            
+
             // Log stats periodically
             const stats = this.anythingLLMWrapper.getStats();
             if (stats.total_requests % 10 === 0) {
                 console.log('[ANYTHINGLLM] Stats:', stats);
             }
-            
+
             return response;
         } catch (error) {
             const responseTime = Date.now() - startTime;
-            
+
             // Record failed query
             if (this.modelMetricsService) {
                 this.modelMetricsService.recordQuery(metricsModelName, {
@@ -394,7 +394,7 @@ class LLMService {
                     qualityScore: 0
                 });
             }
-            
+
             console.error("[ANYTHINGLLM] Error:", error);
             return `⚠️ Erreur AnythingLLM: ${error.message}`;
         }
@@ -410,7 +410,7 @@ class LLMService {
 
     async generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt) {
         // Fallback to default if no model specified
-        const model = modelId || 'granite3.1-moe:1b';
+        const model = modelId || 'qwen2.5:7b';
 
         const messages = [
             { role: 'system', content: systemPrompt },
