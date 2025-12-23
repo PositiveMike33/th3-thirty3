@@ -1,6 +1,6 @@
-ï»¿/**
- * Routes API pour l'entraÃ®nement rÃ©el des modÃ¨les
- * Permet de lancer des sessions d'entraÃ®nement intensif
+/**
+ * Routes API pour l'entraînement réel des modèles
+ * Permet de lancer des sessions d'entraînement intensif
  */
 
 const express = require('express');

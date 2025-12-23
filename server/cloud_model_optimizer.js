@@ -1,4 +1,4 @@
-ï»¿/**
+/**
  * Cloud Model Optimizer Service
  * Uses cloud models (Groq, Gemini, OpenAI) to automatically optimize local models
  * via AnythingLLM integration for knowledge persistence
@@ -51,66 +51,66 @@ const TRAINING_DOMAINS = {
     osint: {
         name: 'OSINT (Open Source Intelligence)',
         prompts: [
-            "GÃ©nÃ¨re un guide complet pour analyser l'empreinte numÃ©rique d'une cible Ã  partir de sources publiques",
-            "CrÃ©e un workflow d'investigation OSINT pour identifier des connexions entre entitÃ©s",
-            "DÃ©veloppe des techniques avancÃ©es de Google Dorking pour la reconnaissance",
-            "Analyse les mÃ©thodes d'extraction d'informations depuis les mÃ©tadonnÃ©es d'images",
-            "GÃ©nÃ¨re un protocole de veille OSINT pour la surveillance de menaces",
-            "CrÃ©e un guide d'analyse de profils sur les rÃ©seaux sociaux (SOCMINT)",
-            "DÃ©veloppe des techniques de corrÃ©lation de donnÃ©es multi-sources",
-            "Explique les mÃ©thodes de vÃ©rification et validation des informations OSINT"
+            "Génère un guide complet pour analyser l'empreinte numérique d'une cible à partir de sources publiques",
+            "Crée un workflow d'investigation OSINT pour identifier des connexions entre entités",
+            "Développe des techniques avancées de Google Dorking pour la reconnaissance",
+            "Analyse les méthodes d'extraction d'informations depuis les métadonnées d'images",
+            "Génère un protocole de veille OSINT pour la surveillance de menaces",
+            "Crée un guide d'analyse de profils sur les réseaux sociaux (SOCMINT)",
+            "Développe des techniques de corrélation de données multi-sources",
+            "Explique les méthodes de vérification et validation des informations OSINT"
         ]
     },
     ethical_hacking: {
-        name: 'Hacking Ã‰thique',
+        name: 'Hacking Éthique',
         prompts: [
-            "GÃ©nÃ¨re un guide de reconnaissance rÃ©seau avec nmap et les techniques d'Ã©numÃ©ration",
-            "CrÃ©e un protocole de test de pÃ©nÃ©tration pour applications web (OWASP Top 10)",
-            "DÃ©veloppe des scÃ©narios de tests d'intrusion avec exploitation de vulnÃ©rabilitÃ©s courantes",
-            "Analyse les techniques de post-exploitation et de maintien d'accÃ¨s Ã©thique",
-            "GÃ©nÃ¨re un guide de sÃ©curisation aprÃ¨s audit de sÃ©curitÃ©",
-            "CrÃ©e des exercices de CTF (Capture The Flag) pour l'entraÃ®nement",
-            "DÃ©veloppe un protocole de red teaming avec techniques d'Ã©vasion",
-            "Explique les mÃ©thodes d'analyse de malware et reverse engineering basique"
+            "Génère un guide de reconnaissance réseau avec nmap et les techniques d'énumération",
+            "Crée un protocole de test de pénétration pour applications web (OWASP Top 10)",
+            "Développe des scénarios de tests d'intrusion avec exploitation de vulnérabilités courantes",
+            "Analyse les techniques de post-exploitation et de maintien d'accès éthique",
+            "Génère un guide de sécurisation après audit de sécurité",
+            "Crée des exercices de CTF (Capture The Flag) pour l'entraînement",
+            "Développe un protocole de red teaming avec techniques d'évasion",
+            "Explique les méthodes d'analyse de malware et reverse engineering basique"
         ]
     },
     social_psychology: {
         name: 'Psychologie Sociale',
         prompts: [
-            "GÃ©nÃ¨re une analyse approfondie des dynamiques de groupe et du conformisme social (Asch, Milgram)",
-            "CrÃ©e des scÃ©narios d'ingÃ©nierie sociale Ã©thique pour sensibilisation Ã  la sÃ©curitÃ©",
-            "DÃ©veloppe un guide des biais cognitifs exploitables en social engineering",
-            "Analyse les techniques de manipulation psychologique et comment s'en protÃ©ger",
-            "GÃ©nÃ¨re un profil psychologique basÃ© sur les patterns de communication digitale",
-            "CrÃ©e des exercices d'analyse comportementale et de lecture d'intentions",
-            "DÃ©veloppe des techniques de persuasion Ã©thique basÃ©es sur Cialdini",
-            "Explique les mÃ©canismes de confiance et de crÃ©dibilitÃ© dans les interactions en ligne"
+            "Génère une analyse approfondie des dynamiques de groupe et du conformisme social (Asch, Milgram)",
+            "Crée des scénarios d'ingénierie sociale éthique pour sensibilisation à la sécurité",
+            "Développe un guide des biais cognitifs exploitables en social engineering",
+            "Analyse les techniques de manipulation psychologique et comment s'en protéger",
+            "Génère un profil psychologique basé sur les patterns de communication digitale",
+            "Crée des exercices d'analyse comportementale et de lecture d'intentions",
+            "Développe des techniques de persuasion éthique basées sur Cialdini",
+            "Explique les mécanismes de confiance et de crédibilité dans les interactions en ligne"
         ]
     },
     social_engineering: {
         name: 'Social Engineering',
         prompts: [
-            "GÃ©nÃ¨re des scÃ©narios de phishing pour la formation et sensibilisation",
-            "CrÃ©e un guide de vishing (voice phishing) et techniques de dÃ©tection",
-            "DÃ©veloppe des red flags pour identifier les tentatives de manipulation",
-            "Analyse les vecteurs d'attaque basÃ©s sur l'humain et les contre-mesures",
-            "GÃ©nÃ¨re un protocole de test d'ingÃ©nierie sociale pour audit de sÃ©curitÃ©",
-            "CrÃ©e des scÃ©narios de pretexting avec analyse de vulnÃ©rabilitÃ©s humaines",
-            "DÃ©veloppe un guide de sensibilisation aux attaques par influence sociale",
-            "Explique les techniques de baiting et tailgating avec prÃ©vention"
+            "Génère des scénarios de phishing pour la formation et sensibilisation",
+            "Crée un guide de vishing (voice phishing) et techniques de détection",
+            "Développe des red flags pour identifier les tentatives de manipulation",
+            "Analyse les vecteurs d'attaque basés sur l'humain et les contre-mesures",
+            "Génère un protocole de test d'ingénierie sociale pour audit de sécurité",
+            "Crée des scénarios de pretexting avec analyse de vulnérabilités humaines",
+            "Développe un guide de sensibilisation aux attaques par influence sociale",
+            "Explique les techniques de baiting et tailgating avec prévention"
         ]
     },
     threat_intelligence: {
         name: 'Threat Intelligence',
         prompts: [
-            "GÃ©nÃ¨re un rapport de threat intelligence sur les APT actifs",
-            "CrÃ©e un framework d'analyse de menaces avec le Diamond Model",
-            "DÃ©veloppe des indicateurs de compromission (IOC) typiques par type d'attaque",
-            "Analyse les tactiques, techniques et procÃ©dures (TTP) des groupes de menaces",
-            "GÃ©nÃ¨re un guide de hunting de menaces proactif",
-            "CrÃ©e des scÃ©narios d'attribution d'attaques basÃ©s sur des patterns",
-            "DÃ©veloppe un protocole de veille sur les vulnÃ©rabilitÃ©s critiques",
-            "Explique les mÃ©thodes de corrÃ©lation threat intel avec MITRE ATT&CK"
+            "Génère un rapport de threat intelligence sur les APT actifs",
+            "Crée un framework d'analyse de menaces avec le Diamond Model",
+            "Développe des indicateurs de compromission (IOC) typiques par type d'attaque",
+            "Analyse les tactiques, techniques et procédures (TTP) des groupes de menaces",
+            "Génère un guide de hunting de menaces proactif",
+            "Crée des scénarios d'attribution d'attaques basés sur des patterns",
+            "Développe un protocole de veille sur les vulnérabilités critiques",
+            "Explique les méthodes de corrélation threat intel avec MITRE ATT&CK"
         ]
     }
 };
@@ -203,15 +203,15 @@ class CloudModelOptimizerService extends EventEmitter {
         
         // System prompt for generating high-quality training data
         const systemPrompt = `Tu es un expert en ${domainConfig.name} et en formation d'IA.
-Ta mission: GÃ©nÃ©rer des donnÃ©es d'entraÃ®nement de HAUTE QUALITÃ‰ pour optimiser un modÃ¨le IA local.
+Ta mission: Générer des données d'entraînement de HAUTE QUALITÉ pour optimiser un modèle IA local.
 
-Format de rÃ©ponse REQUIS:
-1. CONTEXTE: Explique briÃ¨vement le contexte de l'exercice
-2. PROMPT D'ENTRAINEMENT: Le prompt exact Ã  utiliser pour entraÃ®ner le modÃ¨le local
-3. RÃ‰PONSE ATTENDUE: La rÃ©ponse idÃ©ale que le modÃ¨le devrait produire
-4. CRITÃˆRES D'Ã‰VALUATION: Comment Ã©valuer la qualitÃ© de la rÃ©ponse
+Format de réponse REQUIS:
+1. CONTEXTE: Explique brièvement le contexte de l'exercice
+2. PROMPT D'ENTRAINEMENT: Le prompt exact à utiliser pour entraîner le modèle local
+3. RÉPONSE ATTENDUE: La réponse idéale que le modèle devrait produire
+4. CRITÈRES D'ÉVALUATION: Comment évaluer la qualité de la réponse
 
-Sois prÃ©cis, professionnel et orientÃ© vers l'apprentissage machine.`;
+Sois précis, professionnel et orienté vers l'apprentissage machine.`;
 
         if (this.verboseLogging) {
             console.log(`[CLOUD_OPTIMIZER] Generating training data via ${cloudProvider.id} for ${domain}`);
@@ -280,7 +280,7 @@ ${trainingData.generatedData}
                     'Authorization': `Bearer ${anythingLLMKey}`
                 },
                 body: JSON.stringify({
-                    message: `[TRAINING_DATA] MÃ©morise ces donnÃ©es d'entraÃ®nement: ${content}`,
+                    message: `[TRAINING_DATA] Mémorise ces données d'entraînement: ${content}`,
                     mode: 'chat'
                 })
             });
@@ -291,7 +291,7 @@ ${trainingData.generatedData}
             } else {
                 // Fallback to default wrapper
                 await this.anythingLLM.chat(
-                    `[TRAINING_DATA] [${workspaceSlug.toUpperCase()}] MÃ©morise: ${content}`,
+                    `[TRAINING_DATA] [${workspaceSlug.toUpperCase()}] Mémorise: ${content}`,
                     'chat'
                 );
                 console.log(`[CLOUD_OPTIMIZER] Training data stored via wrapper (fallback)`);
@@ -312,15 +312,15 @@ ${trainingData.generatedData}
         }
         
         // Extract the training prompt from generated data
-        const trainingPrompt = `Utilise ces donnÃ©es d'entraÃ®nement pour amÃ©liorer tes compÃ©tences en ${trainingData.domainName}:
+        const trainingPrompt = `Utilise ces données d'entraînement pour améliorer tes compétences en ${trainingData.domainName}:
 
 ${trainingData.generatedData}
 
-Maintenant, gÃ©nÃ¨re une rÃ©ponse similaire pour dÃ©montrer ta comprÃ©hension.`;
+Maintenant, génère une réponse similaire pour démontrer ta compréhension.`;
 
-        const systemPrompt = `Tu es en mode entraÃ®nement intensif. 
-Analyse le contenu fourni et gÃ©nÃ¨re une rÃ©ponse de haute qualitÃ© qui dÃ©montre ta maÃ®trise du sujet.
-Sois prÃ©cis, professionnel et dÃ©taillÃ©.`;
+        const systemPrompt = `Tu es en mode entraînement intensif. 
+Analyse le contenu fourni et génère une réponse de haute qualité qui démontre ta maîtrise du sujet.
+Sois précis, professionnel et détaillé.`;
 
         const startTime = Date.now();
         
@@ -382,9 +382,9 @@ Sois prÃ©cis, professionnel et dÃ©taillÃ©.`;
         // Domain-specific keywords
         const keywords = {
             osint: ['reconnaissance', 'empreinte', 'source', 'analyse', 'veille', 'intelligence', 'metadata'],
-            ethical_hacking: ['vulnÃ©rabilitÃ©', 'exploitation', 'pentest', 'sÃ©curitÃ©', 'intrusion', 'cve', 'nmap'],
+            ethical_hacking: ['vulnérabilité', 'exploitation', 'pentest', 'sécurité', 'intrusion', 'cve', 'nmap'],
             social_psychology: ['manipulation', 'influence', 'biais', 'comportement', 'confiance', 'persuasion'],
-            social_engineering: ['phishing', 'pretexting', 'vishing', 'ingÃ©nierie', 'humain', 'vecteur'],
+            social_engineering: ['phishing', 'pretexting', 'vishing', 'ingénierie', 'humain', 'vecteur'],
             threat_intelligence: ['menace', 'apt', 'ioc', 'ttp', 'attribution', 'mitre', 'attaque']
         };
         

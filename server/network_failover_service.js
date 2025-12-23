@@ -11,7 +11,7 @@
  * 
  * Architecture:
  * - Primary: Cloud models (Groq, OpenAI, Gemini, Anthropic)
- * - Fallback: Local Ollama models (qwen2.5:3b, granite3.1-moe:1b)
+ * - Fallback: Local Ollama models (dolphin-mistral:7b, dolphin-mistral:7b)
  * - Emergency: Cached responses / offline mode
  */
 
@@ -336,7 +336,7 @@ class NetworkFailoverService extends EventEmitter {
                 return { 
                     provider: 'local', 
                     reason: 'Local only mode',
-                    model: 'qwen2.5:3b'
+                    model: 'dolphin-mistral:7b'
                 };
                 
             case FailoverMode.MANUAL:
@@ -358,8 +358,8 @@ class NetworkFailoverService extends EventEmitter {
                     return { 
                         provider: 'local', 
                         reason: 'Internet offline - failover active',
-                        model: 'qwen2.5:3b',
-                        fallbackModel: 'granite3.1-moe:1b'
+                        model: 'dolphin-mistral:7b',
+                        fallbackModel: 'dolphin-mistral:7b'
                     };
                 } else if (this.state === NetworkState.DEGRADED) {
                     return { 
@@ -371,7 +371,7 @@ class NetworkFailoverService extends EventEmitter {
                     return { 
                         provider: 'local', 
                         reason: 'Unknown state - defaulting to local',
-                        model: 'qwen2.5:3b'
+                        model: 'dolphin-mistral:7b'
                     };
                 }
         }
@@ -448,9 +448,9 @@ class NetworkFailoverService extends EventEmitter {
         if (provider.provider === 'local') {
             // Local model recommendations
             const localModels = {
-                code: 'qwen2.5:3b',
-                general: 'qwen2.5:3b',
-                fast: 'granite3.1-moe:1b',
+                code: 'dolphin-mistral:7b',
+                general: 'dolphin-mistral:7b',
+                fast: 'dolphin-mistral:7b',
                 embedding: 'nomic-embed-text:latest'
             };
             return {

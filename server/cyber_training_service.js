@@ -22,8 +22,8 @@ class CyberTrainingService {
             ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
             : (apiKeys.ollama_direct_url || 'http://localhost:11434');
 
-        this.model = 'qwen2.5:3b';
-        this.fallbackModel = 'granite3.1-moe:1b';
+        this.model = 'dolphin-mistral:7b';
+        this.fallbackModel = 'dolphin-mistral:7b';
         this.kaliEnv = KALI_ENVIRONMENT;
 
         console.log(`[CYBER-TRAINING] Service initialized (Ollama: ${this.ollamaUrl})`);

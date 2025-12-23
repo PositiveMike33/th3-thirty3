@@ -1218,5 +1218,181 @@
     },
     "synthesis": "### Résumé Exécutif\nLes équipes d'osint, hacking et générale n'ont pas été trouvées lors de l'étude préliminaire.\n\n### Conclusions Clés\n1. Les équipes spécifiques (osint, hacking, générale) ne sont pas actives sur le projet.\n2. Il est nécessaire de vérifier si ces équipes ont été désactivées ou si elles n'ont jamais été créées.\n\n### Recommandations\n1. Rechercher les équipes spécifiques (osint, hacking, générale) dans la base de données des équipes existantes.\n2. Vérifier avec l'équipe technique pour comprendre pourquoi ces équipes ont pu disparaître ou ne pas être activées.\n\n### Risques Identifiés\n1. Les équipes spécifiques peuvent avoir été désactivées par erreur, nécessitant une réactivation.\n2. Il pourrait y avoir des données manquantes ou des tâches non traitées liées à ces équipes.",
     "endTime": "2025-12-18T17:54:06.846Z"
+  },
+  {
+    "id": "1766480993835",
+    "task": "Simple test mission for integration",
+    "startTime": "2025-12-23T09:09:53.835Z",
+    "status": "completed",
+    "phases": [
+      {
+        "name": "Phase 1 - OSINT & Hacking",
+        "team": "osint|hacking",
+        "agents": [
+          "agent1",
+          "agent2"
+        ],
+        "objective": "Identify vulnerabilities and potential attack vectors",
+        "startTime": "2025-12-23T09:10:26.357Z",
+        "responses": [
+          {
+            "agent": "agent1",
+            "success": false,
+            "error": "Team osint|hacking not found"
+          },
+          {
+            "agent": "agent2",
+            "success": false,
+            "error": "Team osint|hacking not found"
+          }
+        ],
+        "endTime": "2025-12-23T09:10:26.412Z"
+      },
+      {
+        "name": "Phase 2 - General Experts",
+        "team": "general",
+        "agents": [
+          "agent3",
+          "agent4"
+        ],
+        "objective": "Assess the risk level of identified vulnerabilities and suggest mitigation strategies",
+        "startTime": "2025-12-23T09:10:26.412Z",
+        "responses": [
+          {
+            "agent": "agent3",
+            "success": false,
+            "error": "Cannot read properties of undefined (reading 'agent3')"
+          },
+          {
+            "agent": "agent4",
+            "success": false,
+            "error": "Cannot read properties of undefined (reading 'agent4')"
+          }
+        ],
+        "endTime": "2025-12-23T09:10:26.415Z"
+      }
+    ],
+    "results": [],
+    "analysis": {
+      "missionType": "mixed",
+      "priority": "medium",
+      "estimatedTime": "60 minutes",
+      "phases": [
+        {
+          "name": "Phase 1 - OSINT & Hacking",
+          "team": "osint|hacking",
+          "agents": [
+            "agent1",
+            "agent2"
+          ],
+          "objective": "Identify vulnerabilities and potential attack vectors"
+        },
+        {
+          "name": "Phase 2 - General Experts",
+          "team": "general",
+          "agents": [
+            "agent3",
+            "agent4"
+          ],
+          "objective": "Assess the risk level of identified vulnerabilities and suggest mitigation strategies"
+        }
+      ],
+      "risks": [
+        "risk1"
+      ],
+      "requiredData": [
+        "data1"
+      ]
+    },
+    "synthesis": "Résumé exécutif:\n- Échec des phases OSINT et Hacking, ainsi que General Experts.\n\nConclusions clés:\n1. Les équipes OSINT et Hacking n'ont pas été identifiées correctement.\n2. Les agents GENERAL ne semblent pas être en mesure de répondre à la demande.\n\nRecommandations:\n1. Identifier les équipes OSINT et Hacking correctement.\n2. Évaluer et améliorer les compétences des agents GENERAL.\n\nRisques identifiés:\n- Risque de retard dans la mission en raison d'équipes non identifiées ou inefficaces.",
+    "endTime": "2025-12-23T09:10:30.024Z"
+  },
+  {
+    "id": "1766481421499",
+    "task": "Simple test mission for integration",
+    "startTime": "2025-12-23T09:17:01.499Z",
+    "status": "completed",
+    "phases": [
+      {
+        "name": "Phase 1 - OSINT & Hacking",
+        "team": "osint|hacking",
+        "agents": [
+          "agent1",
+          "agent2"
+        ],
+        "objective": "Identify attack surface and vulnerabilities",
+        "startTime": "2025-12-23T09:17:17.163Z",
+        "responses": [
+          {
+            "agent": "agent1",
+            "success": false,
+            "error": "Team osint|hacking not found"
+          },
+          {
+            "agent": "agent2",
+            "success": false,
+            "error": "Team osint|hacking not found"
+          }
+        ],
+        "endTime": "2025-12-23T09:17:17.224Z"
+      },
+      {
+        "name": "Phase 2 - General Experts",
+        "team": "general",
+        "agents": [
+          "agent3",
+          "agent4"
+        ],
+        "objective": "Assess risks and provide mitigation strategies",
+        "startTime": "2025-12-23T09:17:17.224Z",
+        "responses": [
+          {
+            "agent": "agent3",
+            "success": false,
+            "error": "Cannot read properties of undefined (reading 'agent3')"
+          },
+          {
+            "agent": "agent4",
+            "success": false,
+            "error": "Cannot read properties of undefined (reading 'agent4')"
+          }
+        ],
+        "endTime": "2025-12-23T09:17:17.227Z"
+      }
+    ],
+    "results": [],
+    "analysis": {
+      "missionType": "mixed",
+      "priority": "medium",
+      "estimatedTime": "2 hours",
+      "phases": [
+        {
+          "name": "Phase 1 - OSINT & Hacking",
+          "team": "osint|hacking",
+          "agents": [
+            "agent1",
+            "agent2"
+          ],
+          "objective": "Identify attack surface and vulnerabilities"
+        },
+        {
+          "name": "Phase 2 - General Experts",
+          "team": "general",
+          "agents": [
+            "agent3",
+            "agent4"
+          ],
+          "objective": "Assess risks and provide mitigation strategies"
+        }
+      ],
+      "risks": [
+        "risk1"
+      ],
+      "requiredData": [
+        "data1"
+      ]
+    },
+    "synthesis": "1. RÉSUMÉ EXÉCUTIF:\n   - Aucun agent de l'équipe n'a répondu à la demande d'assistance en raison d'erreurs dans le format des demandes.\n   - Il est nécessaire de résoudre ces problèmes avant de poursuivre avec les autres phases de la mission.\n2. CONCLUSIONS CLÉS:\n   - Les agents ont été incapables de répondre aux demandes en raison d'erreurs dans le format des demandes.\n   - Il est essentiel de corriger ces problèmes pour assurer une communication efficace avec l'équipe.\n3. RECOMMANDATIONS:\n   - Vérifiez que les agents sont bien assignés et qu'ils comprennent leur rôle dans la mission.\n   - Assurez-vous que le format des demandes est correct et comprend les informations nécessaires pour répondre aux besoins de l'équipe.\n4. RISQUES IDENTIFIÉS:\n   - Risque d'erreurs persistantes dans la communication avec l'équipe, ce qui peut entraîner des retards et des problèmes de coordination.",
+    "endTime": "2025-12-23T09:17:22.752Z"
   }
 ]

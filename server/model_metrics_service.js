@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Model Metrics Service
  * Tracks performance, expertise, and cognitive progression of Ollama models
  * Integrates with AnythingLLM + Pieces for long-term memory (3 months)
@@ -398,11 +398,11 @@ class ModelMetricsService {
 
     getCategoryLabel(category) {
         const labels = {
-            code: '💻 Code',
-            writing: '✍️ Rédaction',
-            analysis: '🔍 Analyse',
-            creativity: '🎨 Créativité',
-            reasoning: '🧠 Raisonnement'
+            code: '?? Code',
+            writing: '?? R�daction',
+            analysis: '?? Analyse',
+            creativity: '?? Cr�ativit�',
+            reasoning: '?? Raisonnement'
         };
         return labels[category] || category;
     }

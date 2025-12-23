@@ -17,8 +17,8 @@ class OfflineModeService extends EventEmitter {
         // Configuration
         this.config = {
             checkIntervalMs: 10000,          // Vérifier toutes les 10 secondes
-            offlineModel: 'granite3.1-moe:1b', // Modèle ultra-léger offline (801M)
-            onlineModel: 'qwen2.5:3b',         // Modèle normal online
+            offlineModel: 'dolphin-mistral:7b', // Modèle ultra-léger offline (801M)
+            onlineModel: 'dolphin-mistral:7b',         // Modèle normal online
             testHosts: ['8.8.8.8', '1.1.1.1', 'google.com'],
             energyMode: 'normal'              // 'normal', 'eco', 'ultra-eco'
         };

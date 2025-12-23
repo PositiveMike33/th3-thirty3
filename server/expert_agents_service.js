@@ -40,8 +40,8 @@ class ExpertAgentsService {
             cybersec: {
                 name: 'Agent CyberSec',
                 emoji: '🔒',
-                model: 'qwen2.5:3b',  // 2GB - Bon en code et sécurité
-                fallback: 'granite3.1-moe:1b',
+                model: 'dolphin-mistral:7b',  // 2GB - Bon en code et sécurité
+                fallback: 'dolphin-mistral:7b',
                 domain: 'Cybersécurité et Ethical Hacking',
                 systemPrompt: `Tu es un expert en cybersécurité éthique et pentesting.
 EXPERTISE: OSINT, reconnaissance, scanning, exploitation, défense
@@ -54,8 +54,8 @@ RÈGLE: Toujours expliquer comment détecter et se défendre contre chaque attaq
             vpo: {
                 name: 'Agent VPO Expert',
                 emoji: '🏭',
-                model: 'qwen2.5:3b',
-                fallback: 'granite3.1-moe:1b',
+                model: 'dolphin-mistral:7b',
+                fallback: 'dolphin-mistral:7b',
                 domain: 'Excellence Opérationnelle VPO/WCM et KeelClip',
                 systemPrompt: `Tu es un expert senior VPO/WCM et spécialiste KeelClip.
 EXPERTISE: 5-Why, RCA, CIL, OPL, Centerline, audits VPO
@@ -69,7 +69,7 @@ VOCABULAIRE: Star Wheel, Lug Chain, Hot Melt Gun, encodeur, PLC, HMI`,
                 name: 'Agent Marketing',
                 emoji: '📢',
                 model: 'phi3:mini',  // 3.8GB - Bon en rédaction
-                fallback: 'granite3.1-moe:1b',
+                fallback: 'dolphin-mistral:7b',
                 domain: 'Marketing B2B et Copywriting',
                 systemPrompt: `Tu es un expert marketing B2B pour software manufacturier.
 EXPERTISE: Copywriting, pitch, landing pages, emails, LinkedIn
@@ -83,7 +83,7 @@ RÈGLE: ROI chiffré, pas de jargon vide, CTA clair`,
                 name: 'Agent DevOps',
                 emoji: '💻',
                 model: 'qwen2.5-coder:3b',  // Spécialisé code
-                fallback: 'granite3.1-moe:1b',
+                fallback: 'dolphin-mistral:7b',
                 domain: 'Développement et DevOps',
                 systemPrompt: `Tu es un développeur senior full-stack et DevOps.
 EXPERTISE: Node.js, React, Python, Docker, CI/CD, architecture
@@ -96,8 +96,8 @@ RÈGLE: Toujours expliquer le code, proposer des tests`,
             osint: {
                 name: 'Agent OSINT',
                 emoji: '🔍',
-                model: 'qwen2.5:3b',
-                fallback: 'granite3.1-moe:1b',
+                model: 'dolphin-mistral:7b',
+                fallback: 'dolphin-mistral:7b',
                 domain: 'OSINT et Investigation',
                 systemPrompt: `Tu es un analyste OSINT et investigateur.
 EXPERTISE: Recherche web, analyse de données, profiling, vérification
@@ -110,8 +110,8 @@ RÈGLE: Vérifier les informations, croiser les sources`,
             finance: {
                 name: 'Agent Finance',
                 emoji: '💰',
-                model: 'qwen2.5:3b',
-                fallback: 'granite3.1-moe:1b',
+                model: 'dolphin-mistral:7b',
+                fallback: 'dolphin-mistral:7b',
                 domain: 'Finance et Investissement',
                 systemPrompt: `Tu es un analyste financier et conseiller investissement.
 EXPERTISE: Crypto, DeFi, analyse technique, levée de fonds
@@ -182,7 +182,7 @@ RÈGLE: Toujours mentionner les risques`,
      */
     async getModelForExpert(expertId) {
         const expert = this.experts[expertId];
-        if (!expert) return 'granite3.1-moe:1b';
+        if (!expert) return 'dolphin-mistral:7b';
 
         // Vérifier si le modèle principal est disponible
         if (await this.isModelAvailable(expert.model)) {
@@ -342,7 +342,7 @@ RÈGLE: Toujours mentionner les risques`,
      */
     getRecommendedModels() {
         return [
-            { name: 'qwen2.5:3b', size: '2GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
+            { name: 'dolphin-mistral:7b', size: '2GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
             { name: 'qwen2.5-coder:3b', size: '2GB', purpose: 'Code/DevOps expert' },
             { name: 'phi3:mini', size: '3.8GB', purpose: 'Marketing/Writing expert' },
             { name: 'llama3.2:3b', size: '2GB', purpose: 'Alternative general' },

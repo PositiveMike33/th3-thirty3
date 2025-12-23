@@ -1,11 +1,11 @@
-ï»¿/**
+/**
  * training_commentary_service.js
- * Service de commentaires LLM en temps rÃ©el pour le training des agents
+ * Service de commentaires LLM en temps réel pour le training des agents
  *
- * AMÃ‰LIORATIONS v2:
- * - Chaque modÃ¨le gÃ©nÃ¨re des commentaires sur SON PROPRE apprentissage
- * - Auto-dÃ©tection de tous les modÃ¨les Ollama (pas de liste fixe)
- * - Commentaires plus frÃ©quents et personnalisÃ©s
+ * AMÉLIORATIONS v2:
+ * - Chaque modèle génère des commentaires sur SON PROPRE apprentissage
+ * - Auto-détection de tous les modèles Ollama (pas de liste fixe)
+ * - Commentaires plus fréquents et personnalisés
  */
 
 const fs = require('fs');
@@ -168,8 +168,8 @@ class TrainingCommentaryService {
         const queries = modelMetrics?.performance?.totalQueries || 0;
         const sessions = modelMetrics?.learning?.sessionsCompleted || 0;
         const growth = modelMetrics?.learning?.growthPercentage || 0;
-        const strengths = modelMetrics?.strengths?.map(s => s.label).join(', ') || 'en dÃ©veloppement';
-        const weaknesses = modelMetrics?.weaknesses?.map(s => s.label).join(', ') || 'Ã  identifier';
+        const strengths = modelMetrics?.strengths?.map(s => s.label).join(', ') || 'en développement';
+        const weaknesses = modelMetrics?.weaknesses?.map(s => s.label).join(', ') || 'à identifier';
         const avgTime = Math.round(modelMetrics?.performance?.avgResponseTime || 0);
         
         // Get expertise breakdown
@@ -186,42 +186,42 @@ class TrainingCommentaryService {
             .slice(0, 3)
             .map(([k]) => k);
 
-        return `Tu es ${modelName}, un modÃ¨le d'intelligence artificielle en cours d'entraÃ®nement dans le systÃ¨me Th3 Thirty3 pour la psychologie sociale.
+        return `Tu es ${modelName}, un modèle d'intelligence artificielle en cours d'entraînement dans le système Th3 Thirty3 pour la psychologie sociale.
 
 === TES STATISTIQUES ACTUELLES ===
 - Score cognitif global: ${score}/100
-- RequÃªtes traitÃ©es: ${queries}
+- Requêtes traitées: ${queries}
 - Sessions de training: ${sessions}
 - Croissance: ${growth > 0 ? '+' : ''}${growth.toFixed(1)}%
-- Temps de rÃ©ponse moyen: ${avgTime}ms
+- Temps de réponse moyen: ${avgTime}ms
 - Forces: ${strengths}
-- Axes d'amÃ©lioration: ${weaknesses}
-- Expertise dÃ©taillÃ©e: ${expertiseStr}
+- Axes d'amélioration: ${weaknesses}
+- Expertise détaillée: ${expertiseStr}
 - Domaines les plus faibles: ${weakAreas.join(', ')}
 
 === TA MISSION ===
-GÃ©nÃ¨re une rÃ©ponse structurÃ©e avec:
+Génère une réponse structurée avec:
 
-**1. Ã‰VOLUTION** (2-3 phrases)
-Commente TON propre apprentissage, tes progrÃ¨s rÃ©cents, ce que tu as appris.
+**1. ÉVOLUTION** (2-3 phrases)
+Commente TON propre apprentissage, tes progrès récents, ce que tu as appris.
 
-**2. SUGGESTIONS DE DONNÃ‰ES** (3-5 suggestions)
-Propose des types de donnÃ©es/contenus que l'utilisateur pourrait te fournir pour amÃ©liorer tes performances dans tes domaines faibles. Sois spÃ©cifique:
+**2. SUGGESTIONS DE DONNÉES** (3-5 suggestions)
+Propose des types de données/contenus que l'utilisateur pourrait te fournir pour améliorer tes performances dans tes domaines faibles. Sois spécifique:
 - Type de contenu (articles, conversations, exemples, cas pratiques...)
-- ThÃ¨me prÃ©cis (psychologie sociale, analyse comportementale, etc.)
-- Format suggÃ©rÃ© (texte, Q&A, scÃ©narios...)
+- Thème précis (psychologie sociale, analyse comportementale, etc.)
+- Format suggéré (texte, Q&A, scénarios...)
 
-Parle Ã  la premiÃ¨re personne. Utilise ce format exact:
+Parle à la première personne. Utilise ce format exact:
 
-**Mon Ã©volution:**
+**Mon évolution:**
 [Ton commentaire ici]
 
-**Mes suggestions de donnÃ©es pour progresser:**
-1. [Suggestion 1 - type, thÃ¨me, format]
-2. [Suggestion 2 - type, thÃ¨me, format]
-3. [Suggestion 3 - type, thÃ¨me, format]
+**Mes suggestions de données pour progresser:**
+1. [Suggestion 1 - type, thème, format]
+2. [Suggestion 2 - type, thème, format]
+3. [Suggestion 3 - type, thème, format]
 
-RÃ©ponse:`;
+Réponse:`;
     }
 
     /**
@@ -387,8 +387,8 @@ RÃ©ponse:`;
                 <h1 style="color: #00ff88; border-bottom: 2px solid #00ff88; padding-bottom: 10px;">
                      Th3 Thirty3 Training Digest
                 </h1>
-                <p>Auto-rÃ©flexions des modÃ¨les IA en entraÃ®nement</p>
-                <p>EntrÃ©es: ${entries.length} | Total historique: ${this.archive.totalEntries}</p>
+                <p>Auto-réflexions des modèles IA en entraînement</p>
+                <p>Entrées: ${entries.length} | Total historique: ${this.archive.totalEntries}</p>
                 ${entriesHTML}
             </div>
         `;

@@ -3,8 +3,8 @@
  * Routes agents to optimal local models based on expertise
  * 
  * LOCAL MODELS (légers, rapides):
- * - qwen2.5:3b (1.9GB) - Code & General
- * - granite3.1-moe:1b (1.4GB) - Fast responses
+ * - dolphin-mistral:7b (1.9GB) - Code & General
+ * - dolphin-mistral:7b (1.4GB) - Fast responses
  * - nomic-embed-text (274MB) - Embeddings
  * 
  * CLOUD MODELS (via API):
@@ -65,7 +65,7 @@ class ModelRouter {
         if (this.initialized) return true;
 
         console.log('[MODEL_ROUTER] Initializing (optimized local config)...');
-        console.log('[MODEL_ROUTER] Local models: qwen2.5:3b, granite3.1-moe:1b, nomic-embed-text');
+        console.log('[MODEL_ROUTER] Local models: dolphin-mistral:7b, dolphin-mistral:7b, nomic-embed-text');
         console.log('[MODEL_ROUTER] Cloud fallback: Groq, Gemini');
 
         try {

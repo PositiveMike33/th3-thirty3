@@ -8,8 +8,8 @@ const http = require('http');
 // All available models
 const MODELS = [
     'mistral:7b',
-    'qwen2.5:3b', 
-    'granite3.1-moe:1b',
+    'dolphin-mistral:7b', 
+    'dolphin-mistral:7b',
     'llama3.1:8b-instruct-q4_K_M',
     'llama3.2-vision:11b',
     'gpt-oss:120b-cloud'

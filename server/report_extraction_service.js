@@ -13,9 +13,9 @@ class ReportExtractionService {
         this.tagsFile = path.join(this.dataPath, 'tags_database.json');
         
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        // Utiliser granite3.1-moe:1b par défaut (plus léger, 1.4GB)
+        // Utiliser dolphin-mistral:7b par défaut (plus léger, 1.4GB)
         // Ou llama3.2-vision:11b si assez de RAM (11.7GB requis)
-        this.model = process.env.OLLAMA_MODEL || 'granite3.1-moe:1b';
+        this.model = process.env.OLLAMA_MODEL || 'dolphin-mistral:7b';
         
         this.ensureDataFolder();
         this.loadLearning();

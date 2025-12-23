@@ -1,5 +1,5 @@
-ï»¿/**
- * Aikido Security Service - IntÃ©gration API pour le scan de vulnÃ©rabilitÃ©s
+/**
+ * Aikido Security Service - Intégration API pour le scan de vulnérabilités
  * Documentation: https://apidocs.aikido.dev
  * 
  * TEMPORARILY DISABLED - Token needs to be updated
@@ -23,7 +23,7 @@ class AikidoSecurityService {
     }
 
     /**
-     * RequÃªte API authentifiÃ©e avec le token IDE
+     * Requête API authentifiée avec le token IDE
      */
     async apiRequest(endpoint, method = 'GET', body = null, useIdeApi = false) {
         // Skip if disabled

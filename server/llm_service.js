@@ -161,7 +161,7 @@ class LLMService {
     /**
      * Analyzes OSINT tool output using a specific Expert Persona.
      */
-    async analyzeOsintResult(toolId, output, provider = 'local', model = 'qwen2.5:7b') {
+    async analyzeOsintResult(toolId, output, provider = 'local', model = 'dolphin-mistral:7b') {
         const personas = {
             sherlock: `You are 'Ghost', an Elite Social Engineer and Profiler with 20+ years of experience in tracking targets across the digital footprint. 
             Analyze the provided Sherlock username search results. 
@@ -223,7 +223,7 @@ class LLMService {
             // This is critical when running AnythingLLM or other heavy local apps alongside.
             if (providerId !== 'local') {
                 // We don't await this to avoid slowing down the request
-                this.unloadModel('granite3.1-moe:1b').catch(e => console.log("[LLM] Background unload failed:", e.message));
+                this.unloadModel('dolphin-mistral:7b').catch(e => console.log("[LLM] Background unload failed:", e.message));
             }
 
             let response;
@@ -410,7 +410,7 @@ class LLMService {
 
     async generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt) {
         // Fallback to default if no model specified
-        const model = modelId || 'qwen2.5:7b';
+        const model = modelId || 'dolphin-mistral:7b';
 
         const messages = [
             { role: 'system', content: systemPrompt },

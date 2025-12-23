@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Routes API pour le Director des Agents
  * Permet d'interagir avec le Directeur Th3 Thirty3
  */
