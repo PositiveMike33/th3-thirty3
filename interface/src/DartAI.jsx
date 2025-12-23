@@ -225,7 +225,7 @@ const DartAI = () => {
     );
 
     // Kanban Column Component
-    const KanbanColumn = ({ title, status, tasks, color, icon: Icon }) => (
+    const KanbanColumn = ({ title, tasks, color, icon: Icon }) => (
         <div className="flex-1 min-w-[300px] max-w-[350px]">
             <div className={`flex items-center gap-2 mb-4 pb-2 border-b border-${color}-500/30`}>
                 <Icon size={16} className={`text-${color}-400`} />

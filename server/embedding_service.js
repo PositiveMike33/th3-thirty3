@@ -19,10 +19,10 @@ class EmbeddingService {
             ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) 
             : null;
         
-        // Embedding model priority (MoE v2 first, fallback to v1)
+        // Embedding model priority (MoE v2 is primary, v1 removed)
         this.localModels = [
             'nomic-embed-text-v2-moe:latest',
-            'nomic-embed-text:latest'
+            'nomic-embed-text-v2-moe'  // Alternative tag
         ];
         this.activeLocalModel = this.localModels[0];
         
@@ -45,8 +45,7 @@ class EmbeddingService {
         this.isOfflineMode = false;
         
         console.log('[EMBEDDING] Service initialized - OFFLINE-FIRST MODE');
-        console.log('[EMBEDDING] Local priority: nomic-embed-text-v2-moe');
-        console.log('[EMBEDDING] Fallback model: nomic-embed-text');
+        console.log('[EMBEDDING] Local model: nomic-embed-text-v2-moe');
         console.log('[EMBEDDING] Gemini available:', !!this.gemini);
     }
 
