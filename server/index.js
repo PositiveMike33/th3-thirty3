@@ -941,6 +941,19 @@ app.get('/google/drive', async (req, res) => {
     }
 });
 
+// Complete/Uncomplete a Google Task
+app.put('/google/tasks/:taskId', async (req, res) => {
+    const { taskId } = req.params;
+    const { completed, email } = req.body;
+    const userEmail = email || ACCOUNTS[0];
+    try {
+        const result = await googleService.completeTask(userEmail, taskId, completed !== false);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // OSINT Endpoints
 app.get('/osint/tools', (req, res) => {
     res.json(osintService.getTools());
@@ -1586,6 +1599,13 @@ console.log('[SYSTEM] Camera routes mounted at /api/cameras (EasyLife Integratio
 const tuyaRoutes = require('./tuya_routes');
 app.use('/api/tuya', tuyaRoutes);
 console.log('[SYSTEM] Tuya routes mounted at /api/tuya (EasyLife Local Control)');
+
+// Camera Discovery Routes (Passive Network Scanner for Personal Cameras)
+const CameraDiscoveryService = require('./camera_discovery_service');
+const cameraDiscoveryService = new CameraDiscoveryService();
+const cameraDiscoveryRoutes = require('./camera_discovery_routes')(cameraDiscoveryService);
+app.use('/api/camera-discovery', cameraDiscoveryRoutes);
+console.log('[SYSTEM] Camera Discovery routes mounted at /api/camera-discovery (Passive Scanner)');
 
 // Docker Management Routes (Container Auto-Start & Control)
 const dockerRoutes = require('./docker_routes');

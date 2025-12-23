@@ -280,3 +280,180 @@ scanner.mcp_full_audit("192.168.1.0/24")
 
 *Session terminée le 20/12/2025 20:20 - ✅ Integration OSINT 100% Complete*
 
+---
+
+## 📅 Session 2025-12-22 - Intégration Scripts Découverte Passive Caméras
+
+### 🔧 Scripts Intégrés
+
+#### 1. Script Python - `cam_discover.py`
+**Chemin:** `scripts/cam_discover.py`
+
+```bash
+# Usage
+python scripts/cam_discover.py 192.168.1.0/24
+```
+
+**Fonctionnalités:**
+- Scan réseau via nmap ou ping fallback
+- Scan ports caméras (80, 554, 8080, 8081, 6668, 37777, 34567)
+- Détection ONVIF (python-onvif-zeep)
+- Fingerprinting HTTP manufacturier
+- Test RTSP endpoints
+- Export JSON automatique
+
+#### 2. Script Bash WSL - `find_cams.sh`
+**Chemin:** `scripts/find_cams.sh`
+
+```bash
+# Usage via WSL
+wsl bash /mnt/c/Users/th3th/.Th3Thirty3/thethirty3/scripts/find_cams.sh 192.168.1.0/24
+```
+
+**Fonctionnalités:**
+- Compatible WSL Ubuntu
+- Scan nmap complet
+- Identification par headers HTTP
+- Génération rapport texte
+- Commandes d'intégration curl
+
+#### 3. Service Node.js - `camera_discovery_service.js`
+**Chemin:** `server/camera_discovery_service.js`
+
+**Fonctionnalités:**
+- Scan PowerShell natif Windows
+- Port scanning multi-thread
+- Fingerprinting HTTP intégré
+- Test RTSP automatique
+- Wrappers Python/Bash
+- Événements temps réel
+
+### 📡 API Endpoints
+
+| Endpoint | Méthode | Description |
+|----------|---------|-------------|
+| `/api/camera-discovery/status` | GET | Statut service + caméras découvertes |
+| `/api/camera-discovery/scan` | POST | Scan réseau complet |
+| `/api/camera-discovery/quick-scan` | POST | Scan IP unique `{ ip: "..." }` |
+| `/api/camera-discovery/results` | GET | Derniers résultats de scan |
+| `/api/camera-discovery/cameras` | GET | Liste caméras découvertes |
+| `/api/camera-discovery/network-range` | GET | Range réseau auto-détecté |
+| `/api/camera-discovery/python` | POST | Exécuter script Python |
+| `/api/camera-discovery/bash` | POST | Exécuter script Bash via WSL |
+| `/api/camera-discovery/help` | GET | Documentation API |
+
+### 🖥️ Composant Frontend
+
+**Chemin:** `interface/src/components/CameraDiscoveryPanel.jsx`
+
+**Fonctionnalités:**
+- Interface scan réseau
+- Quick scan IP unique
+- Affichage résultats en temps réel
+- Mode compact pour sidebar
+- Liens directs interfaces caméras
+- Indicateurs Tuya/RTSP/ONVIF
+
+### 📁 Fichiers Créés
+
+| Fichier | Description |
+|---------|-------------|
+| `scripts/cam_discover.py` | Script Python découverte ONVIF |
+| `scripts/find_cams.sh` | Script Bash WSL |
+| `server/camera_discovery_service.js` | Service Node.js wrapper |
+| `server/camera_discovery_routes.js` | Routes API REST |
+| `interface/src/components/CameraDiscoveryPanel.jsx` | UI React |
+| `server/data/camera_scans/` | Dossier résultats scans |
+
+### 🔧 Prochaines Étapes
+
+1. **Tester les scripts:**
+   ```bash
+   # Python (depuis racine projet)
+   python scripts/cam_discover.py 192.168.1.0/24
+   
+   # API
+   curl http://localhost:3000/api/camera-discovery/scan -X POST -H "Content-Type: application/json"
+   ```
+
+2. **Intégrer dans ProjectDashboard** le composant `CameraDiscoveryPanel`
+
+3. **Obtenir Local Keys Tuya** pour contrôle complet caméras
+
+---
+
+*Session 22/12/2025 - ✅ Scripts Découverte Passive Caméras Intégrés*
+
+---
+
+## 📅 Session 2025-12-22 (Suite) - Diagnostic Caméras EasyLife
+
+### 📹 Caméras Identifiées
+
+| Caméra | Device ID | IP | MAC | Status |
+|--------|-----------|-----|-----|--------|
+| EasyLife #1 | `131400200201030` | `192.168.1.165` | `98:A8:29:80:0F:68` | ✅ Connectée WiFi |
+| EasyLife #2 | `131400200165748` | À découvrir | À découvrir | En attente |
+
+### 🔍 Résultats Diagnostic
+
+**Connexion réseau:**
+- ✅ Caméra visible dans table ARP (MAC → IP)
+- ❌ Tous ports locaux bloqués (80, 554, 6668, etc.)
+- ❌ Ne répond pas aux pings
+- 📡 Mode **Cloud-Only** (communication P2P/STUN)
+
+**API Tuya Cloud:**
+- ✅ Token obtenu avec succès
+- ❌ "Permission Deny" - compte utilisateur non lié
+- ⏳ En attente de liaison via QR code Tuya Smart
+
+### 🔐 Credentials Tuya IoT
+
+```
+Access ID: d3kkrderuvnuh99mqxkc
+Access Secret: 0c572dcb06dd40dca0bad623469f7d13
+Region: us (Western America Data Center)
+Project: EasyLifeCamera
+```
+
+### ⏳ Blocage Actuel
+
+**Problème:** L'app EasyLife n'a pas de scanner QR pour lier le compte au projet Tuya IoT.
+
+**Solution requise:** 
+1. Télécharger app "Tuya Smart" ou "Smart Life"
+2. Se connecter avec le même compte EasyLife
+3. Scanner le QR code depuis la plateforme Tuya
+
+**Status:** Problème de connexion réseau sur les apps Tuya Smart/Smart Life (investigation en cours)
+
+### 📁 Fichiers Intégrés Cette Session
+
+| Fichier | Lignes | Description |
+|---------|--------|-------------|
+| `scripts/cam_discover.py` | ~480 | Script Python ONVIF + Port Scan |
+| `scripts/find_cams.sh` | ~220 | Script Bash WSL |
+| `server/camera_discovery_service.js` | ~540 | Service Node.js |
+| `server/camera_discovery_routes.js` | ~170 | Routes API REST |
+| `interface/src/components/CameraDiscoveryPanel.jsx` | ~340 | Composant React UI |
+
+### 🔧 Prochaines Étapes (Demain)
+
+**Plan: Méthode Émulateur Android pour extraire Local Keys**
+
+1. **Télécharger BlueStacks 5** → https://www.bluestacks.com/download.html
+2. **Télécharger Smart Life APK v3.6.1** → https://apkpure.com/smart-life-smart-living/com.tuya.smartlife/versions
+3. **Installer et configurer** BlueStacks
+4. **Installer Smart Life 3.6.1** dans l'émulateur
+5. **Se connecter avec Google** (mikegauthierguillet@gmail.com)
+6. **Extraire fichier XML** contenant les Local Keys
+7. **Configurer caméras** dans Th3 Thirty3
+
+**Fichiers à avoir prêts:**
+- BlueStacks installer (~500 MB)
+- Smart Life 3.6.1 APK (~50 MB)
+
+---
+
+*Session terminée 22/12/2025 02:52 - À demain pour finir l'intégration! 🎯*

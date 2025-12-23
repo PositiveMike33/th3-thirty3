@@ -22,6 +22,8 @@ import RiskDashboard from './RiskDashboard';
 import NetworkStatus from './NetworkStatus';
 import ServerConsole from './ServerConsole';
 import LoginPage from './LoginPage';
+import GoogleServicesPage from './GoogleServicesPage';
+import OpenNotebookPage from './OpenNotebookPage';
 import { API_URL } from './config';
 import './index.css';
 
@@ -77,6 +79,8 @@ function App() {
                     <Link to="/simulator" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🎮 SIMULATOR</Link>
                     <Link to="/risks" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🛡️ RISKS</Link>
                     <Link to="/space" className="hover:text-blue-400 transition-colors font-mono text-sm tracking-widest"> SPACE</Link>
+                    <Link to="/notebook" className="hover:text-orange-400 transition-colors font-mono text-sm tracking-widest">📓 NOTEBOOK</Link>
+                    <Link to="/google" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🔴 GOOGLE</Link>
                     <a href="/keelclip/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors font-mono text-sm tracking-widest"> KEELCLIP</a>
                     <Link to="/settings" className="hover:text-yellow-400 transition-colors font-mono text-sm tracking-widest"> SETTINGS</Link>
                     {/* Network Status Indicator - RISK-006 */}
@@ -99,6 +103,8 @@ function App() {
                         <Route path="/space" element={<SpaceDashboard />} />
                         <Route path="/simulator" element={<CyberKineticSimulator />} />
                         <Route path="/risks" element={<RiskDashboard />} />
+                        <Route path="/google" element={<GoogleServicesPage />} />
+                        <Route path="/notebook" element={<OpenNotebookPage />} />
                         <Route path="/subscription" element={<SubscriptionPage />} />
                         <Route path="/payment" element={<PaymentDashboard />} />
                       </Routes>

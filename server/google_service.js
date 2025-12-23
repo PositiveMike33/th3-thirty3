@@ -284,6 +284,44 @@ class GoogleService {
             return false;
         }
     }
+
+    /**
+     * Complete (or uncomplete) a task in Google Tasks
+     * @param {string} email - User email
+     * @param {string} taskId - The ID of the task to complete
+     * @param {boolean} completed - Whether to mark as completed (true) or uncomplete (false)
+     */
+    async completeTask(email, taskId, completed = true) {
+        const auth = await this.getClient(email);
+        if (!auth) return { success: false, error: 'Not authenticated' };
+
+        const service = google.tasks({ version: 'v1', auth });
+        try {
+            // First, get the default task list
+            const taskLists = await service.tasklists.list({ maxResults: 1 });
+            if (!taskLists.data.items || taskLists.data.items.length === 0) {
+                return { success: false, error: 'No task lists found' };
+            }
+
+            const taskListId = taskLists.data.items[0].id;
+
+            // Update the task status
+            const result = await service.tasks.patch({
+                tasklist: taskListId,
+                task: taskId,
+                requestBody: {
+                    status: completed ? 'completed' : 'needsAction',
+                    ...(completed ? { completed: new Date().toISOString() } : { completed: null })
+                }
+            });
+
+            console.log(`[GOOGLE] Task ${taskId} marked as ${completed ? 'completed' : 'active'} for ${email}`);
+            return { success: true, task: result.data };
+        } catch (error) {
+            console.error(`Error updating task ${taskId} for ${email}:`, error);
+            return { success: false, error: error.message };
+        }
+    }
 }
 
 module.exports = GoogleService;

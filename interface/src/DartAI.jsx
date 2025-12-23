@@ -80,6 +80,29 @@ const DartAI = () => {
         }
     };
 
+    // Toggle task completion status
+    const toggleTaskStatus = async (taskId, currentStatus) => {
+        const newStatus = currentStatus === 'completed' ? 'todo' : 'completed';
+        try {
+            const res = await fetch(`${API_URL}/api/dart/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Update local state
+                setTasks(prev => prev.map(t => 
+                    (t.id === taskId || t.dart_id === taskId)
+                        ? { ...t, status: newStatus }
+                        : t
+                ));
+            }
+        } catch (error) {
+            console.error('Failed to toggle task status:', error);
+        }
+    };
+
     return (
         <div className="flex-1 h-full bg-gradient-to-br from-gray-950 via-purple-950/20 to-gray-950 text-white overflow-hidden flex flex-col">
             {/* Header */}
@@ -248,13 +271,34 @@ const DartAI = () => {
                                         {tasks.map((task, index) => (
                                             <div 
                                                 key={task.id || task.dart_id || index}
-                                                className="group bg-gradient-to-r from-black/60 to-purple-900/10 border border-purple-500/20 rounded-xl p-4 hover:border-purple-500/50 transition-all cursor-pointer"
+                                                className={`group bg-gradient-to-r from-black/60 to-purple-900/10 border rounded-xl p-4 transition-all cursor-pointer ${
+                                                    task.status === 'completed'
+                                                        ? 'border-green-500/50 bg-green-900/10'
+                                                        : 'border-purple-500/20 hover:border-purple-500/50'
+                                                }`}
+                                                onClick={() => toggleTaskStatus(task.id || task.dart_id, task.status)}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex items-start gap-3 flex-1">
-                                                        <div className="mt-1 w-5 h-5 rounded border-2 border-purple-500/50 group-hover:border-purple-400 transition-colors" />
+                                                        <button 
+                                                            className="mt-1 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleTaskStatus(task.id || task.dart_id, task.status);
+                                                            }}
+                                                        >
+                                                            {task.status === 'completed' ? (
+                                                                <CheckCircle size={20} className="text-green-400" />
+                                                            ) : (
+                                                                <Circle size={20} className="text-purple-500/50 group-hover:text-purple-400" />
+                                                            )}
+                                                        </button>
                                                         <div className="flex-1">
-                                                            <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors">
+                                                            <h3 className={`font-semibold transition-colors ${
+                                                                task.status === 'completed' 
+                                                                    ? 'text-gray-500 line-through' 
+                                                                    : 'text-white group-hover:text-purple-300'
+                                                            }`}>
                                                                 {task.title}
                                                             </h3>
                                                             {task.description && (
@@ -263,13 +307,20 @@ const DartAI = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                                            task.priority === 'high' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
-                                                            task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
-                                                            'bg-green-500/20 text-green-300 border border-green-500/30'
-                                                        }`}>
-                                                            {(task.priority || 'normal').toUpperCase()}
-                                                        </span>
+                                                        {task.status === 'completed' && (
+                                                            <span className="px-2 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30">
+                                                                DONE
+                                                            </span>
+                                                        )}
+                                                        {task.status !== 'completed' && (
+                                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                                                task.priority === 'high' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                                                                task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                                                                'bg-green-500/20 text-green-300 border border-green-500/30'
+                                                            }`}>
+                                                                {(task.priority || 'normal').toUpperCase()}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-between items-center text-xs text-gray-500 mt-3">
