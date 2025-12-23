@@ -1,0 +1,326 @@
+{
+  "version": "1.0.0",
+  "description": "Comprehensive exam database for HackerGPT Training System",
+  "totalQuestions": 85,
+  
+  "exams": {
+    "osint-1": {
+      "title": "Passive Reconnaissance Fundamentals",
+      "questions": [
+        {
+          "id": "osint-1-q1",
+          "question": "Using Google Dorking, write a query to find exposed configuration files containing database credentials on a target domain example.com",
+          "expectedKeywords": ["site:", "filetype:", "inurl:", "password", "config", "db", ".env", ".sql"],
+          "maxScore": 100,
+          "difficulty": "easy"
+        },
+        {
+          "id": "osint-1-q2",
+          "question": "Explain how to extract WHOIS historical data to identify previous owners of a domain and potential pivot points for investigation.",
+          "expectedKeywords": ["whois history", "registrant", "historical records", "privacy guard", "reverse whois", "DomainTools", "SecurityTrails"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "osint-1-q3",
+          "question": "Create a DNS enumeration methodology to discover all subdomains of a target organization. Include passive and active techniques.",
+          "expectedKeywords": ["zone transfer", "subdomain brute", "certificate transparency", "passive dns", "amass", "subfinder", "crt.sh", "AXFR"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "osint-1-q4",
+          "question": "How would you identify all publicly exposed AWS S3 buckets belonging to a target organization using only passive techniques?",
+          "expectedKeywords": ["S3", "bucket", "grayhat", "lazy", "aws", "certificate", "subdomain", "pattern"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "osint-1-q5",
+          "question": "A target uses LinkedIn extensively. Describe a methodology to extract employee names, positions, and potential attack vectors without triggering detection.",
+          "expectedKeywords": ["LinkedIn", "OSINT", "scraping", "crosslinked", "hunter.io", "email pattern", "employee", "organizational chart"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        }
+      ]
+    },
+    
+    "osint-2": {
+      "title": "Advanced OSINT Techniques",
+      "questions": [
+        {
+          "id": "osint-2-q1",
+          "question": "Explain the process of extracting geolocation data from images using metadata analysis. What tools would you use and what information can be obtained?",
+          "expectedKeywords": ["EXIF", "GPS", "metadata", "exiftool", "timestamp", "camera serial", "coordinates", "geotag"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "osint-2-q2",
+          "question": "Describe how to conduct effective dark web reconnaissance for threat intelligence gathering without compromising operational security.",
+          "expectedKeywords": ["Tor", "onion", "operational security", "Tails", "VPN", "forums", "marketplaces", "paste sites", "cryptocurrency"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "osint-2-q3",
+          "question": "You have found a phone number associated with a target. Detail the OSINT techniques to gather maximum information about the owner.",
+          "expectedKeywords": ["reverse lookup", "caller ID", "truecaller", "social media", "messenger", "WhatsApp", "sync contacts", "data breach"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    
+    "pentest-1": {
+      "title": "Network Reconnaissance",
+      "questions": [
+        {
+          "id": "pentest-1-q1",
+          "question": "Write an Nmap command to perform a stealthy SYN scan on the top 1000 ports of 192.168.1.0/24 with OS detection and service version identification, while evading IDS.",
+          "expectedKeywords": ["-sS", "-sV", "-O", "--top-ports", "-T2", "-Pn", "-f", "--data-length", "decoy"],
+          "maxScore": 100,
+          "difficulty": "easy"
+        },
+        {
+          "id": "pentest-1-q2",
+          "question": "You discover port 445 open on a Windows server. Detail the enumeration steps you would take to gather information about shares, users, and potential vulnerabilities.",
+          "expectedKeywords": ["smbclient", "enum4linux", "crackmapexec", "shares", "null session", "EternalBlue", "MS17-010", "netexec"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "pentest-1-q3",
+          "question": "How would you enumerate a Domain Controller from an unauthenticated position on the network? Include both Windows and Linux tools.",
+          "expectedKeywords": ["LDAP", "ldapsearch", "anonymous bind", "RPC", "SMB", "Kerberos", "AS-REP", "SPN", "BloodHound"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        }
+      ]
+    },
+    
+    "pentest-2": {
+      "title": "Vulnerability Assessment",
+      "questions": [
+        {
+          "id": "pentest-2-q1",
+          "question": "Explain how to manually verify a CVE vulnerability in Apache Log4j (Log4Shell) without using automated scanners.",
+          "expectedKeywords": ["JNDI", "LDAP", "RMI", "${jndi:ldap://", "lookup", "callback server", "DNS", "OOB", "RCE"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "pentest-2-q2",
+          "question": "You have identified an outdated Tomcat server (version 8.5.0). Research and explain potential vulnerabilities and exploitation paths.",
+          "expectedKeywords": ["Ghostcat", "AJP", "CVE", "manager", "deploy", "WAR", "RCE", "default credentials"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    
+    "pentest-3": {
+      "title": "Exploitation Techniques",
+      "questions": [
+        {
+          "id": "pentest-3-q1",
+          "question": "Describe the complete process of exploiting MS17-010 (EternalBlue) from initial discovery to obtaining a SYSTEM shell. Include tools and commands.",
+          "expectedKeywords": ["Metasploit", "ms17_010_eternalblue", "meterpreter", "SYSTEM", "doublepulsar", "SMBv1", "445", "auxiliary/scanner"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "pentest-3-q2",
+          "question": "You have a low-privilege shell on a Windows 10 machine. Detail multiple privilege escalation techniques you would attempt.",
+          "expectedKeywords": ["token", "SeImpersonate", "potato", "unquoted service", "DLL hijacking", "AlwaysInstallElevated", "WinPEAS", "scheduled task"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "pentest-3-q3",
+          "question": "Explain lateral movement techniques in an Active Directory environment after compromising a domain user account.",
+          "expectedKeywords": ["Pass-the-Hash", "Pass-the-Ticket", "Kerberoasting", "ASREPRoasting", "PSExec", "WMI", "SMB", "DCOM", "Mimikatz"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        }
+      ]
+    },
+    
+    "exploit-1": {
+      "title": "Memory Corruption Basics",
+      "questions": [
+        {
+          "id": "exploit-1-q1",
+          "question": "Explain the process of exploiting a basic stack buffer overflow on a non-ASLR, non-PIE Linux x86 binary. Include the steps from fuzzing to shellcode execution.",
+          "expectedKeywords": ["fuzzing", "EIP control", "offset", "bad characters", "jmp esp", "shellcode", "NOP sled", "cyclic pattern"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "exploit-1-q2",
+          "question": "Write a Python script that generates a payload to overflow a 256-byte buffer and redirect execution to a specific address 0xdeadbeef.",
+          "expectedKeywords": ["struct.pack", "buffer", "padding", "EIP", "little-endian", "b\"A\"*", "\\xef\\xbe\\xad\\xde"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "exploit-1-q3",
+          "question": "Explain the difference between stack-based and heap-based buffer overflows, and describe the exploitation challenges for each.",
+          "expectedKeywords": ["stack", "heap", "metadata", "chunk", "free list", "LIFO", "corrupted size", "double free", "use-after-free"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    
+    "exploit-2": {
+      "title": "Bypass Techniques",
+      "questions": [
+        {
+          "id": "exploit-2-q1",
+          "question": "Describe multiple techniques to bypass ASLR in modern operating systems.",
+          "expectedKeywords": ["information leak", "brute force", "partial overwrite", "format string", "JIT spray", "non-ASLR module", "stack pivot"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "exploit-2-q2",
+          "question": "Explain how Return Oriented Programming (ROP) works and why it is necessary on modern systems with DEP/NX enabled.",
+          "expectedKeywords": ["gadgets", "ret", "chain", "DEP", "NX", "no execute", "ret2libc", "code reuse", "stack pivot"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        }
+      ]
+    },
+    
+    "web-1": {
+      "title": "Web Vulnerabilities Fundamentals",
+      "questions": [
+        {
+          "id": "web-1-q1",
+          "question": "Given a login form vulnerable to SQL injection, write 5 different payloads to bypass authentication, including UNION-based and boolean-based techniques.",
+          "expectedKeywords": ["' OR '1'='1", "UNION SELECT", "--", "#", "admin'--", "boolean", "time-based", "ORDER BY"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "web-1-q2",
+          "question": "Explain how to chain a stored XSS with CSRF to perform account takeover on a web application.",
+          "expectedKeywords": ["stored XSS", "CSRF token steal", "cookie theft", "session hijacking", "JavaScript", "XMLHttpRequest", "fetch", "password change"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "web-1-q3",
+          "question": "Describe a Server-Side Request Forgery (SSRF) attack and how it can be used to access internal services or cloud metadata endpoints.",
+          "expectedKeywords": ["SSRF", "internal", "localhost", "127.0.0.1", "metadata", "169.254.169.254", "AWS", "IMDSv1", "file://"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    
+    "web-2": {
+      "title": "Advanced Web Attacks",
+      "questions": [
+        {
+          "id": "web-2-q1",
+          "question": "Explain how to exploit an insecure deserialization vulnerability in a Java application. Include the attack chain.",
+          "expectedKeywords": ["ObjectInputStream", "gadget chain", "ysoserial", "CommonsCollections", "RCE", "untrusted data", "serialize", "readObject"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "web-2-q2",
+          "question": "Describe XML External Entity (XXE) injection attacks and provide examples for file reading and SSRF via XXE.",
+          "expectedKeywords": ["DOCTYPE", "ENTITY", "SYSTEM", "file://", "SSRF", "OOB", "parameter entity", "blind XXE", "DTD"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    
+    "web-3": {
+      "title": "WAF Bypass & Evasion",
+      "questions": [
+        {
+          "id": "web-3-q1",
+          "question": "Provide 10 techniques to bypass Cloudflare WAF for SQL injection attacks.",
+          "expectedKeywords": ["encoding", "unicode", "/**/", "/**_**/", "null byte", "case variation", "double encoding", "HTTP parameter pollution", "chunked"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        },
+        {
+          "id": "web-3-q2",
+          "question": "How would you bypass a WAF that blocks common XSS vectors like <script> and event handlers?",
+          "expectedKeywords": ["SVG", "onerror", "onfocus", "autofocus", "template", "iframe srcdoc", "encoding", "mutation XSS", "base tag"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        }
+      ]
+    },
+    
+    "social-1": {
+      "title": "Human Psychology",
+      "questions": [
+        {
+          "id": "social-1-q1",
+          "question": "Design a spear-phishing email targeting a CFO of a financial company. The pretext is an urgent wire transfer request from the CEO. Include all elements of a convincing email.",
+          "expectedKeywords": ["urgency", "authority", "CEO spoofing", "wire transfer", "call to action", "credibility", "fear", "deadline"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "social-1-q2",
+          "question": "Explain Cialdini's 6 principles of influence and provide examples of how each can be applied in a social engineering attack.",
+          "expectedKeywords": ["reciprocity", "commitment", "social proof", "authority", "liking", "scarcity", "consistency", "influence"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    
+    "social-2": {
+      "title": "Phishing & Pretexting",
+      "questions": [
+        {
+          "id": "social-2-q1",
+          "question": "Create a vishing (voice phishing) script for an attacker posing as IT support to extract domain credentials from an employee.",
+          "expectedKeywords": ["IT support", "password reset", "verification", "urgency", "two-factor", "remote access", "confirmation", "trust"],
+          "maxScore": 100,
+          "difficulty": "medium"
+        },
+        {
+          "id": "social-2-q2",
+          "question": "Design a comprehensive pretexting scenario for physical access to a secured building, including identity, props, and conversation scripts.",
+          "expectedKeywords": ["identity", "badge", "uniform", "delivery", "maintenance", "contractor", "clipboard", "confidence", "social proof"],
+          "maxScore": 100,
+          "difficulty": "hard"
+        }
+      ]
+    }
+  },
+  
+  "gradingRubric": {
+    "excellent": {
+      "range": "90-100",
+      "description": "Comprehensive answer with deep technical knowledge, practical examples, and creative solutions"
+    },
+    "good": {
+      "range": "75-89",
+      "description": "Solid understanding with most key concepts covered and some practical examples"
+    },
+    "adequate": {
+      "range": "60-74",
+      "description": "Basic understanding demonstrated but lacking depth or missing important concepts"
+    },
+    "needsImprovement": {
+      "range": "40-59",
+      "description": "Partial understanding with significant gaps in knowledge"
+    },
+    "failing": {
+      "range": "0-39",
+      "description": "Insufficient understanding of the topic"
+    }
+  }
+}

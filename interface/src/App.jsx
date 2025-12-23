@@ -24,6 +24,8 @@ import ServerConsole from './ServerConsole';
 import LoginPage from './LoginPage';
 import GoogleServicesPage from './GoogleServicesPage';
 import OpenNotebookPage from './OpenNotebookPage';
+import AgentEvolutionDashboard from './components/AgentEvolutionDashboard';
+import AgentTeamChat from './components/AgentTeamChat';
 import { API_URL } from './config';
 import './index.css';
 
@@ -80,6 +82,8 @@ function App() {
                     <Link to="/risks" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🛡️ RISKS</Link>
                     <Link to="/space" className="hover:text-blue-400 transition-colors font-mono text-sm tracking-widest"> SPACE</Link>
                     <Link to="/notebook" className="hover:text-orange-400 transition-colors font-mono text-sm tracking-widest">📓 NOTEBOOK</Link>
+                    <Link to="/evolution" className="hover:text-purple-400 transition-colors font-mono text-sm tracking-widest">🧬 EVOLUTION</Link>
+                    <Link to="/team-chat" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🤝 TEAM</Link>
                     <Link to="/google" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🔴 GOOGLE</Link>
                     <a href="/keelclip/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors font-mono text-sm tracking-widest"> KEELCLIP</a>
                     <Link to="/settings" className="hover:text-yellow-400 transition-colors font-mono text-sm tracking-widest"> SETTINGS</Link>
@@ -105,6 +109,8 @@ function App() {
                         <Route path="/risks" element={<RiskDashboard />} />
                         <Route path="/google" element={<GoogleServicesPage />} />
                         <Route path="/notebook" element={<OpenNotebookPage />} />
+                        <Route path="/evolution" element={<AgentEvolutionDashboard />} />
+                        <Route path="/team-chat" element={<AgentTeamChat />} />
                         <Route path="/subscription" element={<SubscriptionPage />} />
                         <Route path="/payment" element={<PaymentDashboard />} />
                       </Routes>

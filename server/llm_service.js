@@ -7,6 +7,7 @@ const knowledgeBase = require('./knowledge_base_service');
 const { SECURITY_RESEARCH_PROMPTS, getSecurityPrompt, buildSecurityQuery } = require('./security_research_prompts');
 const FibonacciCognitiveOptimizer = require('./fibonacci_cognitive_optimizer');
 const { modelListCache, withTimeout } = require('./performance_utils');
+const runpodService = require('./runpod_service');
 
 class LLMService {
     constructor() {
@@ -31,9 +32,13 @@ class LLMService {
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
             groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
+            runpod: { name: 'RunPod (GPU Cloud)', type: 'cloud' },
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
+        
+        // RunPod service for GPU cloud inference
+        this.runpodService = runpodService;
         
         console.log('[LLM] Service initialized - UNCENSORED MODE');
         console.log('[LLM] Default model:', this.defaultLocalModel);
@@ -322,6 +327,9 @@ USER QUERY: ${query}`;
                 case 'groq':
                     response = await this.generateGroqResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
+                case 'runpod':
+                    response = await this.generateRunPodResponse(augmentedPrompt, modelId, systemPrompt);
+                    break;
                 case 'perplexity':
                     response = await this.generatePerplexityResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
@@ -561,6 +569,153 @@ USER QUERY: ${query}`;
             providerName: 'lmstudio'
         });
     }
+
+    /**
+     * Generate response using RunPod GPU Cloud
+     * Supports serverless endpoints and OpenAI-compatible pods
+     * 
+     * Models available:
+     * - llama70b: Llama 3.3 70B (serverless)
+     * - mistral: Mistral 7B/8x7B (serverless)
+     * - qwen: Qwen 2.5 72B (serverless)
+     * - vllm: Generic vLLM endpoint (custom models)
+     * 
+     * @param {string} prompt - User prompt
+     * @param {string} modelId - Model to use (llama70b, mistral, qwen, vllm)
+     * @param {string} systemPrompt - System prompt
+     */
+    async generateRunPodResponse(prompt, modelId, systemPrompt) {
+        if (!this.runpodService) {
+            throw new Error('RunPod service not initialized');
+        }
+        
+        const status = this.runpodService.getStatus();
+        
+        if (!status.configured) {
+            console.log('[LLM] RunPod not configured, falling back to Groq...');
+            return await this.generateGroqResponse(prompt, 'llama-3.3-70b-versatile', systemPrompt);
+        }
+        
+        const model = modelId || 'llama70b';
+        console.log(`[LLM] RunPod request: model=${model}`);
+        
+        const startTime = Date.now();
+        
+        try {
+            // Try serverless first (fastest)
+            if (status.serverlessEndpoints.includes(model) || status.serverlessEndpoints.includes('vllm')) {
+                const response = await this.runpodService.generateServerlessResponse(prompt, model, {
+                    systemPrompt,
+                    maxTokens: 2048,
+                    temperature: 0.7
+                });
+                
+                const responseTime = Date.now() - startTime;
+                console.log(`[RUNPOD] Serverless response in ${responseTime}ms`);
+                
+                // Record metrics
+                if (this.modelMetricsService) {
+                    this.modelMetricsService.recordQuery(`[RUNPOD] ${model}`, {
+                        responseTime,
+                        tokensGenerated: Math.floor((response?.length || 0) / 4),
+                        success: true,
+                        category: 'chat',
+                        qualityScore: 85
+                    });
+                }
+                
+                return response;
+            }
+            
+            // Try OpenAI-compatible endpoint (for custom pods)
+            if (process.env.RUNPOD_OPENAI_ENDPOINT) {
+                const response = await this.runpodService.generateOpenAICompatibleResponse(prompt, {
+                    systemPrompt,
+                    model: model,
+                    maxTokens: 2048
+                });
+                
+                const responseTime = Date.now() - startTime;
+                console.log(`[RUNPOD] OpenAI-compatible response in ${responseTime}ms`);
+                
+                return response;
+            }
+            
+            // No RunPod endpoint available, fallback to Groq
+            console.log('[LLM] No RunPod endpoint available, falling back to Groq...');
+            return await this.generateGroqResponse(prompt, 'llama-3.3-70b-versatile', systemPrompt);
+            
+        } catch (error) {
+            console.error('[RUNPOD] Error:', error.message);
+            
+            // SMART FAILOVER: Try Groq, then local
+            console.log('[LLM] RunPod failed, attempting failover...');
+            
+            try {
+                // Failover 1: Groq (fast cloud)
+                if (process.env.GROQ_API_KEY) {
+                    console.log('[LLM] Failover to Groq...');
+                    return await this.generateGroqResponse(prompt, 'llama-3.3-70b-versatile', systemPrompt);
+                }
+            } catch (groqError) {
+                console.error('[LLM] Groq failover failed:', groqError.message);
+            }
+            
+            try {
+                // Failover 2: Local Ollama
+                console.log('[LLM] Failover to local Ollama...');
+                return await this.generateOllamaResponse(prompt, null, null, systemPrompt);
+            } catch (localError) {
+                console.error('[LLM] Local failover failed:', localError.message);
+                throw new Error(`All inference providers failed. RunPod: ${error.message}`);
+            }
+        }
+    }
+
+    /**
+     * Smart inference with automatic provider selection
+     * Chooses the best provider based on availability and model requirements
+     * 
+     * Priority: RunPod (big models) → Groq (fast) → Local (fallback)
+     */
+    async generateSmartResponse(prompt, options = {}) {
+        const { 
+            preferGPU = false, 
+            requireUncensored = false,
+            maxLatency = 30000,
+            systemPrompt = 'You are a helpful AI assistant.'
+        } = options;
+        
+        // If uncensored required, use local
+        if (requireUncensored) {
+            console.log('[LLM] Smart: Uncensored required, using local');
+            return await this.generateOllamaResponse(prompt, null, null, systemPrompt);
+        }
+        
+        // If GPU preferred and RunPod available
+        if (preferGPU && this.runpodService?.getStatus().configured) {
+            console.log('[LLM] Smart: GPU preferred, using RunPod');
+            return await this.generateRunPodResponse(prompt, 'llama70b', systemPrompt);
+        }
+        
+        // Fast response preferred - use Groq
+        if (process.env.GROQ_API_KEY && maxLatency < 10000) {
+            console.log('[LLM] Smart: Fast response needed, using Groq');
+            return await this.generateGroqResponse(prompt, 'llama-3.1-8b-instant', systemPrompt);
+        }
+        
+        // Default: Groq for speed, fallback to local
+        if (process.env.GROQ_API_KEY) {
+            try {
+                return await this.generateGroqResponse(prompt, 'llama-3.3-70b-versatile', systemPrompt);
+            } catch (e) {
+                console.log('[LLM] Smart: Groq failed, falling back to local');
+            }
+        }
+        
+        return await this.generateOllamaResponse(prompt, null, null, systemPrompt);
+    }
+
 
     async generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt) {
         // Use uncensored model by default, with automatic fallback chain

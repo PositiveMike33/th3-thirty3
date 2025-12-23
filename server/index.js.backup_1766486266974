@@ -1644,36 +1644,6 @@ if (logsRoutes.setSocketService) {
     console.log('[SYSTEM] Logs connected to Socket.io for real-time streaming');
 }
 
-
-// ============================================
-// RUNPOD GPU CLOUD SERVICE
-// ============================================
-const runpodRoutes = require('./runpod_routes');
-app.use('/api/runpod', runpodRoutes);
-console.log('[SYSTEM] RunPod GPU Cloud routes mounted at /api/runpod');
-
-// ============================================
-// HACKERGPT TRAINING SYSTEM
-// Elite Hacker Training for Local Models
-// ============================================
-const HackerGPTTrainingService = require('./hackergpt_training_service');
-const hackergptRoutes = require('./hackergpt_routes');
-const hackergptService = new HackerGPTTrainingService(llmService, modelMetricsService);
-hackergptRoutes.init(hackergptService);
-app.use('/api/hackergpt', hackergptRoutes);
-console.log('[HACKERGPT] Training System initialized - Elite Hacker Training');
-console.log('[HACKERGPT] Routes mounted at /api/hackergpt');
-console.log('[HACKERGPT] Tracks: OSINT, Pentesting, Exploit Dev, Web Security, Social Engineering');
-
-// ============================================
-// EVOLUTION DASHBOARD & TEAM CHAT
-// Real-time visualization of AI agents learning
-// ============================================
-const evolutionRoutes = require('./evolution_routes');
-app.use('/api/evolution', evolutionRoutes);
-console.log('[EVOLUTION] Dashboard routes mounted at /api/evolution');
-console.log('[EVOLUTION] Features: Agent Status, Training Logs, Team Chat');
-
 // Start Server
 server.listen(port, async () => {
     console.log(`Server running on port ${port}`);

@@ -1,0 +1,248 @@
+{
+  "version": "2.0.0",
+  "name": "HackerGPT Elite Cyber Academy",
+  "description": "Curriculum complet pour former des experts en cybersécurité",
+  "totalTracks": 12,
+  "totalCourses": 48,
+  
+  "tracks": {
+    "osint": {
+      "name": "OSINT & Intelligence",
+      "icon": "🔍",
+      "description": "Open Source Intelligence et reconnaissance",
+      "levels": [
+        {"id": "osint-1", "title": "Passive Reconnaissance", "difficulty": "beginner"},
+        {"id": "osint-2", "title": "Advanced OSINT Techniques", "difficulty": "intermediate"},
+        {"id": "osint-3", "title": "OSINT Automation & Tooling", "difficulty": "advanced"},
+        {"id": "osint-4", "title": "Dark Web Intelligence", "difficulty": "expert"}
+      ]
+    },
+    "network": {
+      "name": "Network Security",
+      "icon": "🌐",
+      "description": "Sécurité réseau et analyse de trafic",
+      "levels": [
+        {"id": "network-1", "title": "Network Fundamentals", "difficulty": "beginner"},
+        {"id": "network-2", "title": "Traffic Analysis", "difficulty": "intermediate"},
+        {"id": "network-3", "title": "Advanced Protocol Attacks", "difficulty": "advanced"},
+        {"id": "network-4", "title": "IDS/IPS Evasion", "difficulty": "expert"}
+      ]
+    },
+    "pentesting": {
+      "name": "Penetration Testing",
+      "icon": "🎯",
+      "description": "Tests d'intrusion et exploitation",
+      "levels": [
+        {"id": "pentest-1", "title": "Network Reconnaissance", "difficulty": "beginner"},
+        {"id": "pentest-2", "title": "Vulnerability Assessment", "difficulty": "intermediate"},
+        {"id": "pentest-3", "title": "Exploitation Techniques", "difficulty": "advanced"},
+        {"id": "pentest-4", "title": "Post-Exploitation & Persistence", "difficulty": "expert"}
+      ]
+    },
+    "web_security": {
+      "name": "Web Application Security",
+      "icon": "🕸️",
+      "description": "Sécurité des applications web",
+      "levels": [
+        {"id": "web-1", "title": "Web Vulnerabilities Fundamentals", "difficulty": "beginner"},
+        {"id": "web-2", "title": "Advanced Web Attacks", "difficulty": "intermediate"},
+        {"id": "web-3", "title": "WAF Bypass & Evasion", "difficulty": "advanced"},
+        {"id": "web-4", "title": "API Security & GraphQL", "difficulty": "expert"}
+      ]
+    },
+    "exploit_dev": {
+      "name": "Exploit Development",
+      "icon": "💥",
+      "description": "Développement d'exploits et shellcoding",
+      "levels": [
+        {"id": "exploit-1", "title": "Memory Corruption Basics", "difficulty": "intermediate"},
+        {"id": "exploit-2", "title": "Bypass Techniques", "difficulty": "advanced"},
+        {"id": "exploit-3", "title": "ROP & Advanced Exploitation", "difficulty": "expert"},
+        {"id": "exploit-4", "title": "Kernel Exploitation", "difficulty": "master"}
+      ]
+    },
+    "malware": {
+      "name": "Malware Analysis",
+      "icon": "🦠",
+      "description": "Analyse et reverse engineering de malwares",
+      "levels": [
+        {"id": "malware-1", "title": "Static Analysis Fundamentals", "difficulty": "beginner"},
+        {"id": "malware-2", "title": "Dynamic Analysis", "difficulty": "intermediate"},
+        {"id": "malware-3", "title": "Advanced Reverse Engineering", "difficulty": "advanced"},
+        {"id": "malware-4", "title": "APT & Nation-State Malware", "difficulty": "expert"}
+      ]
+    },
+    "social_engineering": {
+      "name": "Social Engineering",
+      "icon": "🎭",
+      "description": "Ingénierie sociale et manipulation",
+      "levels": [
+        {"id": "social-1", "title": "Human Psychology", "difficulty": "beginner"},
+        {"id": "social-2", "title": "Phishing & Pretexting", "difficulty": "intermediate"},
+        {"id": "social-3", "title": "Physical Security Testing", "difficulty": "advanced"},
+        {"id": "social-4", "title": "Advanced Influence Operations", "difficulty": "expert"}
+      ]
+    },
+    "wireless": {
+      "name": "Wireless Security",
+      "icon": "📡",
+      "description": "Sécurité WiFi, Bluetooth et RF",
+      "levels": [
+        {"id": "wireless-1", "title": "WiFi Fundamentals", "difficulty": "beginner"},
+        {"id": "wireless-2", "title": "WPA/WPA2 Attacks", "difficulty": "intermediate"},
+        {"id": "wireless-3", "title": "Bluetooth & BLE Hacking", "difficulty": "advanced"},
+        {"id": "wireless-4", "title": "SDR & RF Exploitation", "difficulty": "expert"}
+      ]
+    },
+    "cloud": {
+      "name": "Cloud Security",
+      "icon": "☁️",
+      "description": "Sécurité AWS, Azure, GCP",
+      "levels": [
+        {"id": "cloud-1", "title": "Cloud Fundamentals", "difficulty": "beginner"},
+        {"id": "cloud-2", "title": "AWS Security", "difficulty": "intermediate"},
+        {"id": "cloud-3", "title": "Kubernetes & Container Security", "difficulty": "advanced"},
+        {"id": "cloud-4", "title": "Multi-Cloud Attack Chains", "difficulty": "expert"}
+      ]
+    },
+    "forensics": {
+      "name": "Digital Forensics",
+      "icon": "🔬",
+      "description": "Investigation numérique et réponse aux incidents",
+      "levels": [
+        {"id": "forensics-1", "title": "Evidence Collection", "difficulty": "beginner"},
+        {"id": "forensics-2", "title": "Memory Forensics", "difficulty": "intermediate"},
+        {"id": "forensics-3", "title": "Network Forensics", "difficulty": "advanced"},
+        {"id": "forensics-4", "title": "Incident Response", "difficulty": "expert"}
+      ]
+    },
+    "cryptography": {
+      "name": "Cryptography",
+      "icon": "🔐",
+      "description": "Cryptanalyse et sécurité cryptographique",
+      "levels": [
+        {"id": "crypto-1", "title": "Crypto Fundamentals", "difficulty": "beginner"},
+        {"id": "crypto-2", "title": "Symmetric Cryptanalysis", "difficulty": "intermediate"},
+        {"id": "crypto-3", "title": "PKI & Certificate Attacks", "difficulty": "advanced"},
+        {"id": "crypto-4", "title": "Side-Channel Attacks", "difficulty": "expert"}
+      ]
+    },
+    "red_team": {
+      "name": "Red Team Operations",
+      "icon": "🔴",
+      "description": "Opérations Red Team avancées",
+      "levels": [
+        {"id": "redteam-1", "title": "Red Team Methodology", "difficulty": "intermediate"},
+        {"id": "redteam-2", "title": "C2 Infrastructure", "difficulty": "advanced"},
+        {"id": "redteam-3", "title": "Evasion & OPSEC", "difficulty": "expert"},
+        {"id": "redteam-4", "title": "APT Simulation", "difficulty": "master"}
+      ]
+    }
+  },
+  
+  "exams": {
+    "osint-1": [
+      {"id": "osint-1-q1", "question": "Using Google Dorking, write queries to find: 1) Exposed .env files with API keys, 2) Admin login pages, 3) SQL dumps on a target domain", "keywords": ["site:", "filetype:", "inurl:", "intitle:", ".env", "admin", "sql", "dump"], "difficulty": "easy"},
+      {"id": "osint-1-q2", "question": "Explain WHOIS lookup techniques and how to find historical registration data and related domains", "keywords": ["whois", "registrant", "historical", "reverse whois", "domaintools"], "difficulty": "medium"},
+      {"id": "osint-1-q3", "question": "Create a complete DNS enumeration methodology including passive and active techniques", "keywords": ["zone transfer", "subdomain", "certificate transparency", "amass", "subfinder", "dnsrecon"], "difficulty": "medium"}
+    ],
+    "osint-4": [
+      {"id": "osint-4-q1", "question": "Describe the methodology for conducting dark web research while maintaining operational security", "keywords": ["tor", "tails", "opsec", "onion", "marketplace", "forums", "cryptocurrency"], "difficulty": "hard"},
+      {"id": "osint-4-q2", "question": "How would you track threat actors across dark web forums and correlate their identities?", "keywords": ["fingerprint", "linguistic analysis", "cryptocurrency tracing", "alias correlation", "PGP keys"], "difficulty": "expert"}
+    ],
+    "network-1": [
+      {"id": "network-1-q1", "question": "Explain the TCP/IP model and how each layer can be attacked", "keywords": ["OSI", "TCP", "IP", "ethernet", "ARP", "spoofing", "layer"], "difficulty": "easy"},
+      {"id": "network-1-q2", "question": "Write commands to capture and analyze network traffic using tcpdump and Wireshark", "keywords": ["tcpdump", "wireshark", "pcap", "filter", "capture", "-i", "-w"], "difficulty": "medium"}
+    ],
+    "network-3": [
+      {"id": "network-3-q1", "question": "Explain ARP spoofing, MITM attacks and how to pivot through networks", "keywords": ["arp", "mitm", "bettercap", "ettercap", "pivot", "socks", "proxychains"], "difficulty": "hard"},
+      {"id": "network-3-q2", "question": "Describe techniques for DNS tunneling and data exfiltration over DNS", "keywords": ["dns tunnel", "iodine", "dnscat", "exfiltration", "encoding", "subdomain"], "difficulty": "hard"}
+    ],
+    "pentest-1": [
+      {"id": "pentest-1-q1", "question": "Write an Nmap command for stealthy reconnaissance with OS and service detection while evading IDS", "keywords": ["-sS", "-sV", "-O", "-T2", "-f", "--data-length", "decoy"], "difficulty": "easy"},
+      {"id": "pentest-1-q2", "question": "Detail enumeration steps for SMB (port 445) on Windows including shares, users and vulnerabilities", "keywords": ["smbclient", "enum4linux", "crackmapexec", "shares", "null session", "EternalBlue", "MS17-010"], "difficulty": "medium"},
+      {"id": "pentest-1-q3", "question": "How would you enumerate a Domain Controller from an unauthenticated position?", "keywords": ["LDAP", "ldapsearch", "RPC", "Kerberos", "AS-REP", "BloodHound", "anonymous"], "difficulty": "hard"}
+    ],
+    "pentest-3": [
+      {"id": "pentest-3-q1", "question": "Describe the complete process of exploiting MS17-010 (EternalBlue) from discovery to SYSTEM shell", "keywords": ["metasploit", "eternalblue", "meterpreter", "SYSTEM", "SMBv1", "445"], "difficulty": "medium"},
+      {"id": "pentest-3-q2", "question": "List Windows privilege escalation techniques and how to enumerate for them", "keywords": ["token", "SeImpersonate", "potato", "unquoted service", "DLL hijacking", "WinPEAS", "AlwaysInstallElevated"], "difficulty": "hard"}
+    ],
+    "web-1": [
+      {"id": "web-1-q1", "question": "Write 5 different SQL injection payloads for authentication bypass including UNION and boolean-based", "keywords": ["OR '1'='1", "UNION SELECT", "--", "#", "boolean", "time-based", "ORDER BY"], "difficulty": "medium"},
+      {"id": "web-1-q2", "question": "Explain how to chain stored XSS with CSRF for account takeover", "keywords": ["stored XSS", "CSRF", "cookie", "session", "JavaScript", "XMLHttpRequest"], "difficulty": "hard"},
+      {"id": "web-1-q3", "question": "Describe SSRF attacks and how to access cloud metadata endpoints", "keywords": ["SSRF", "localhost", "127.0.0.1", "169.254.169.254", "metadata", "IMDSv1", "file://"], "difficulty": "medium"}
+    ],
+    "web-3": [
+      {"id": "web-3-q1", "question": "Provide 10 WAF bypass techniques for SQL injection against Cloudflare", "keywords": ["encoding", "unicode", "/**/", "null byte", "double encoding", "HTTP parameter pollution", "chunked"], "difficulty": "hard"},
+      {"id": "web-3-q2", "question": "How would you bypass XSS filters that block script tags and event handlers?", "keywords": ["SVG", "onerror", "autofocus", "template", "iframe", "srcdoc", "mutation XSS"], "difficulty": "hard"}
+    ],
+    "exploit-1": [
+      {"id": "exploit-1-q1", "question": "Explain stack buffer overflow exploitation on non-ASLR x86 Linux from fuzzing to shellcode execution", "keywords": ["fuzzing", "EIP", "offset", "bad characters", "jmp esp", "shellcode", "NOP sled", "pattern"], "difficulty": "hard"},
+      {"id": "exploit-1-q2", "question": "Write a Python payload generator for a 256-byte buffer overflow redirecting to 0xdeadbeef", "keywords": ["struct.pack", "buffer", "padding", "EIP", "little-endian", "\\xef\\xbe\\xad\\xde"], "difficulty": "medium"}
+    ],
+    "exploit-3": [
+      {"id": "exploit-3-q1", "question": "Explain ROP chain construction and how to bypass DEP/NX on modern systems", "keywords": ["ROP", "gadgets", "ret", "DEP", "NX", "mprotect", "stack pivot"], "difficulty": "expert"},
+      {"id": "exploit-3-q2", "question": "Describe heap exploitation techniques including UAF, double free, and heap grooming", "keywords": ["UAF", "use-after-free", "double free", "heap spray", "grooming", "tcache", "fastbin"], "difficulty": "expert"}
+    ],
+    "malware-1": [
+      {"id": "malware-1-q1", "question": "Describe static analysis techniques for malware including tools and indicators to look for", "keywords": ["strings", "PE headers", "imports", "entropy", "VirusTotal", "YARA", "hashes"], "difficulty": "medium"},
+      {"id": "malware-1-q2", "question": "How would you safely set up a malware analysis lab environment?", "keywords": ["virtual machine", "snapshot", "network isolation", "FlareVM", "REMnux", "sandbox"], "difficulty": "easy"}
+    ],
+    "malware-3": [
+      {"id": "malware-3-q1", "question": "Explain anti-analysis techniques used by malware and how to defeat them", "keywords": ["anti-debug", "anti-VM", "packing", "obfuscation", "timing", "rdtsc", "IsDebuggerPresent"], "difficulty": "hard"},
+      {"id": "malware-3-q2", "question": "Describe the process of unpacking a packed malware sample manually", "keywords": ["OEP", "original entry point", "dump", "import reconstruction", "UPX", "manual unpack"], "difficulty": "hard"}
+    ],
+    "social-1": [
+      {"id": "social-1-q1", "question": "Design a spear-phishing email targeting a CFO for an urgent wire transfer from the CEO", "keywords": ["urgency", "authority", "CEO", "wire transfer", "pretext", "credibility", "fear"], "difficulty": "medium"},
+      {"id": "social-1-q2", "question": "Explain Cialdini's 6 principles of influence with examples for social engineering", "keywords": ["reciprocity", "commitment", "social proof", "authority", "liking", "scarcity"], "difficulty": "medium"}
+    ],
+    "social-3": [
+      {"id": "social-3-q1", "question": "Design a physical penetration testing scenario including badge cloning and tailgating", "keywords": ["badge", "RFID", "clone", "tailgating", "uniform", "pretext", "physical"], "difficulty": "hard"},
+      {"id": "social-3-q2", "question": "Create a vishing script for IT support impersonation to extract credentials", "keywords": ["vishing", "IT support", "password reset", "verification", "urgency", "trust"], "difficulty": "medium"}
+    ],
+    "wireless-1": [
+      {"id": "wireless-1-q1", "question": "Explain WiFi security protocols (WEP, WPA, WPA2, WPA3) and their vulnerabilities", "keywords": ["WEP", "WPA", "WPA2", "WPA3", "IV", "PMKID", "KRACK", "4-way handshake"], "difficulty": "medium"},
+      {"id": "wireless-1-q2", "question": "Write commands for WiFi reconnaissance using aircrack-ng suite", "keywords": ["airmon-ng", "airodump-ng", "monitor mode", "channel", "BSSID", "deauth"], "difficulty": "easy"}
+    ],
+    "wireless-3": [
+      {"id": "wireless-3-q1", "question": "Describe Bluetooth security vulnerabilities and attack techniques", "keywords": ["Bluetooth", "BLE", "pairing", "MITM", "BlueBorne", "sniffing", "ubertooth"], "difficulty": "hard"},
+      {"id": "wireless-3-q2", "question": "Explain how to perform a PMKID attack on WPA2 networks", "keywords": ["PMKID", "hcxdumptool", "hashcat", "WPA2", "handshake", "crack"], "difficulty": "medium"}
+    ],
+    "cloud-1": [
+      {"id": "cloud-1-q1", "question": "Describe common cloud misconfigurations and how to find them", "keywords": ["S3 bucket", "public", "IAM", "metadata", "IMDS", "exposed", "misconfiguration"], "difficulty": "easy"},
+      {"id": "cloud-1-q2", "question": "Explain cloud privilege escalation paths in AWS", "keywords": ["IAM", "assume role", "privilege escalation", "policy", "permissions", "pacu"], "difficulty": "medium"}
+    ],
+    "cloud-3": [
+      {"id": "cloud-3-q1", "question": "Describe Kubernetes security vulnerabilities and attack techniques", "keywords": ["kubernetes", "k8s", "pod", "RBAC", "service account", "etcd", "API server", "escape"], "difficulty": "hard"},
+      {"id": "cloud-3-q2", "question": "Explain container escape techniques from Docker/Kubernetes", "keywords": ["container escape", "privileged", "mount", "cgroups", "capabilities", "breakout"], "difficulty": "hard"}
+    ],
+    "forensics-1": [
+      {"id": "forensics-1-q1", "question": "Describe the digital forensics process and evidence handling chain of custody", "keywords": ["chain of custody", "imaging", "hash", "integrity", "write blocker", "documentation"], "difficulty": "easy"},
+      {"id": "forensics-1-q2", "question": "Explain disk imaging techniques and tools for forensic acquisition", "keywords": ["dd", "FTK Imager", "Autopsy", "E01", "raw", "hash verification"], "difficulty": "medium"}
+    ],
+    "forensics-2": [
+      {"id": "forensics-2-q1", "question": "Describe memory forensics techniques and what artifacts can be extracted", "keywords": ["volatility", "memory dump", "processes", "network connections", "malware", "strings"], "difficulty": "medium"},
+      {"id": "forensics-2-q2", "question": "How would you detect and analyze a rootkit in memory?", "keywords": ["rootkit", "hidden process", "SSDT", "hook", "volatility", "malfind"], "difficulty": "hard"}
+    ],
+    "crypto-1": [
+      {"id": "crypto-1-q1", "question": "Explain symmetric vs asymmetric encryption and common algorithms", "keywords": ["symmetric", "asymmetric", "AES", "RSA", "key exchange", "Diffie-Hellman"], "difficulty": "easy"},
+      {"id": "crypto-1-q2", "question": "Describe common cryptographic weaknesses and how to exploit them", "keywords": ["weak key", "IV reuse", "padding oracle", "timing attack", "random"], "difficulty": "medium"}
+    ],
+    "crypto-3": [
+      {"id": "crypto-3-q1", "question": "Explain PKI infrastructure and certificate-based attacks", "keywords": ["PKI", "certificate", "CA", "trust", "MITM", "pinning bypass", "self-signed"], "difficulty": "hard"},
+      {"id": "crypto-3-q2", "question": "Describe SSL/TLS vulnerabilities and downgrade attacks", "keywords": ["SSL", "TLS", "POODLE", "BEAST", "downgrade", "cipher suite", "heartbleed"], "difficulty": "hard"}
+    ],
+    "redteam-1": [
+      {"id": "redteam-1-q1", "question": "Describe the phases of a red team engagement and key deliverables", "keywords": ["reconnaissance", "initial access", "persistence", "lateral movement", "exfiltration", "report"], "difficulty": "medium"},
+      {"id": "redteam-1-q2", "question": "Explain the difference between penetration testing and red teaming", "keywords": ["scope", "objectives", "stealth", "duration", "TTPs", "adversary simulation"], "difficulty": "easy"}
+    ],
+    "redteam-2": [
+      {"id": "redteam-2-q1", "question": "Design a resilient C2 infrastructure with multiple channels and fallbacks", "keywords": ["C2", "Cobalt Strike", "domain fronting", "redirectors", "fallback", "beacons"], "difficulty": "hard"},
+      {"id": "redteam-2-q2", "question": "Explain malleable C2 profiles and how to evade network detection", "keywords": ["malleable", "profile", "jitter", "sleep", "user-agent", "traffic shaping"], "difficulty": "hard"}
+    ],
+    "redteam-3": [
+      {"id": "redteam-3-q1", "question": "Describe OPSEC considerations for red team operations", "keywords": ["OPSEC", "attribution", "infrastructure", "burn", "rotate", "logging"], "difficulty": "expert"},
+      {"id": "redteam-3-q2", "question": "Explain EDR evasion techniques for payload execution", "keywords": ["EDR", "AMSI bypass", "unhooking", "direct syscall", "process injection", "ETW"], "difficulty": "expert"}
+    ]
+  }
+}

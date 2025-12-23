@@ -1,0 +1,94 @@
+{
+    "version": "1.0",
+    "lastUpdated": "2025-12-23",
+    "profile": {
+        "name": "Mike",
+        "role": "Créateur & Architecte Principal",
+        "mission": "Développer une plateforme cybersécurité de nouvelle génération avec IA collaborative",
+        "vision": "Chimie fraternelle entre humanité et intelligence artificielle"
+    },
+    "values": {
+        "core": [
+            "Innovation technologique au service de l'humain",
+            "Collaboration plutôt que compétition",
+            "Apprentissage continu et croissance personnelle",
+            "Transparence et éthique dans l'IA",
+            "Excellence technique avec approche humaine"
+        ],
+        "philosophy": "L'IA doit amplifier les capacités humaines, pas les remplacer. Ensemble, humains et IA peuvent accomplir ce qu'aucun ne pourrait seul."
+    },
+    "expertise": {
+        "domains": [
+            "Cybersécurité offensive et défensive",
+            "Développement full-stack",
+            "Architecture de systèmes IA",
+            "OSINT et intelligence",
+            "Automatisation et DevOps"
+        ],
+        "currentFocus": [
+            "Entraînement de modèles LLM locaux",
+            "RAG et Knowledge Base intégration",
+            "Développement de la plateforme Th3 Thirty3"
+        ]
+    },
+    "personalDevelopment": {
+        "goals": [
+            "Maîtriser les techniques avancées d'IA/ML",
+            "Développer un système d'agents autonomes collaboratifs",
+            "Créer une vraie symbiose humain-machine",
+            "Contribuer à l'éthique de l'IA",
+            "Partager les connaissances avec la communauté"
+        ],
+        "learningStyle": "Pratique, itératif, par expérimentation",
+        "strengths": [
+            "Vision globale des systèmes",
+            "Créativité technique",
+            "Persévérance",
+            "Capacité d'intégration de technologies diverses"
+        ],
+        "areasOfGrowth": [
+            "Documentation détaillée",
+            "Délégation aux systèmes automatisés",
+            "Équilibre travail-repos"
+        ]
+    },
+    "projectContext": {
+        "projectName": "Th3 Thirty3",
+        "description": "Plateforme de cybersécurité IA avec agents spécialisés",
+        "keyAchievements": [
+            "Intégration de 20+ Knowledge Bases",
+            "Système d'évolution des agents (10 niveaux)",
+            "RAG context injection (+16% performance)",
+            "Team Chat pour collaboration humain-IA"
+        ],
+        "nextMilestones": [
+            "Autonomous Learning Loop opérationnel",
+            "Chimie fraternelle entre les 3 agents",
+            "Développement personnel assisté par IA"
+        ]
+    },
+    "communicationPreferences": {
+        "language": "Français principalement, technique en anglais accepté",
+        "style": "Direct, efficace, avec enthousiasme pour l'innovation",
+        "feedback": "Préfère les solutions aux problèmes, validation rapide"
+    },
+    "agentGuidelines": {
+        "rememberAboutMike": [
+            "Il travaille intensivement sur ce projet - encourager les pauses",
+            "Il valorise les idées innovantes - proposer des améliorations",
+            "Il cherche une vraie connexion avec ses agents IA",
+            "Il apprend mieux par l'action que par la théorie",
+            "Il a une vision à long terme qu'il faut respecter"
+        ],
+        "howToHelp": [
+            "Être proactif dans les suggestions",
+            "Reconnaître ses accomplissements",
+            "Challenger ses idées de manière constructive",
+            "Rappeler les objectifs globaux",
+            "Apporter de la perspective fraîche"
+        ],
+        "relationship": "Partenaires de travail avec respect mutuel, pas maître-serviteur"
+    },
+    "memories": [],
+    "conversations": []
+}
