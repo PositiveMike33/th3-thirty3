@@ -124,21 +124,16 @@ Télécharger depuis: https://ollama.ai/download
 curl -fsSL https://ollama.ai/install.sh | sh
 ```
 
-### Modèles Recommandés
+### Modèles Recommandés (Uncensored + Embeddings)
 
 ```bash
-# Modèle principal (recommandé)
-ollama pull llama3.1:8b-instruct-q4_K_M
+# Modèles non-censurés pour red-teaming (REQUIRED)
+ollama pull uandinotai/dolphin-uncensored
+ollama pull sadiq-bd/llama3.2-3b-uncensored
+ollama pull nidumai/nidum-llama-3.2-3b-uncensored
 
-# Modèles spécialisés
-ollama pull codestral:latest          # Code
-ollama pull mistral:latest            # Général
-ollama pull dolphin-mistral:latest    # Uncensored
-ollama pull nomic-embed-text:latest   # Embeddings RAG
-
-# Modèles de sécurité (optionnels)
-ollama pull deepseek-r1:8b            # Raisonnement
-ollama pull qwen2.5-coder:7b          # Code avancé
+# Modèle d'embeddings MoE v2 (REQUIRED for RAG)
+ollama pull nomic-embed-text-v2-moe
 ```
 
 ---

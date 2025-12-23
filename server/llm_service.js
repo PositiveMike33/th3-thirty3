@@ -9,20 +9,33 @@ const FibonacciCognitiveOptimizer = require('./fibonacci_cognitive_optimizer');
 
 class LLMService {
     constructor() {
-        this.ollama = new Ollama();
+        this.ollama = new Ollama({ host: process.env.OLLAMA_URL || 'http://localhost:11434' });
         this.socketService = null;
         this.modelMetricsService = null;
         this.anythingLLMWrapper = new AnythingLLMWrapper();
         this.knowledgeBase = knowledgeBase; // RAG Knowledge Base
         this.cognitiveOptimizer = new FibonacciCognitiveOptimizer(); // Fibonacci Learning
+        
+        // Uncensored local models (priority order for offline/red-teaming)
+        this.uncensoredModels = [
+            'uandinotai/dolphin-uncensored:latest',
+            'sadiq-bd/llama3.2-3b-uncensored:latest',
+            'nidumai/nidum-llama-3.2-3b-uncensored:latest'
+        ];
+        this.defaultLocalModel = this.uncensoredModels[0];
+        this.isOfflineMode = false;
+        
         this.providers = {
-            local: { name: 'Local (Ollama)', type: 'local' },
+            local: { name: 'Local (Ollama Uncensored)', type: 'local' },
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
             groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
+        
+        console.log('[LLM] Service initialized - UNCENSORED MODE');
+        console.log('[LLM] Default model:', this.defaultLocalModel);
     }
 
     setSocketService(socketService) {
@@ -164,8 +177,11 @@ class LLMService {
 
     /**
      * Analyzes OSINT tool output using a specific Expert Persona.
+     * Uses uncensored models for unrestricted analysis.
      */
-    async analyzeOsintResult(toolId, output, provider = 'local', model = 'granite3.1-moe:1b') {
+    async analyzeOsintResult(toolId, output, provider = 'local', model = null) {
+        // Use uncensored model by default for OSINT analysis
+        const defaultModel = model || this.defaultLocalModel;
         const personas = {
             sherlock: `You are 'Ghost', an Elite Social Engineer and Profiler with 20+ years of experience in tracking targets across the digital footprint. 
             Analyze the provided Sherlock username search results. 
@@ -195,7 +211,7 @@ class LLMService {
         // Use the requested provider/model, or fallback to a smart default if not specified
         // For analysis, we prefer a smarter model if available (e.g., Gemini Flash/Pro)
         let targetProvider = provider;
-        let targetModel = model;
+        let targetModel = defaultModel;
 
         if (process.env.ANYTHING_LLM_KEY && provider === 'local') {
             targetProvider = 'anythingllm';
@@ -282,7 +298,7 @@ USER QUERY: ${query}`;
             // This is critical when running AnythingLLM or other heavy local apps alongside.
             if (providerId !== 'local') {
                 // We don't await this to avoid slowing down the request
-                this.unloadModel('granite3.1-moe:1b').catch(e => console.log("[LLM] Background unload failed:", e.message));
+                this.unloadModel(this.defaultLocalModel).catch(e => console.log("[LLM] Background unload failed:", e.message));
             }
 
             let response;
@@ -541,8 +557,11 @@ USER QUERY: ${query}`;
     }
 
     async generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt) {
-        // Fallback to default if no model specified
-        const model = modelId || 'granite3.1-moe:1b';
+        // Use uncensored model by default, with automatic fallback chain
+        let model = modelId || this.defaultLocalModel;
+        
+        // If specified model fails, try fallback chain
+        const modelsToTry = modelId ? [modelId, ...this.uncensoredModels] : this.uncensoredModels;
 
         const messages = [
             { role: 'system', content: systemPrompt },
@@ -554,12 +573,51 @@ USER QUERY: ${query}`;
             console.warn("[LLM] Image ignored for non-vision local model.");
         }
 
-        const response = await this.ollama.chat({
-            model: model,
-            messages: messages,
-            images: (imageBase64 && (model.includes('llava') || model.includes('vision'))) ? [imageBase64] : undefined
-        });
-        return response.message.content;
+        let lastError = null;
+        for (const tryModel of modelsToTry) {
+            try {
+                console.log(`[LLM] Trying model: ${tryModel}`);
+                const response = await this.ollama.chat({
+                    model: tryModel,
+                    messages: messages,
+                    images: (imageBase64 && (tryModel.includes('llava') || tryModel.includes('vision'))) ? [imageBase64] : undefined
+                });
+                
+                // Update default if we had to fallback
+                if (tryModel !== this.defaultLocalModel && !modelId) {
+                    console.log(`[LLM] Switched default to: ${tryModel}`);
+                    this.defaultLocalModel = tryModel;
+                }
+                
+                // Mark offline mode active
+                if (!this.isOfflineMode) {
+                    this.isOfflineMode = true;
+                    console.log('[LLM] ⚡ OFFLINE MODE ACTIVE - Using local uncensored models');
+                }
+                
+                return response.message.content;
+            } catch (err) {
+                lastError = err;
+                console.warn(`[LLM] Model ${tryModel} failed: ${err.message}`);
+            }
+        }
+        
+        throw lastError || new Error('All local models failed');
+    }
+
+    /**
+     * Enable/disable offline mode
+     */
+    setOfflineMode(offline = true) {
+        this.isOfflineMode = offline;
+        console.log(`[LLM] ${offline ? '⚡ OFFLINE' : '🌐 ONLINE'} mode enabled`);
+    }
+
+    /**
+     * Get available uncensored models
+     */
+    getUncensoredModels() {
+        return this.uncensoredModels;
     }
 
     setMCPService(mcpService) {

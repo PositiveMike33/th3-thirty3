@@ -14,10 +14,17 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 class EmbeddingService {
     constructor() {
-        this.ollama = new Ollama({ host: 'http://localhost:11434' });
+        this.ollama = new Ollama({ host: process.env.OLLAMA_URL || 'http://localhost:11434' });
         this.gemini = process.env.GEMINI_API_KEY 
             ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) 
             : null;
+        
+        // Embedding model priority (MoE v2 first, fallback to v1)
+        this.localModels = [
+            'nomic-embed-text-v2-moe:latest',
+            'nomic-embed-text:latest'
+        ];
+        this.activeLocalModel = this.localModels[0];
         
         // Cache for embeddings (reduces API calls)
         this.cache = new Map();
@@ -29,14 +36,17 @@ class EmbeddingService {
             ollama_failures: 0,
             gemini_success: 0,
             gemini_failures: 0,
-            cache_hits: 0
+            cache_hits: 0,
+            offline_mode_activations: 0
         };
         
-        // Default to local mode
+        // Default to local mode (OFFLINE FIRST)
         this.preferLocal = true;
+        this.isOfflineMode = false;
         
-        console.log('[EMBEDDING] Service initialized');
-        console.log('[EMBEDDING] Local priority: nomic-embed-text');
+        console.log('[EMBEDDING] Service initialized - OFFLINE-FIRST MODE');
+        console.log('[EMBEDDING] Local priority: nomic-embed-text-v2-moe');
+        console.log('[EMBEDDING] Fallback model: nomic-embed-text');
         console.log('[EMBEDDING] Gemini available:', !!this.gemini);
     }
 
@@ -139,22 +149,53 @@ class EmbeddingService {
 
     /**
      * Embed using Ollama with nomic-embed-text (LOCAL)
+     * Tries MoE v2 first, falls back to v1, works completely offline
      * @private
      */
     async _embedWithOllama(texts) {
-        console.log(`[EMBEDDING] Using nomic-embed-text (local) for ${texts.length} text(s)`);
+        console.log(`[EMBEDDING] Using ${this.activeLocalModel} (local) for ${texts.length} text(s)`);
         
         const embeddings = [];
         
         for (const text of texts) {
-            const response = await this.ollama.embeddings({
-                model: 'nomic-embed-text:latest',
-                prompt: text
-            });
-            embeddings.push(response.embedding);
+            let success = false;
+            let lastError = null;
+            
+            // Try each local model in order
+            for (const model of this.localModels) {
+                try {
+                    const response = await this.ollama.embeddings({
+                        model: model,
+                        prompt: text
+                    });
+                    embeddings.push(response.embedding);
+                    
+                    // Update active model if different
+                    if (this.activeLocalModel !== model) {
+                        this.activeLocalModel = model;
+                        console.log(`[EMBEDDING] Switched to fallback model: ${model}`);
+                    }
+                    
+                    success = true;
+                    break;
+                } catch (err) {
+                    lastError = err;
+                    console.warn(`[EMBEDDING] Model ${model} failed: ${err.message}`);
+                }
+            }
+            
+            if (!success) {
+                throw lastError || new Error('All local embedding models failed');
+            }
         }
         
-        console.log(`[EMBEDDING] ✅ nomic-embed-text completed (${embeddings.length} embeddings)`);
+        // Mark as offline mode since local worked
+        if (!this.isOfflineMode) {
+            this.isOfflineMode = true;
+            console.log('[EMBEDDING] ✅ OFFLINE MODE ACTIVE - Using local embeddings only');
+        }
+        
+        console.log(`[EMBEDDING] ✅ ${this.activeLocalModel} completed (${embeddings.length} embeddings)`);
         return embeddings;
     }
 
@@ -240,10 +281,43 @@ class EmbeddingService {
             cache_size: this.cache.size,
             total_requests: totalRequests,
             prefer_local: this.preferLocal,
+            is_offline_mode: this.isOfflineMode,
+            active_local_model: this.activeLocalModel,
+            available_local_models: this.localModels,
             ollama_available: true,  // Always assume Ollama is available locally
-            gemini_available: !!this.gemini,
-            primary_provider: this.preferLocal ? 'nomic-embed-text (local)' : 'Gemini (cloud)'
+            gemini_available: !!this.gemini && !this.isOfflineMode,
+            primary_provider: `${this.activeLocalModel} (local)`
         };
+    }
+
+    /**
+     * Force offline mode (disable cloud providers)
+     */
+    setOfflineMode(offline = true) {
+        this.isOfflineMode = offline;
+        if (offline) {
+            this.preferLocal = true;
+            this.stats.offline_mode_activations++;
+            console.log('[EMBEDDING] ⚡ OFFLINE MODE ENABLED - Cloud providers disabled');
+        } else {
+            console.log('[EMBEDDING] 🌐 ONLINE MODE - Cloud providers available');
+        }
+    }
+
+    /**
+     * Check if a local model is available
+     */
+    async checkLocalModels() {
+        const available = [];
+        for (const model of this.localModels) {
+            try {
+                await this.ollama.embeddings({ model, prompt: 'test' });
+                available.push(model);
+            } catch {
+                // Model not available
+            }
+        }
+        return available;
     }
 
     /**
