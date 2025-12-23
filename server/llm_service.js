@@ -6,6 +6,7 @@ const AnythingLLMWrapper = require('./anythingllm_wrapper');
 const knowledgeBase = require('./knowledge_base_service');
 const { SECURITY_RESEARCH_PROMPTS, getSecurityPrompt, buildSecurityQuery } = require('./security_research_prompts');
 const FibonacciCognitiveOptimizer = require('./fibonacci_cognitive_optimizer');
+const { modelListCache, withTimeout } = require('./performance_utils');
 
 class LLMService {
     constructor() {
@@ -48,13 +49,17 @@ class LLMService {
 
     /**
      * Lists all available models (Local + Cloud + Agents).
+     * OPTIMIZED: Results cached for 30 seconds to reduce latency
      */
     async listModels(computeMode = 'local') {
-        // Note: Called frequently by frontend polling, avoid verbose logging
-        const models = { local: [], cloud: [] };
+        const cacheKey = `models_${computeMode}`;
+        
+        // Return cached result if available (30 second TTL)
+        return modelListCache.getOrCompute(cacheKey, async () => {
+            const models = { local: [], cloud: [] };
 
-        // --- LOCAL MODE (Always Available) ---
-        // 1. Ollama
+            // --- LOCAL MODE (Always Available) ---
+            // 1. Ollama
         try {
             // Wrap Ollama call in a timeout promise
             const list = await Promise.race([
@@ -172,7 +177,8 @@ class LLMService {
             }
         }
 
-        return models;
+            return models;
+        }, 30000); // 30 second cache TTL
     }
 
     /**

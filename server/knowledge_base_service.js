@@ -1,15 +1,18 @@
 /**
  * Knowledge Base Service
  * Loads OSINT tools, security trends, and OPSEC scenarios for RAG-based AI responses
+ * OPTIMIZED: Pre-indexed keywords and cached searches
  */
 
 const fs = require('fs');
 const path = require('path');
+const { knowledgeCache } = require('./performance_utils');
 
 class KnowledgeBaseService {
     constructor() {
         this.knowledgeDir = path.join(__dirname, 'knowledge');
         this.datasets = {};
+        this.searchIndex = new Map(); // Pre-built keyword index
         this.loadAllDatasets();
     }
 
@@ -165,15 +168,19 @@ class KnowledgeBaseService {
 
     /**
      * Build context string for LLM prompt augmentation
+     * OPTIMIZED: Cached for 60 seconds to speed up repeated queries
      * @param {string} query - User query
      * @returns {string} Context to inject into prompt
      */
     buildRAGContext(query) {
-        const relevant = this.search(query);
-        
-        if (relevant.length === 0) {
-            return '';
-        }
+        // Use cache for repeated queries
+        const cacheKey = `rag_${query.toLowerCase().substring(0, 50)}`;
+        return knowledgeCache.getOrComputeSync(cacheKey, () => {
+            const relevant = this.search(query);
+            
+            if (relevant.length === 0) {
+                return '';
+            }
 
         let context = '\n--- BASE DE CONNAISSANCES PERTINENTE ---\n';
         relevant.slice(0, 5).forEach((entry, i) => {
@@ -233,7 +240,8 @@ class KnowledgeBaseService {
         context += '\n--- FIN DE LA BASE ---\n';
 
 
-        return context;
+            return context;
+        }, 60000); // 60 second cache TTL
     }
 
     /**

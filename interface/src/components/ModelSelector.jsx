@@ -1,25 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { API_URL } from '../config';
 
-const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
+const ModelSelector = memo(({ onSelectModel, currentModel, currentProvider }) => {
     const [models, setModels] = useState({ local: [], cloud: [] });
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        fetch(`${API_URL}/models`)
+        // Only fetch once on mount - backend caches for 30 seconds
+        const controller = new AbortController();
+        fetch(`${API_URL}/models`, { signal: controller.signal })
             .then(res => res.json())
-            .then(data => {
-                setModels(data);
-            })
+            .then(setModels)
             .catch(err => {
-                console.error("Failed to load models", err);
+                if (err.name !== 'AbortError') {
+                    console.error("Failed to load models", err);
+                }
             });
+        return () => controller.abort();
     }, []);
 
-    const handleSelect = (modelId, provider) => {
+    const handleSelect = useCallback((modelId, provider) => {
         onSelectModel(modelId, provider);
         setIsOpen(false);
-    };
+    }, [onSelectModel]);
+
+    // Memoize filtered lists
+    const cloudModels = useMemo(() => 
+        models.cloud.filter(m => m.provider !== 'anythingllm'), 
+        [models.cloud]
+    );
+    
+    const agentModels = useMemo(() => 
+        models.cloud.filter(m => m.provider === 'anythingllm'),
+        [models.cloud]
+    );
 
     return (
         <div className="relative">
@@ -60,11 +74,11 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                                 </button>
                             ))}
 
-                            {/* CLOUD - All models */}
+                            {/* CLOUD - All models (memoized) */}
                             <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0 z-10">
-                                <span className="text-[9px] text-blue-500 font-bold">☁️ CLOUD ({models.cloud.filter(m => m.provider !== 'anythingllm').length})</span>
+                                <span className="text-[9px] text-blue-500 font-bold">☁️ CLOUD ({cloudModels.length})</span>
                             </div>
-                            {models.cloud.filter(m => m.provider !== 'anythingllm').map(model => (
+                            {cloudModels.map(model => (
                                 <button
                                     key={model.id}
                                     onClick={() => handleSelect(model.id, model.provider)}
@@ -75,13 +89,13 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
                                 </button>
                             ))}
 
-                            {/* AGENTS - All agents */}
-                            {models.cloud.some(m => m.provider === 'anythingllm') && (
+                            {/* AGENTS - All agents (memoized) */}
+                            {agentModels.length > 0 && (
                                 <>
                                     <div className="px-2 py-1 bg-[#111] border-y border-gray-800 sticky top-0 z-10">
-                                        <span className="text-[9px] text-purple-500 font-bold">🤖 AGENTS ({models.cloud.filter(m => m.provider === 'anythingllm').length})</span>
+                                        <span className="text-[9px] text-purple-500 font-bold">🤖 AGENTS ({agentModels.length})</span>
                                     </div>
-                                    {models.cloud.filter(m => m.provider === 'anythingllm').map(model => (
+                                    {agentModels.map(model => (
                                         <button
                                             key={model.id}
                                             onClick={() => handleSelect(model.id, model.provider)}
@@ -98,6 +112,6 @@ const ModelSelector = ({ onSelectModel, currentModel, currentProvider }) => {
             )}
         </div>
     );
-};
+});
 
 export default ModelSelector;
