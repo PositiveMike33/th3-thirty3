@@ -303,10 +303,10 @@ const DartAI = () => {
     };
 
     // Kanban Column Component
-    const KanbanColumn = ({ title, tasks, color, icon: Icon }) => (
+    const KanbanColumn = ({ title, tasks, color, icon: ColumnIcon }) => (
         <div className="flex-1 min-w-[300px] max-w-[350px]">
             <div className={`flex items-center gap-2 mb-4 pb-2 border-b border-${color}-500/30`}>
-                <Icon size={16} className={`text-${color}-400`} />
+                <ColumnIcon size={16} className={`text-${color}-400`} />
                 <h3 className="font-semibold text-sm text-white">{title}</h3>
                 <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">{tasks.length}</span>
             </div>
@@ -713,7 +713,7 @@ const DartAI = () => {
                                 { status: 'todo', label: 'To Do', icon: Circle, color: 'gray' },
                                 { status: 'in_progress', label: 'In Progress', icon: Play, color: 'blue' },
                                 { status: 'completed', label: 'Completed', icon: CheckCircle, color: 'green' }
-                            ].map(({ status, label, icon: StatusIcon, color }) => (
+                            ].map(({ status, label, icon: BtnIcon, color }) => (
                                 <button
                                     key={status}
                                     onClick={() => setTaskStatus(selectedTask.id || selectedTask.dart_id, status)}
@@ -727,7 +727,7 @@ const DartAI = () => {
                                         ${isUpdating === (selectedTask.id || selectedTask.dart_id) ? 'animate-pulse' : ''}
                                     `}
                                 >
-                                    <StatusIcon size={18} />
+                                    <BtnIcon size={18} />
                                     <span className="text-sm">{label}</span>
                                 </button>
                             ))}
