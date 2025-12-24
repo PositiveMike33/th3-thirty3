@@ -29,22 +29,27 @@ const FIBONACCI_XP = [
 ];
 
 // Level thresholds (exponential based on Fibonacci)
+// Chaque niveau devient progressivement plus difficile
+// Niveau 10 = PRODIGE, puis sous-niveaux Prodige Expert/Maître/Génie
 const LEVEL_THRESHOLDS = [
-    { level: 1, xp: 0, title: 'Novice' },
-    { level: 2, xp: 1000, title: 'Apprentice' },
-    { level: 3, xp: 2000, title: 'Initiate' },
-    { level: 4, xp: 4000, title: 'Practitioner' },
-    { level: 5, xp: 7000, title: 'Skilled' },
-    { level: 6, xp: 12000, title: 'Expert' },
-    { level: 7, xp: 20000, title: 'Master' },
-    { level: 8, xp: 33000, title: 'Elite' },
-    { level: 9, xp: 54000, title: 'Champion' },
-    { level: 10, xp: 88000, title: 'Legendary' },
-    { level: 11, xp: 143000, title: 'Mythic' },
-    { level: 12, xp: 232000, title: 'Transcendent' },
-    { level: 13, xp: 376000, title: 'Cybernetic' },
-    { level: 14, xp: 610000, title: 'Ascended' },
-    { level: 15, xp: 1000000, title: 'Maximum' }
+    // PHASE 1: Apprentissage (Niveau 1-5)
+    { level: 1, xp: 0, title: 'Novice', difficulty: 'basic', phase: 'learning' },
+    { level: 2, xp: 1000, title: 'Apprenti', difficulty: 'easy', phase: 'learning' },
+    { level: 3, xp: 3000, title: 'Initié', difficulty: 'moderate', phase: 'learning' },
+    { level: 4, xp: 6000, title: 'Praticien', difficulty: 'intermediate', phase: 'learning' },
+    { level: 5, xp: 10000, title: 'Compétent', difficulty: 'challenging', phase: 'learning' },
+    
+    // PHASE 2: Expertise (Niveau 6-9)
+    { level: 6, xp: 18000, title: 'Expert', difficulty: 'hard', phase: 'expertise' },
+    { level: 7, xp: 30000, title: 'Maître', difficulty: 'very_hard', phase: 'expertise' },
+    { level: 8, xp: 50000, title: 'Élite', difficulty: 'expert', phase: 'expertise' },
+    { level: 9, xp: 80000, title: 'Champion', difficulty: 'master', phase: 'expertise' },
+    
+    // PHASE 3: PRODIGE (Niveau 10+)
+    { level: 10, xp: 130000, title: 'PRODIGE', difficulty: 'prodigy', phase: 'prodigy', isProdigy: true },
+    { level: 11, xp: 210000, title: 'Prodige Expert', difficulty: 'prodigy_expert', phase: 'prodigy', isProdigy: true },
+    { level: 12, xp: 340000, title: 'Prodige Maître', difficulty: 'prodigy_master', phase: 'prodigy', isProdigy: true },
+    { level: 13, xp: 550000, title: 'Prodige Génie', difficulty: 'prodigy_genius', phase: 'prodigy', isProdigy: true, isFinal: true }
 ];
 
 // Decay rates per day of inactivity (descending)

@@ -114,7 +114,12 @@ console.log('[SYSTEM] Satellite OSINT initialized (Sentinel Hub API - Copernicus
 // Fibonacci XP System Routes (Exponential Model Progression)
 const fibonacciXPRoutes = require('./fibonacci_xp_routes');
 app.use('/api/xp', fibonacciXPRoutes);
-console.log('[SYSTEM] Fibonacci XP System initialized (1,1,2,3,5,8,13... exponential growth)');
+console.log('[SYSTEM] Fibonacci XP System initialized (1,1,2,3,5,8,13... | Niveau 10 = PRODIGE)');
+
+// HackerGPT Teacher Routes (Cloud teacher for local models)
+const hackerGPTTeacherRoutes = require('./hackergpt_teacher_routes');
+app.use('/api/teacher', hackerGPTTeacherRoutes);
+console.log('[SYSTEM] HackerGPT Teacher initialized (Cloud → Local learning)');
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
