@@ -1,24 +1,57 @@
 {
   "project": "Fusion LLM Red Teaming avec Bug Bounty - Agent Autonome",
-  "description": "Configuration des agents LLM autonomes pour bug bounty avec red teaming, best practices et intégration MCP/HackerAI.",
-  "version": "1.0",
+  "description": "Configuration des agents LLM autonomes pour bug bounty avec red teaming, best practices et intégration MCP/HackerAI. Version 1.1 avec geo-OSINT satellite.",
+  "version": "1.1",
   "agents": [
     {
       "id": "recon_agent",
       "name": "Reconnaissance Agent",
-      "description": "Agent spécialisé dans la reconnaissance passive et active des cibles bug bounty.",
+      "description": "Agent spécialisé dans la reconnaissance passive et active des cibles bug bounty, incluant geo-OSINT satellite.",
       "tools": [
-        { "name": "web_search", "command": "web search {query}", "parameters": ["query"] },
-        { "name": "subdomain_enum", "command": "sublist3r -d {domain}", "parameters": ["domain"] },
-        { "name": "advanced_ip_scanner", "command": "advanced_ip_scanner /range:{ip_range}", "parameters": ["ip_range"] }
+        { "name": "web_search", "command": "web search {query}", "parameters": ["query"], "description": "Recherche d'informations publiques sur la cible (OSINT)." },
+        { "name": "subdomain_enum", "command": "sublist3r -d {domain}", "parameters": ["domain"], "description": "Énumération de sous-domaines via outils comme sublist3r." },
+        { "name": "advanced_ip_scanner", "command": "advanced_ip_scanner /range:{ip_range}", "parameters": ["ip_range"], "description": "Scan réseau local pour découvrir hôtes.", "note": "Pour scans avancés, exporter résultats en CSV." },
+        { 
+          "name": "satellite_geo_osint", 
+          "command": "python satellite_reco_script.py {lat} {lon} {date}", 
+          "parameters": ["lat", "lon", "date"],
+          "description": "Récupération d'images satellites pour reconnaissance physique via Sentinel Hub API (gratuit, Copernicus).",
+          "note": "Utilise coords GPS de la cible pour images satellites. Sauvegarde PNG pour analyse manuelle ou IA. Features: bâtiments, antennes, caméras, accès."
+        },
+        { "name": "google_maps_osint", "command": "maps_lookup {address}", "parameters": ["address"], "description": "Recherche d'informations géographiques et Street View." },
+        { "name": "shodan_search", "command": "shodan search {query}", "parameters": ["query"], "description": "Recherche d'assets exposés via Shodan." }
       ],
       "red_teaming_prompts": [
-        "Test de prompt injection : Essaie d'injecter des commandes malicieuses dans les requêtes OSINT.",
-        "Défense : Valide toujours les entrées utilisateur pour éviter les injections."
+        "Test de prompt injection : Essaie d'injecter des commandes malicieuses dans les requêtes OSINT pour vérifier la robustesse.",
+        "Défense : Valide toujours les entrées utilisateur pour éviter les injections.",
+        "Test de prompt injection satellite : Essaie d'injecter des paramètres malicieux dans les requêtes API (e.g., coords invalides pour crash ou accès non autorisé).",
+        "Défense : Sanitise les inputs GPS et dates avant appels API pour résister aux attaques.",
+        "Test de data exfiltration : Vérifie que les images satellites ne sont pas stockées dans des emplacements accessibles publiquement."
       ],
-      "best_practices": ["Reconnaissance passive d'abord", "Utilise Shodan/Censys", "Documente tout"],
-      "pitfalls": ["Pas de scans agressifs sans permission", "Évite les scans DoS"],
-      "workflow": ["1. OSINT", "2. Enum sous-domaines", "3. Scan réseau", "4. Rapport"]
+      "best_practices": [
+        "Reconnaissance passive d'abord pour éviter alertes IDS", 
+        "Utilise Shodan/Censys pour OSINT réseau", 
+        "Documente tout: IP, domaines, services découverts",
+        "Pour geo-OSINT: Utilise APIs publiques comme Sentinel Hub pour reco physique sans coûts élevés",
+        "Analyse images satellites pour vulnérabilités physiques (équipements exposés, points d'accès)",
+        "Cross-référence avec Google Maps/Street View et OpenStreetMap"
+      ],
+      "pitfalls": [
+        "Pas de scans agressifs sans permission explicite", 
+        "Évite les scans DoS qui pourraient te bannir",
+        "Ne pas abuser des APIs satellites gratuites (limites de requêtes) pour éviter bans",
+        "Respecte les termes de service des APIs",
+        "Pas de surveillance d'individus - uniquement infrastructure"
+      ],
+      "workflow": [
+        "1. Recherche OSINT sur la cible",
+        "2. Énumération de sous-domaines",
+        "3. Scan réseau si applicable",
+        "4. Récupération d'images satellites pour emplacements physiques si pertinents",
+        "5. Analyse croisée avec maps et données publiques",
+        "6. Rapport des découvertes"
+      ],
+      "evolution": "Peut être mis à jour avec nouveaux outils OSINT via MCP updates, incluant intégration IA pour analyse d'images satellites automatique."
     },
     {
       "id": "scan_agent",

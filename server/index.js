@@ -106,6 +106,11 @@ const hackergptAcademyRoutes = require('./hackergpt_academy_routes');
 app.use('/api/hackergpt-academy', hackergptAcademyRoutes);
 console.log('[SYSTEM] HackerGPT Academy initialized (6 modules, challenges, labs, leaderboard)');
 
+// Satellite OSINT Routes (Geo-OSINT for Bug Bounty Reconnaissance)
+const satelliteOsintRoutes = require('./satellite_osint_routes');
+app.use('/api/satellite', satelliteOsintRoutes);
+console.log('[SYSTEM] Satellite OSINT initialized (Sentinel Hub API - Copernicus geo-OSINT)');
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
