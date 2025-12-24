@@ -91,6 +91,11 @@ const networkScannerRoutes = require('./network_scanner_routes');
 app.use('/api/network', networkScannerRoutes);
 console.log('[SYSTEM] Network Scanner initialized (Nmap + TShark via WSL Ubuntu)');
 
+// HackerAI Routes (Penetration Testing AI - hackerai.co/hackergpt)
+const hackeraiRoutes = require('./hackerai_routes');
+app.use('/api/hackerai', hackeraiRoutes);
+console.log('[SYSTEM] HackerAI Service initialized (Pentest AI via local agent/cloud)');
+
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
@@ -136,9 +141,11 @@ const contextService = new ContextService(memoryService, mcpService);
 const LLMService = require('./llm_service');
 const llmService = new LLMService();
 
-// Initialize Google Service
-const GoogleService = require('./google_service');
-const googleService = new GoogleService();
+// Google Service DISABLED - Use DartAI for task management instead
+// Saves 189MB by not loading googleapis package
+// const GoogleService = require('./google_service');
+// const googleService = new GoogleService();
+const googleService = null; // Stub for backwards compatibility
 
 // Initialize Finance Service
 const FinanceService = require('./finance_service');
@@ -199,9 +206,10 @@ const sessionManager = new SessionManager();
 const VisionService = require('./vision_service');
 const visionService = new VisionService(llmService);
 
-// Initialize KeelClip Analyzer (5-Why Generator)
-const KeelClipAnalyzer = require('./keelclip_analyzer');
-const keelclipAnalyzer = new KeelClipAnalyzer(llmService);
+// KeelClip Analyzer DISABLED - Will be separate project
+// const KeelClipAnalyzer = require('./keelclip_analyzer');
+// const keelclipAnalyzer = new KeelClipAnalyzer(llmService);
+const keelclipAnalyzer = null; // Stub for backwards compatibility
 
 // Initialize Model Metrics Service (Training Dashboard)
 const ModelMetricsService = require('./model_metrics_service');
@@ -266,39 +274,13 @@ const injectFileContent = async (message) => {
     }
 };
 
-// Helper: Fetch Google Context
+// Helper: Fetch Google Context - DISABLED (Use DartAI instead)
 const fetchGoogleContext = async (message) => {
-    const checks = [];
-    const msg = message.toLowerCase();
-
-    try {
-        if (msg.includes('mail') || msg.includes('courriel')) {
-            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listUnreadEmails(email).catch(e => `Error: ${e.message}`)))
-                .then(res => "\n\n[EMAILS RECENTS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-        }
-
-        if (msg.includes('calendrier') || msg.includes('agenda') || msg.includes('rendez-vous')) {
-            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listUpcomingEvents(email).catch(e => `Error: ${e.message}`)))
-                .then(res => "\n\n[AGENDA]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-        }
-
-        if (msg.includes('t�che') || msg.includes('todo')) {
-            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listTasks(email).catch(e => `Error: ${e.message}`)))
-                .then(res => "\n\n[GOOGLE TASKS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-        }
-
-        if (msg.includes('drive') || msg.includes('fichiers')) {
-            checks.push(Promise.all(ACCOUNTS.map(email => googleService.listDriveFiles(email).catch(e => `Error: ${e.message}`)))
-                .then(res => "\n\n[GOOGLE DRIVE (R�cents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
-        }
-
-        const results = await Promise.all(checks);
-        return results.join('');
-    } catch (error) {
-        console.error("[CONTEXT] Google fetch failed:", error.message);
-        return "";
-    }
+    // Google services disabled to save 189MB memory
+    // Use /api/dart/tasks for task management
+    return "";
 };
+
 
 // Helper: Fetch Finance Context
 const fetchFinanceContext = async (message) => {
@@ -876,101 +858,27 @@ app.post('/ingest', async (req, res) => {
 });
 
 // Google Auth Routes
-app.get('/auth/google', (req, res) => {
-    const email = req.query.email;
-    if (!email) return res.status(400).send("Email requis");
-    try {
-        const url = googleService.getAuthUrl(email);
-        res.redirect(url);
-    } catch (e) {
-        res.status(500).send(e.message);
-    }
-});
+// ============================================
+// GOOGLE ROUTES - DEPRECATED (Use DartAI instead)
+// Saves 189MB by not loading googleapis package
+// ============================================
 
-app.get('/auth/google/callback', async (req, res) => {
-    const { code, state } = req.query; // state is the email
-    if (code && state) {
-        await googleService.handleCallback(code, state);
-        res.send("Connexion r�ussie ! Vous pouvez fermer cette fen�tre.");
-    } else {
-        res.status(400).send("Erreur d'authentification.");
-    }
-});
+const googleDeprecatedResponse = {
+    success: false,
+    deprecated: true,
+    message: 'Google services disabled. Use /api/dart/tasks for task management.',
+    alternative: '/api/dart/tasks'
+};
 
-app.get('/google/status', async (req, res) => {
-    const status = {};
-    for (const email of ACCOUNTS) {
-        const client = await googleService.getClient(email);
-        status[email] = !!client;
-    }
-    res.json(status);
-});
-
-app.get('/google/calendar', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    if (!email) return res.status(400).json({ error: "No account configured" });
-
-    try {
-        const events = await googleService.getUpcomingEvents(email);
-        res.json({ events });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/google/emails', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const emails = await googleService.getUnreadEmails(email);
-        res.json({ emails });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Alias: /google/mail ? /google/emails (for API consistency)
-app.get('/google/mail', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const emails = await googleService.getUnreadEmails(email);
-        res.json({ emails });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/google/tasks', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const tasks = await googleService.getTasks(email);
-        res.json({ tasks });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/google/drive', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const files = await googleService.getDriveFiles(email);
-        res.json({ files });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Complete/Uncomplete a Google Task
-app.put('/google/tasks/:taskId', async (req, res) => {
-    const { taskId } = req.params;
-    const { completed, email } = req.body;
-    const userEmail = email || ACCOUNTS[0];
-    try {
-        const result = await googleService.completeTask(userEmail, taskId, completed !== false);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
+app.get('/auth/google', (req, res) => res.json(googleDeprecatedResponse));
+app.get('/auth/google/callback', (req, res) => res.json(googleDeprecatedResponse));
+app.get('/google/status', (req, res) => res.json({ ...googleDeprecatedResponse, accounts: {} }));
+app.get('/google/calendar', (req, res) => res.json({ ...googleDeprecatedResponse, events: [] }));
+app.get('/google/emails', (req, res) => res.json({ ...googleDeprecatedResponse, emails: [] }));
+app.get('/google/mail', (req, res) => res.json({ ...googleDeprecatedResponse, emails: [] }));
+app.get('/google/tasks', (req, res) => res.json({ ...googleDeprecatedResponse, tasks: [], alternative: '/api/dart/tasks' }));
+app.get('/google/drive', (req, res) => res.json({ ...googleDeprecatedResponse, files: [] }));
+app.put('/google/tasks/:taskId', (req, res) => res.json({ ...googleDeprecatedResponse, alternative: '/api/dart/tasks/:id' }));
 
 // OSINT Endpoints
 app.get('/osint/tools', (req, res) => {
