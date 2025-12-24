@@ -14,6 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const { GoldenRatioMemorySystem, PHI, INVERSE_PHI, FIBONACCI_INTERVALS } = require('./golden_ratio_memory');
+const { getFibonacciXPSystem } = require('./fibonacci_xp_system');
 
 // Local cache file for quick access
 const METRICS_PATH = path.join(__dirname, 'data', 'model_metrics.json');
@@ -47,11 +48,14 @@ class ModelMetricsService {
         this.phi = PHI;           // 1.618 - growth ratio
         this.inversePhi = INVERSE_PHI; // 0.618 - decay/retention ratio
         
+        // FIBONACCI XP SYSTEM - Exponential progression
+        this.xpSystem = getFibonacciXPSystem();
+        
         this.ensureDataDir();
         this.loadMetrics();
         this.startSkillDecayChecker(); // Start decay system
         
-        console.log('[MODEL_METRICS] Golden Ratio Learning System initialized (φ=1.618)');
+        console.log('[MODEL_METRICS] Golden Ratio + Fibonacci XP System initialized (φ=1.618)');
     }
 
     ensureDataDir() {
@@ -207,6 +211,18 @@ class ModelMetricsService {
         if (tokensGenerated > 0) {
             perf.totalTokensGenerated += tokensGenerated;
             perf.tokensPerSecond = tokensGenerated / (responseTime / 1000);
+            
+            // FIBONACCI XP: Accumulate XP for tokens processed
+            if (this.xpSystem && success) {
+                const xpResult = this.xpSystem.addTrainingXP(modelName, tokensGenerated);
+                model.fibonacciXP = {
+                    xp: xpResult.totalXP,
+                    level: xpResult.level,
+                    title: xpResult.title,
+                    lastGain: xpResult.xpGained,
+                    fibMultiplier: xpResult.fibMultiplier
+                };
+            }
         }
 
         // Update expertise if category provided

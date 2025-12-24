@@ -111,6 +111,11 @@ const satelliteOsintRoutes = require('./satellite_osint_routes');
 app.use('/api/satellite', satelliteOsintRoutes);
 console.log('[SYSTEM] Satellite OSINT initialized (Sentinel Hub API - Copernicus geo-OSINT)');
 
+// Fibonacci XP System Routes (Exponential Model Progression)
+const fibonacciXPRoutes = require('./fibonacci_xp_routes');
+app.use('/api/xp', fibonacciXPRoutes);
+console.log('[SYSTEM] Fibonacci XP System initialized (1,1,2,3,5,8,13... exponential growth)');
+
 // Model Configuration
 const IDENTITY = require('./config/identity');
 
