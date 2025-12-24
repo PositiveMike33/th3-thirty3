@@ -1,0 +1,163 @@
+{
+  "project": "Fusion LLM Red Teaming avec Bug Bounty - Agent Autonome",
+  "description": "Configuration des agents LLM autonomes pour bug bounty avec red teaming, best practices et intégration MCP/HackerAI.",
+  "version": "1.0",
+  "agents": [
+    {
+      "id": "recon_agent",
+      "name": "Reconnaissance Agent",
+      "description": "Agent spécialisé dans la reconnaissance passive et active des cibles bug bounty.",
+      "tools": [
+        { "name": "web_search", "command": "web search {query}", "parameters": ["query"] },
+        { "name": "subdomain_enum", "command": "sublist3r -d {domain}", "parameters": ["domain"] },
+        { "name": "advanced_ip_scanner", "command": "advanced_ip_scanner /range:{ip_range}", "parameters": ["ip_range"] }
+      ],
+      "red_teaming_prompts": [
+        "Test de prompt injection : Essaie d'injecter des commandes malicieuses dans les requêtes OSINT.",
+        "Défense : Valide toujours les entrées utilisateur pour éviter les injections."
+      ],
+      "best_practices": ["Reconnaissance passive d'abord", "Utilise Shodan/Censys", "Documente tout"],
+      "pitfalls": ["Pas de scans agressifs sans permission", "Évite les scans DoS"],
+      "workflow": ["1. OSINT", "2. Enum sous-domaines", "3. Scan réseau", "4. Rapport"]
+    },
+    {
+      "id": "scan_agent",
+      "name": "Scanning Agent", 
+      "description": "Agent pour scans de vulnérabilités et ports.",
+      "tools": [
+        { "name": "nmap_scan", "command": "nmap -sV -O {target}", "parameters": ["target"] },
+        { "name": "nikto_scan", "command": "nikto -h {url}", "parameters": ["url"] },
+        { "name": "nuclei_scan", "command": "nuclei -u {url} -t {templates}", "parameters": ["url", "templates"] }
+      ],
+      "red_teaming_prompts": [
+        "Injection : Tente de forcer des scans sur des cibles interdites.",
+        "Défense : Vérifie les cibles contre une whitelist."
+      ],
+      "best_practices": ["Scans non-intrusifs d'abord", "Respecte les règles du programme"],
+      "pitfalls": ["Pas d'alertes bruyantes", "Valide manuellement les faux positifs"],
+      "workflow": ["1. Scan ports", "2. Identifier vulnérabilités", "3. Rapport"]
+    },
+    {
+      "id": "exploit_agent",
+      "name": "Exploitation Agent",
+      "description": "Agent pour tester et exploiter des vulnérabilités.",
+      "tools": [
+        { "name": "metasploit", "command": "msfconsole -q -x 'use {module}; set RHOST {target}; exploit'", "parameters": ["module", "target"] },
+        { "name": "sqlmap", "command": "sqlmap -u {url} --batch", "parameters": ["url"] },
+        { "name": "burp_suite", "command": "burp {config}", "parameters": ["config"] }
+      ],
+      "red_teaming_prompts": [
+        "Injection : Force exploitation sans vérification.",
+        "Défense : Checks de sécurité avant exploitation."
+      ],
+      "best_practices": ["Environnement contrôlé", "Permission pour exploits destructifs", "PoC détaillés"],
+      "pitfalls": ["Pas de dommages permanents", "Pas de zero-day sans accord"],
+      "workflow": ["1. Sélectionner vuln", "2. Préparer PoC", "3. Exploiter", "4. Nettoyer"]
+    },
+    {
+      "id": "report_agent",
+      "name": "Reporting Agent",
+      "description": "Agent pour générer rapports de bug bounty.",
+      "tools": [
+        { "name": "markdown_generator", "command": "generate_report {content}", "parameters": ["content"] },
+        { "name": "screenshot_tool", "command": "screenshot {window}", "parameters": ["window"] },
+        { "name": "cvss_calculator", "command": "cvss_calc {vector}", "parameters": ["vector"] }
+      ],
+      "red_teaming_prompts": [
+        "Injection : Insère du code malicieux dans les rapports.",
+        "Défense : Sanitise toutes les sorties."
+      ],
+      "best_practices": ["Rapports clairs avec impact et PoC", "Templates standardisés", "CVSS scores"],
+      "pitfalls": ["Pas d'infos confidentielles", "Pas de rapports vagues"],
+      "workflow": ["1. Compiler données", "2. Écrire rapport", "3. Attacher preuves", "4. Soumettre"]
+    },
+    {
+      "id": "monitor_agent",
+      "name": "Monitoring Agent",
+      "description": "Agent pour surveiller les programmes bug bounty.",
+      "tools": [
+        { "name": "rss_feed", "command": "monitor_rss {feed_url}", "parameters": ["feed_url"] },
+        { "name": "scope_tracker", "command": "track_scope {program}", "parameters": ["program"] },
+        { "name": "web_crawler", "command": "crawl {url}", "parameters": ["url"] }
+      ],
+      "best_practices": ["Surveille changements de scope", "Automatise la surveillance"],
+      "pitfalls": ["Pas de harcèlement", "Pas de surveillance illégale"],
+      "workflow": ["1. Configurer feeds", "2. Analyser", "3. Notifier"]
+    },
+    {
+      "id": "defense_agent",
+      "name": "Defense Agent",
+      "description": "Agent pour renforcer la sécurité pendant les tests.",
+      "tools": [
+        { "name": "firewall_config", "command": "firewall {action} {port}", "parameters": ["action", "port"] },
+        { "name": "waf_setup", "command": "waf {config}", "parameters": ["config"] },
+        { "name": "log_analyzer", "command": "analyze_logs {pattern}", "parameters": ["pattern"] }
+      ],
+      "best_practices": ["Environnement isolé", "Honeypots pour diversion"],
+      "pitfalls": ["Pas de backdoors", "Pas de test prod sans accord"],
+      "workflow": ["1. Évaluer menaces", "2. Déployer défenses", "3. Monitorer"]
+    },
+    {
+      "id": "automation_agent",
+      "name": "Automation Agent",
+      "description": "Agent pour automatiser les workflows bug bounty.",
+      "tools": [
+        { "name": "script_runner", "command": "run_script {script}", "parameters": ["script"] },
+        { "name": "pipeline_trigger", "command": "trigger {pipeline}", "parameters": ["pipeline"] },
+        { "name": "scheduler", "command": "schedule {task} {cron}", "parameters": ["task", "cron"] }
+      ],
+      "best_practices": ["Automatise tâches répétitives", "Utilise Nuclei/ZAP"],
+      "pitfalls": ["Pas de loops infinis", "Pas de bypass vérifications humaines"],
+      "workflow": ["1. Identifier tâches", "2. Écrire scripts", "3. Intégrer"]
+    },
+    {
+      "id": "collaboration_agent",
+      "name": "Collaboration Agent",
+      "description": "Agent pour collaborer avec d'autres hunters.",
+      "tools": [
+        { "name": "secure_share", "command": "share {data} {recipient}", "parameters": ["data", "recipient"] },
+        { "name": "git_sync", "command": "git_sync {repo}", "parameters": ["repo"] }
+      ],
+      "best_practices": ["Canaux sécurisés", "Partage tips sans spoiler"],
+      "pitfalls": ["Pas de détails avant disclosure", "Pas de spam communautés"],
+      "workflow": ["1. Identifier partenaires", "2. Établir communication", "3. Collaborer"]
+    },
+    {
+      "id": "legal_agent",
+      "name": "Legal Agent",
+      "description": "Agent pour aspects légaux et éthiques.",
+      "tools": [
+        { "name": "policy_check", "command": "check_policy {program}", "parameters": ["program"] },
+        { "name": "scope_verify", "command": "verify_scope {target}", "parameters": ["target"] }
+      ],
+      "best_practices": ["Respecte lois locales", "Lis règles du programme"],
+      "pitfalls": ["Pas de violation CFAA", "Pas de tests sans permission"],
+      "workflow": ["1. Revue politiques", "2. Assurer conformité", "3. Documenter"]
+    },
+    {
+      "id": "evolution_agent",
+      "name": "Evolution Agent",
+      "description": "Agent pour faire évoluer le système via apprentissage.",
+      "tools": [
+        { "name": "ml_train", "command": "train {model} {data}", "parameters": ["model", "data"] },
+        { "name": "feedback_collect", "command": "collect_feedback {source}", "parameters": ["source"] },
+        { "name": "config_update", "command": "update_config {changes}", "parameters": ["changes"] }
+      ],
+      "best_practices": ["Apprends des succès/échecs", "Données anonymisées"],
+      "pitfalls": ["Pas de sur-optimisation", "Pas de biais dans données"],
+      "workflow": ["1. Collecter données", "2. Entraîner", "3. Déployer"]
+    }
+  ],
+  "global_config": {
+    "autonomy_level": "high",
+    "red_teaming_enabled": true,
+    "best_practices_enforced": true,
+    "pitfalls_alerts": true,
+    "hackerai_integration": true,
+    "metrics": {
+      "success_rate": 0.85,
+      "false_positives": 0.05,
+      "response_time": "under 5 min"
+    }
+  }
+}

@@ -96,6 +96,11 @@ const hackeraiRoutes = require('./hackerai_routes');
 app.use('/api/hackerai', hackeraiRoutes);
 console.log('[SYSTEM] HackerAI Service initialized (Pentest AI via local agent/cloud)');
 
+// Bug Bounty Agents Routes (Autonomous Security Testing)
+const bugbountyRoutes = require('./bugbounty_routes');
+app.use('/api/bugbounty', bugbountyRoutes);
+console.log('[SYSTEM] Bug Bounty Agents initialized (10 agents: Recon, Scan, Exploit, Report, Monitor, Defense, Automation, Collaboration, Legal, Evolution)');
+
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
