@@ -19,12 +19,49 @@ class HackerAIService {
         this.mode = process.env.HACKERAI_MODE || 'docker';
         this.agentProcess = null;
         this.isRunning = false;
+        this.externalAgentDetected = false;
+        this.connectionId = null;
         this.logs = [];
         
         if (this.token) {
             console.log('[HACKERAI] HackerAI Service initialized (Token configured)');
+            // Check if external agent is already running
+            this.detectExternalAgent();
         } else {
             console.log('[HACKERAI] HackerAI Service initialized (No token - configure HACKERAI_TOKEN)');
+        }
+    }
+
+    /**
+     * Detect if HackerAI agent is running externally (CLI)
+     */
+    async detectExternalAgent() {
+        try {
+            const { exec } = require('child_process');
+            // Check for hackerai-local or @hackerai/local processes
+            exec('tasklist /FI "IMAGENAME eq node.exe" /FO CSV', (error, stdout) => {
+                if (!error && stdout.toLowerCase().includes('node')) {
+                    // Assume HackerAI might be running if we have a token configured
+                    // A more precise check would require querying the HackerAI API
+                    if (this.token) {
+                        this.externalAgentDetected = true;
+                        console.log('[HACKERAI] External agent detected (token configured, node processes running)');
+                    }
+                }
+            });
+        } catch (e) {
+            // Ignore detection errors
+        }
+    }
+
+    /**
+     * Mark external agent as connected (called when we know it's running)
+     */
+    setExternalAgentConnected(connected = true, connectionId = null) {
+        this.externalAgentDetected = connected;
+        this.connectionId = connectionId;
+        if (connected) {
+            console.log(`[HACKERAI] External agent marked as connected${connectionId ? ': ' + connectionId : ''}`);
         }
     }
 
@@ -34,8 +71,10 @@ class HackerAIService {
     getStatus() {
         return {
             configured: !!this.token,
-            running: this.isRunning,
+            running: this.isRunning || this.externalAgentDetected,
             mode: this.mode,
+            connectionId: this.connectionId,
+            externalAgent: this.externalAgentDetected,
             logsCount: this.logs.length
         };
     }

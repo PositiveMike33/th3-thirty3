@@ -124,4 +124,35 @@ router.get('/check', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/hackerai/connect
+ * Mark external HackerAI agent as connected
+ */
+router.post('/connect', (req, res) => {
+    try {
+        const { connectionId } = req.body;
+        getService().setExternalAgentConnected(true, connectionId);
+        res.json({ 
+            success: true, 
+            message: 'External agent marked as connected',
+            connectionId 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/hackerai/disconnect
+ * Mark external HackerAI agent as disconnected
+ */
+router.post('/disconnect', (req, res) => {
+    try {
+        getService().setExternalAgentConnected(false);
+        res.json({ success: true, message: 'External agent disconnected' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 module.exports = router;
