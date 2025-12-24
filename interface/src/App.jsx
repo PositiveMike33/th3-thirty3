@@ -26,6 +26,7 @@ import GoogleServicesPage from './GoogleServicesPage';
 import OpenNotebookPage from './OpenNotebookPage';
 import AgentEvolutionDashboard from './components/AgentEvolutionDashboard';
 import AgentTeamChat from './components/AgentTeamChat';
+import HackerGPTAcademy from './HackerGPTAcademy';
 import { API_URL } from './config';
 import './index.css';
 
@@ -84,7 +85,7 @@ function App() {
                     <Link to="/notebook" className="hover:text-orange-400 transition-colors font-mono text-sm tracking-widest">📓 NOTEBOOK</Link>
                     <Link to="/evolution" className="hover:text-purple-400 transition-colors font-mono text-sm tracking-widest">🧬 EVOLUTION</Link>
                     <Link to="/team-chat" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🤝 TEAM</Link>
-                    <Link to="/hackerai" className="hover:text-green-400 transition-colors font-mono text-sm tracking-widest">🔓 HACKERAI</Link>
+                    <Link to="/hackerai" className="hover:text-green-400 transition-colors font-mono text-sm tracking-widest">🔓 ACADEMY</Link>
                     <Link to="/settings" className="hover:text-yellow-400 transition-colors font-mono text-sm tracking-widest"> SETTINGS</Link>
                     {/* Network Status Indicator - RISK-006 */}
                     <NetworkStatus compact={true} />
@@ -110,6 +111,7 @@ function App() {
                         <Route path="/notebook" element={<OpenNotebookPage />} />
                         <Route path="/evolution" element={<AgentEvolutionDashboard />} />
                         <Route path="/team-chat" element={<AgentTeamChat />} />
+                        <Route path="/hackerai" element={<HackerGPTAcademy />} />
                         <Route path="/subscription" element={<SubscriptionPage />} />
                         <Route path="/payment" element={<PaymentDashboard />} />
                       </Routes>

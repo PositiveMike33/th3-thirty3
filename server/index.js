@@ -101,6 +101,10 @@ const bugbountyRoutes = require('./bugbounty_routes');
 app.use('/api/bugbounty', bugbountyRoutes);
 console.log('[SYSTEM] Bug Bounty Agents initialized (10 agents: Recon, Scan, Exploit, Report, Monitor, Defense, Automation, Collaboration, Legal, Evolution)');
 
+// HackerGPT Academy Routes (Training, Teaching, Testing)
+const hackergptAcademyRoutes = require('./hackergpt_academy_routes');
+app.use('/api/hackergpt-academy', hackergptAcademyRoutes);
+console.log('[SYSTEM] HackerGPT Academy initialized (6 modules, challenges, labs, leaderboard)');
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
