@@ -250,6 +250,11 @@ const wifiTrainingRoutes = initWifiTraining(llmService, modelMetricsService);
 app.use('/api/wifi-training', wifiTrainingRoutes);
 console.log('[WIFI-TRAINING] WiFi Security Training Service initialized (50+ scenarios)');
 
+// Lightweight Agents Routes (Resource-efficient alternative to AnythingLLM)
+const lightweightAgentsRoutes = require('./lightweight_agents_routes');
+app.use('/api/agents', lightweightAgentsRoutes);
+console.log('[AGENTS] Lightweight Agent System initialized (5 specialized agents, direct Ollama)');
+
 
 // Helper: Inject File Content (Delegated to ContextService)
 const injectFileContent = async (message) => {
