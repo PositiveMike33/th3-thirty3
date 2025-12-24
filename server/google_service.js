@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const { google } = require('googleapis');
-const { OAuth2 } = google.auth;
+
+// LAZY LOAD: googleapis is 189MB - only load when needed
+let google = null;
+let OAuth2 = null;
 
 const SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
@@ -11,35 +13,55 @@ const SCOPES = [
     'https://www.googleapis.com/auth/tasks'
 ];
 
+// Lazy load function
+function loadGoogleApis() {
+    if (!google) {
+        const googleapis = require('googleapis');
+        google = googleapis.google;
+        OAuth2 = google.auth.OAuth2;
+        console.log("[GOOGLE] googleapis loaded (189MB)");
+    }
+    return { google, OAuth2 };
+}
+
 class GoogleService {
     constructor() {
         this.credentialsPath = path.join(__dirname, 'credentials.json');
         this.tokensDir = path.join(__dirname, 'tokens');
         this.clients = {}; // Map<email, OAuth2Client>
         this.credentials = null;
+        this.isAvailable = false;
 
         if (!fs.existsSync(this.tokensDir)) {
             fs.mkdirSync(this.tokensDir);
         }
 
-        // Load credentials once
+        // Load credentials once - but don't load googleapis yet
         if (fs.existsSync(this.credentialsPath)) {
             try {
                 const content = fs.readFileSync(this.credentialsPath);
                 this.credentials = JSON.parse(content);
+                this.isAvailable = true;
+                console.log("[GOOGLE] Credentials found - googleapis will load on first use");
             } catch (e) {
                 console.error("[GOOGLE] Failed to load credentials.json:", e.message);
             }
+        } else {
+            console.log("[GOOGLE] No credentials.json - 189MB googleapis skipped");
         }
     }
+
 
     getAuthUrl(email) {
         if (!this.credentials) {
             throw new Error("Fichier credentials.json manquant ou invalide !");
         }
 
+        // Lazy load googleapis on first use
+        const { OAuth2: OAuth2Client } = loadGoogleApis();
+
         const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
-        const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+        const oAuth2Client = new OAuth2Client(client_id, client_secret, redirect_uris[0]);
 
         // Store client temporarily
         this.clients[email] = oAuth2Client;
@@ -51,6 +73,7 @@ class GoogleService {
             prompt: 'consent'
         });
     }
+
 
     async handleCallback(code, email) {
         if (!this.clients[email]) {
@@ -85,8 +108,11 @@ class GoogleService {
         if (!fs.existsSync(tokenPath)) return null;
         if (!this.credentials) return null;
 
+        // Lazy load googleapis
+        const { OAuth2: OAuth2Client } = loadGoogleApis();
+
         const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
-        const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+        const oAuth2Client = new OAuth2Client(client_id, client_secret, redirect_uris[0]);
 
         try {
             const tokenContent = await require('fs').promises.readFile(tokenPath, 'utf8');

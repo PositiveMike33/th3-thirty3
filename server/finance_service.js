@@ -1,4 +1,5 @@
-const ccxt = require('ccxt');
+// LAZY LOAD: ccxt is 50MB - only load when needed
+let ccxt = null;
 
 class FinanceService {
     constructor() {
@@ -9,6 +10,11 @@ class FinanceService {
     initialize() {
         if (process.env.KRAKEN_API_KEY && process.env.KRAKEN_PRIVATE_KEY) {
             try {
+                // Lazy load ccxt only when credentials exist
+                if (!ccxt) {
+                    ccxt = require('ccxt');
+                    console.log("[FINANCE] ccxt loaded (50MB)");
+                }
                 this.kraken = new ccxt.kraken({
                     apiKey: process.env.KRAKEN_API_KEY,
                     secret: process.env.KRAKEN_PRIVATE_KEY,
@@ -18,9 +24,10 @@ class FinanceService {
                 console.error("[FINANCE] Failed to initialize Kraken:", error.message);
             }
         } else {
-            console.warn("[FINANCE] Kraken credentials missing in .env");
+            console.log("[FINANCE] Kraken skipped (no credentials) - 50MB saved");
         }
     }
+
 
     async getPortfolio() {
         if (!this.kraken) return "Kraken non configuré.";
