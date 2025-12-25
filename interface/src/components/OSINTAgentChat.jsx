@@ -35,8 +35,8 @@ Comment puis-je vous aider ?`,
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isExpanded, setIsExpanded] = useState(!compact);
-    const [provider, setProvider] = useState('ollama'); // Default to ollama
-    const [model, setModel] = useState('llama3.1:8b-instruct-q4_K_M');
+    const [provider, _setProvider] = useState('ollama'); // Default to ollama
+    const [model] = useState('llama3.1:8b-instruct-q4_K_M');
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 

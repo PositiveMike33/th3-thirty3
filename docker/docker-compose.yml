@@ -1,6 +1,54 @@
 version: '3.8'
 
 services:
+  # =========================================================================
+  # HACKERGPT KALI - Full Pentesting Environment
+  # =========================================================================
+  hackergpt-kali:
+    build:
+      context: ./hackergpt-kali
+      dockerfile: Dockerfile
+    image: th3thirty3/hackergpt-kali:latest
+    container_name: hackergpt_kali
+    restart: unless-stopped
+    ports:
+      # TOR SOCKS5 proxy
+      - "9150:9050"
+      # TOR Control port
+      - "9151:9051"
+      # Metasploit listener
+      - "4444:4444"
+      - "4445:4445"
+      # Web proxy ports
+      - "8181:8080"
+    environment:
+      - TZ=America/Montreal
+      - TERM=xterm-256color
+    volumes:
+      # Persist tools data
+      - hackergpt_data:/opt/hackergpt
+      # Mount shared scripts
+      - ./scripts:/opt/scripts:ro
+      # Mount wordlists
+      - hackergpt_wordlists:/usr/share/wordlists
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_PTRACE
+    networks:
+      - th3_network
+    tty: true
+    stdin_open: true
+    healthcheck:
+      test: ["CMD", "curl", "-s", "--socks5", "localhost:9050", "https://check.torproject.org/api/ip"]
+      interval: 120s
+      timeout: 30s
+      retries: 3
+      start_period: 180s
+
+  # =========================================================================
+  # KALI-TOR - Basic TOR Container (Legacy)
+  # =========================================================================
   kali-tor:
     build:
       context: ./kali-tor
@@ -78,6 +126,10 @@ networks:
     driver: bridge
 
 volumes:
+  hackergpt_data:
+    driver: local
+  hackergpt_wordlists:
+    driver: local
   tor_data:
     driver: local
   redis_data:

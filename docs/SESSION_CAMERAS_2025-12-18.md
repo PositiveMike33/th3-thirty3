@@ -457,3 +457,108 @@ Project: EasyLifeCamera
 ---
 
 *Session terminée 22/12/2025 02:52 - À demain pour finir l'intégration! 🎯*
+
+---
+
+## 📅 Session 2025-12-24 - Tests Fonctionnalités & Guide Local Keys
+
+### 🔍 Tests Effectués
+
+**Script Python Discovery:**
+```bash
+python scripts\cam_discover.py 192.168.1.0/24
+```
+
+**Résultats:**
+- ✅ 3 devices trouvés en 10.8s
+- `192.168.1.1` → Ports [80, 8080] (Router)
+- `192.168.1.108` → Ports [80, 8080] (Caméra potentielle - HTTP 404)
+- `192.168.1.166` → Ports [8080] (Web server actif)
+
+**Vérification ARP:**
+```bash
+arp -a | findstr "192.168.1.16"
+```
+- `192.168.1.165` → MAC `98-a8-29-80-0f-68` ✅
+- `192.168.1.166` → MAC `a0-d0-5b-b6-8e-e2` ✅
+
+**Conclusion:** Camera #1 possède probablement 2 interfaces réseau (WiFi + Ethernet)
+
+### 🛠️ Corrections Apportées
+
+**Problème:** Duplication `cameraDiscoveryRoutes` dans `server/index.js`  
+**Solution:** Supprimé déclaration dupliquée, conservé celle avec service init
+
+**Fichiers modifiés:**
+- `server/index.js` - Fix duplication routes
+
+### ✅ APIs Testées
+
+| Endpoint | Méthode | Status |
+|----------|---------|--------|
+| `/api/camera-discovery/status` | GET | ✅ Fonctionnel |
+| `/api/tuya/status` | GET | ✅ Fonctionnel |
+
+**Statut Serveur:**
+```
+🎉 TH3 THIRTY3 - FULLY OPERATIONAL
+✅ Camera Discovery: Active
+✅ Tuya Service: Active (2 devices, 0 online)
+✅ Tor Network: Exit IP 5.255.118.151
+```
+
+### 📄 Documentation Créée
+
+**Nouveau fichier:** `tuya_local_keys_guide.md`
+
+**Contenu:**
+- ✅ Méthode Recommandée: platform.tuya.com + QR Code (5-10 min)
+  1. Se connecter à https://platform.tuya.com
+  2. Cloud → Project Management → EasyLifeCamera
+  3. Devices → Link App Account → Scanner QR avec Tuya Smart/Smart Life
+  4. Récupérer Local Keys dans "All Devices"
+
+- ✅ Méthode Alternative: Émulateur BlueStacks Android
+  - Installation Smart Life APK v3.6.1
+  - Extraction XML avec Local Keys
+  
+- ✅ Troubleshooting complet
+- ✅ Configuration automatique post-récupération
+
+### 📹 Mise à Jour Caméras
+
+| # | Device ID | IP(s) | MAC(s) | Status |
+|---|-----------|-------|--------|--------|
+| 1 | `131400200201030` | `192.168.1.165`<br>`192.168.1.166` | `98-a8-29-80-0f-68`<br>`a0-d0-5b-b6-8e-e2` | ⏳ En attente Local Key |
+| 2 | `131400200165748` | À découvrir | À découvrir | ⏳ En attente |
+
+### 🎯 Prochaine Étape
+
+**IMMÉDIAT:** Récupérer les Local Keys via https://platform.tuya.com
+
+**Une fois obtenus, fournir:**
+```
+Camera 1 (131400200201030): [LOCAL_KEY]
+Camera 2 (131400200165748): [LOCAL_KEY]
+```
+
+**Auto-configuration:**
+- Mise à jour config Tuya
+- Test connexion locale
+- Validation contrôles PTZ
+- Intégration Dashboard
+
+### 🚨 Problèmes Identifiés
+
+1. **Browser Automation:** Timeout/connection reset
+   - Solution: Guide manuel fourni
+
+2. **ONVIF Disabled:** `python-onvif-zeep` pas installé
+   - Solution future: `pip install python-onvif-zeep`
+
+3. **IP 192.168.1.108:** Caméra inconnue détectée
+   - À investiguer: Type, credentials, protocoles
+
+---
+
+*Session terminée 24/12/2025 19:25 - APIs testées ✅ | Guide Local Keys créé ✅*

@@ -8,6 +8,7 @@ const { SECURITY_RESEARCH_PROMPTS, getSecurityPrompt, buildSecurityQuery } = req
 const FibonacciCognitiveOptimizer = require('./fibonacci_cognitive_optimizer');
 const { modelListCache, withTimeout } = require('./performance_utils');
 const runpodService = require('./runpod_service');
+const { performanceManager } = require('./config/performance_mode');
 
 class LLMService {
     constructor() {
@@ -41,8 +42,11 @@ class LLMService {
         // RunPod service for GPU cloud inference
         this.runpodService = runpodService;
         
-        console.log('[LLM] Service initialized - UNCENSORED MODE');
-        console.log('[LLM] Default model:', this.defaultLocalModel);
+        // Performance Mode Manager
+        this.performanceManager = performanceManager;
+        
+        console.log('[LLM] Service initialized - PERFORMANCE MODE');
+        console.log('[LLM] Primary: HackerGPT (Groq) | Auto-unload: 30s');
     }
 
     setSocketService(socketService) {
@@ -55,9 +59,24 @@ class LLMService {
 
     /**
      * Lists all available models (Local + Cloud + Agents).
-     * OPTIMIZED: Results cached for 30 seconds to reduce latency
+     * PERFORMANCE MODE: Returns only HackerGPT
      */
     async listModels(computeMode = 'local') {
+        // PERFORMANCE MODE: Return only HackerGPT
+        if (this.performanceManager.config.enabled) {
+            return {
+                local: [],
+                cloud: [
+                    { 
+                        id: 'llama-3.3-70b-versatile', 
+                        name: '🤖 HackerGPT (Primary)', 
+                        provider: 'groq',
+                        description: 'Fast cloud inference - no local VRAM'
+                    }
+                ]
+            };
+        }
+        
         const cacheKey = `models_${computeMode}`;
         
         // Return cached result if available (30 second TTL)
@@ -840,7 +859,63 @@ USER QUERY: ${query}`;
 
     async unloadModel(modelName) {
         // Only relevant for local Ollama
-        await this.ollama.chat({ model: modelName, messages: [], keep_alive: 0 });
+        try {
+            await this.ollama.generate({ model: modelName, prompt: '', keep_alive: 0 });
+            this.performanceManager.loadedModels.delete(modelName);
+            console.log(`[LLM] Unloaded model: ${modelName}`);
+        } catch (e) {
+            console.log(`[LLM] Unload failed: ${e.message}`);
+        }
+    }
+
+    // ===== PERFORMANCE MODE METHODS =====
+    
+    /**
+     * Get HackerGPT response (primary model in performance mode)
+     * Uses Groq for fast, CPU-only inference
+     */
+    async getHackerGPTResponse(prompt, systemPrompt) {
+        const config = this.performanceManager.getPrimaryModel();
+        this.performanceManager.recordActivity();
+        
+        console.log('[LLM] HackerGPT request via Groq');
+        return await this.generateGroqResponse(prompt, config.model, systemPrompt);
+    }
+    
+    /**
+     * Smart chat that uses HackerGPT in performance mode
+     */
+    async smartChat(prompt, systemPrompt, options = {}) {
+        const { forceLocal = false } = options;
+        
+        // Performance mode: use HackerGPT (Groq)
+        if (this.performanceManager.config.enabled && !forceLocal) {
+            return await this.getHackerGPTResponse(prompt, systemPrompt);
+        }
+        
+        // Normal mode: use local uncensored
+        return await this.generateOllamaResponse(prompt, null, null, systemPrompt);
+    }
+    
+    /**
+     * Unload all local models to free VRAM
+     */
+    async unloadAllModels() {
+        await this.performanceManager.unloadAllLocalModels();
+    }
+    
+    /**
+     * Get performance mode status
+     */
+    getPerformanceStatus() {
+        return this.performanceManager.getStatus();
+    }
+    
+    /**
+     * Enable/disable performance mode
+     */
+    setPerformanceMode(enabled) {
+        this.performanceManager.setEnabled(enabled);
     }
 }
 

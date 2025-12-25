@@ -66,6 +66,8 @@ app.use('/api/payment', paymentDashboardRoutes);
 const dartRoutes = require('./routes/dart');
 app.use('/api/dart', dartRoutes);
 
+
+
 // Astronomy Routes (IPGeolocation Space Data)
 const astronomyRoutes = require('./astronomy_routes');
 app.use('/api/astronomy', astronomyRoutes);
@@ -165,11 +167,23 @@ const contextService = new ContextService(memoryService, mcpService);
 const LLMService = require('./llm_service');
 const llmService = new LLMService();
 
-// Google Service DISABLED - Use DartAI for task management instead
-// Saves 189MB by not loading googleapis package
-// const GoogleService = require('./google_service');
-// const googleService = new GoogleService();
-const googleService = null; // Stub for backwards compatibility
+// Performance Mode Routes (HackerGPT only, auto-unload)
+const performanceRoutes = require('./routes/performance')(llmService);
+app.use('/api/performance', performanceRoutes);
+console.log('[SYSTEM] Performance Mode: HackerGPT primary | Auto-unload: 30s');
+
+// Google Multi-Account Service (3 accounts: Gmail, Calendar, Drive, YouTube)
+const GoogleMultiAccountService = require('./google_multi_account_service');
+const googleMultiService = new GoogleMultiAccountService();
+googleMultiService.initialize().catch(err => console.error('[GOOGLE] Init error:', err));
+
+// Google Routes
+const googleRoutes = require('./google_routes')(googleMultiService);
+app.use('/api/google', googleRoutes);
+
+// Legacy compatibility stub
+const googleService = googleMultiService;
+console.log('[SYSTEM] Google Multi-Account Service initialized (3 Gmail accounts, 4 APIs)');
 
 // Initialize Finance Service
 const FinanceService = require('./finance_service');
@@ -883,26 +897,40 @@ app.post('/ingest', async (req, res) => {
 
 // Google Auth Routes
 // ============================================
-// GOOGLE ROUTES - DEPRECATED (Use DartAI instead)
-// Saves 189MB by not loading googleapis package
+// GOOGLE ROUTES - LEGACY REDIRECTS
+// Redirect old /google/* routes to new /api/google/* routes
 // ============================================
 
-const googleDeprecatedResponse = {
-    success: false,
-    deprecated: true,
-    message: 'Google services disabled. Use /api/dart/tasks for task management.',
-    alternative: '/api/dart/tasks'
-};
+// Status and Auth redirects
+app.get('/auth/google', (req, res) => {
+    const email = req.query.email || 'mikegauthierguillet@gmail.com';
+    res.redirect(`/api/google/auth/${encodeURIComponent(email)}`);
+});
+app.get('/auth/google/callback', (req, res) => res.redirect('/api/google/callback?' + new URLSearchParams(req.query)));
+app.get('/google/status', (req, res) => res.redirect('/api/google/status'));
 
-app.get('/auth/google', (req, res) => res.json(googleDeprecatedResponse));
-app.get('/auth/google/callback', (req, res) => res.json(googleDeprecatedResponse));
-app.get('/google/status', (req, res) => res.json({ ...googleDeprecatedResponse, accounts: {} }));
-app.get('/google/calendar', (req, res) => res.json({ ...googleDeprecatedResponse, events: [] }));
-app.get('/google/emails', (req, res) => res.json({ ...googleDeprecatedResponse, emails: [] }));
-app.get('/google/mail', (req, res) => res.json({ ...googleDeprecatedResponse, emails: [] }));
-app.get('/google/tasks', (req, res) => res.json({ ...googleDeprecatedResponse, tasks: [], alternative: '/api/dart/tasks' }));
-app.get('/google/drive', (req, res) => res.json({ ...googleDeprecatedResponse, files: [] }));
-app.put('/google/tasks/:taskId', (req, res) => res.json({ ...googleDeprecatedResponse, alternative: '/api/dart/tasks/:id' }));
+// Gmail redirects
+app.get('/google/emails', async (req, res) => {
+    const email = req.query.email || 'mikegauthierguillet@gmail.com';
+    res.redirect(`/api/google/gmail/${encodeURIComponent(email)}/inbox`);
+});
+app.get('/google/mail', (req, res) => res.redirect('/api/google/gmail/unread'));
+
+// Calendar redirects  
+app.get('/google/calendar', (req, res) => {
+    const email = req.query.email || 'mikegauthierguillet@gmail.com';
+    res.redirect(`/api/google/calendar/${encodeURIComponent(email)}/events`);
+});
+
+// Tasks redirect (to Dart for task management)
+app.get('/google/tasks', (req, res) => res.redirect('/api/dart/tasks'));
+app.put('/google/tasks/:taskId', (req, res) => res.redirect(307, `/api/dart/tasks/${req.params.taskId}`));
+
+// Drive redirects
+app.get('/google/drive', (req, res) => {
+    const email = req.query.email || 'mikegauthierguillet@gmail.com';
+    res.redirect(`/api/google/drive/${encodeURIComponent(email)}/files`);
+});
 
 // OSINT Endpoints
 app.get('/osint/tools', (req, res) => {

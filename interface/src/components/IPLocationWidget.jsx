@@ -3,7 +3,7 @@
  * Displays user's IP info using iplocation.net API
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 const IPLocationWidget = ({ 
     display = 'LIPFB',  // L:Location, I:ISP, P:Proxy, F:Platform, B:Browser
@@ -18,11 +18,7 @@ const IPLocationWidget = ({
     // API Key for iplocation.net
     const API_KEY = 'wosTmWLXYjYuE//UCr/N4nUAp0NrfIFluBFBdzHeG6M=';
 
-    useEffect(() => {
-        loadWidget();
-    }, [display, width]);
-
-    const loadWidget = () => {
+    const loadWidget = useCallback(() => {
         setIsLoaded(false);
         setError(null);
 
@@ -60,7 +56,11 @@ const IPLocationWidget = ({
         } catch (err) {
             setError(err.message);
         }
-    };
+    }, [display, width]);
+
+    useEffect(() => {
+        loadWidget();
+    }, [loadWidget]);
 
     return (
         <div className={`ip-location-widget ${className}`}>

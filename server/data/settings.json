@@ -14,9 +14,12 @@
     "anthropic": "",
     "perplexity": "",
     "anythingllm_url": "",
-    "anythingllm_key": ""
+    "anythingllm_key": "",
+    "groq": "",
+    "gemini": "",
+    "userApiKey": ""
   },
-  "themeMode": "light",
+  "themeMode": "paint",
   "customWallpaper": "",
   "language": "fr-QC"
 }

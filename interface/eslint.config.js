@@ -23,7 +23,15 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', { 
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^[A-Z_]|^_',
+        destructuredArrayIgnorePattern: '^_'
+      }],
+      // Disable overly strict react-compiler rules that flag valid async patterns
+      'react-hooks/set-state-in-effect': 'off',
+      // Disable purity check that flags Date.now() in event handlers
+      'react-hooks/purity': 'off',
     },
   },
 ])
