@@ -58,6 +58,63 @@ class LLMService {
     }
 
     /**
+     * Truncate prompt to fit within token limits
+     * Estimates ~4 chars per token, keeps safety margin
+     * @param {string} prompt - The prompt to truncate
+     * @param {string} systemPrompt - The system prompt
+     * @param {number} maxTokens - Maximum tokens allowed (default 10000 for Groq free tier safety)
+     * @returns {object} - { prompt, systemPrompt, wasTruncated }
+     */
+    truncateForTokenLimit(prompt, systemPrompt, maxTokens = 10000) {
+        const CHARS_PER_TOKEN = 4; // Conservative estimate
+        const maxChars = maxTokens * CHARS_PER_TOKEN;
+        
+        // Calculate current sizes
+        const systemChars = (systemPrompt || '').length;
+        const promptChars = (prompt || '').length;
+        const totalChars = systemChars + promptChars;
+        
+        // If within limit, return as-is
+        if (totalChars <= maxChars) {
+            return { prompt, systemPrompt, wasTruncated: false };
+        }
+        
+        console.log(`[LLM] ⚠️ Prompt too long: ${totalChars} chars (~${Math.ceil(totalChars/CHARS_PER_TOKEN)} tokens). Truncating to ${maxTokens} tokens...`);
+        
+        // Reserve 20% for system prompt, 80% for user prompt
+        const systemMaxChars = Math.floor(maxChars * 0.2);
+        const promptMaxChars = Math.floor(maxChars * 0.75); // Leave margin for response
+        
+        let truncatedSystem = systemPrompt || '';
+        let truncatedPrompt = prompt || '';
+        
+        // Truncate system prompt if too long
+        if (truncatedSystem.length > systemMaxChars) {
+            truncatedSystem = truncatedSystem.substring(0, systemMaxChars - 50) + '\n\n[System prompt truncated for token limit]';
+        }
+        
+        // Truncate user prompt if too long
+        if (truncatedPrompt.length > promptMaxChars) {
+            // Try to find a good breaking point (paragraph or sentence)
+            const breakPoint = truncatedPrompt.lastIndexOf('\n\n', promptMaxChars);
+            const sentenceBreak = truncatedPrompt.lastIndexOf('. ', promptMaxChars);
+            const cutPoint = breakPoint > promptMaxChars * 0.5 ? breakPoint : 
+                            sentenceBreak > promptMaxChars * 0.5 ? sentenceBreak + 1 : 
+                            promptMaxChars;
+            
+            truncatedPrompt = truncatedPrompt.substring(0, cutPoint) + '\n\n[... Context truncated due to token limit. Please be more specific in your query.]';
+        }
+        
+        console.log(`[LLM] ✅ Truncated: ${truncatedSystem.length + truncatedPrompt.length} chars (~${Math.ceil((truncatedSystem.length + truncatedPrompt.length)/CHARS_PER_TOKEN)} tokens)`);
+        
+        return {
+            prompt: truncatedPrompt,
+            systemPrompt: truncatedSystem,
+            wasTruncated: true
+        };
+    }
+
+    /**
      * Lists all available models (Local + Cloud + Agents).
      * PERFORMANCE MODE: Returns only HackerGPT
      */
@@ -518,12 +575,25 @@ USER QUERY: ${query}`;
         }
     }
 
+    /**
+     * Generate response using Groq API (Ultra-fast inference)
+     * Applies automatic prompt truncation for free tier TPM limits (12000 tokens)
+     */
     async generateGroqResponse(prompt, modelId, systemPrompt) {
-        return this.generateOpenAICompatibleResponse(prompt, null, modelId || "llama-3.1-8b-instant", systemPrompt, {
-            apiKey: process.env.GROQ_API_KEY,
-            baseURL: 'https://api.groq.com/openai/v1',
-            providerName: 'groq'
-        });
+        // Groq free tier has 12000 TPM limit - truncate to 10000 for safety margin
+        const truncated = this.truncateForTokenLimit(prompt, systemPrompt, 10000);
+        
+        return this.generateOpenAICompatibleResponse(
+            truncated.prompt, 
+            null, 
+            modelId || "llama-3.1-8b-instant", 
+            truncated.systemPrompt, 
+            {
+                apiKey: process.env.GROQ_API_KEY,
+                baseURL: 'https://api.groq.com/openai/v1',
+                providerName: 'groq'
+            }
+        );
     }
 
     /**
