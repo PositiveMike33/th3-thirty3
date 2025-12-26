@@ -77,7 +77,7 @@ class OsintService {
     async runTool(toolId, target) {
         if (!target) throw new Error("Target is required");
         // Strict sanitization to prevent command injection
-        if (/[;\&|`$(){}[\]\\]/.test(target)) throw new Error("Invalid target format - special characters not allowed");
+        if (/[;&|`$(){}[\]\\]/.test(target)) throw new Error("Invalid target format - special characters not allowed");
 
         try {
             switch (toolId) {
@@ -95,6 +95,22 @@ class OsintService {
                         return await this.runLocalCommand(`ping -n 4 ${target}`);
                     }
                     return await this.runLocalCommand(`ping -c 4 ${target}`);
+                
+                case 'nmap':
+                    // Basic Nmap port scan via WSL or Docker Kali
+                    return await this.runNmapScan(target, 'basic');
+                
+                case 'nmap-service':
+                    // Nmap with service detection
+                    return await this.runNmapScan(target, 'service');
+                
+                case 'nmap-camera':
+                    // Nmap scan for IP camera ports
+                    return await this.runNmapScan(target, 'camera');
+                
+                case 'network-discover':
+                    // Network discovery scan
+                    return await this.runNetworkDiscovery(target);
                     
                 case 'sherlock':
                     return await this.runSherlock(target);
@@ -106,11 +122,147 @@ class OsintService {
                     return await this.runAmass(target);
                     
                 default:
-                    throw new Error("Unknown tool");
+                    throw new Error(`Unknown tool: ${toolId}`);
             }
         } catch (error) {
             return `Error running ${toolId}: ${error.message}`;
         }
+    }
+
+    /**
+     * Run Nmap scan with different modes
+     * @param {string} target - Target IP or domain
+     * @param {string} mode - 'basic', 'service', or 'camera'
+     */
+    async runNmapScan(target, mode = 'basic') {
+        // Validate target format
+        if (!/^[a-zA-Z0-9.-\/]+$/.test(target)) {
+            return "Invalid target format for Nmap.";
+        }
+
+        let command;
+        switch (mode) {
+            case 'service':
+                // Service detection (-sV)
+                command = `nmap -sV -T4 --top-ports 100 ${target}`;
+                break;
+            case 'camera':
+                // Camera-specific ports (RTSP, HTTP, Tuya, etc.)
+                command = `nmap -p 80,554,8080,8081,8000,8443,6668,37777,34567,9000 -sV ${target}`;
+                break;
+            case 'basic':
+            default:
+                // Quick scan of top 1000 ports
+                command = `nmap -T4 --top-ports 1000 ${target}`;
+                break;
+        }
+
+        console.log(`[OSINT] Running Nmap (${mode}): ${target}`);
+
+        // Try Docker Kali first
+        try {
+            const result = await this.runTorCommand(command, 180000);
+            if (result && result.trim()) {
+                return result;
+            }
+        } catch (error) {
+            console.log('[OSINT] Docker Nmap failed, trying WSL...');
+        }
+
+        // Fallback to WSL
+        try {
+            const wslCommand = `wsl ${command}`;
+            const result = await this.runLocalCommand(wslCommand, 180000);
+            if (result && result.trim()) {
+                return result;
+            }
+        } catch (error) {
+            console.log('[OSINT] WSL Nmap failed, trying local...');
+        }
+
+        // Fallback to local Windows nmap (if installed)
+        try {
+            const result = await this.runLocalCommand(command, 180000);
+            if (result && result.trim()) {
+                return result;
+            }
+            return `Nmap scan completed but returned no results. Target may be offline or blocking scans.`;
+        } catch (error) {
+            return `Nmap not available. Install via: 
+1. WSL: wsl --install then sudo apt install nmap
+2. Or Docker: docker pull kalilinux/kali-rolling
+3. Or Windows: https://nmap.org/download.html
+
+Error: ${error.message}`;
+        }
+    }
+
+    /**
+     * Run network discovery (ARP scan or ping sweep)
+     * @param {string} target - Network range (e.g., 192.168.1.0/24)
+     */
+    async runNetworkDiscovery(target) {
+        // Validate network range format
+        if (!/^[0-9.\/]+$/.test(target)) {
+            return "Invalid network range format. Use format like: 192.168.1.0/24";
+        }
+
+        console.log(`[OSINT] Running network discovery: ${target}`);
+
+        // Try multiple methods
+        const results = [];
+
+        // Method 1: arp-scan via Docker
+        try {
+            const arpResult = await this.runTorCommand(`arp-scan ${target}`, 60000);
+            if (arpResult && arpResult.trim() && !arpResult.includes('error')) {
+                results.push("=== ARP Scan Results ===\n" + arpResult);
+            }
+        } catch (e) {
+            console.log('[OSINT] ARP scan not available');
+        }
+
+        // Method 2: Ping sweep via PowerShell (Windows)
+        if (process.platform === 'win32') {
+            try {
+                const baseIp = target.replace('/24', '').replace(/\.\d+$/, '');
+                const pingScript = `
+                    $results = @()
+                    1..254 | ForEach-Object {
+                        $ip = "${baseIp}.$_"
+                        $ping = New-Object System.Net.NetworkInformation.Ping
+                        try {
+                            $result = $ping.Send($ip, 200)
+                            if ($result.Status -eq 'Success') {
+                                Write-Output "$ip - Active"
+                            }
+                        } catch {}
+                    }
+                `;
+                const pingResult = await this.runLocalCommand(`powershell -Command "${pingScript.replace(/\n/g, ' ')}"`, 120000);
+                if (pingResult && pingResult.trim()) {
+                    results.push("=== Ping Sweep Results ===\n" + pingResult);
+                }
+            } catch (e) {
+                console.log('[OSINT] Ping sweep failed:', e.message);
+            }
+        }
+
+        // Method 3: nmap ping scan
+        try {
+            const nmapResult = await this.runNmapScan(target, 'basic');
+            if (nmapResult && !nmapResult.includes('not available')) {
+                results.push("=== Nmap Discovery ===\n" + nmapResult);
+            }
+        } catch (e) {
+            console.log('[OSINT] Nmap discovery failed');
+        }
+
+        if (results.length === 0) {
+            return `Network discovery completed but found no active hosts on ${target}.\nThis could mean:\n1. No hosts are online\n2. Hosts are blocking ICMP/ARP\n3. Network range is incorrect`;
+        }
+
+        return results.join("\n\n");
     }
 
     /**
