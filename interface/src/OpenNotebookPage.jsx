@@ -382,9 +382,11 @@ const OpenNotebookPage = () => {
                                                             <div>
                                                                 <h4 className="text-white font-medium">{item.title || `Source ${idx + 1}`}</h4>
                                                                 <p className="text-gray-500 text-sm mt-1 line-clamp-2">
-                                                                    {typeof item.content === 'string' 
-                                                                        ? item.content.substring(0, 150) + '...'
-                                                                        : JSON.stringify(item.content).substring(0, 150) + '...'
+                                                                    {item.content 
+                                                                        ? (typeof item.content === 'string' 
+                                                                            ? item.content.substring(0, 150) + '...'
+                                                                            : JSON.stringify(item.content).substring(0, 150) + '...')
+                                                                        : 'No content preview available'
                                                                     }
                                                                 </p>
                                                                 {item.metadata && (
