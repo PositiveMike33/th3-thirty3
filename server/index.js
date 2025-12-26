@@ -58,7 +58,7 @@ app.use('/api/subscription', subscriptionRoutes);
 const paymentRoutes = require('./payment_routes');
 app.use('/api/payment', paymentRoutes);
 
-// Payment Dashboard Routes (Stats temps r�el)
+// Payment Dashboard Routes (Stats temps réel)
 const paymentDashboardRoutes = require('./payment_dashboard_routes');
 app.use('/api/payment', paymentDashboardRoutes);
 
@@ -129,14 +129,14 @@ const IDENTITY = require('./config/identity');
 const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
 const ACCOUNTS = [
-    'mikegauthierguillet@gmail.com',  // Priorit�
+    'mikegauthierguillet@gmail.com',  // Priorité
     'th3thirty3@gmail.com',
     'mgauthierguillet@gmail.com'
 ];
 
 // Model Configuration
 const modelName = IDENTITY.default_model;
-console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connect� : ${modelName}`);
+console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connecté : ${modelName}`);
 
 // Initialize Memory Service
 const memoryService = new MemoryService();
@@ -287,7 +287,7 @@ const AgentDirectorService = require('./agent_director_service');
 const agentDirectorRoutes = require('./agent_director_routes');
 const agentDirector = new AgentDirectorService(llmService, llmService.anythingLLMWrapper);
 agentDirectorRoutes.setAgentDirector(agentDirector);
-console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybers�curit�, OSINT, Agent Thirty3');
+console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersécurité, OSINT, Agent Thirty3');
 console.log('[SYSTEM] Real Training Service initialized (Shodan + model training)');
 
 // Initialize WiFi Security Training Service (Specialized WiFi attack/defense training)
@@ -1200,7 +1200,7 @@ app.post('/feedback', async (req, res) => {
         console.log(`[FEEDBACK] Received correction for: "${originalQuery}"`);
         await memoryService.addCorrection(originalQuery, wrongResponse, correction);
 
-        res.json({ success: true, message: "Correction m�moris�e. Je ne ferai plus cette erreur." });
+        res.json({ success: true, message: "Correction mémorisée. Je ne ferai plus cette erreur." });
     } catch (error) {
         console.error("Feedback error:", error);
         res.status(500).json({ error: error.message });
@@ -1241,7 +1241,7 @@ app.post('/chat', async (req, res) => {
         // PERMISSION CHECK: Model
         if (!userService.canUseModel(user, provider || 'local', model || '')) {
             return res.status(403).json({
-                reply: `? ACC�S REFUS� : Votre niveau (${user.tier}) ne permet pas d'utiliser le mod�le ${model} (${provider}).`,
+                reply: `⛔ ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser le modèle ${model} (${provider}).`,
                 error: "Insufficient Permissions"
             });
         }
@@ -1249,7 +1249,7 @@ app.post('/chat', async (req, res) => {
         // PERMISSION CHECK: Fabric Pattern
         if (pattern && !userService.canUseTool(user, `fabric_basic`)) {
             return res.status(403).json({
-                reply: `? ACC�S REFUS� : Votre niveau (${user.tier}) ne permet pas d'utiliser la biblioth�que Fabric.`,
+                reply: `⛔ ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser la bibliothèque Fabric.`,
                 error: "Insufficient Permissions"
             });
         }
@@ -1272,19 +1272,19 @@ app.post('/chat', async (req, res) => {
 
         // Handle Commands
         if (message.trim().toLowerCase() === '/clear') {
-            currentSession.messages = [{ role: "assistant", content: "M�moire effac�e. On repart � neuf." }];
+            currentSession.messages = [{ role: "assistant", content: "Mémoire effacée. On repart à neuf." }];
             sessionManager.saveSession(currentSession.id, currentSession);
-            return res.json({ reply: "M�moire effac�e.", sessionId: currentSession.id });
+            return res.json({ reply: "Mémoire effacée.", sessionId: currentSession.id });
         }
 
         // Handle Ingest Command via Chat
         if (message.trim().toLowerCase() === '/ingest') {
             const vaultPath = process.env.OBSIDIAN_VAULT_PATH;
-            if (!vaultPath) return res.json({ reply: "Erreur: OBSIDIAN_VAULT_PATH non configur�." });
+            if (!vaultPath) return res.json({ reply: "Erreur: OBSIDIAN_VAULT_PATH non configuré." });
 
             // Trigger async ingestion
             const count = await memoryService.ingestVault(vaultPath);
-            return res.json({ reply: `Ingestion termin�e.J'ai dig�r� ${count} notes.` });
+            return res.json({ reply: `Ingestion terminée. J'ai digéré ${count} notes.` });
         }
 
         // Handle Feedback (Correction)
@@ -1304,24 +1304,24 @@ app.post('/chat', async (req, res) => {
                     console.log("[BYE] System Integrity Verified.");
                 } catch (err) {
                     console.error("[BYE] System Integrity Check Failed:", err.message);
-                    return res.json({ reply: "?? ATTENTION : Les tests de s�curit� ont �chou�. V�rifiez les logs avant de fermer." });
+                    return res.json({ reply: "⚠️ ATTENTION : Les tests de sécurité ont échoué. Vérifiez les logs avant de fermer." });
                 }
 
                 await llmService.unloadModel(model || "uandinotai/dolphin-uncensored:latest");
 
-                const byeResponse = `### SYST�ME TH3 THIRTY3
+                const byeResponse = `### SYSTÈME TH3 THIRTY3
 
-**PROTOCOLE DE SAUVEGARDE ACTIV�.**
+**PROTOCOLE DE SAUVEGARDE ACTIVÉ.**
 
-Donn�es enregistr�es :
-*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arr�t H�morragie.
-*   **Objectif Actuel (LOCK) :** Logistique de d�ploiement & Ex�cution du shift de travail (Cible : 484$).
-*   **Statut :** EN ATTENTE D'EX�CUTION.
+Données enregistrées :
+*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arrêt Hémorragie.
+*   **Objectif Actuel (LOCK) :** Logistique de déploiement & Exécution du shift de travail (Cible : 484$).
+*   **Statut :** EN ATTENTE D'EXÉCUTION.
 
-Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la structure.
+Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
 
-� ton retour, la premi�re chose que tu verras sera :
-> **RAPPEL OBJECTIF :** Shift Travail termin� ?
+À ton retour, la première chose que tu verras sera :
+> **RAPPEL OBJECTIF :** Shift Travail terminé ?
 > **STATUS :** [YES/NO]
 
 **SERVER SHUTDOWN...**
@@ -1331,7 +1331,7 @@ Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la struct
                 return res.json({ reply: byeResponse });
             } catch (e) {
                 console.error("Error unloading model:", e);
-                return res.json({ reply: "Erreur lors de la d�connexion du cerveau. Check la console." });
+                return res.json({ reply: "Erreur lors de la déconnexion du cerveau. Check la console." });
             }
         }
 
@@ -1347,12 +1347,12 @@ Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la struct
         const memoryResults = await memoryService.search(message, 3); // Top 3 relevant memories
         if (memoryResults.length > 0) {
             const memoryContext = memoryResults.map(m => m.text).join('\n---\n');
-            messageWithContext += `\n\n[M�MOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tir�es de ta m�moire (notes ou conversations pass�es) :\n${memoryContext}\n[FIN M�MOIRE]\n`;
+            messageWithContext += `\n\n[MÉMOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tirées de ta mémoire (notes ou conversations passées) :\n${memoryContext}\n[FIN MÉMOIRE]\n`;
             console.log(`[RAG] Injected ${memoryResults.length} memories.`);
         }
 
         // 1c. INCIDENT ANALYSIS (Auto-detect VPO context)
-        const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'd�faut', 'bourrage'];
+        const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'défaut', 'bourrage'];
         const isIncidentContext = vpoKeywords.some(keyword => message.toLowerCase().includes(keyword));
         
         let incidentAnalysis = null;
@@ -1372,12 +1372,12 @@ Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la struct
                     const report = await keelclipAnalyzer.generate5Why(incidentAnalysis, message);
                     const validation = keelclipAnalyzer.validate5WhyReport(report);
                     
-                    messageWithContext += `\n\n[RAPPORT 5-WHY G�N�R�]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
+                    messageWithContext += `\n\n[RAPPORT 5-WHY GÉNÉRÉ]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
                     console.log(`[CHAT] ? 5-Why report generated (Score: ${validation.score})`);
                 }
             } catch (error) {
                 console.error("[CHAT] Incident analysis failed:", error.message);
-                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle �chou�e - ${error.message}]\n`;
+                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle échouée - ${error.message}]\n`;
             }
         }
         
@@ -1419,10 +1419,10 @@ Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la struct
             if (pattern) {
                 // MODE FABRIC
                 finalSystemPrompt += `
-\n[MODE EXPERT ACTIV�]
-1. **STYLE** : Fran�ais standard PROFESSIONNEL et TECHNIQUE.
-2. **FORMAT** : R�ponse directe. Juste le r�sultat.
-3. **TON** : Efficacit� maximale.
+\n[MODE EXPERT ACTIVÉ]
+1. **STYLE** : Français standard PROFESSIONNEL et TECHNIQUE.
+2. **FORMAT** : Réponse directe. Juste le résultat.
+3. **TON** : Efficacité maximale.
 \n[PATTERN: ${pattern.toUpperCase()}]\n${getPatternContent(pattern)}`;
             } else {
                 // MODE CHAT
@@ -1430,10 +1430,10 @@ Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la struct
                 const styleInstructions = styleService.generateStylePrompt(styleProfile);
 
                 finalSystemPrompt += `
-\n[MODE APPRENTISSAGE ACTIV�]
+\n[MODE APPRENTISSAGE ACTIVÉ]
 1. **OBJECTIF** : Analyse le style de l'utilisateur dans l'historique (vocabulaire, structure de phrase, jargon).
 2. **ADAPTATION** : Imite son style. Deviens son miroir.
-3. **�VOLUTION** : Plus tu parles avec lui, plus tu dois lui ressembler. Utilise ses expressions. Sois son extension num�rique.
+3. **ÉVOLUTION** : Plus tu parles avec lui, plus tu dois lui ressembler. Utilise ses expressions. Sois son extension numérique.
 ${styleInstructions}`;
             }
         }
@@ -1473,7 +1473,7 @@ ${styleInstructions}`;
         console.error('CRITICAL ERROR:', error);
         require('fs').writeFileSync('server_error.log', `[${new Date().toISOString()}] ${error.stack}\n`, { flag: 'a' });
         res.status(500).json({
-            reply: "Erreur syst�me critique.",
+            reply: "Erreur système critique.",
             error: error.message
         });
     }
