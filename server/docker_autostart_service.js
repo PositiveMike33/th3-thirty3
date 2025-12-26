@@ -25,7 +25,7 @@ class DockerAutoStartService extends EventEmitter {
                 name: 'th3_kali_tor',
                 description: 'Kali Linux + TOR for anonymous operations',
                 required: true,
-                composeFile: 'docker/docker-compose.yml',
+                composeFile: require('path').join(__dirname, '..', 'docker', 'docker-compose.yml'),
                 service: 'kali-tor',
                 healthCheck: async () => this.checkTorHealth(),
                 startDelay: 30000 // Wait for TOR bootstrap
@@ -34,7 +34,7 @@ class DockerAutoStartService extends EventEmitter {
                 name: 'th3_redis',
                 description: 'Redis cache for session management',
                 required: false,
-                composeFile: 'docker/docker-compose.yml',
+                composeFile: require('path').join(__dirname, '..', 'docker', 'docker-compose.yml'),
                 service: 'redis',
                 healthCheck: async () => this.checkRedisHealth()
             },
@@ -42,7 +42,7 @@ class DockerAutoStartService extends EventEmitter {
                 name: 'th3_ollama_proxy',
                 description: 'Ollama load balancer and proxy',
                 required: false,
-                composeFile: 'docker/docker-compose.yml',
+                composeFile: require('path').join(__dirname, '..', 'docker', 'docker-compose.yml'),
                 service: 'ollama-proxy',
                 depends: ['th3_redis']
             },

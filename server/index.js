@@ -212,11 +212,18 @@ mcpService.registerLocalTool(webSearch, webSearch.handler);
 //     console.warn("[MCP] OBSIDIAN_VAULT_PATH not set. Skipping Obsidian connection.");
 // }
 
-// Connect to Pieces MCP Server
+// Connect to Pieces MCP Server (optional - runs if Pieces for Developers is active)
 const PIECES_MCP_URL = 'http://localhost:39300/model_context_protocol/2024-11-05/sse';
 const piecesSessionId = uuidv4();
 mcpService.connectSSE('pieces', PIECES_MCP_URL, piecesSessionId)
-    .catch(err => console.error("[MCP] Failed to connect to Pieces:", err));
+    .then(connected => {
+        if (connected) {
+            console.log('[MCP] ✅ Pieces for Developers connected');
+        }
+    })
+    .catch(() => {
+        console.log('[MCP] ⚠️ Pieces not available (optional - start Pieces for Developers to enable)');
+    });
 
 // Pass MCP Service to LLM Service
 llmService.setMCPService(mcpService);

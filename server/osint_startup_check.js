@@ -21,23 +21,23 @@ class OsintStartupCheck {
         
         // OSINT endpoints to test
         this.osintEndpoints = [
-            { name: 'IP Location', path: '/ip/locate?ip=8.8.8.8', method: 'GET' },
-            { name: 'IP2Location', path: '/ip2location/lookup?ip=8.8.8.8', method: 'GET' },
-            { name: 'WHOIS Domain', path: '/whois/domain?domain=google.com', method: 'GET' },
-            { name: 'Shodan Status', path: '/shodan/status', method: 'GET' },
+            { name: 'IP Location', path: '/api/iplocation/lookup?ip=8.8.8.8', method: 'GET' },
+            { name: 'IP2Location', path: '/api/ip2location/lookup?ip=8.8.8.8', method: 'GET' },
+            { name: 'WHOIS Domain', path: '/api/whois/lookup?domain=google.com', method: 'GET' },
+            { name: 'Shodan Status', path: '/api/shodan/status', method: 'GET' },
             { name: 'Network Scanner Status', path: '/api/network/status', method: 'GET' },
             { name: 'OSINT Tools List', path: '/osint/tools', method: 'GET' },
-            { name: 'TOR Status', path: '/tor/status', method: 'GET' },
-            { name: 'VPN Status', path: '/vpn/status', method: 'GET' },
-            { name: 'Camera Discovery', path: '/api/cameras/status', method: 'GET' }
+            { name: 'TOR Status', path: '/api/tor/status', method: 'GET' },
+            { name: 'VPN Status', path: '/api/vpn/status', method: 'GET' },
+            { name: 'Camera Discovery', path: '/api/camera-discovery/status', method: 'GET' }
         ];
         
         // Core services to verify
         this.coreServices = [
-            { name: 'LLM Models', path: '/models/list', method: 'GET' },
+            { name: 'LLM Models', path: '/models', method: 'GET' },
             { name: 'Fibonacci Cognitive', path: '/models/metrics', method: 'GET' },
             { name: 'Director Agents', path: '/api/director/status', method: 'GET' },
-            { name: 'Google Services', path: '/google/status', method: 'GET' },
+            { name: 'Google Services', path: '/api/google/status', method: 'GET' },
             { name: 'Auth Status', path: '/auth/status', method: 'GET' }
         ];
     }

@@ -37,8 +37,24 @@ class KnowledgeBaseService {
                 try {
                     const content = fs.readFileSync(filePath, 'utf8');
                     const name = file.replace('.json', '');
-                    this.datasets[name] = JSON.parse(content);
-                    console.log(`[KNOWLEDGE] Loaded ${file} (${this.datasets[name].length} entries)`);
+                    const data = JSON.parse(content);
+                    this.datasets[name] = data;
+                    
+                    // Calculate entry count based on structure
+                    let entryCount = 0;
+                    if (Array.isArray(data)) {
+                        entryCount = data.length;
+                    } else if (typeof data === 'object' && data !== null) {
+                        // Count top-level keys or specific arrays within the object
+                        if (data.scenarios) entryCount = data.scenarios.length;
+                        else if (data.workflow_categories) entryCount = data.workflow_categories.length;
+                        else if (data.expert_domains) entryCount = Object.keys(data.expert_domains).length;
+                        else if (data.entries) entryCount = data.entries.length;
+                        else if (data.training_scenarios) entryCount = data.training_scenarios.length;
+                        else if (data.methodology_phases) entryCount = data.methodology_phases.length;
+                        else entryCount = Object.keys(data).length;
+                    }
+                    console.log(`[KNOWLEDGE] Loaded ${file} (${entryCount} entries)`);
                 } catch (error) {
                     console.error(`[KNOWLEDGE] Failed to load ${file}:`, error.message);
                 }
