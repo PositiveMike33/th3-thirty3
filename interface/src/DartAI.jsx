@@ -70,14 +70,15 @@ const DartAI = () => {
     };
 
     const loadGoogleTasks = async () => {
+        // Google Tasks API not implemented - using Dart tasks instead
+        // This section could be expanded if Google Tasks API is added later
         try {
-            const res = await fetch(`${API_URL}/google/tasks?email=th3thirty3@gmail.com`);
-            const data = await res.json();
-            if (data.tasks) {
-                setGoogleTasks(data.tasks.slice(0, 5)); // Show top 5 Google Tasks
-            }
+            // For now, we don't have a separate Google Tasks integration
+            // The Dart tasks already sync with the main system
+            setGoogleTasks([]);
         } catch (error) {
             console.error('Failed to load Google Tasks:', error);
+            setGoogleTasks([]);
         }
     };
 

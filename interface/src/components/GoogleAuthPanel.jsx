@@ -1,37 +1,81 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
 
 const GoogleAuthPanel = () => {
     const [googleStatus, setGoogleStatus] = useState({});
-    const ACCOUNTS = ['th3thirty3@gmail.com', 'mikegauthierguillet@gmail.com', 'mgauthierguillet@gmail.com'];
+    const [loading, setLoading] = useState(true);
+    
+    const ACCOUNTS = [
+        'mikegauthierguillet@gmail.com',
+        'th3thirty3@gmail.com', 
+        'mgauthierguillet@gmail.com'
+    ];
 
     useEffect(() => {
-        // Check Google Status
-        fetch(`${API_URL}/google/status`)
-            .then(res => res.json())
-            .then(setGoogleStatus)
-            .catch(console.error);
+        fetchGoogleStatus();
+        const interval = setInterval(fetchGoogleStatus, 30000);
+        return () => clearInterval(interval);
     }, []);
 
-    const connectGoogle = (email) => {
-        window.open(`${API_URL}/auth/google?email=${email}`, '_blank', 'width=500,height=600');
+    const fetchGoogleStatus = async () => {
+        try {
+            const response = await fetch(API_URL + '/api/google/status');
+            if (response.ok) {
+                const data = await response.json();
+                const statusMap = {};
+                if (data.accounts) {
+                    data.accounts.forEach(account => {
+                        statusMap[account.email] = account.connected;
+                    });
+                }
+                setGoogleStatus(statusMap);
+            }
+        } catch (error) {
+            console.error('[GoogleAuthPanel] Error:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    const connectGoogle = async (email) => {
+        try {
+            const response = await fetch(API_URL + '/api/google/auth/' + encodeURIComponent(email));
+            if (response.ok) {
+                const data = await response.json();
+                if (data.authUrl) {
+                    window.open(data.authUrl, '_blank');
+                }
+            }
+        } catch (error) {
+            console.error('[GoogleAuthPanel] Error:', error);
+        }
+    };
+
+    if (loading) {
+        return <div className="text-xs text-gray-500">Loading...</div>;
+    }
+
     return (
-        <div className="flex gap-2 mt-2">
-            {ACCOUNTS.map(email => (
-                <button
-                    key={email}
-                    onClick={() => googleStatus && !googleStatus[email] && connectGoogle(email)}
-                    className={`text-[8px] px-2 py-1 rounded border ${(googleStatus && googleStatus[email])
-                        ? 'bg-green-900/50 border-green-500 text-green-300 cursor-default'
-                        : 'bg-red-900/20 border-red-900 text-red-500 hover:bg-red-900/40'
-                        }`}
-                    title={email}
-                >
-                    {email.split('@')[0]} {(googleStatus && googleStatus[email]) ? '✓' : '✗'}
-                </button>
-            ))}
+        <div className="space-y-1">
+            <span className="text-xs text-gray-500 uppercase tracking-widest">Comptes Google</span>
+            <div className="flex flex-col gap-1 mt-1">
+                {ACCOUNTS.map((email) => {
+                    const isConnected = googleStatus[email] === true;
+                    const shortName = email.split('@')[0];
+                    return (
+                        <button
+                            key={email}
+                            onClick={() => !isConnected && connectGoogle(email)}
+                            title={email}
+                            className={isConnected 
+                                ? 'text-xs px-2 py-1 rounded border bg-green-900/20 border-green-900 text-green-400' 
+                                : 'text-xs px-2 py-1 rounded border bg-red-900/20 border-red-900 text-red-500 hover:bg-red-900/40'}
+                        >
+                            {shortName} {isConnected ? 'OK' : 'X'}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 };
