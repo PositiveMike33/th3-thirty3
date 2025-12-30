@@ -1,0 +1,123 @@
+# Th3 Thirty3 - GPU-Enabled Docker Compose
+# TensorFlow + CUDA for Ethical Hacking AI Training
+
+services:
+  # ================================
+  # TensorFlow GPU Training Service
+  # ================================
+  tensorflow-trainer:
+    build:
+      context: ./gpu_training
+      dockerfile: Dockerfile
+    container_name: th3-gpu-trainer
+    restart: unless-stopped
+    ports:
+      - "5000:5000"  # Training API
+      - "6006:6006"  # TensorBoard
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - TF_FORCE_GPU_ALLOW_GROWTH=true
+      - TRAINING_MODE=both  # auto + on-demand
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - SERVER_URL=http://host.docker.internal:3000
+    volumes:
+      - ./gpu_training:/app
+      - ./server/data:/app/server_data
+      - gpu-models:/app/trained_models
+      - gpu-cache:/root/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, compute, utility]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - th3-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ================================
+  # Backend API (with GPU support)
+  # ================================
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: th3-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GPU_TRAINER_URL=http://tensorflow-trainer:5000
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - ANYTHING_LLM_URL=${ANYTHING_LLM_URL:-http://host.docker.internal:3001}
+      - ANYTHING_LLM_KEY=${ANYTHING_LLM_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./server/data:/app/data
+      - ./server/.env:/app/.env:ro
+    depends_on:
+      - tensorflow-trainer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - th3-network
+
+  # ================================
+  # Frontend
+  # ================================
+  frontend:
+    build:
+      context: ./interface
+      dockerfile: Dockerfile
+    container_name: th3-frontend
+    restart: unless-stopped
+    ports:
+      - "5174:80"
+    depends_on:
+      - server
+    networks:
+      - th3-network
+
+  # ================================
+  # Ollama with GPU (optional if running externally)
+  # ================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: th3-ollama-gpu
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - th3-network
+    profiles:
+      - with-ollama  # Only start if explicitly requested
+
+networks:
+  th3-network:
+    driver: bridge
+
+volumes:
+  gpu-models:
+  gpu-cache:
+  ollama-data:
