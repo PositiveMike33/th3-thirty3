@@ -13,12 +13,12 @@ class OfflineModeService extends EventEmitter {
         this.isOnline = true;
         this.checkInterval = null;
         this.lastCheck = Date.now();
-        
+
         // Configuration
         this.config = {
             checkIntervalMs: 10000,          // Vérifier toutes les 10 secondes
-            offlineModel: 'dolphin-mistral:7b', // Modèle ultra-léger offline (801M)
-            onlineModel: 'dolphin-mistral:7b',         // Modèle normal online
+            offlineModel: 'granite4:3b', // Granite 4.0 for offline (2.1GB)
+            onlineModel: 'ministral-3:latest',         // Ministral 3 for online
             testHosts: ['8.8.8.8', '1.1.1.1', 'google.com'],
             energyMode: 'normal'              // 'normal', 'eco', 'ultra-eco'
         };
@@ -86,7 +86,7 @@ class OfflineModeService extends EventEmitter {
             try {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 3000);
-                
+
                 await fetch('https://www.google.com/generate_204', {
                     method: 'HEAD',
                     signal: controller.signal
@@ -116,10 +116,10 @@ class OfflineModeService extends EventEmitter {
      */
     handleOffline() {
         console.log('[OFFLINE-MODE] 🔴 Internet connection LOST - Switching to OFFLINE mode');
-        
+
         this.stats.offlineEvents++;
         this.stats.lastOfflineStart = Date.now();
-        
+
         // Désactiver services cloud
         Object.keys(this.cloudServices).forEach(service => {
             this.cloudServices[service] = false;
@@ -150,9 +150,9 @@ class OfflineModeService extends EventEmitter {
      */
     handleOnline() {
         console.log('[OFFLINE-MODE] 🟢 Internet connection RESTORED - Switching to ONLINE mode');
-        
+
         this.stats.onlineEvents++;
-        
+
         // Calculer temps offline
         if (this.stats.lastOfflineStart) {
             this.stats.totalOfflineTime += Date.now() - this.stats.lastOfflineStart;
@@ -189,7 +189,7 @@ class OfflineModeService extends EventEmitter {
      */
     setEnergyMode(mode) {
         this.config.energyMode = mode;
-        
+
         const modeConfigs = {
             normal: {
                 checkIntervalMs: 10000,
@@ -212,7 +212,7 @@ class OfflineModeService extends EventEmitter {
         };
 
         const cfg = modeConfigs[mode] || modeConfigs.normal;
-        
+
         // Appliquer la config
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
@@ -283,8 +283,8 @@ class OfflineModeService extends EventEmitter {
             cloudServices: this.cloudServices,
             stats: {
                 ...this.stats,
-                currentOfflineTime: this.stats.lastOfflineStart 
-                    ? Date.now() - this.stats.lastOfflineStart 
+                currentOfflineTime: this.stats.lastOfflineStart
+                    ? Date.now() - this.stats.lastOfflineStart
                     : 0,
                 totalOfflineTimeFormatted: this.formatDuration(this.stats.totalOfflineTime)
             }
@@ -298,7 +298,7 @@ class OfflineModeService extends EventEmitter {
         const seconds = Math.floor(ms / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
-        
+
         if (hours > 0) return `${hours}h ${minutes % 60}m`;
         if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
         return `${seconds}s`;

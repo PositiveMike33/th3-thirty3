@@ -3,9 +3,9 @@
  * Routes agents to optimal local models based on expertise
  * 
  * LOCAL MODELS (légers, rapides):
- * - dolphin-mistral:7b (1.9GB) - Code & General
- * - dolphin-mistral:7b (1.4GB) - Fast responses
- * - nomic-embed-text (274MB) - Embeddings
+ * - ministral-3:latest (6GB) - Code & General
+ * - ministral-3:latest (6GB) - Fast responses
+ * - mxbai-embed-large (669MB) - Embeddings
  * 
  * CLOUD MODELS (via API):
  * - Groq (Llama, Mixtral)
@@ -17,15 +17,15 @@
 // Optimized for minimal resource usage
 const LOCAL_MODELS = {
     code: 'granite4:3b',             // IBM Granite 4.0 - Code/RAG
-    general: 'dolphin-mistral:7b',   // Uncensored - general purpose
+    general: 'ministral-3:latest',   // Mistral Ministral 3 for general purpose
     fast: 'granite4:3b',             // Granite 4.0 for fast responses
-    embedding: 'nomic-embed-text:latest' // Embeddings
+    embedding: 'mxbai-embed-large:latest' // Embeddings
 };
 
 // Models available for training rotation
 const ALL_LOCAL_MODELS = [
     'granite4:3b',
-    'dolphin-mistral:7b'
+    'ministral-3:latest'
 ];
 
 // Cloud providers for heavy tasks
@@ -66,7 +66,7 @@ class ModelRouter {
         if (this.initialized) return true;
 
         console.log('[MODEL_ROUTER] Initializing (optimized local config)...');
-        console.log('[MODEL_ROUTER] Local models: dolphin-mistral:7b, dolphin-mistral:7b, nomic-embed-text');
+        console.log('[MODEL_ROUTER] Local models: granite4:3b, ministral-3:latest, mxbai-embed-large');
         console.log('[MODEL_ROUTER] Cloud fallback: Groq, Gemini');
 
         try {
@@ -89,19 +89,19 @@ class ModelRouter {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'nomic-embed-text:latest',
+                    model: 'mxbai-embed-large:latest',
                     prompt: 'init'
                 })
             });
 
             if (response.ok) {
-                console.log('[MODEL_ROUTER] ✅ nomic-embed-text ready');
-                this.currentlyLoaded.add('nomic-embed-text:latest');
+                console.log('[MODEL_ROUTER] ✅ mxbai-embed-large ready');
+                this.currentlyLoaded.add('mxbai-embed-large:latest');
                 return true;
             }
             return false;
         } catch (error) {
-            console.warn('[MODEL_ROUTER] nomic-embed not available:', error.message);
+            console.warn('[MODEL_ROUTER] mxbai-embed not available:', error.message);
             return false;
         }
     }
@@ -280,7 +280,7 @@ class ModelRouter {
      * Get embedding model
      */
     getEmbeddingModel() {
-        return 'nomic-embed-text:latest';
+        return 'mxbai-embed-large:latest';
     }
 
     /**
@@ -324,22 +324,22 @@ const modelRouter = new ModelRouter();
 modelRouter.models = {
     orchestrator: {
         primary: 'granite4:3b',           // IBM Granite 4.0
-        fallback: 'dolphin-mistral:7b'
+        fallback: 'ministral-3:latest'
     },
     technical: {
         primary: 'granite4:3b',           // Granite 4.0 for code
-        fallback: 'dolphin-mistral:7b'
+        fallback: 'ministral-3:latest'
     },
     nlp: {
-        primary: 'dolphin-mistral:7b',
+        primary: 'ministral-3:latest',
         fallback: 'granite4:3b'
     },
     vision: {
-        primary: 'dolphin-mistral:7b',
+        primary: 'ministral-3:latest',
         fallback: 'granite4:3b'
     },
     embedding: {
-        primary: 'nomic-embed-text:latest',
+        primary: 'mxbai-embed-large:latest',
         fallback: null
     }
 };

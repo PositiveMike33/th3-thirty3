@@ -16,7 +16,7 @@ module.exports = {
     // AI Provider Configuration
     ai: {
         provider: process.env.AI_PROVIDER || 'anythingllm', // 'anythingllm', 'ollama', 'openrouter'
-        
+
         // AnythingLLM
         anythingllm: {
             url: process.env.ANYTHING_LLM_URL || 'http://localhost:3001/api/v1',
@@ -28,7 +28,7 @@ module.exports = {
         ollama: {
             url: process.env.OLLAMA_URL || 'http://localhost:11434',
             model: process.env.OLLAMA_MODEL || 'llama3.2-vision:11b',
-            embeddingModel: process.env.OLLAMA_EMBEDDING || 'nomic-embed-text'
+            embeddingModel: process.env.OLLAMA_EMBEDDING || 'mxbai-embed-large'
         },
 
         // OpenRouter (Cloud)

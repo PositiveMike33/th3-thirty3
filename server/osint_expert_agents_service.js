@@ -13,13 +13,13 @@ class OsintExpertAgentsService {
     constructor() {
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.dataPath = path.join(__dirname, 'data', 'osint_experts');
-        this.model = 'dolphin-mistral:7b';
-        this.fallbackModel = 'dolphin-mistral:7b';
+        this.model = 'ministral-3:latest';
+        this.fallbackModel = 'granite4:3b';
         this.kaliEnv = KALI_ENVIRONMENT;
-        
+
         this.ensureDataFolder();
         this.initializeAgents();
-        
+
         console.log(`[OSINT-EXPERTS] Service initialized with ${Object.keys(this.agents).length} tool experts on ${this.kaliEnv.os}`);
     }
 
@@ -279,21 +279,21 @@ RÈGLE: Suivre le flux, identifier les exchanges, wallet profiling`
     initializeAgents() {
         this.agents = {};
         const configs = this.getOsintToolConfigs();
-        
+
         for (const [id, config] of Object.entries(configs)) {
             const knowledgePath = path.join(this.dataPath, `${id}_knowledge.json`);
-            let knowledge = { 
-                interactions: 0, 
-                learned: [], 
+            let knowledge = {
+                interactions: 0,
+                learned: [],
                 investigations: [],
                 successfulTechniques: [],
                 commonQueries: {}
             };
-            
+
             if (fs.existsSync(knowledgePath)) {
                 knowledge = JSON.parse(fs.readFileSync(knowledgePath, 'utf8'));
             }
-            
+
             this.agents[id] = { ...config, knowledge, knowledgePath };
         }
     }
@@ -318,11 +318,11 @@ RÈGLE: Suivre le flux, identifier les exchanges, wallet profiling`
         // Construire le contexte avec les connaissances apprises
         let learnedContext = '';
         if (agent.knowledge.learned.length > 0) {
-            learnedContext = '\n\nTECHNIQUES APPRISES:\n' + 
+            learnedContext = '\n\nTECHNIQUES APPRISES:\n' +
                 agent.knowledge.learned.slice(-10).map(l => `- ${l.content}`).join('\n');
         }
         if (agent.knowledge.successfulTechniques.length > 0) {
-            learnedContext += '\n\nTECHNIQUES RÉUSSIES:\n' + 
+            learnedContext += '\n\nTECHNIQUES RÉUSSIES:\n' +
                 agent.knowledge.successfulTechniques.slice(-5).join('\n');
         }
 
@@ -380,11 +380,11 @@ Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et don
     processResponse(agent, agentId, question, response, modelUsed) {
         // Incrémenter et tracker
         agent.knowledge.interactions++;
-        
+
         // Tracker les queries communes
         const queryKey = question.toLowerCase().substring(0, 50);
         agent.knowledge.commonQueries[queryKey] = (agent.knowledge.commonQueries[queryKey] || 0) + 1;
-        
+
         this.saveAgentKnowledge(agentId);
 
         return {
@@ -454,7 +454,7 @@ Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et don
      */
     recommendExpert(task) {
         const taskLower = task.toLowerCase();
-        
+
         const keywords = {
             shodan: ['iot', 'device', 'port', 'service', 'exposed', 'shodan'],
             theharvester: ['email', 'harvest', 'domain', 'subdomain', 'linkedin'],
@@ -493,7 +493,7 @@ Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et don
      */
     async multiExpertInvestigation(target, targetType = 'domain') {
         console.log(`[OSINT-EXPERTS] Multi-expert investigation: ${target} (${targetType})`);
-        
+
         const expertsToConsult = {
             domain: ['amass', 'theharvester', 'shodan'],
             person: ['socialmedia', 'osintframework', 'geoint'],
@@ -550,10 +550,10 @@ Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et don
             try {
                 const result = await this.consultExpert(agentId, question);
                 results.push(result);
-                
+
                 // Auto-teach from the response
                 this.teachExpert(agentId, `Topic: ${topic} - ${question.substring(0, 50)}`, true);
-                
+
                 await new Promise(resolve => setTimeout(resolve, 500));
             } catch (error) {
                 results.push({ error: error.message });

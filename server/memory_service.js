@@ -10,7 +10,7 @@ class MemoryService {
         this.db = null;
         this.table = null;
         this.tableName = 'memory_store';
-        this.embedModel = 'nomic-embed-text';
+        this.embedModel = 'mxbai-embed-large';
     }
 
     async initialize() {

@@ -114,30 +114,30 @@ class OrchestratorService extends EventEmitter {
     constructor() {
         super();
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        
+
         // Use ModelRouter for intelligent model selection
         this.modelRouter = modelRouter;
         this.orchestratorModel = modelRouter.models.orchestrator.primary;  // gpt-oss:120b-cloud
         this.fallbackModel = modelRouter.models.orchestrator.fallback;     // mistral:7b
-        
+
         this.dataPath = path.join(__dirname, 'data', 'orchestrator');
-        
+
         // Équipes d'agents
         this.teams = {
             osint: {
                 name: 'OSINT Team',
                 emoji: '🔍',
-                agents: ['shodan', 'theharvester', 'maltego', 'reconng', 'spiderfoot', 
-                         'amass', 'socialmedia', 'geoint', 'darkweb', 'imagint', 'crypto', 'osintframework'],
+                agents: ['shodan', 'theharvester', 'maltego', 'reconng', 'spiderfoot',
+                    'amass', 'socialmedia', 'geoint', 'darkweb', 'imagint', 'crypto', 'osintframework'],
                 serviceFile: 'osint_expert_agents_service'
             },
             hacking: {
                 name: 'Hacking Team',
                 emoji: '💀',
                 agents: ['nmap', 'masscan', 'metasploit', 'sqlmap', 'burpsuite', 'hydra',
-                         'hashcat', 'johntheripper', 'wireshark', 'responder', 'mitmproxy',
-                         'reverseshells', 'persistence', 'privesc_linux', 'privesc_windows',
-                         'aircrack', 'bloodhound', 'impacket', 'mimikatz'],
+                    'hashcat', 'johntheripper', 'wireshark', 'responder', 'mitmproxy',
+                    'reverseshells', 'persistence', 'privesc_linux', 'privesc_windows',
+                    'aircrack', 'bloodhound', 'impacket', 'mimikatz'],
                 serviceFile: 'hacking_expert_agents_service'
             },
             general: {
@@ -151,10 +151,10 @@ class OrchestratorService extends EventEmitter {
         // État des missions
         this.activeMissions = [];
         this.missionHistory = [];
-        
+
         this.ensureDataFolder();
         this.loadMissionHistory();
-        
+
         // Initialize DartAI for automatic task sync
         try {
             this.dartService = new DartService();
@@ -164,18 +164,18 @@ class OrchestratorService extends EventEmitter {
             this.dartSyncEnabled = false;
             console.warn('[ORCHESTRATOR] DartAI sync disabled:', e.message);
         }
-        
-        // CRITICAL: Preload nomic-embed-text (must be loaded before any model operations)
+
+        // CRITICAL: Preload mxbai-embed-large (must be loaded before any model operations)
         this.modelRouter.ensureNomicLoaded().then(loaded => {
             if (loaded) {
-                console.log('[ORCHESTRATOR] 📦 nomic-embed-text preloaded successfully');
+                console.log('[ORCHESTRATOR] 📦 mxbai-embed-large preloaded successfully');
             } else {
-                console.warn('[ORCHESTRATOR] ⚠️ Failed to preload nomic-embed-text');
+                console.warn('[ORCHESTRATOR] ⚠️ Failed to preload mxbai-embed-large');
             }
         }).catch(err => {
-            console.error('[ORCHESTRATOR] ❌ nomic preload error:', err.message);
+            console.error('[ORCHESTRATOR] ❌ mxbai preload error:', err.message);
         });
-        
+
         console.log('[ORCHESTRATOR] 🎯 Chef d\'Équipe initialized - Managing', this.getTotalAgents(), 'agents');
     }
 
@@ -205,7 +205,7 @@ class OrchestratorService extends EventEmitter {
      * Get optimal model for a team based on expertise
      */
     getOptimalModelForTeam(teamName) {
-        switch(teamName) {
+        switch (teamName) {
             case 'osint':
                 return this.modelRouter.models.technical.primary;  // dolphin-mistral:7b for technical analysis
             case 'hacking':
@@ -280,13 +280,13 @@ Réponds en JSON:
 
         try {
             const response = await this.callLLM(analysisPrompt);
-            
+
             // Parser le JSON
             const jsonMatch = response.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
             }
-            
+
             return { error: 'Could not parse analysis', raw: response };
         } catch (error) {
             console.error('[ORCHESTRATOR] Analysis error:', error.message);
@@ -328,7 +328,7 @@ Réponds en JSON:
             // Phase 2: Exécuter chaque phase
             for (const phase of (analysis.phases || [])) {
                 console.log(`[ORCHESTRATOR] 📍 Executing phase: ${phase.name}`);
-                
+
                 const phaseResult = {
                     name: phase.name,
                     team: phase.team,
@@ -341,10 +341,10 @@ Réponds en JSON:
                 // Consulter chaque agent de la phase
                 // [MANAGEMENT] Load optimal model for this team using ModelRouter
                 const teamModel = this.getOptimalModelForTeam(phase.team);
-                try { 
+                try {
                     await this.modelRouter.loadModel(teamModel, false);  // nomic preloaded automatically
-                } catch(e) { 
-                    console.warn(`Failed to load ${teamModel}:`, e.message); 
+                } catch (e) {
+                    console.warn(`Failed to load ${teamModel}:`, e.message);
                 }
 
                 for (const agentId of (phase.agents || [])) {
@@ -366,17 +366,17 @@ Réponds en JSON:
 
                 phaseResult.endTime = new Date().toISOString();
                 mission.phases.push(phaseResult);
-                
+
                 this.emit('mission:phase', { missionId, phase: phaseResult });
             }
 
             // [MANAGEMENT] Unload Expert Model to free VRAM for Synthesis
-            try { await modelManager.unloadModel('dolphin-mistral:7b'); } catch(e) {}
+            try { await modelManager.unloadModel('ministral-3:latest'); } catch (e) { }
 
             // Phase 3: Synthèse
             mission.status = 'synthesizing';
             mission.synthesis = await this.synthesizeResults(mission);
-            
+
             mission.status = 'completed';
             mission.endTime = new Date().toISOString();
 
@@ -401,7 +401,7 @@ Phases: ${mission.phases?.length || 0}
 Duration: ${new Date(mission.endTime) - new Date(mission.startTime)}ms
 Synthesis: ${mission.synthesis?.substring(0, 200) || 'N/A'}
                 `.trim();
-                
+
                 await this.dartService.createTask(taskTitle, { description: taskDesc });
                 console.log('[ORCHESTRATOR] 📋 Mission synced to DartAI');
                 mission.dartSynced = true;

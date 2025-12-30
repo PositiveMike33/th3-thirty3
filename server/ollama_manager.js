@@ -32,7 +32,7 @@ class OllamaModelManager {
         this.unloadTimeout = null;
         this.UNLOAD_DELAY = 5 * 60 * 1000;  // 5 minutes d'inactivité
         this.loadedModels = new Set();
-        
+
         console.log(`[OLLAMA] Model Manager initialized (${OLLAMA_URL})${PROXY_ENABLED ? ' [PROXY MODE]' : ''}`);
     }
 
@@ -49,9 +49,9 @@ class OllamaModelManager {
                 this.resetUnloadTimer(modelName);
                 return true;
             }
-            
+
             console.log(`[OLLAMA] Loading model via API: ${modelName}`);
-            
+
             // Use generate endpoint with minimal prompt to trigger load
             const response = await fetch(`${OLLAMA_URL}/api/generate`, {
                 method: 'POST',
@@ -64,19 +64,19 @@ class OllamaModelManager {
                     keep_alive: '5m'  // Keep alive for 5 minutes
                 })
             });
-            
+
             if (!response.ok) {
                 const errText = await response.text();
                 throw new Error(`HTTP Error: ${response.status} - ${errText}`);
             }
-            
+
             this.currentModel = modelName;
             this.loadedModels.add(modelName);
             this.resetUnloadTimer(modelName);
-            
+
             console.log(`[OLLAMA] ✅ Model ${modelName} loaded`);
             return true;
-            
+
         } catch (error) {
             console.error(`[OLLAMA] ❌ Failed to load ${modelName}:`, error.message);
             return false;
@@ -90,7 +90,7 @@ class OllamaModelManager {
     async unloadModel(modelName) {
         try {
             console.log(`[OLLAMA] Unloading model: ${modelName}`);
-            
+
             // Use keep_alive: 0 to immediately unload
             await fetch(`${OLLAMA_URL}/api/generate`, {
                 method: 'POST',
@@ -101,15 +101,15 @@ class OllamaModelManager {
                     keep_alive: 0
                 })
             });
-            
+
             if (this.currentModel === modelName) {
                 this.currentModel = null;
             }
             this.loadedModels.delete(modelName);
-            
+
             console.log(`[OLLAMA] Model ${modelName} unloaded`);
             return true;
-            
+
         } catch (error) {
             console.error(`[OLLAMA] Failed to unload ${modelName}:`, error.message);
             return false;
@@ -126,7 +126,7 @@ class OllamaModelManager {
             clearTimeout(this.unloadTimeout);
             this.unloadTimeout = null;
         }
-        
+
         // Start new timer to unload after inactivity
         this.unloadTimeout = setTimeout(() => {
             console.log(`[OLLAMA] Auto-unloading ${modelName} after ${this.UNLOAD_DELAY / 1000}s inactivity`);
@@ -176,28 +176,28 @@ class OllamaModelManager {
     }
 
     /**
-     * Preload embedding model (nomic-embed-text)
+     * Preload embedding model (mxbai-embed-large)
      */
     async preloadEmbedding() {
         try {
-            console.log('[OLLAMA] Preloading nomic-embed-text for embeddings...');
-            
+            console.log('[OLLAMA] Preloading mxbai-embed-large for embeddings...');
+
             const response = await fetch(`${OLLAMA_URL}/api/embeddings`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify({
-                    model: 'nomic-embed-text:latest',
+                    model: 'mxbai-embed-large:latest',
                     prompt: 'preload test'
                 })
             });
-            
+
             if (response.ok) {
-                console.log('[OLLAMA] ✅ nomic-embed-text preloaded');
-                this.loadedModels.add('nomic-embed-text:latest');
+                console.log('[OLLAMA] ✅ mxbai-embed-large preloaded');
+                this.loadedModels.add('mxbai-embed-large:latest');
                 return true;
             }
             return false;
-            
+
         } catch (error) {
             console.error('[OLLAMA] Failed to preload embedding model:', error.message);
             return false;

@@ -11,7 +11,7 @@
  * 
  * Architecture:
  * - Primary: Cloud models (Groq, OpenAI, Gemini, Anthropic)
- * - Fallback: Local Ollama models (dolphin-mistral:7b, dolphin-mistral:7b)
+ * - Fallback: Local Ollama models (ministral-3:latest, granite4:3b)
  * - Emergency: Cached responses / offline mode
  */
 
@@ -48,18 +48,18 @@ const FailoverMode = {
 class NetworkFailoverService extends EventEmitter {
     constructor() {
         super();
-        
+
         this.state = NetworkState.UNKNOWN;
         this.previousState = NetworkState.UNKNOWN;
         this.mode = FailoverMode.AUTO;
         this.isOnline = false;
         this.isOllamaAvailable = false;
-        
+
         // Configuration
         this.checkIntervalMs = 10000;        // Check every 10 seconds
         this.offlineThreshold = 3;           // Require 3 failed checks to go offline
         this.onlineThreshold = 2;            // Require 2 successful checks to go online
-        
+
         // Tracking
         this.consecutiveFailures = 0;
         this.consecutiveSuccesses = 0;
@@ -67,7 +67,7 @@ class NetworkFailoverService extends EventEmitter {
         this.lastOnline = null;
         this.lastOffline = null;
         this.checkInterval = null;
-        
+
         // Statistics
         this.stats = {
             totalChecks: 0,
@@ -78,10 +78,10 @@ class NetworkFailoverService extends EventEmitter {
             averageLatency: 0,
             lastLatencies: []
         };
-        
+
         // Endpoint status cache
         this.endpointStatus = {};
-        
+
         console.log('[NETWORK_FAILOVER] Service initialized');
     }
 
@@ -93,18 +93,18 @@ class NetworkFailoverService extends EventEmitter {
             console.log('[NETWORK_FAILOVER] Already running');
             return;
         }
-        
+
         console.log('[NETWORK_FAILOVER] Starting connectivity monitoring...');
         console.log(`[NETWORK_FAILOVER] Mode: ${this.mode}, Interval: ${this.checkIntervalMs}ms`);
-        
+
         // Initial check
         this.performConnectivityCheck();
-        
+
         // Start periodic checks
         this.checkInterval = setInterval(() => {
             this.performConnectivityCheck();
         }, this.checkIntervalMs);
-        
+
         this.emit('started');
     }
 
@@ -127,26 +127,26 @@ class NetworkFailoverService extends EventEmitter {
         this.state = NetworkState.CHECKING;
         this.lastCheck = new Date();
         this.stats.totalChecks++;
-        
+
         const startTime = Date.now();
-        
+
         try {
             // Check internet connectivity (at least 1 endpoint must respond)
             const internetResults = await this.checkInternetConnectivity();
-            
+
             // Check local Ollama availability
             const ollamaResult = await this.checkOllamaAvailability();
-            
+
             const latency = Date.now() - startTime;
             this.updateLatencyStats(latency);
-            
+
             // Determine new state
             const wasOnline = this.isOnline;
             const wasOllamaAvailable = this.isOllamaAvailable;
-            
+
             this.isOnline = internetResults.online;
             this.isOllamaAvailable = ollamaResult.available;
-            
+
             // Update consecutive counters
             if (this.isOnline) {
                 this.consecutiveSuccesses++;
@@ -157,13 +157,13 @@ class NetworkFailoverService extends EventEmitter {
                 this.consecutiveSuccesses = 0;
                 this.stats.offlineChecks++;
             }
-            
+
             // Determine actual state based on thresholds
             this.updateNetworkState(wasOnline, wasOllamaAvailable);
-            
+
             // Emit status update
             this.emit('statusUpdate', this.getStatus());
-            
+
         } catch (error) {
             console.error('[NETWORK_FAILOVER] Check error:', error.message);
             this.consecutiveFailures++;
@@ -178,13 +178,13 @@ class NetworkFailoverService extends EventEmitter {
         const results = await Promise.allSettled(
             CONNECTIVITY_ENDPOINTS.map(endpoint => this.checkEndpoint(endpoint))
         );
-        
+
         let successCount = 0;
         let totalLatency = 0;
-        
+
         results.forEach((result, index) => {
             const endpoint = CONNECTIVITY_ENDPOINTS[index];
-            
+
             if (result.status === 'fulfilled' && result.value.success) {
                 this.endpointStatus[endpoint.name] = {
                     available: true,
@@ -201,7 +201,7 @@ class NetworkFailoverService extends EventEmitter {
                 };
             }
         });
-        
+
         return {
             online: successCount >= 1, // At least 1 endpoint must respond
             successCount,
@@ -216,9 +216,9 @@ class NetworkFailoverService extends EventEmitter {
     async checkEndpoint(endpoint) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), endpoint.timeout);
-        
+
         const startTime = Date.now();
-        
+
         try {
             const response = await fetch(endpoint.url, {
                 method: 'HEAD',
@@ -227,9 +227,9 @@ class NetworkFailoverService extends EventEmitter {
                     'User-Agent': 'Th3Thirty3-NetworkMonitor/1.0'
                 }
             });
-            
+
             clearTimeout(timeoutId);
-            
+
             return {
                 success: response.status < 500, // Accept any non-server-error response
                 latency: Date.now() - startTime,
@@ -248,14 +248,14 @@ class NetworkFailoverService extends EventEmitter {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2000);
-            
+
             const startTime = Date.now();
             const response = await fetch(OLLAMA_ENDPOINT, {
                 signal: controller.signal
             });
-            
+
             clearTimeout(timeoutId);
-            
+
             if (response.ok) {
                 const data = await response.json();
                 return {
@@ -264,7 +264,7 @@ class NetworkFailoverService extends EventEmitter {
                     latency: Date.now() - startTime
                 };
             }
-            
+
             return { available: false, error: 'Bad response' };
         } catch (error) {
             return { available: false, error: error.message };
@@ -276,12 +276,12 @@ class NetworkFailoverService extends EventEmitter {
      */
     updateNetworkState(wasOnline, wasOllamaAvailable) {
         this.previousState = this.state;
-        
+
         // Determine new state
         if (this.isOnline && this.isOllamaAvailable) {
             if (this.consecutiveSuccesses >= this.onlineThreshold || this.state === NetworkState.ONLINE) {
                 this.state = NetworkState.ONLINE;
-                
+
                 // Recovery event
                 if (!wasOnline && this.previousState === NetworkState.OFFLINE) {
                     this.lastOnline = new Date();
@@ -293,7 +293,7 @@ class NetworkFailoverService extends EventEmitter {
         } else if (!this.isOnline && this.isOllamaAvailable) {
             if (this.consecutiveFailures >= this.offlineThreshold || this.state === NetworkState.OFFLINE) {
                 this.state = NetworkState.OFFLINE;
-                
+
                 // Failover event
                 if (wasOnline && this.previousState === NetworkState.ONLINE) {
                     this.lastOffline = new Date();
@@ -320,7 +320,7 @@ class NetworkFailoverService extends EventEmitter {
         if (this.stats.lastLatencies.length > 100) {
             this.stats.lastLatencies.shift();
         }
-        this.stats.averageLatency = 
+        this.stats.averageLatency =
             this.stats.lastLatencies.reduce((a, b) => a + b, 0) / this.stats.lastLatencies.length;
     }
 
@@ -331,47 +331,47 @@ class NetworkFailoverService extends EventEmitter {
         switch (this.mode) {
             case FailoverMode.CLOUD_ONLY:
                 return { provider: 'cloud', reason: 'Cloud only mode' };
-                
+
             case FailoverMode.LOCAL_ONLY:
-                return { 
-                    provider: 'local', 
+                return {
+                    provider: 'local',
                     reason: 'Local only mode',
-                    model: 'dolphin-mistral:7b'
+                    model: 'ministral-3:latest'
                 };
-                
+
             case FailoverMode.MANUAL:
                 // Return current preference (set externally)
-                return { 
+                return {
                     provider: this.isOnline ? 'cloud' : 'local',
                     reason: 'Manual mode'
                 };
-                
+
             case FailoverMode.AUTO:
             default:
                 if (this.state === NetworkState.ONLINE) {
-                    return { 
-                        provider: 'cloud', 
+                    return {
+                        provider: 'cloud',
                         reason: 'Internet available',
                         preferredCloud: 'groq' // Fastest cloud provider
                     };
                 } else if (this.state === NetworkState.OFFLINE) {
-                    return { 
-                        provider: 'local', 
+                    return {
+                        provider: 'local',
                         reason: 'Internet offline - failover active',
-                        model: 'dolphin-mistral:7b',
-                        fallbackModel: 'dolphin-mistral:7b'
+                        model: 'ministral-3:latest',
+                        fallbackModel: 'granite4:3b'
                     };
                 } else if (this.state === NetworkState.DEGRADED) {
-                    return { 
-                        provider: 'cloud', 
+                    return {
+                        provider: 'cloud',
                         reason: 'Degraded connectivity',
                         useRetry: true
                     };
                 } else {
-                    return { 
-                        provider: 'local', 
+                    return {
+                        provider: 'local',
                         reason: 'Unknown state - defaulting to local',
-                        model: 'dolphin-mistral:7b'
+                        model: 'ministral-3:latest'
                     };
                 }
         }
@@ -395,7 +395,7 @@ class NetworkFailoverService extends EventEmitter {
         if (Object.values(NetworkState).includes(state)) {
             this.previousState = this.state;
             this.state = state;
-            
+
             if (state === NetworkState.OFFLINE) {
                 this.isOnline = false;
                 this.emit('failover', { forced: true, timestamp: new Date() });
@@ -403,7 +403,7 @@ class NetworkFailoverService extends EventEmitter {
                 this.isOnline = true;
                 this.emit('recovery', { forced: true, timestamp: new Date() });
             }
-            
+
             this.emit('statusUpdate', this.getStatus());
         }
     }
@@ -444,14 +444,14 @@ class NetworkFailoverService extends EventEmitter {
      */
     getRecommendedModel(domain = 'general') {
         const provider = this.getOptimalProvider();
-        
+
         if (provider.provider === 'local') {
             // Local model recommendations
             const localModels = {
-                code: 'dolphin-mistral:7b',
-                general: 'dolphin-mistral:7b',
-                fast: 'dolphin-mistral:7b',
-                embedding: 'nomic-embed-text:latest'
+                code: 'ministral-3:latest',
+                general: 'ministral-3:latest',
+                fast: 'granite4:3b',
+                embedding: 'mxbai-embed-large:latest'
             };
             return {
                 model: localModels[domain] || localModels.general,

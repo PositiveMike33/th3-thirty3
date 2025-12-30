@@ -13,13 +13,13 @@ class HackingExpertAgentsService {
     constructor() {
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.dataPath = path.join(__dirname, 'data', 'hacking_experts');
-        this.model = 'dolphin-mistral:7b';
-        this.fallbackModel = 'dolphin-mistral:7b';
+        this.model = 'ministral-3:latest';
+        this.fallbackModel = 'granite4:3b';
         this.kaliEnv = KALI_ENVIRONMENT;
-        
+
         this.ensureDataFolder();
         this.initializeAgents();
-        
+
         console.log(`[HACKING-EXPERTS] Service initialized with ${Object.keys(this.agents).length} tool experts on ${this.kaliEnv.os}`);
     }
 
@@ -452,22 +452,22 @@ DÉFENSE: Credential Guard, Protected Users, LSA protection`
     initializeAgents() {
         this.agents = {};
         const configs = this.getHackingToolConfigs();
-        
+
         for (const [id, config] of Object.entries(configs)) {
             const knowledgePath = path.join(this.dataPath, `${id}_knowledge.json`);
-            let knowledge = { 
-                interactions: 0, 
+            let knowledge = {
+                interactions: 0,
                 techniques: [],
                 codeSnippets: [],
                 successfulExploits: [],
                 defenseStrategies: [],
                 trainingHistory: []
             };
-            
+
             if (fs.existsSync(knowledgePath)) {
                 knowledge = JSON.parse(fs.readFileSync(knowledgePath, 'utf8'));
             }
-            
+
             this.agents[id] = { ...config, knowledge, knowledgePath };
         }
     }
@@ -490,11 +490,11 @@ DÉFENSE: Credential Guard, Protected Users, LSA protection`
         // Construire le contexte avec les connaissances apprises
         let learnedContext = '';
         if (agent.knowledge.techniques.length > 0) {
-            learnedContext = '\n\nTECHNIQUES APPRISES:\n' + 
+            learnedContext = '\n\nTECHNIQUES APPRISES:\n' +
                 agent.knowledge.techniques.slice(-10).map(t => `- ${t.content}`).join('\n');
         }
         if (agent.knowledge.codeSnippets.length > 0) {
-            learnedContext += '\n\nCODE SNIPPETS MÉMORISÉS:\n' + 
+            learnedContext += '\n\nCODE SNIPPETS MÉMORISÉS:\n' +
                 agent.knowledge.codeSnippets.slice(-5).map(c => `\`\`\`\n${c.code}\n\`\`\``).join('\n');
         }
 
@@ -555,17 +555,17 @@ Réponds en EXPERT ${agent.tool} sur Kali Linux. Donne:
 
     processResponse(agent, agentId, question, response, modelUsed) {
         agent.knowledge.interactions++;
-        
+
         // Track la question dans l'historique d'entraînement
         agent.knowledge.trainingHistory.push({
             question: question.substring(0, 100),
             timestamp: new Date().toISOString()
         });
-        
+
         if (agent.knowledge.trainingHistory.length > 100) {
             agent.knowledge.trainingHistory = agent.knowledge.trainingHistory.slice(-100);
         }
-        
+
         this.saveAgentKnowledge(agentId);
 
         return {
@@ -669,10 +669,10 @@ Réponds en EXPERT ${agent.tool} sur Kali Linux. Donne:
             try {
                 const result = await this.consultExpert(agentId, question);
                 results.push(result);
-                
+
                 // Auto-teach from the response
                 this.teachTechnique(agentId, `Topic: ${topic} - ${question.substring(0, 50)}`, null, true);
-                
+
                 // Petit délai pour éviter surcharge
                 await new Promise(resolve => setTimeout(resolve, 500));
             } catch (error) {
