@@ -308,13 +308,107 @@ class SecurityScannerService {
      * @returns {Object} Résultats headers
      */
     async scanHeaders(domain) {
-        // Placeholder - sera implémenté dans micro-objectif 1.3
-        return {
+        const result = {
             score: 0,
             present: [],
-            missing: this.SECURITY_HEADERS,
-            issues: ['Implementation pending']
+            missing: [],
+            values: {},
+            issues: []
         };
+
+        try {
+            const headers = await this.fetchHeaders(domain);
+
+            if (headers.error) {
+                result.issues.push(headers.error);
+                result.missing = [...this.SECURITY_HEADERS];
+                return result;
+            }
+
+            // Vérifier chaque header de sécurité
+            for (const header of this.SECURITY_HEADERS) {
+                const value = headers[header];
+                if (value) {
+                    result.present.push(header);
+                    result.values[header] = value;
+                } else {
+                    result.missing.push(header);
+                }
+            }
+
+            // Calculer le score (chaque header vaut ~14 points)
+            const pointsPerHeader = 100 / this.SECURITY_HEADERS.length;
+            let score = result.present.length * pointsPerHeader;
+
+            // Bonus/Malus pour configuration spécifique
+            if (result.values['strict-transport-security']) {
+                const hsts = result.values['strict-transport-security'].toLowerCase();
+                if (hsts.includes('max-age=') && parseInt(hsts.match(/max-age=(\d+)/)?.[1] || 0) >= 31536000) {
+                    score += 5; // HSTS avec 1 an minimum
+                }
+                if (hsts.includes('includesubdomains')) {
+                    score += 3;
+                }
+            }
+
+            if (result.values['content-security-policy']) {
+                const csp = result.values['content-security-policy'].toLowerCase();
+                if (csp.includes("default-src 'self'") || csp.includes('default-src self')) {
+                    score += 5; // CSP restrictif
+                }
+            }
+
+            // Générer les issues
+            if (result.missing.includes('strict-transport-security')) {
+                result.issues.push('HSTS manquant - Vulnérable aux attaques downgrade');
+            }
+            if (result.missing.includes('content-security-policy')) {
+                result.issues.push('CSP manquant - Vulnérable aux attaques XSS');
+            }
+            if (result.missing.includes('x-frame-options')) {
+                result.issues.push('X-Frame-Options manquant - Vulnérable au clickjacking');
+            }
+
+            result.score = Math.min(100, Math.round(score));
+
+        } catch (error) {
+            result.issues.push(`Erreur headers: ${error.message}`);
+            result.missing = [...this.SECURITY_HEADERS];
+        }
+
+        return result;
+    }
+
+    /**
+     * Récupérer les headers HTTP d'un domaine
+     */
+    fetchHeaders(domain) {
+        return new Promise((resolve) => {
+            const url = `https://${domain}`;
+
+            https.get(url, { timeout: 10000 }, (res) => {
+                const headers = {};
+                for (const [key, value] of Object.entries(res.headers)) {
+                    headers[key.toLowerCase()] = value;
+                }
+                resolve(headers);
+            }).on('error', (err) => {
+                // Essayer HTTP si HTTPS échoue
+                http.get(`http://${domain}`, { timeout: 10000 }, (res) => {
+                    const headers = {};
+                    for (const [key, value] of Object.entries(res.headers)) {
+                        headers[key.toLowerCase()] = value;
+                    }
+                    headers['_http_only'] = true;
+                    resolve(headers);
+                }).on('error', (err2) => {
+                    resolve({ error: `Impossible de récupérer les headers: ${err2.message}` });
+                });
+            }).on('timeout', function () {
+                this.destroy();
+                resolve({ error: 'Timeout lors de la récupération des headers' });
+            });
+        });
     }
 
     /**
