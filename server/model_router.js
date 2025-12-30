@@ -13,17 +13,18 @@
  * - OpenAI
  */
 
-// Local model configuration - UNCENSORED MODEL (dolphin-mistral)
-// Optimized for minimal resource usage with single model
+// Local model configuration - GRANITE 4.0 + DOLPHIN-MISTRAL
+// Optimized for minimal resource usage
 const LOCAL_MODELS = {
-    code: 'dolphin-mistral:7b',      // Uncensored - for all code tasks
+    code: 'granite4:3b',             // IBM Granite 4.0 - Code/RAG
     general: 'dolphin-mistral:7b',   // Uncensored - general purpose
-    fast: 'dolphin-mistral:7b',      // Single model for simplicity
+    fast: 'granite4:3b',             // Granite 4.0 for fast responses
     embedding: 'nomic-embed-text:latest' // Embeddings
 };
 
-// Single uncensored model for training
+// Models available for training rotation
 const ALL_LOCAL_MODELS = [
+    'granite4:3b',
     'dolphin-mistral:7b'
 ];
 
@@ -319,23 +320,23 @@ class ModelRouter {
 const modelRouter = new ModelRouter();
 
 // BACKWARD COMPATIBILITY: Add 'models' property for orchestrator_service.js
-// Single uncensored model (dolphin-mistral) for all tasks
+// Granite 4.0 for code/technical, dolphin-mistral for general
 modelRouter.models = {
     orchestrator: {
-        primary: 'dolphin-mistral:7b',      // Uncensored
+        primary: 'granite4:3b',           // IBM Granite 4.0
         fallback: 'dolphin-mistral:7b'
     },
     technical: {
-        primary: 'dolphin-mistral:7b',
+        primary: 'granite4:3b',           // Granite 4.0 for code
         fallback: 'dolphin-mistral:7b'
     },
     nlp: {
         primary: 'dolphin-mistral:7b',
-        fallback: 'dolphin-mistral:7b'
+        fallback: 'granite4:3b'
     },
     vision: {
         primary: 'dolphin-mistral:7b',
-        fallback: 'dolphin-mistral:7b'
+        fallback: 'granite4:3b'
     },
     embedding: {
         primary: 'nomic-embed-text:latest',
