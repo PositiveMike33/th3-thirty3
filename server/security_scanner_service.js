@@ -520,14 +520,97 @@ class SecurityScannerService {
      * @returns {Object} Résultats ports
      */
     async scanWithShodan(domain) {
-        // Placeholder - sera implémenté dans micro-objectif 1.5
-        return {
+        const result = {
             score: 100,
             ports: [],
             services: [],
             dangerousPorts: [],
-            issues: []
+            vulns: [],
+            issues: [],
+            shodanData: null
         };
+
+        try {
+            // Résoudre le domaine en IP
+            let ip;
+            try {
+                const addresses = await dns.resolve4(domain);
+                ip = addresses[0];
+            } catch (e) {
+                result.issues.push('Impossible de résoudre le domaine en IP');
+                return result;
+            }
+
+            // Utiliser Shodan si disponible
+            if (this.shodanService) {
+                try {
+                    const shodanData = await this.shodanService.getHost(ip);
+                    result.shodanData = shodanData;
+
+                    // Extraire les ports
+                    if (shodanData.ports) {
+                        result.ports = shodanData.ports;
+                    }
+
+                    // Extraire les services
+                    if (shodanData.data) {
+                        result.services = shodanData.data.map(service => ({
+                            port: service.port,
+                            protocol: service.transport || 'tcp',
+                            product: service.product || 'unknown',
+                            version: service.version || '',
+                            banner: service.data?.substring(0, 200) || ''
+                        }));
+                    }
+
+                    // Vérifier les vulnérabilités connues
+                    if (shodanData.vulns) {
+                        result.vulns = shodanData.vulns;
+                    }
+
+                } catch (e) {
+                    result.issues.push(`Shodan: ${e.message}`);
+                }
+            } else {
+                result.issues.push('Service Shodan non connecté - Scan ports limité');
+            }
+
+            // Identifier les ports dangereux parmi ceux détectés
+            result.dangerousPorts = result.ports.filter(port =>
+                this.DANGEROUS_PORTS.includes(port)
+            );
+
+            // Calculer le score
+            let score = 100;
+
+            // Pénalité pour ports dangereux
+            score -= result.dangerousPorts.length * 15;
+
+            // Pénalité pour vulnérabilités connues
+            score -= result.vulns.length * 10;
+
+            // Pénalité pour trop de ports ouverts (> 10)
+            if (result.ports.length > 10) {
+                score -= (result.ports.length - 10) * 2;
+                result.issues.push(`${result.ports.length} ports exposés - Surface d'attaque élevée`);
+            }
+
+            // Générer les issues
+            if (result.dangerousPorts.length > 0) {
+                result.issues.push(`Ports dangereux exposés: ${result.dangerousPorts.join(', ')}`);
+            }
+
+            if (result.vulns.length > 0) {
+                result.issues.push(`${result.vulns.length} vulnérabilités CVE détectées`);
+            }
+
+            result.score = Math.max(0, Math.min(100, score));
+
+        } catch (error) {
+            result.issues.push(`Erreur Shodan: ${error.message}`);
+        }
+
+        return result;
     }
 
     /**
