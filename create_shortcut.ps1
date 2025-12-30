@@ -1,14 +1,10 @@
-$TargetFile = "$PSScriptRoot\start_th3_thirty3.bat"
+# Create NEXUS33 Desktop Shortcut
+$WshShell = New-Object -ComObject WScript.Shell
 $DesktopPath = [Environment]::GetFolderPath("Desktop")
-$ShortcutFile = "$DesktopPath\Th3 Thirty3.lnk"
-$WScriptShell = New-Object -ComObject WScript.Shell
-$Shortcut = $WScriptShell.CreateShortcut($ShortcutFile)
-$Shortcut.TargetPath = $TargetFile
-$Shortcut.WorkingDirectory = $PSScriptRoot
-# Attempt to set icon if available (assuming .ico format, but we might have .png from generation)
-# Windows shortcuts need .ico. We'll stick to default or try to convert if possible, 
-# but for now let's just create the shortcut.
-# $Shortcut.IconLocation = "$PSScriptRoot\icon.ico" 
+$Shortcut = $WshShell.CreateShortcut("$DesktopPath\NEXUS33.lnk")
+$Shortcut.TargetPath = "C:\Users\th3th\Th3-Thirty3\th3-thirty3\NEXUS33-docker.bat"
+$Shortcut.WorkingDirectory = "C:\Users\th3th\Th3-Thirty3\th3-thirty3"
+$Shortcut.IconLocation = "C:\Users\th3th\Th3-Thirty3\th3-thirty3\icon.ico"
+$Shortcut.Description = "NEXUS33 - AI Cybersecurity Platform"
 $Shortcut.Save()
-
-Write-Host "Shortcut created successfully at $ShortcutFile" -ForegroundColor Green
+Write-Host "Shortcut created on Desktop!" -ForegroundColor Green
