@@ -1,13 +1,17 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-// Correct path: server/fabric/patterns (relative to this file in server/)
+// Fabric patterns paths - check multiple locations
+const USER_FABRIC_PATH = path.join(os.homedir(), '.config', 'fabric', 'patterns');
 const FABRIC_PATH_PRIMARY = path.join(__dirname, 'fabric', 'patterns');
 const FABRIC_PATH_FALLBACK_1 = path.join(__dirname, '..', 'fabric', 'data', 'patterns');
 const FABRIC_PATH_FALLBACK_2 = path.join(__dirname, 'fabric-official', 'data', 'patterns');
 
 const getPatternsDir = () => {
-    // Check primary path first (server/fabric/patterns)
+    // Check user's Fabric config first (most likely to have patterns)
+    if (fs.existsSync(USER_FABRIC_PATH)) return USER_FABRIC_PATH;
+    // Then check project paths
     if (fs.existsSync(FABRIC_PATH_PRIMARY)) return FABRIC_PATH_PRIMARY;
     if (fs.existsSync(FABRIC_PATH_FALLBACK_1)) return FABRIC_PATH_FALLBACK_1;
     if (fs.existsSync(FABRIC_PATH_FALLBACK_2)) return FABRIC_PATH_FALLBACK_2;
