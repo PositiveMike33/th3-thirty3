@@ -4,7 +4,12 @@
     "description": "Backend for th3 thirty3 agent",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "test": "jest --passWithNoTests",
+        "test:watch": "jest --watch"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.71.0",
