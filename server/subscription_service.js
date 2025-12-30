@@ -7,22 +7,22 @@ class SubscriptionService {
     constructor() {
         // Définition des tiers avec niveaux et limites
         this.TIERS = {
-            initiate: { 
-                level: 0, 
-                name: 'FREE', 
+            initiate: {
+                level: 0,
+                name: 'FREE',
                 label: '🆓 Gratuit',
-                limits: { 
+                limits: {
                     chat_per_day: 10,
                     google_search_per_day: 5,
                     patterns: 5,
                     agents: 0
                 }
             },
-            operator: { 
-                level: 1, 
-                name: 'PREMIUM', 
+            operator: {
+                level: 1,
+                name: 'PREMIUM',
                 label: '⭐ Premium',
-                limits: { 
+                limits: {
                     chat_per_day: -1, // -1 = illimité
                     google_search_per_day: -1,
                     patterns: -1,
@@ -41,11 +41,43 @@ class SubscriptionService {
                     seats: 10   // 10 utilisateurs par license entreprise
                 }
             },
-            architect: { 
-                level: 3, 
-                name: 'OWNER', 
+            architect: {
+                level: 3,
+                name: 'OWNER',
                 label: '👑 Propriétaire',
                 limits: {} // Aucune limite
+            },
+
+            // ========= NEXUS33 SECURITY TIERS =========
+            security_starter: {
+                level: 1,
+                name: 'SECURITY_STARTER',
+                label: '🔒 Security Starter',
+                limits: {
+                    domains: 1,
+                    scans_per_month: 4,
+                    api_access: false
+                }
+            },
+            security_pro: {
+                level: 2,
+                name: 'SECURITY_PRO',
+                label: '🛡️ Security Pro',
+                limits: {
+                    domains: 5,
+                    scans_per_month: -1, // Illimité
+                    api_access: false
+                }
+            },
+            security_enterprise: {
+                level: 3,
+                name: 'SECURITY_ENTERPRISE',
+                label: '🏢 Security Enterprise',
+                limits: {
+                    domains: -1, // Illimité
+                    scans_per_month: -1,
+                    api_access: true
+                }
             }
         };
 
@@ -56,30 +88,30 @@ class SubscriptionService {
             'chat_unlimited': 'operator',     // Illimité
             'chat_cloud_models': 'operator',  // Groq, OpenAI
             'chat_claude': 'architect',       // Claude réservé OWNER
-            
+
             // Recherche & OSINT
             'google_search_basic': 'initiate',   // 5 recherches/jour
             'google_search_advanced': 'operator', // Illimité
             'osint_basic': 'operator',           // Outils OSINT basiques
             'osint_advanced': 'operator',        // Outils OSINT avancés
             'osint_tor': 'architect',            // OSINT via Tor
-            
+
             // Hacking & Security
             'hacking_basic': 'operator',         // Outils hacking basiques
             'hacking_advanced': 'architect',     // Outils avancés + Tor
             'cyber_training': 'operator',
             'cyber_training_aikido': 'architect',
-            
+
             // Data & Analytics
             'patterns_limited': 'initiate',      // 5 patterns
             'patterns_all': 'operator',          // 232 patterns
             'kpi_view': 'operator',
             'kpi_edit': 'architect',
-            
+
             // Finance & Pro
             'finance': 'architect',              // Kraken - Propriétaire seul
             'vision': 'architect',               // VPO - Propriétaire seul
-            
+
             // Agents
             'agents_limited': 'operator',        // 10 agents
             'agents_all': 'architect'            // 37 agents
@@ -110,7 +142,7 @@ class SubscriptionService {
         const requiredLevel = this.TIERS[requiredTier]?.level ?? 99;
 
         const hasAccess = userLevel >= requiredLevel;
-        
+
         if (!hasAccess) {
             console.log(`[SUBSCRIPTION] Access denied: ${user.username} (${user.tier}) -> ${feature} (requires ${requiredTier})`);
         }
@@ -157,7 +189,7 @@ class SubscriptionService {
      */
     getAccessibleFeatures(tierName) {
         const userLevel = this.TIERS[tierName]?.level ?? -1;
-        
+
         return Object.entries(this.FEATURES)
             .filter(([feature, requiredTier]) => {
                 const requiredLevel = this.TIERS[requiredTier]?.level ?? 99;
