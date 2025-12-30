@@ -22,6 +22,7 @@ import RiskDashboard from './RiskDashboard';
 import NetworkStatus from './NetworkStatus';
 import ServerConsole from './ServerConsole';
 import LoginPage from './LoginPage';
+import UnifiedDashboard from './UnifiedDashboard';
 import { API_URL } from './config';
 import './index.css';
 
@@ -45,7 +46,7 @@ function App() {
         <Routes>
           {/* Login Page - Public Route */}
           <Route path="/login" element={<LoginPage />} />
-          
+
           {/* Protected Routes */}
           <Route path="/*" element={
             <ProtectedRoute>
@@ -67,15 +68,9 @@ function App() {
                   <nav className="p-4 bg-gray-900/80 border-b border-gray-800 text-white flex justify-center gap-8 backdrop-blur-md z-20 items-center">
                     <Link to="/" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">CHAT</Link>
                     <Link to="/professional" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROFESSIONAL</Link>
+                    <Link to="/unified" className="hover:text-emerald-400 transition-colors font-mono text-sm tracking-widest">📊 UNIFIED</Link>
                     <Link to="/projects" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROJECTS</Link>
-                    <Link to="/osint" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">OSINT</Link>
-                    <Link to="/cyber-training" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest"> CYBER</Link>
-                    <Link to="/training" className="hover:text-purple-400 transition-colors font-mono text-sm tracking-widest"> TRAINING</Link>
-                    <Link to="/dashboard" className="hover:text-purple-400 transition-colors font-mono text-sm tracking-widest"> SOC</Link>
-                    <Link to="/dart" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest"> DART AI</Link>
-                    <Link to="/finetuning" className="hover:text-orange-400 transition-colors font-mono text-sm tracking-widest"> FINE-TUNE</Link>
                     <Link to="/simulator" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🎮 SIMULATOR</Link>
-                    <Link to="/risks" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🛡️ RISKS</Link>
                     <Link to="/space" className="hover:text-blue-400 transition-colors font-mono text-sm tracking-widest"> SPACE</Link>
                     <a href="/keelclip/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors font-mono text-sm tracking-widest"> KEELCLIP</a>
                     <Link to="/settings" className="hover:text-yellow-400 transition-colors font-mono text-sm tracking-widest"> SETTINGS</Link>
@@ -88,6 +83,7 @@ function App() {
                       <Routes>
                         <Route path="/" element={<ChatInterface />} />
                         <Route path="/professional" element={<ProfessionalPage />} />
+                        <Route path="/unified" element={<UnifiedDashboard />} />
                         <Route path="/projects" element={<ProjectDashboard />} />
                         <Route path="/osint" element={<OsintDashboard />} />
                         <Route path="/cyber-training" element={<CyberTrainingPage />} />
@@ -108,7 +104,7 @@ function App() {
 
                     {/* Global Chat Overlay - Persistent Everywhere */}
                     <GlobalChat />
-                    
+
                     {/* Server Console - RISK-006: Internal Terminal Display */}
                     <ServerConsole />
                   </div>
