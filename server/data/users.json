@@ -4,11 +4,11 @@
       "id": "admin-001",
       "username": "th3thirty3",
       "email": "th3thirty3@gmail.com",
-      "password": "$2b$10$KXvsVGD08tUKSHjS3pArduEoiSZoqGUZkVOrkeckivWBamICOkZwy",
+      "password": "$2b$10$NQlFxatBt872qsgLU2P1SeX2mwmLue9UJHR8VOrryCGFePyKXoTEC",
       "tier": "architect",
       "key": "sk-ADMIN-TH3-THIRTY3-MASTER-KEY",
-      "createdAt": "2025-12-30T04:20:18.015Z",
-      "lastLogin": null,
+      "createdAt": "2025-12-30T04:36:54.875Z",
+      "lastLogin": "2025-12-30T04:38:31.227Z",
       "profile": {
         "firstName": "Th3",
         "lastName": "Thirty3",
@@ -23,7 +23,7 @@
       "usage": {
         "chatCount": 0,
         "searchCount": 0,
-        "lastActive": null
+        "lastActive": "2025-12-30T04:38:31.227Z"
       }
     }
   ]

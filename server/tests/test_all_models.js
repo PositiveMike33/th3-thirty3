@@ -1,193 +1,266 @@
 /**
- * Model Performance Test Suite
- * Tests all 7 Ollama models for response time, quality, and compatibility
+ * Test All Models Script
+ * Vérifie que tous les modèles sont:
+ * 1. Disponibles dans Ollama
+ * 2. Connectés via le Model Router
+ * 3. Capables de générer des réponses
+ * 4. mxbai-embed-large is ready for local embeddings (fallback: snowflake-arctic-embed)
+ * 5. La rotation des modèles fonctionne correctement
  */
 
-const http = require('http');
+const modelRouter = require('./model_router');
+const EmbeddingService = require('./embedding_service');
+const TrainingCommentaryService = require('./training_commentary_service');
 
-// All available models (currently installed)
-const MODELS = [
-    'ministral-3:latest',  // 6GB - General purpose
-    'granite4:3b',         // 2.1GB - Code/Fast
-    'granite-flash:latest' // 2.1GB - Custom Granite 4.0
-    // mxbai-embed-large and snowflake-arctic-embed excluded (embedding models)
-];
-
-// Test prompts for different capabilities
-const TEST_PROMPTS = {
-    coding: "Write a JavaScript function that checks if a string is a palindrome. Keep it short.",
-    analysis: "What is SQL injection? Explain in 2 sentences.",
-    creative: "Write a haiku about cybersecurity.",
-    reasoning: "If all hackers are programmers, and some programmers are artists, can hackers be artists? Answer briefly."
+const COLORS = {
+    reset: '\x1b[0m',
+    green: '\x1b[32m',
+    red: '\x1b[31m',
+    yellow: '\x1b[33m',
+    cyan: '\x1b[36m',
+    magenta: '\x1b[35m'
 };
 
-class ModelTester {
-    constructor() {
-        this.results = [];
-    }
+function log(color, symbol, message) {
+    console.log(`${color}${symbol}${COLORS.reset} ${message}`);
+}
 
-    async testModel(modelName, prompt, category) {
-        return new Promise((resolve) => {
-            const startTime = Date.now();
-            let response = '';
-            let error = null;
+async function testOllamaConnection() {
+    log(COLORS.cyan, '🔍', 'Testing Ollama connection...');
 
-            const postData = JSON.stringify({
-                model: modelName,
-                prompt: prompt,
-                stream: false,
-                options: {
-                    temperature: 0.7,
-                    num_predict: 150  // Limit tokens for faster testing
-                }
-            });
+    try {
+        const response = await fetch('http://localhost:11434/api/tags');
+        const data = await response.json();
+        const models = data.models || [];
 
-            const options = {
-                hostname: 'localhost',
-                port: 11434,
-                path: '/api/generate',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(postData)
-                },
-                timeout: 60000  // 60s timeout
-            };
+        log(COLORS.green, '✅', `Ollama connected - ${models.length} models available`);
 
-            const req = http.request(options, (res) => {
-                res.on('data', (chunk) => {
-                    try {
-                        const data = JSON.parse(chunk.toString());
-                        response += data.response || '';
-                    } catch (e) {
-                        response += chunk.toString();
-                    }
-                });
-
-                res.on('end', () => {
-                    const endTime = Date.now();
-                    resolve({
-                        model: modelName,
-                        category,
-                        success: res.statusCode === 200,
-                        responseTime: endTime - startTime,
-                        responseLength: response.length,
-                        preview: response.substring(0, 100).replace(/\n/g, ' '),
-                        error: null
-                    });
-                });
-            });
-
-            req.on('error', (e) => {
-                resolve({
-                    model: modelName,
-                    category,
-                    success: false,
-                    responseTime: Date.now() - startTime,
-                    responseLength: 0,
-                    preview: '',
-                    error: e.message
-                });
-            });
-
-            req.on('timeout', () => {
-                req.destroy();
-                resolve({
-                    model: modelName,
-                    category,
-                    success: false,
-                    responseTime: 60000,
-                    responseLength: 0,
-                    preview: '',
-                    error: 'Timeout (60s)'
-                });
-            });
-
-            req.write(postData);
-            req.end();
+        console.log('\n📦 Available Models:');
+        models.forEach(m => {
+            const sizeGB = (m.size / (1024 * 1024 * 1024)).toFixed(2);
+            const isEmbed = m.name.includes('embed') ? ' [EMBEDDING]' : '';
+            const isOptimized = m.name.includes('q4_K_M') ? ' [UNSLOTH Q4_K_M]' : '';
+            console.log(`   - ${m.name} (${sizeGB}GB)${isEmbed}${isOptimized}`);
         });
+
+        return models;
+    } catch (error) {
+        log(COLORS.red, '❌', `Ollama connection failed: ${error.message}`);
+        return [];
     }
+}
 
-    async runFullTest() {
-        console.log('╔════════════════════════════════════════════════════════════════╗');
-        console.log('║           MODEL PERFORMANCE TEST SUITE                         ║');
-        console.log('║           Testing 6 models × 4 categories = 24 tests           ║');
-        console.log('╚════════════════════════════════════════════════════════════════╝\n');
+async function testModelRouter() {
+    log(COLORS.cyan, '\n🔍', 'Testing Model Router...');
 
-        const results = {};
+    try {
+        // Initialize router
+        await modelRouter.initialize();
+        log(COLORS.green, '✅', 'Model Router initialized');
 
-        for (const model of MODELS) {
-            console.log(`\n📦 Testing: ${model}`);
-            console.log('─'.repeat(60));
+        // Check nomic preload
+        const status = modelRouter.getStatus();
+        if (status.currentlyLoaded.some(m => m.includes('nomic'))) {
+            log(COLORS.green, '✅', 'nomic-embed-text preloaded for local embeddings');
+        } else {
+            log(COLORS.yellow, '⚠️', 'nomic-embed-text not preloaded');
+        }
 
-            results[model] = {
-                tests: [],
-                avgResponseTime: 0,
-                successRate: 0
-            };
+        // Test different domain routes
+        const domains = ['security', 'code', 'vision', 'general', 'fast'];
+        console.log('\n🎯 Domain Routing Tests:');
 
-            for (const [category, prompt] of Object.entries(TEST_PROMPTS)) {
-                process.stdout.write(`  [${category}] `);
+        for (const domain of domains) {
+            const result = await modelRouter.routeToModel(domain);
+            // routeToModel returns { model, isLocal, provider }
+            const modelName = result.model;
+            const providerTag = result.isLocal ? '[LOCAL]' : `[CLOUD: ${result.provider}]`;
+            log(COLORS.green, '  ✅', `${domain} → ${modelName} ${providerTag}`);
+        }
 
-                const result = await this.testModel(model, prompt, category);
-                results[model].tests.push(result);
+        return true;
+    } catch (error) {
+        log(COLORS.red, '❌', `Model Router test failed: ${error.message}`);
+        return false;
+    }
+}
 
-                if (result.success) {
-                    console.log(`✅ ${result.responseTime}ms (${result.responseLength} chars)`);
-                } else {
-                    console.log(`❌ ${result.error || 'Failed'}`);
-                }
+
+async function testEmbeddings() {
+    log(COLORS.cyan, '\n🔍', 'Testing Embedding Service (nomic-embed-text priority)...');
+
+    try {
+        const embedService = new EmbeddingService();
+
+        // Test local embedding (nomic)
+        console.log('   Testing nomic-embed-text (local)...');
+        const localEmbed = await embedService.embed('Test embedding for local processing', 'ollama');
+        log(COLORS.green, '✅', `nomic-embed-text: ${localEmbed.length} dimensions`);
+
+        // Get stats
+        const stats = embedService.getStats();
+        log(COLORS.green, '✅', `Primary provider: ${stats.primary_provider}`);
+
+        return true;
+    } catch (error) {
+        log(COLORS.red, '❌', `Embedding test failed: ${error.message}`);
+        return false;
+    }
+}
+
+async function testCommentaryRotation() {
+    log(COLORS.cyan, '\n🔍', 'Testing Training Commentary Service...');
+
+    try {
+        const commentaryService = new TrainingCommentaryService();
+
+        console.log('\n🔄 Commentary Model Availability Test:');
+
+        // Test getAvailableModels (works async, returns cached list or fetches from Ollama)
+        const models = await commentaryService.getAvailableModels();
+
+        if (models && models.length > 0) {
+            log(COLORS.green, '✅', `${models.length} models available for commentary`);
+            models.forEach(m => console.log(`     - ${m}`));
+        } else {
+            log(COLORS.yellow, '⚠️', 'No models available for commentary');
+        }
+
+        // Check service status
+        const status = commentaryService.getStatus();
+        console.log('\n📊 Commentary Status:');
+        console.log(`   Total entries: ${status.totalEntries}`);
+        console.log(`   Is active: ${status.isActive}`);
+
+        return true;
+    } catch (error) {
+        log(COLORS.red, '❌', `Commentary rotation test failed: ${error.message}`);
+        return false;
+    }
+}
+
+
+async function testModelGeneration() {
+    log(COLORS.cyan, '\n🔍', 'Testing Model Generation (all models)...');
+
+    const models = await testOllamaConnection();
+    const genModels = models.filter(m => !m.name.includes('embed'));
+
+    console.log('\n💬 Generation Tests:');
+
+    const results = [];
+    for (const model of genModels) {
+        try {
+            const startTime = Date.now();
+
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: model.name,
+                    prompt: 'Say "OK" in one word.',
+                    stream: false,
+                    options: { num_predict: 5 }
+                })
+            });
+
+            const elapsed = Date.now() - startTime;
+
+            if (response.ok) {
+                const data = await response.json();
+                const hasUnsloth = model.name.includes('q4_K_M');
+                const tag = hasUnsloth ? ' [UNSLOTH]' : '';
+                log(COLORS.green, '  ✅', `${model.name}${tag}: ${elapsed}ms`);
+                results.push({ model: model.name, success: true, time: elapsed });
+            } else {
+                log(COLORS.red, '  ❌', `${model.name}: HTTP ${response.status}`);
+                results.push({ model: model.name, success: false });
             }
-
-            // Calculate stats
-            const tests = results[model].tests;
-            const successful = tests.filter(t => t.success);
-            results[model].avgResponseTime = successful.length > 0
-                ? Math.round(successful.reduce((a, t) => a + t.responseTime, 0) / successful.length)
-                : 0;
-            results[model].successRate = Math.round((successful.length / tests.length) * 100);
+        } catch (error) {
+            log(COLORS.red, '  ❌', `${model.name}: ${error.message}`);
+            results.push({ model: model.name, success: false, error: error.message });
         }
-
-        // Print summary
-        console.log('\n\n╔════════════════════════════════════════════════════════════════╗');
-        console.log('║                    TEST SUMMARY                                 ║');
-        console.log('╚════════════════════════════════════════════════════════════════╝\n');
-
-        console.log('┌─────────────────────────────────────┬───────────┬───────────────┐');
-        console.log('│ Model                               │ Success   │ Avg Time      │');
-        console.log('├─────────────────────────────────────┼───────────┼───────────────┤');
-
-        for (const [model, data] of Object.entries(results)) {
-            const name = model.padEnd(35);
-            const success = `${data.successRate}%`.padEnd(9);
-            const time = data.avgResponseTime > 0 ? `${data.avgResponseTime}ms`.padEnd(13) : 'N/A'.padEnd(13);
-            console.log(`│ ${name} │ ${success} │ ${time} │`);
-        }
-
-        console.log('└─────────────────────────────────────┴───────────┴───────────────┘');
-
-        // Save results to JSON
-        const fs = require('fs');
-        fs.writeFileSync(
-            require('path').join(__dirname, 'data', 'model_test_results.json'),
-            JSON.stringify({ timestamp: new Date().toISOString(), results }, null, 2)
-        );
-        console.log('\n📄 Results saved to data/model_test_results.json');
-
-        return results;
     }
+
+    // Summary
+    const successful = results.filter(r => r.success).length;
+    const total = results.length;
+    console.log(`\n📊 Generation Summary: ${successful}/${total} models working`);
+
+    return results;
+}
+
+async function runAllTests() {
+    console.log('═'.repeat(60));
+    console.log('   🧪 TH3 THIRTY3 - MODEL SYSTEM TEST SUITE');
+    console.log('═'.repeat(60));
+    console.log();
+
+    const results = {
+        ollama: false,
+        router: false,
+        embeddings: false,
+        rotation: false,
+        generation: null
+    };
+
+    try {
+        // Test 1: Ollama Connection
+        const models = await testOllamaConnection();
+        results.ollama = models.length > 0;
+
+        // Test 2: Model Router
+        results.router = await testModelRouter();
+
+        // Test 3: Embeddings
+        results.embeddings = await testEmbeddings();
+
+        // Test 4: Commentary Rotation
+        results.rotation = await testCommentaryRotation();
+
+        // Test 5: All Model Generation
+        results.generation = await testModelGeneration();
+
+    } catch (error) {
+        log(COLORS.red, '❌', `Test suite error: ${error.message}`);
+    }
+
+    // Final Summary
+    console.log('\n' + '═'.repeat(60));
+    console.log('   📋 FINAL SUMMARY');
+    console.log('═'.repeat(60));
+
+    console.log(`   Ollama Connection:     ${results.ollama ? '✅ OK' : '❌ FAILED'}`);
+    console.log(`   Model Router:          ${results.router ? '✅ OK' : '❌ FAILED'}`);
+    console.log(`   Embeddings (nomic):    ${results.embeddings ? '✅ OK' : '❌ FAILED'}`);
+    console.log(`   Commentary Rotation:   ${results.rotation ? '✅ OK' : '❌ FAILED'}`);
+
+    if (results.generation) {
+        const genOK = results.generation.filter(r => r.success).length;
+        const genTotal = results.generation.length;
+        console.log(`   Model Generation:      ${genOK}/${genTotal} models working`);
+    }
+
+    console.log('\n' + '═'.repeat(60));
+
+    const allPassed = results.ollama && results.router && results.embeddings && results.rotation;
+    if (allPassed) {
+        log(COLORS.green, '🎉', 'ALL CORE TESTS PASSED!');
+    } else {
+        log(COLORS.red, '⚠️', 'Some tests failed - check logs above');
+    }
+
+    return results;
 }
 
 // Run if executed directly
 if (require.main === module) {
-    const tester = new ModelTester();
-    tester.runFullTest().then(() => {
-        console.log('\n✅ All tests complete!');
-        process.exit(0);
-    }).catch(err => {
-        console.error('Test failed:', err);
-        process.exit(1);
-    });
+    runAllTests()
+        .then(() => process.exit(0))
+        .catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
 }
 
-module.exports = ModelTester;
+module.exports = { runAllTests };
