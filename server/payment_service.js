@@ -9,7 +9,7 @@ class PaymentService {
     constructor() {
         this.stripeEnabled = !!process.env.STRIPE_SECRET_KEY;
         this.paypalEnabled = !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
-        
+
         // Prix des tiers (en cents pour Stripe)
         this.PRICING = {
             operator: {
@@ -39,6 +39,51 @@ class PaymentService {
                     'Support prioritaire',
                     'SLA garanti',
                     'Personnalisation'
+                ]
+            },
+
+            // ========= NEXUS33 SECURITY PRICING (CAD) =========
+            security_starter: {
+                monthly: 9900, // 99$ CAD
+                yearly: 99000, // 990$ CAD (2 mois gratuits)
+                currency: 'cad',
+                name: 'Security Starter',
+                features: [
+                    '1 domaine surveillé',
+                    '4 scans par mois',
+                    'Rapport SSL/Headers/DNS',
+                    'Alertes email',
+                    'Score de sécurité'
+                ]
+            },
+            security_pro: {
+                monthly: 19900, // 199$ CAD
+                yearly: 199000, // 1990$ CAD (2 mois gratuits)
+                currency: 'cad',
+                name: 'Security Pro',
+                recommended: true,
+                features: [
+                    '5 domaines surveillés',
+                    'Scans illimités',
+                    'Rapport complet avec Loi 25',
+                    'Scan Shodan (ports/vulns)',
+                    'Alertes en temps réel',
+                    'Support prioritaire'
+                ]
+            },
+            security_enterprise: {
+                monthly: 49900, // 499$ CAD
+                yearly: 499000, // 4990$ CAD (2 mois gratuits)
+                currency: 'cad',
+                name: 'Security Enterprise',
+                features: [
+                    'Domaines illimités',
+                    'Scans illimités',
+                    'Accès API complet',
+                    'Rapport personnalisé',
+                    'Conformité Loi 25 complète',
+                    'Account manager dédié',
+                    'Formation équipe'
                 ]
             }
         };
@@ -166,9 +211,9 @@ class PaymentService {
                 const session = event.data.object;
                 const userId = session.metadata.user_id;
                 const tier = session.metadata.tier;
-                
+
                 console.log(`[PAYMENT] Payment successful for user ${userId} - upgrading to ${tier}`);
-                
+
                 const userService = require('./user_service');
                 const success = userService.updateUserTier(userId, tier);
 
@@ -189,7 +234,7 @@ class PaymentService {
             case 'customer.subscription.deleted':
                 const subscription = event.data.object;
                 console.log(`[PAYMENT] Subscription canceled: ${subscription.id}`);
-                
+
                 // TODO: Downgrade utilisateur vers tier gratuit
                 return {
                     success: true,
@@ -199,7 +244,7 @@ class PaymentService {
             case 'invoice.payment_failed':
                 const invoice = event.data.object;
                 console.log(`[PAYMENT] Payment failed: ${invoice.id}`);
-                
+
                 return {
                     success: true,
                     action: 'payment_failed',
