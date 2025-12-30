@@ -18,7 +18,7 @@ class AgentMemoryService {
             ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
             : (apiKeys.ollama_direct_url || 'http://localhost:11434');
 
-        this.embeddingModel = 'nomic-embed-text:latest';
+        this.embeddingModel = 'mxbai-embed-large:latest';
         this.dataPath = path.join(__dirname, 'data', 'embeddings');
         this.piecesUrl = apiKeys.pieces_host || 'http://localhost:39300';
 
@@ -50,7 +50,7 @@ class AgentMemoryService {
     }
 
     /**
-     * Générer un embedding avec nomic-embed-text
+     * Générer un embedding avec mxbai-embed-large
      */
     async generateEmbedding(text) {
         try {

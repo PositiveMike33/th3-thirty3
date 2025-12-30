@@ -26,8 +26,8 @@ start "" "C:\Users\th3th\AppData\Local\Programs\AnythingLLM\AnythingLLM.exe"
 
 echo [SYSTEM] Pre-loading AI Models...
 timeout /t 5 /nobreak >nul
-start /min cmd /c "echo /bye | ollama run granite3.1-moe:1b"
-start /min cmd /c "echo /bye | ollama run nomic-embed-text:latest"
+start /min cmd /c "echo /bye | ollama run granite4:3b"
+start /min cmd /c "echo /bye | ollama run mxbai-embed-large:latest"
 
 echo [SYSTEM] Waiting for connection...
 timeout /t 5 /nobreak >nul

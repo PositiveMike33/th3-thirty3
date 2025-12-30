@@ -5,15 +5,12 @@
 
 const http = require('http');
 
-// All available models
+// All available models (currently installed)
 const MODELS = [
-    'mistral:7b',
-    'dolphin-mistral:7b', 
-    'dolphin-mistral:7b',
-    'llama3.1:8b-instruct-q4_K_M',
-    'llama3.2-vision:11b',
-    'gpt-oss:120b-cloud'
-    // nomic-embed-text excluded (embedding model, not generation)
+    'ministral-3:latest',  // 6GB - General purpose
+    'granite4:3b',         // 2.1GB - Code/Fast
+    'granite-flash:latest' // 2.1GB - Custom Granite 4.0
+    // mxbai-embed-large and snowflake-arctic-embed excluded (embedding models)
 ];
 
 // Test prompts for different capabilities
@@ -122,7 +119,7 @@ class ModelTester {
         for (const model of MODELS) {
             console.log(`\n📦 Testing: ${model}`);
             console.log('─'.repeat(60));
-            
+
             results[model] = {
                 tests: [],
                 avgResponseTime: 0,
@@ -131,10 +128,10 @@ class ModelTester {
 
             for (const [category, prompt] of Object.entries(TEST_PROMPTS)) {
                 process.stdout.write(`  [${category}] `);
-                
+
                 const result = await this.testModel(model, prompt, category);
                 results[model].tests.push(result);
-                
+
                 if (result.success) {
                     console.log(`✅ ${result.responseTime}ms (${result.responseLength} chars)`);
                 } else {
@@ -145,7 +142,7 @@ class ModelTester {
             // Calculate stats
             const tests = results[model].tests;
             const successful = tests.filter(t => t.success);
-            results[model].avgResponseTime = successful.length > 0 
+            results[model].avgResponseTime = successful.length > 0
                 ? Math.round(successful.reduce((a, t) => a + t.responseTime, 0) / successful.length)
                 : 0;
             results[model].successRate = Math.round((successful.length / tests.length) * 100);
@@ -159,14 +156,14 @@ class ModelTester {
         console.log('┌─────────────────────────────────────┬───────────┬───────────────┐');
         console.log('│ Model                               │ Success   │ Avg Time      │');
         console.log('├─────────────────────────────────────┼───────────┼───────────────┤');
-        
+
         for (const [model, data] of Object.entries(results)) {
             const name = model.padEnd(35);
             const success = `${data.successRate}%`.padEnd(9);
             const time = data.avgResponseTime > 0 ? `${data.avgResponseTime}ms`.padEnd(13) : 'N/A'.padEnd(13);
             console.log(`│ ${name} │ ${success} │ ${time} │`);
         }
-        
+
         console.log('└─────────────────────────────────────┴───────────┴───────────────┘');
 
         // Save results to JSON

@@ -30,16 +30,28 @@ class AuthService {
                 // Create default admin user
                 this.users = [{
                     id: 'admin-001',
-                    username: 'admin',
-                    email: 'admin@nexus33.io',
-                    password: bcrypt.hashSync('admin123', 10),
+                    username: 'th3thirty3',
+                    email: 'th3thirty3@gmail.com',
+                    password: bcrypt.hashSync('Buthaijutsu333!', 10),
                     tier: 'architect',
                     key: 'sk-ADMIN-TH3-THIRTY3-MASTER-KEY',
                     createdAt: new Date().toISOString(),
+                    lastLogin: null,
                     profile: {
-                        firstName: 'Admin',
-                        lastName: 'Nexus33',
-                        avatar: null
+                        firstName: 'Th3',
+                        lastName: 'Thirty3',
+                        avatar: null,
+                        bio: ''
+                    },
+                    settings: {
+                        theme: 'dark',
+                        notifications: true,
+                        language: 'fr'
+                    },
+                    usage: {
+                        chatCount: 0,
+                        searchCount: 0,
+                        lastActive: null
                     }
                 }];
                 this.saveUsers();
@@ -79,8 +91,8 @@ class AuthService {
         }
 
         // Check if user exists
-        const existingUser = this.users.find(u => 
-            u.email.toLowerCase() === email.toLowerCase() || 
+        const existingUser = this.users.find(u =>
+            u.email.toLowerCase() === email.toLowerCase() ||
             u.username.toLowerCase() === username.toLowerCase()
         );
 
@@ -142,7 +154,7 @@ class AuthService {
         }
 
         // Find user
-        const user = this.users.find(u => 
+        const user = this.users.find(u =>
             u.email.toLowerCase() === emailOrUsername.toLowerCase() ||
             u.username.toLowerCase() === emailOrUsername.toLowerCase()
         );
@@ -180,7 +192,7 @@ class AuthService {
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
             const user = this.users.find(u => u.id === decoded.userId);
-            
+
             if (!user) {
                 throw new Error('User not found');
             }
@@ -256,7 +268,7 @@ class AuthService {
      */
     generateToken(user) {
         return jwt.sign(
-            { 
+            {
                 userId: user.id,
                 username: user.username,
                 tier: user.tier

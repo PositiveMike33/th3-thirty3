@@ -11,15 +11,15 @@ class ReportExtractionService {
         this.dataPath = path.join(__dirname, 'data');
         this.learningFile = path.join(this.dataPath, 'learned_patterns.json');
         this.tagsFile = path.join(this.dataPath, 'tags_database.json');
-        
+
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        // Utiliser dolphin-mistral:7b par défaut (plus léger, 1.4GB)
-        // Ou llama3.2-vision:11b si assez de RAM (11.7GB requis)
-        this.model = process.env.OLLAMA_MODEL || 'dolphin-mistral:7b';
-        
+        // Utiliser ministral-3:latest par défaut
+        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+        this.model = process.env.OLLAMA_MODEL || 'ministral-3:latest';
+
         this.ensureDataFolder();
         this.loadLearning();
-        
+
         console.log('[EXTRACTION] Service initialisé avec Llama 3.2');
     }
 
@@ -152,7 +152,7 @@ RÉPONDS UNIQUEMENT EN JSON VALIDE:
 Extrait les informations structurées.`;
 
         const result = await this.queryLlama(prompt, systemPrompt);
-        
+
         try {
             // Parser le JSON de la réponse
             const jsonMatch = result.match(/\{[\s\S]*\}/);
@@ -162,7 +162,7 @@ Extrait les informations structurées.`;
         } catch (e) {
             console.error('[EXTRACTION] Erreur parsing JSON:', e.message);
         }
-        
+
         return { raw: result };
     }
 
@@ -297,7 +297,7 @@ Génère ce rapport complet avec les vraies informations de l'incident.`;
             };
         }
         this.learnedPatterns.components[component].totalIncidents++;
-        
+
         if (!this.learnedPatterns.components[component].defects[defect]) {
             this.learnedPatterns.components[component].defects[defect] = {
                 count: 0,

@@ -4,7 +4,7 @@
  * 1. Disponibles dans Ollama
  * 2. Connectés via le Model Router
  * 3. Capables de générer des réponses
- * 4. nomic-embed-text est prêt pour les embeddings locaux
+ * 4. mxbai-embed-large is ready for local embeddings (fallback: snowflake-arctic-embed)
  * 5. La rotation des modèles fonctionne correctement
  */
 
@@ -27,14 +27,14 @@ function log(color, symbol, message) {
 
 async function testOllamaConnection() {
     log(COLORS.cyan, '🔍', 'Testing Ollama connection...');
-    
+
     try {
         const response = await fetch('http://localhost:11434/api/tags');
         const data = await response.json();
         const models = data.models || [];
-        
+
         log(COLORS.green, '✅', `Ollama connected - ${models.length} models available`);
-        
+
         console.log('\n📦 Available Models:');
         models.forEach(m => {
             const sizeGB = (m.size / (1024 * 1024 * 1024)).toFixed(2);
@@ -42,7 +42,7 @@ async function testOllamaConnection() {
             const isOptimized = m.name.includes('q4_K_M') ? ' [UNSLOTH Q4_K_M]' : '';
             console.log(`   - ${m.name} (${sizeGB}GB)${isEmbed}${isOptimized}`);
         });
-        
+
         return models;
     } catch (error) {
         log(COLORS.red, '❌', `Ollama connection failed: ${error.message}`);
@@ -52,12 +52,12 @@ async function testOllamaConnection() {
 
 async function testModelRouter() {
     log(COLORS.cyan, '\n🔍', 'Testing Model Router...');
-    
+
     try {
         // Initialize router
         await modelRouter.initialize();
         log(COLORS.green, '✅', 'Model Router initialized');
-        
+
         // Check nomic preload
         const status = modelRouter.getStatus();
         if (status.currentlyLoaded.some(m => m.includes('nomic'))) {
@@ -65,11 +65,11 @@ async function testModelRouter() {
         } else {
             log(COLORS.yellow, '⚠️', 'nomic-embed-text not preloaded');
         }
-        
+
         // Test different domain routes
         const domains = ['security', 'code', 'vision', 'general', 'fast'];
         console.log('\n🎯 Domain Routing Tests:');
-        
+
         for (const domain of domains) {
             const result = await modelRouter.routeToModel(domain);
             // routeToModel returns { model, isLocal, provider }
@@ -77,7 +77,7 @@ async function testModelRouter() {
             const providerTag = result.isLocal ? '[LOCAL]' : `[CLOUD: ${result.provider}]`;
             log(COLORS.green, '  ✅', `${domain} → ${modelName} ${providerTag}`);
         }
-        
+
         return true;
     } catch (error) {
         log(COLORS.red, '❌', `Model Router test failed: ${error.message}`);
@@ -88,19 +88,19 @@ async function testModelRouter() {
 
 async function testEmbeddings() {
     log(COLORS.cyan, '\n🔍', 'Testing Embedding Service (nomic-embed-text priority)...');
-    
+
     try {
         const embedService = new EmbeddingService();
-        
+
         // Test local embedding (nomic)
         console.log('   Testing nomic-embed-text (local)...');
         const localEmbed = await embedService.embed('Test embedding for local processing', 'ollama');
         log(COLORS.green, '✅', `nomic-embed-text: ${localEmbed.length} dimensions`);
-        
+
         // Get stats
         const stats = embedService.getStats();
         log(COLORS.green, '✅', `Primary provider: ${stats.primary_provider}`);
-        
+
         return true;
     } catch (error) {
         log(COLORS.red, '❌', `Embedding test failed: ${error.message}`);
@@ -110,28 +110,28 @@ async function testEmbeddings() {
 
 async function testCommentaryRotation() {
     log(COLORS.cyan, '\n🔍', 'Testing Training Commentary Service...');
-    
+
     try {
         const commentaryService = new TrainingCommentaryService();
-        
+
         console.log('\n🔄 Commentary Model Availability Test:');
-        
+
         // Test getAvailableModels (works async, returns cached list or fetches from Ollama)
         const models = await commentaryService.getAvailableModels();
-        
+
         if (models && models.length > 0) {
             log(COLORS.green, '✅', `${models.length} models available for commentary`);
             models.forEach(m => console.log(`     - ${m}`));
         } else {
             log(COLORS.yellow, '⚠️', 'No models available for commentary');
         }
-        
+
         // Check service status
         const status = commentaryService.getStatus();
         console.log('\n📊 Commentary Status:');
         console.log(`   Total entries: ${status.totalEntries}`);
         console.log(`   Is active: ${status.isActive}`);
-        
+
         return true;
     } catch (error) {
         log(COLORS.red, '❌', `Commentary rotation test failed: ${error.message}`);
@@ -142,17 +142,17 @@ async function testCommentaryRotation() {
 
 async function testModelGeneration() {
     log(COLORS.cyan, '\n🔍', 'Testing Model Generation (all models)...');
-    
+
     const models = await testOllamaConnection();
     const genModels = models.filter(m => !m.name.includes('embed'));
-    
+
     console.log('\n💬 Generation Tests:');
-    
+
     const results = [];
     for (const model of genModels) {
         try {
             const startTime = Date.now();
-            
+
             const response = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -163,9 +163,9 @@ async function testModelGeneration() {
                     options: { num_predict: 5 }
                 })
             });
-            
+
             const elapsed = Date.now() - startTime;
-            
+
             if (response.ok) {
                 const data = await response.json();
                 const hasUnsloth = model.name.includes('q4_K_M');
@@ -181,12 +181,12 @@ async function testModelGeneration() {
             results.push({ model: model.name, success: false, error: error.message });
         }
     }
-    
+
     // Summary
     const successful = results.filter(r => r.success).length;
     const total = results.length;
     console.log(`\n📊 Generation Summary: ${successful}/${total} models working`);
-    
+
     return results;
 }
 
@@ -195,7 +195,7 @@ async function runAllTests() {
     console.log('   🧪 TH3 THIRTY3 - MODEL SYSTEM TEST SUITE');
     console.log('═'.repeat(60));
     console.log();
-    
+
     const results = {
         ollama: false,
         router: false,
@@ -203,53 +203,53 @@ async function runAllTests() {
         rotation: false,
         generation: null
     };
-    
+
     try {
         // Test 1: Ollama Connection
         const models = await testOllamaConnection();
         results.ollama = models.length > 0;
-        
+
         // Test 2: Model Router
         results.router = await testModelRouter();
-        
+
         // Test 3: Embeddings
         results.embeddings = await testEmbeddings();
-        
+
         // Test 4: Commentary Rotation
         results.rotation = await testCommentaryRotation();
-        
+
         // Test 5: All Model Generation
         results.generation = await testModelGeneration();
-        
+
     } catch (error) {
         log(COLORS.red, '❌', `Test suite error: ${error.message}`);
     }
-    
+
     // Final Summary
     console.log('\n' + '═'.repeat(60));
     console.log('   📋 FINAL SUMMARY');
     console.log('═'.repeat(60));
-    
+
     console.log(`   Ollama Connection:     ${results.ollama ? '✅ OK' : '❌ FAILED'}`);
     console.log(`   Model Router:          ${results.router ? '✅ OK' : '❌ FAILED'}`);
     console.log(`   Embeddings (nomic):    ${results.embeddings ? '✅ OK' : '❌ FAILED'}`);
     console.log(`   Commentary Rotation:   ${results.rotation ? '✅ OK' : '❌ FAILED'}`);
-    
+
     if (results.generation) {
         const genOK = results.generation.filter(r => r.success).length;
         const genTotal = results.generation.length;
         console.log(`   Model Generation:      ${genOK}/${genTotal} models working`);
     }
-    
+
     console.log('\n' + '═'.repeat(60));
-    
+
     const allPassed = results.ollama && results.router && results.embeddings && results.rotation;
     if (allPassed) {
         log(COLORS.green, '🎉', 'ALL CORE TESTS PASSED!');
     } else {
         log(COLORS.red, '⚠️', 'Some tests failed - check logs above');
     }
-    
+
     return results;
 }
 

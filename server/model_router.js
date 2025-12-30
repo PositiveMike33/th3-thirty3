@@ -13,7 +13,7 @@
  * - OpenAI
  */
 
-// Local model configuration - GRANITE 4.0 + DOLPHIN-MISTRAL
+// Local model configuration - GRANITE 4.0 + MINISTRAL 3
 // Optimized for minimal resource usage
 const LOCAL_MODELS = {
     code: 'granite4:3b',             // IBM Granite 4.0 - Code/RAG
@@ -60,7 +60,7 @@ class ModelRouter {
     }
 
     /**
-     * Initialize the router - preload nomic-embed-text for embeddings
+     * Initialize the router - preload mxbai-embed-large for embeddings
      */
     async initialize() {
         if (this.initialized) return true;
@@ -81,7 +81,7 @@ class ModelRouter {
     }
 
     /**
-     * Ensure nomic-embed-text is ready for local embeddings
+     * Ensure mxbai-embed-large is ready for local embeddings
      */
     async ensureNomicLoaded() {
         try {
@@ -369,7 +369,7 @@ class ModelRouter {
 const modelRouter = new ModelRouter();
 
 // BACKWARD COMPATIBILITY: Add 'models' property for orchestrator_service.js
-// Granite 4.0 for code/technical, dolphin-mistral for general
+// Granite 4.0 for code/technical, ministral-3 for general
 modelRouter.models = {
     orchestrator: {
         primary: 'granite4:3b',           // IBM Granite 4.0

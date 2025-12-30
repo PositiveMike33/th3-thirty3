@@ -207,9 +207,11 @@ class OrchestratorService extends EventEmitter {
     getOptimalModelForTeam(teamName) {
         switch (teamName) {
             case 'osint':
-                return this.modelRouter.models.technical.primary;  // dolphin-mistral:7b for technical analysis
+                return this.modelRouter.models.technical.primary;  // ministral-3 for technical analysis
             case 'hacking':
-                return this.modelRouter.models.technical.primary;  // dolphin-mistral:7b for exploit code
+                return this.modelRouter.models.technical.primary;  // ministral-3 for exploit code
+            case 'reverse_engineering':
+                return this.modelRouter.models.technical.primary;  // ministral-3 for exploit code
             case 'general':
                 return this.modelRouter.models.nlp.primary;  // mistral:7b for general intelligence
             default:

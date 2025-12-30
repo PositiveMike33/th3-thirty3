@@ -42,7 +42,7 @@ async function runTests() {
     await testEndpoint('Chat Local (Initiate)', `${BASE_URL}/chat`, 'POST', {
         message: 'Hello',
         provider: 'local',
-        model: 'dolphin-mistral:7b'
+        model: 'ministral-3:latest'
     }, KEYS.INITIATE, 200);
 
     // 2. Test Chat (Cloud Model) - Should FAIL for Initiate

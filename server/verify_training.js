@@ -27,7 +27,7 @@ const BENCHMARK_PROMPTS = {
 const EXPERTISE_CATEGORIES = ['coding', 'intelligence', 'logic', 'creativity', 'chat', 'humanizer', 'analysis', 'writing'];
 
 // Modèle à tester (le plus rapide)
-const TEST_MODEL = 'dolphin-mistral:7b';
+const TEST_MODEL = 'ministral-3:latest';
 
 async function callOllama(model, prompt, systemPrompt = '') {
     const response = await fetch(`${OLLAMA_API}/api/generate`, {
@@ -44,26 +44,26 @@ async function callOllama(model, prompt, systemPrompt = '') {
             }
         })
     });
-    
+
     if (!response.ok) {
         throw new Error(`Ollama error: ${response.status}`);
     }
-    
+
     return await response.json();
 }
 
 function evaluateResponse(category, response, responseTime) {
     let score = 50; // Base score
-    
+
     // Score basé sur la longueur de la réponse (max 20 points)
     const lengthScore = Math.min(20, Math.floor(response.length / 50));
     score += lengthScore;
-    
+
     // Score basé sur le temps de réponse (max 15 points) - plus c'est rapide, mieux c'est
     if (responseTime < 5000) score += 15;
     else if (responseTime < 10000) score += 10;
     else if (responseTime < 20000) score += 5;
-    
+
     // Bonus par catégorie
     const categoryKeywords = {
         coding: ['function', 'return', 'const', 'let', 'var', '=>', 'if (', 'for ('],
@@ -72,11 +72,11 @@ function evaluateResponse(category, response, responseTime) {
         analysis: ['avantages', 'inconvénients', 'risques', 'opportunités'],
         writing: ['.', ',', '!', '?'] // Ponctuation variée = meilleure écriture
     };
-    
+
     const keywords = categoryKeywords[category] || [];
     const keywordMatches = keywords.filter(kw => response.toLowerCase().includes(kw.toLowerCase())).length;
     score += Math.min(15, keywordMatches * 3);
-    
+
     return Math.min(100, Math.max(0, score));
 }
 
@@ -143,42 +143,42 @@ async function runVerificationTest() {
 
     for (const [category, prompt] of Object.entries(BENCHMARK_PROMPTS)) {
         process.stdout.write(`   [${category.padEnd(12)}] `);
-        
+
         try {
             const startTime = Date.now();
             const result = await callOllama(TEST_MODEL, prompt);
             const responseTime = Date.now() - startTime;
             const response = result.response || '';
-            
+
             // Évaluer la réponse
             const qualityScore = evaluateResponse(category, response, responseTime);
-            
+
             // Mettre à jour les métriques
             model.performance.totalQueries++;
             model.performance.successfulQueries++;
-            
+
             // Mettre à jour le temps de réponse moyen
             const oldAvg = model.performance.avgResponseTime;
             model.performance.avgResponseTime = ((oldAvg * (model.performance.totalQueries - 1)) + responseTime) / model.performance.totalQueries;
-            
+
             // Mettre à jour l'expertise
             const exp = model.expertise[category];
             const oldScore = exp.score;
             exp.samples++;
             exp.score = Math.round((oldScore * (exp.samples - 1) + qualityScore) / exp.samples);
             exp.lastUpdated = new Date().toISOString();
-            
+
             benchmarkResults[category] = {
                 responseTime,
                 qualityScore,
                 responseLength: response.length
             };
-            
+
             totalScore += qualityScore;
             successCount++;
-            
+
             console.log(`✅ Score: ${qualityScore}/100 (${responseTime}ms, ${response.length} chars)`);
-            
+
         } catch (error) {
             console.log(`❌ Erreur: ${error.message}`);
             benchmarkResults[category] = { error: error.message, qualityScore: 0 };
@@ -189,12 +189,12 @@ async function runVerificationTest() {
     // Calculer le score cognitif global
     const avgExpertise = EXPERTISE_CATEGORIES.reduce((sum, cat) => sum + model.expertise[cat].score, 0) / EXPERTISE_CATEGORIES.length;
     model.cognitive.overallScore = Math.round(avgExpertise);
-    
+
     // Calculer le taux de progression
     const previousScore = model.learning.lastSessionScore || 50;
     const currentScore = model.cognitive.overallScore;
     model.cognitive.learningRate = currentScore - previousScore;
-    
+
     // Mettre à jour les métriques d'apprentissage
     model.learning.sessionsCompleted++;
     model.learning.lastSessionScore = currentScore;
@@ -209,7 +209,7 @@ async function runVerificationTest() {
     const sortedExpertise = EXPERTISE_CATEGORIES
         .map(cat => ({ category: cat, score: model.expertise[cat].score }))
         .sort((a, b) => b.score - a.score);
-    
+
     model.strengths = sortedExpertise.slice(0, 3).filter(e => e.score > 55);
     model.weaknesses = sortedExpertise.slice(-3).filter(e => e.score < 60);
 
@@ -219,11 +219,11 @@ async function runVerificationTest() {
         results: benchmarkResults,
         overallScore: currentScore
     });
-    
+
     // Garder seulement les 30 derniers jours
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     model.benchmarks = model.benchmarks.filter(b => new Date(b.date) > thirtyDaysAgo);
-    
+
     // Ajouter à l'historique
     model.history.push({
         date: new Date().toISOString(),
@@ -250,21 +250,21 @@ async function runVerificationTest() {
     console.log(`   Score moyen: ${model.learning.averageSessionScore}/100`);
     console.log(`   Score pic: ${model.learning.peakScore}/100`);
     console.log(`   Croissance: ${model.learning.growthPercentage}%`);
-    
+
     console.log('\n   📊 Expertise par catégorie:');
     EXPERTISE_CATEGORIES.forEach(cat => {
         const score = model.expertise[cat].score;
         const bar = '█'.repeat(Math.floor(score / 5)) + '░'.repeat(20 - Math.floor(score / 5));
         console.log(`      ${cat.padEnd(12)} [${bar}] ${score}/100`);
     });
-    
+
     if (model.strengths.length > 0) {
         console.log('\n   💪 Forces:', model.strengths.map(s => s.category).join(', '));
     }
     if (model.weaknesses.length > 0) {
         console.log('   ⚠️  Faiblesses:', model.weaknesses.map(w => w.category).join(', '));
     }
-    
+
     console.log('\n   ✅ Métriques sauvegardées dans data/model_metrics.json');
     console.log('   ✅ LE TRAINING FONCTIONNE!\n');
 

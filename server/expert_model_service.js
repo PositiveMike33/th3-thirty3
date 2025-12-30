@@ -16,7 +16,7 @@ class ExpertModelService {
             'ddos-expert-33': {
                 name: 'DDoS Expert',
                 description: 'Expert en attaques DDoS et stratégies de défense',
-                baseModel: 'dolphin-mistral:7b',
+                baseModel: 'ministral-3:latest',
                 modelfile: 'Modelfile.ddos-expert',
                 trainingData: 'ddos_expert_training.json',
                 expertise: ['volumetric', 'layer7', 'botnet', 'defense', 'http2-rapid-reset']
@@ -24,7 +24,7 @@ class ExpertModelService {
             'osint-shodan-33': {
                 name: 'OSINT Shodan Expert',
                 description: 'Expert en reconnaissance passive Shodan',
-                baseModel: 'dolphin-mistral:7b',
+                baseModel: 'ministral-3:latest',
                 modelfile: 'Modelfile.osint-shodan',
                 trainingData: 'osint_shodan_training.json',
                 expertise: ['shodan', 'infrastructure', 'ports', 'ssl', 'risk-scoring']
@@ -57,10 +57,10 @@ class ExpertModelService {
         }
 
         const modelfilePath = path.join(this.modelsDir, config.modelfile);
-        
+
         return new Promise((resolve, reject) => {
             console.log(`[EXPERT] Creating ${modelName} from ${config.modelfile}...`);
-            
+
             exec(`ollama create ${modelName} -f "${modelfilePath}"`, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`[EXPERT] Error creating ${modelName}:`, error.message);
@@ -78,7 +78,7 @@ class ExpertModelService {
      */
     async listExpertModels() {
         const results = [];
-        
+
         for (const [modelName, config] of Object.entries(this.expertModels)) {
             const exists = await this.checkModelExists(modelName);
             results.push({
@@ -89,7 +89,7 @@ class ExpertModelService {
                 installed: exists
             });
         }
-        
+
         return results;
     }
 
@@ -101,7 +101,7 @@ class ExpertModelService {
         if (!config) return null;
 
         const dataPath = path.join(this.trainingDataDir, config.trainingData);
-        
+
         try {
             const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
             return data;
@@ -116,10 +116,10 @@ class ExpertModelService {
      */
     async initializeAllModels() {
         const results = [];
-        
+
         for (const modelName of Object.keys(this.expertModels)) {
             const exists = await this.checkModelExists(modelName);
-            
+
             if (!exists) {
                 try {
                     await this.createExpertModel(modelName);
@@ -131,7 +131,7 @@ class ExpertModelService {
                 results.push({ model: modelName, status: 'exists' });
             }
         }
-        
+
         return results;
     }
 
