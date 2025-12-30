@@ -417,15 +417,101 @@ class SecurityScannerService {
      * @returns {Object} Résultats DNS
      */
     async scanDNS(domain) {
-        // Placeholder - sera implémenté dans micro-objectif 1.4
-        return {
+        const result = {
             score: 0,
             records: {},
             spf: false,
             dkim: false,
             dmarc: false,
-            issues: ['Implementation pending']
+            dnssec: false,
+            issues: []
         };
+
+        try {
+            // Récupérer les enregistrements A
+            try {
+                result.records.A = await dns.resolve4(domain);
+            } catch (e) {
+                result.records.A = [];
+            }
+
+            // Récupérer les enregistrements MX
+            try {
+                result.records.MX = await dns.resolveMx(domain);
+            } catch (e) {
+                result.records.MX = [];
+            }
+
+            // Récupérer les enregistrements TXT pour SPF/DKIM/DMARC
+            try {
+                const txtRecords = await dns.resolveTxt(domain);
+                result.records.TXT = txtRecords.map(r => r.join(''));
+
+                // Vérifier SPF
+                result.spf = result.records.TXT.some(txt =>
+                    txt.toLowerCase().startsWith('v=spf1'));
+
+                // Vérifier DMARC
+                try {
+                    const dmarcRecords = await dns.resolveTxt(`_dmarc.${domain}`);
+                    result.dmarc = dmarcRecords.some(r =>
+                        r.join('').toLowerCase().startsWith('v=dmarc1'));
+                } catch (e) {
+                    result.dmarc = false;
+                }
+
+            } catch (e) {
+                result.records.TXT = [];
+            }
+
+            // Vérifier DKIM (essayer quelques sélecteurs communs)
+            const dkimSelectors = ['google', 'default', 'selector1', 'selector2', 'k1'];
+            for (const selector of dkimSelectors) {
+                try {
+                    const dkimRecords = await dns.resolveTxt(`${selector}._domainkey.${domain}`);
+                    if (dkimRecords.length > 0) {
+                        result.dkim = true;
+                        result.dkimSelector = selector;
+                        break;
+                    }
+                } catch (e) {
+                    // Sélecteur non trouvé
+                }
+            }
+
+            // Calculer le score DNS
+            let score = 20; // Base: domaine résolvable
+
+            if (result.records.A?.length > 0) score += 10;
+            if (result.records.MX?.length > 0) score += 10;
+
+            // Email security (60 points)
+            if (result.spf) {
+                score += 20;
+            } else {
+                result.issues.push('SPF manquant - Emails vulnérables au spoofing');
+            }
+
+            if (result.dkim) {
+                score += 20;
+            } else {
+                result.issues.push('DKIM non détecté - Authenticité des emails non vérifiable');
+            }
+
+            if (result.dmarc) {
+                score += 20;
+            } else {
+                result.issues.push('DMARC manquant - Pas de politique anti-spoofing');
+            }
+
+            result.score = Math.min(100, score);
+
+        } catch (error) {
+            result.issues.push(`Erreur DNS: ${error.message}`);
+            result.score = 0;
+        }
+
+        return result;
     }
 
     /**
