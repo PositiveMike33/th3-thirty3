@@ -227,11 +227,19 @@ class ModelRouter {
 
     /**
      * Load a local model via Ollama
+     * VRAM ISOLATION: ministral-3 (6GB) requires all other models to be unloaded first
      */
     async loadModel(modelName) {
         try {
             if (this.currentlyLoaded.has(modelName)) {
                 return true;
+            }
+
+            // VRAM ISOLATION: ministral-3 is 6GB - requires exclusive VRAM access
+            const isHeavyModel = modelName.includes('ministral-3');
+            if (isHeavyModel) {
+                console.log(`[MODEL_ROUTER] ⚠️ VRAM ISOLATION: Unloading all models before loading ${modelName}`);
+                await this.unloadAllModels();
             }
 
             console.log(`[MODEL_ROUTER] Loading: ${modelName}`);
@@ -256,6 +264,47 @@ class ModelRouter {
             return false;
         } catch (error) {
             console.error(`[MODEL_ROUTER] ❌ Failed to load ${modelName}:`, error.message);
+            return false;
+        }
+    }
+
+    /**
+     * Unload ALL models from VRAM to free memory for heavy models
+     * Used for VRAM isolation with ministral-3 (6GB)
+     */
+    async unloadAllModels() {
+        try {
+            // Get list of loaded models
+            const response = await fetch('http://localhost:11434/api/ps');
+            if (!response.ok) return false;
+
+            const data = await response.json();
+            const loadedModels = data.models || [];
+
+            console.log(`[MODEL_ROUTER] Unloading ${loadedModels.length} models for VRAM isolation...`);
+
+            for (const model of loadedModels) {
+                try {
+                    // Use keep_alive: 0 to immediately unload
+                    await fetch('http://localhost:11434/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: model.name,
+                            keep_alive: 0
+                        })
+                    });
+                    console.log(`[MODEL_ROUTER] ✅ Unloaded: ${model.name}`);
+                } catch (e) {
+                    console.warn(`[MODEL_ROUTER] ⚠️ Could not unload ${model.name}`);
+                }
+            }
+
+            this.currentlyLoaded.clear();
+            console.log('[MODEL_ROUTER] 🧹 VRAM cleared - ready for heavy model');
+            return true;
+        } catch (error) {
+            console.warn('[MODEL_ROUTER] Unload all error:', error.message);
             return false;
         }
     }
