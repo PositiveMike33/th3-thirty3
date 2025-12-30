@@ -183,15 +183,123 @@ class SecurityScannerService {
      * @returns {Object} Résultats SSL
      */
     async scanSSL(domain) {
-        // Placeholder - sera implémenté dans micro-objectif 1.2
-        return {
+        const result = {
             score: 0,
             valid: false,
             issuer: null,
+            subject: null,
             expiry: null,
+            daysUntilExpiry: null,
             protocol: null,
-            issues: ['Implementation pending']
+            issues: []
         };
+
+        try {
+            const certInfo = await this.getCertificateInfo(domain);
+
+            if (certInfo.error) {
+                result.issues.push(certInfo.error);
+                result.score = 0;
+                return result;
+            }
+
+            result.valid = certInfo.valid;
+            result.issuer = certInfo.issuer;
+            result.subject = certInfo.subject;
+            result.expiry = certInfo.expiry;
+            result.daysUntilExpiry = certInfo.daysUntilExpiry;
+            result.protocol = certInfo.protocol;
+
+            // Calculer le score SSL
+            let score = 0;
+
+            // Certificat valide (+40 points)
+            if (certInfo.valid) {
+                score += 40;
+            } else {
+                result.issues.push('Certificat SSL invalide');
+            }
+
+            // Expiration (+30 points)
+            if (certInfo.daysUntilExpiry > 30) {
+                score += 30;
+            } else if (certInfo.daysUntilExpiry > 7) {
+                score += 15;
+                result.issues.push('Certificat expire dans moins de 30 jours');
+            } else if (certInfo.daysUntilExpiry > 0) {
+                score += 5;
+                result.issues.push('Certificat expire dans moins de 7 jours - URGENT');
+            } else {
+                result.issues.push('Certificat expiré!');
+            }
+
+            // Protocole TLS moderne (+30 points)
+            if (certInfo.protocol === 'TLSv1.3') {
+                score += 30;
+            } else if (certInfo.protocol === 'TLSv1.2') {
+                score += 25;
+                result.issues.push('Recommandé: Activer TLS 1.3');
+            } else {
+                score += 10;
+                result.issues.push('Protocole TLS obsolète - Mettre à jour immédiatement');
+            }
+
+            result.score = Math.min(100, score);
+
+        } catch (error) {
+            result.issues.push(`Erreur SSL: ${error.message}`);
+            result.score = 0;
+        }
+
+        return result;
+    }
+
+    /**
+     * Obtenir les informations du certificat
+     */
+    getCertificateInfo(domain) {
+        return new Promise((resolve) => {
+            const options = {
+                host: domain,
+                port: 443,
+                method: 'GET',
+                rejectUnauthorized: false,
+                timeout: 10000
+            };
+
+            const req = https.request(options, (res) => {
+                const cert = res.socket.getPeerCertificate();
+                const protocol = res.socket.getProtocol ? res.socket.getProtocol() : 'unknown';
+
+                if (cert && Object.keys(cert).length > 0) {
+                    const expiry = new Date(cert.valid_to);
+                    const now = new Date();
+                    const daysUntilExpiry = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+
+                    resolve({
+                        valid: res.socket.authorized !== false,
+                        issuer: cert.issuer?.O || cert.issuer?.CN || 'Unknown',
+                        subject: cert.subject?.CN || domain,
+                        expiry: cert.valid_to,
+                        daysUntilExpiry,
+                        protocol
+                    });
+                } else {
+                    resolve({ error: 'Aucun certificat SSL trouvé' });
+                }
+            });
+
+            req.on('error', (err) => {
+                resolve({ error: `Connexion SSL échouée: ${err.message}` });
+            });
+
+            req.on('timeout', () => {
+                req.destroy();
+                resolve({ error: 'Timeout de connexion SSL' });
+            });
+
+            req.end();
+        });
     }
 
     /**
