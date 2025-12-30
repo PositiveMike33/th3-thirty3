@@ -17,6 +17,7 @@ class LLMService {
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
             groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
+            gemini: { name: 'Google Gemini', type: 'cloud' },
             lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
@@ -74,10 +75,10 @@ class LLMService {
         // --- CLOUD MODE ---
         if (computeMode === 'cloud') {
             // Gemini
-            // if (process.env.GEMINI_API_KEY) {
-            //     models.cloud.push({ id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' });
-            //     models.cloud.push({ id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'gemini' });
-            // }
+            if (process.env.GEMINI_API_KEY) {
+                models.cloud.push({ id: 'gemini-2.5-flash-preview-05-20', name: '⚡ Gemini 2.5 Flash', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-2.5-pro-preview-05-06', name: '🧠 Gemini 2.5 Pro', provider: 'gemini' });
+            }
 
             // OpenAI - All Available Models
             if (process.env.OPENAI_API_KEY) {
@@ -241,6 +242,9 @@ class LLMService {
                 case 'perplexity':
                     response = await this.generatePerplexityResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
+                case 'gemini':
+                    response = await this.generateGeminiResponse(augmentedPrompt, modelId, systemPrompt);
+                    break;
                 case 'openrouter':
                     response = await this.generateOpenRouterResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
@@ -333,6 +337,21 @@ class LLMService {
             baseURL: 'https://api.groq.com/openai/v1',
             providerName: 'groq'
         });
+    }
+
+    async generateGeminiResponse(prompt, modelId, systemPrompt) {
+        if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY missing");
+
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+        const model = genAI.getGenerativeModel({
+            model: modelId || "gemini-2.5-flash-preview-05-20",
+            systemInstruction: systemPrompt
+        });
+
+        const result = await model.generateContent(prompt);
+        return result.response.text();
     }
 
     async generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt) {
