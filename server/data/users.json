@@ -2,9 +2,9 @@
   "users": [
     {
       "id": "admin-001",
-      "username": "th3thirty3",
+      "username": "admin",
       "email": "th3thirty3@gmail.com",
-      "password": "$2b$10$NQlFxatBt872qsgLU2P1SeX2mwmLue9UJHR8VOrryCGFePyKXoTEC",
+      "password": "$2b$10$yowBZzVEQ/v8QVV.h7g/ZeVXeoQ15TF5ycLqLvgycMzz37KC82jH6",
       "tier": "architect",
       "key": "sk-ADMIN-TH3-THIRTY3-MASTER-KEY",
       "createdAt": "2025-12-30T04:36:54.875Z",

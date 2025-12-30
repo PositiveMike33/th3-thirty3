@@ -14,9 +14,9 @@ const ProjectDashboard = () => {
     // const [loading, setLoading] = useState(false); // Unused
     // const [loading, setLoading] = useState(false); // Removed unused state
     // Sidebar was removed - these states are kept for potential future use
-     
+
     const [_showNewProjectInput, _setShowNewProjectInput] = useState(false);
-     
+
     const [_newProjectName, _setNewProjectName] = useState("");
     const [newTaskContent, setNewTaskContent] = useState("");
 
@@ -104,21 +104,21 @@ const ProjectDashboard = () => {
 
     useEffect(() => {
         let isMounted = true;
-        
+
         const initData = async () => {
             if (isMounted) {
                 await fetchGoogleData();
                 await fetchAgents();
             }
         };
-        
+
         initData();
 
         // Real-time refresh every 30s
         const interval = setInterval(() => {
             if (isMounted) fetchGoogleData();
         }, 30000);
-        
+
         return () => {
             isMounted = false;
             clearInterval(interval);
@@ -128,7 +128,7 @@ const ProjectDashboard = () => {
     // --- PROJECT ACTIONS ---
 
     // Project CRUD functions - kept for API but sidebar removed
-     
+
     const _handleCreateProject = async (name) => {
         if (!name?.trim()) return;
         try {
@@ -145,7 +145,7 @@ const ProjectDashboard = () => {
         }
     };
 
-     
+
     const _handleDeleteProject = async (id) => {
         if (!confirm("Supprimer ce projet ?")) return;
         try {
@@ -260,7 +260,7 @@ const ProjectDashboard = () => {
     };
 
     return (
-        <div 
+        <div
             className="flex flex-col w-full bg-transparent text-cyan-300 overflow-hidden"
             style={{ height: 'calc(100vh - 130px)' }}
         >
@@ -289,7 +289,7 @@ const ProjectDashboard = () => {
             </div>
 
             {/* MAIN CONTENT - Takes remaining height */}
-            <div 
+            <div
                 className="flex gap-4 p-4"
                 style={{ height: 'calc(100vh - 200px)' }}
             >
@@ -369,13 +369,41 @@ const ProjectDashboard = () => {
                     </div>
                 )}
 
-                {/* MAPS (75% Width) */}
-                <div 
+                {/* MAPS (75% Width) - With Street View & Aerial View */}
+                <div
                     className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black"
                     style={{ width: '75%', height: '100%' }}
                 >
                     <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
-                        <MapIcon size={12} /> TRAFIC / MAPS
+                        <MapIcon size={12} /> GOOGLE MAPS
+                    </div>
+                    <div className="absolute top-2 right-2 z-10 flex gap-2">
+                        <button
+                            onClick={() => {
+                                // Open Street View
+                                window.open('https://www.google.com/maps/@45.5017,-73.5673,3a,75y,90t/data=!3m6!1e1!3m4!1s0x4cc91a541c64b70d:0x654e3138211fefef!2e0!4b1', '_blank');
+                            }}
+                            className="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded border border-green-500"
+                        >
+                            🚶 Street View
+                        </button>
+                        <button
+                            onClick={() => {
+                                // Open Satellite/Aerial View
+                                window.open('https://www.google.com/maps/@45.5576996,-73.711873,5000m/data=!3m1!1e3', '_blank');
+                            }}
+                            className="bg-purple-600 hover:bg-purple-500 text-white text-xs px-2 py-1 rounded border border-purple-500"
+                        >
+                            🛰️ Vue Aérienne
+                        </button>
+                        <button
+                            onClick={() => {
+                                window.open('https://www.google.com/maps/@45.5576996,-73.711873,12z', '_blank');
+                            }}
+                            className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1 rounded border border-blue-500"
+                        >
+                            🗺️ Ouvrir Maps
+                        </button>
                     </div>
                     <iframe
                         className="absolute inset-0 w-full h-full"
@@ -383,12 +411,12 @@ const ProjectDashboard = () => {
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d178794.6234978716!2d-73.711873!3d45.5576996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a541c64b70d%3A0x654e3138211fefef!2sMontr%C3%A9al%2C%20QC!5e0!3m2!1sen!2sca!4v1709848293000!5m2!1sen!2sca"
+                        src="https://www.google.com/maps/embed/v1/view?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&center=45.5576996,-73.711873&zoom=12&maptype=satellite"
                     ></iframe>
                 </div>
 
                 {/* RIGHT SIDEBAR - Model Progress + Google Widgets (25% Width) */}
-                <div 
+                <div
                     className="flex flex-col gap-3 overflow-hidden"
                     style={{ width: '25%', height: '100%' }}
                 >

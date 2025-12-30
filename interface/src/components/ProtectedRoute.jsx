@@ -8,6 +8,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const ProtectedRoute = ({ children }) => {
+    // TEMPORARILY DISABLED: Authentication bypass for development
+    // TODO: Re-enable when backend is ready
+    return children;
+
+    /* Original auth check - uncomment when ready:
     const { isAuthenticated, loading } = useAuth();
     const location = useLocation();
 
@@ -29,6 +34,7 @@ const ProtectedRoute = ({ children }) => {
     }
 
     return children;
+    */
 };
 
 export default ProtectedRoute;

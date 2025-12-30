@@ -4,14 +4,17 @@ import React, { useState } from 'react';
 import KPIDashboard from './KPIDashboard';
 import RiskDashboard from './RiskDashboard';
 import OsintDashboard from './OsintDashboard';
+import SecurityDashboard from './pages/SecurityDashboard';
 import DartAI from './DartAI';
 import AgentMonitor from './AgentMonitor';
+import ModelIntelligenceDashboard from './components/ModelIntelligenceDashboard';
 import OllamaTrainingDashboard from './OllamaTrainingDashboard';
 import FineTuningDashboard from './FineTuningDashboard';
 import CyberTrainingPage from './CyberTrainingPage';
 import NetworkStatus from './NetworkStatus';
 import ServerConsole from './ServerConsole';
 import ProjectDashboard from './ProjectDashboard';
+import PaymentDashboard from './PaymentDashboard';
 
 /**
  * UnifiedDashboard - Central hub for all dashboards
@@ -29,7 +32,8 @@ const UnifiedDashboard = () => {
             tabs: [
                 { name: 'SOC Dashboard', component: <KPIDashboard /> },
                 { name: 'Risk Analysis', component: <RiskDashboard /> },
-                { name: 'OSINT', component: <OsintDashboard /> }
+                { name: 'OSINT', component: <OsintDashboard /> },
+                { name: 'Nexus33 Scans', component: <SecurityDashboard /> }
             ]
         },
         ai: {
@@ -38,7 +42,8 @@ const UnifiedDashboard = () => {
             color: 'purple',
             tabs: [
                 { name: 'Dart AI', component: <DartAI /> },
-                { name: 'Agent Monitor', component: <AgentMonitor standalone={true} /> }
+                { name: 'Agent Monitor', component: <AgentMonitor standalone={true} /> },
+                { name: 'Model Intelligence', component: <ModelIntelligenceDashboard /> }
             ]
         },
         training: {
@@ -58,7 +63,8 @@ const UnifiedDashboard = () => {
             tabs: [
                 { name: 'Network Status', component: <NetworkStatus /> },
                 { name: 'Server Console', component: <ServerConsole standalone={true} /> },
-                { name: 'Projects', component: <ProjectDashboard /> }
+                { name: 'Projects', component: <ProjectDashboard /> },
+                { name: 'Payments', component: <PaymentDashboard /> }
             ]
         }
     };
@@ -74,8 +80,8 @@ const UnifiedDashboard = () => {
                         key={key}
                         onClick={() => { setActiveCategory(key); setActiveSubTab(0); }}
                         className={`px-6 py-3 rounded-lg font-mono text-sm transition-all duration-300 ${activeCategory === key
-                                ? `bg-${cat.color}-500/20 text-${cat.color}-400 border border-${cat.color}-500/50`
-                                : 'bg-gray-700/50 text-gray-400 hover:bg-gray-600/50 border border-transparent'
+                            ? `bg-${cat.color}-500/20 text-${cat.color}-400 border border-${cat.color}-500/50`
+                            : 'bg-gray-700/50 text-gray-400 hover:bg-gray-600/50 border border-transparent'
                             }`}
                     >
                         <span className="mr-2">{cat.icon}</span>
@@ -91,8 +97,8 @@ const UnifiedDashboard = () => {
                         key={index}
                         onClick={() => setActiveSubTab(index)}
                         className={`px-4 py-2 rounded text-xs font-mono transition-all ${activeSubTab === index
-                                ? 'bg-gray-700 text-white'
-                                : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'
+                            ? 'bg-gray-700 text-white'
+                            : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'
                             }`}
                     >
                         {tab.name}
