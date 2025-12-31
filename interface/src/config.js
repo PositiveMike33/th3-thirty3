@@ -10,19 +10,19 @@
 const FORCE_PRODUCTION = false;
 
 // Détection automatique du mode (Vite uses import.meta.env)
-const IS_PRODUCTION = FORCE_PRODUCTION || 
-    import.meta.env.MODE === 'production' || 
+const IS_PRODUCTION = FORCE_PRODUCTION ||
+    import.meta.env.MODE === 'production' ||
     import.meta.env.PROD === true ||
     (typeof window !== 'undefined' && window.location.hostname === 'nexus33.io');
 
 // Configuration par environnement
 const ENVIRONMENTS = {
     development: {
-        API_URL: 'http://localhost:3000',
+        API_URL: 'http://localhost:3001',
         FRONTEND_URL: 'http://localhost:5173',
         OLLAMA_URL: 'http://localhost:11434',
-        ANYTHINGLLM_URL: 'http://localhost:3001',
-        WS_URL: 'ws://localhost:3000',
+        ANYTHINGLLM_URL: 'http://localhost:3002',
+        WS_URL: 'ws://localhost:3001',
         DOMAIN: 'localhost'
     },
     production: {
@@ -53,15 +53,15 @@ export const APP_CONFIG = {
         danger: "#ef4444"
     },
     defaultAvatar: "Avatar",
-    
+
     // URLs dynamiques selon l'environnement
     apiBaseUrl: ENV.API_URL,
     frontendUrl: ENV.FRONTEND_URL,
-    ollamaUrl: ENV.OLLAMA_URL,  
+    ollamaUrl: ENV.OLLAMA_URL,
     anythingLLMUrl: ENV.ANYTHINGLLM_URL,
     wsUrl: ENV.WS_URL,
     domain: ENV.DOMAIN,
-    
+
     // Flags d'environnement
     isProduction: IS_PRODUCTION,
     isDevelopment: !IS_PRODUCTION

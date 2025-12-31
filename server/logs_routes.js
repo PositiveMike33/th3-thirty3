@@ -14,6 +14,13 @@ router.get('/', (req, res) => {
     res.json({ success: true, logs, count: logs.length });
 });
 
+// GET /api/logs/recent - Frontend compatibility route
+router.get('/recent', (req, res) => {
+    const limit = parseInt(req.query.limit) || 100;
+    const logs = logger.getRecentLogs(limit);
+    res.json({ success: true, logs, count: logs.length });
+});
+
 // GET /api/logs/stats - Get log statistics
 router.get('/stats', (req, res) => {
     const stats = logger.getStats();

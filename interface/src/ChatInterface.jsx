@@ -32,7 +32,7 @@ const ChatInterface = () => {
 
     // Model Selection State
     const [selectedProvider, setSelectedProvider] = useState('local');
-    const [selectedModel, setSelectedModel] = useState('granite3.1-moe:1b');
+    const [selectedModel, setSelectedModel] = useState('granite4:3b');
 
     // Feedback State
     const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -249,10 +249,10 @@ const ChatInterface = () => {
             // Track metrics for Training Dashboard - ALL PROVIDERS
             if (selectedModel) {
                 // Format model name: prefix cloud models with provider for distinction
-                const trackingName = selectedProvider === 'local' 
-                    ? selectedModel 
+                const trackingName = selectedProvider === 'local'
+                    ? selectedModel
                     : `[${selectedProvider.toUpperCase()}] ${selectedModel}`;
-                
+
                 fetch(`${API_URL}/models/${encodeURIComponent(trackingName)}/track-query`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

@@ -33,7 +33,7 @@ const GlobalChat = () => {
                     message: msgToSend,
                     sessionId: sessionId,
                     provider: 'local', // Default to local for speed in global chat
-                    model: 'granite3.1-moe:1b'
+                    model: 'granite4:3b'
                 }),
             });
             const data = await response.json();
@@ -105,8 +105,8 @@ const GlobalChat = () => {
                 {messages.map((msg) => (
                     <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[85%] p-2 rounded text-sm ${msg.sender === 'user'
-                                ? 'bg-cyan-900/30 text-cyan-100 border border-cyan-900'
-                                : 'bg-gray-900/50 text-gray-300 border border-gray-800'
+                            ? 'bg-cyan-900/30 text-cyan-100 border border-cyan-900'
+                            : 'bg-gray-900/50 text-gray-300 border border-gray-800'
                             }`}>
                             {msg.text}
                         </div>
