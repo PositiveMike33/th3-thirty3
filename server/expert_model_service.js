@@ -16,7 +16,7 @@ class ExpertModelService {
             'ddos-expert-33': {
                 name: 'DDoS Expert',
                 description: 'Expert en attaques DDoS et stratégies de défense',
-                baseModel: 'ministral-3:latest',
+                baseModel: 'granite-flash:latest',
                 modelfile: 'Modelfile.ddos-expert',
                 trainingData: 'ddos_expert_training.json',
                 expertise: ['volumetric', 'layer7', 'botnet', 'defense', 'http2-rapid-reset']
@@ -24,7 +24,7 @@ class ExpertModelService {
             'osint-shodan-33': {
                 name: 'OSINT Shodan Expert',
                 description: 'Expert en reconnaissance passive Shodan',
-                baseModel: 'ministral-3:latest',
+                baseModel: 'granite-flash:latest',
                 modelfile: 'Modelfile.osint-shodan',
                 trainingData: 'osint_shodan_training.json',
                 expertise: ['shodan', 'infrastructure', 'ports', 'ssl', 'risk-scoring']

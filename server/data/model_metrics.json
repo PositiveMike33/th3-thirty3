@@ -3,61 +3,61 @@
     "modelName": "granite-flash:latest",
     "createdAt": "2025-12-14T18:07:23.670Z",
     "performance": {
-      "totalQueries": 163,
-      "successfulQueries": 163,
+      "totalQueries": 187,
+      "successfulQueries": 187,
       "failedQueries": 0,
-      "avgResponseTime": 622742.3190184048,
+      "avgResponseTime": 543356.3422459889,
       "minResponseTime": 188,
       "maxResponseTime": 57402952,
-      "tokensPerSecond": 99.71753830351793,
-      "totalTokensGenerated": 89478
+      "tokensPerSecond": 89.1226127871575,
+      "totalTokensGenerated": 96564
     },
     "expertise": {
       "coding": {
         "score": null,
-        "samples": 15,
-        "lastUpdated": "2025-12-18T07:30:47.126Z"
+        "samples": 18,
+        "lastUpdated": "2025-12-31T08:42:05.767Z"
       },
       "intelligence": {
         "score": null,
-        "samples": 15,
-        "lastUpdated": "2025-12-18T07:30:51.899Z"
+        "samples": 18,
+        "lastUpdated": "2025-12-31T08:42:10.937Z"
       },
       "logic": {
         "score": null,
-        "samples": 14,
-        "lastUpdated": "2025-12-18T07:30:53.980Z"
+        "samples": 17,
+        "lastUpdated": "2025-12-31T08:42:13.575Z"
       },
       "creativity": {
-        "score": 35.58767153706002,
-        "samples": 15,
-        "lastUpdated": "2025-12-18T07:30:58.817Z"
+        "score": 38.82305961421668,
+        "samples": 18,
+        "lastUpdated": "2025-12-31T08:42:15.310Z"
       },
       "chat": {
-        "score": 11,
-        "samples": 45,
-        "lastUpdated": "2025-12-18T12:01:48.555Z"
+        "score": null,
+        "samples": 48,
+        "lastUpdated": "2025-12-31T08:42:20.432Z"
       },
       "humanizer": {
         "score": null,
-        "samples": 15,
-        "lastUpdated": "2025-12-18T07:31:08.013Z"
+        "samples": 18,
+        "lastUpdated": "2025-12-31T08:42:21.593Z"
       },
       "analysis": {
-        "score": 52.49399788298261,
-        "samples": 29,
-        "lastUpdated": "2025-12-18T10:44:15.011Z"
+        "score": 53.978935581452994,
+        "samples": 32,
+        "lastUpdated": "2025-12-31T08:42:25.975Z"
       },
       "writing": {
-        "score": 36.48831712315524,
-        "samples": 15,
-        "lastUpdated": "2025-12-18T07:31:21.227Z"
+        "score": 38.740264269296034,
+        "samples": 18,
+        "lastUpdated": "2025-12-31T08:42:29.592Z"
       }
     },
     "cognitive": {
-      "overallScore": 16.1,
-      "learningRate": 0.0215,
-      "consistency": 0,
+      "overallScore": null,
+      "learningRate": null,
+      "consistency": null,
       "adaptability": 0
     },
     "learning": {
@@ -68,23 +68,17 @@
       "peakScore": 0,
       "growthPercentage": 0
     },
-    "strengths": [
-      {
-        "category": "analysis",
-        "score": 72,
-        "label": "🔍 Analyse"
-      }
-    ],
+    "strengths": [],
     "weaknesses": [
       {
-        "category": "logic",
-        "score": 0,
-        "label": "logic"
+        "category": "analysis",
+        "score": 54,
+        "label": "?? Analyse"
       },
       {
-        "category": "humanizer",
-        "score": 0,
-        "label": "humanizer"
+        "category": "writing",
+        "score": 39,
+        "label": "?? R�daction"
       }
     ],
     "history": [
@@ -2507,6 +2501,342 @@
         "cognitiveScore": 16.1,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:35:24.495Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 35.58767153706002,
+          "chat": 11,
+          "humanizer": null,
+          "analysis": 52.49399788298261,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:35.625Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 35.58767153706002,
+          "chat": 11,
+          "humanizer": null,
+          "analysis": 52.49399788298261,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:38.324Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 35.58767153706002,
+          "chat": 11,
+          "humanizer": null,
+          "analysis": 52.49399788298261,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:39.784Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": 11,
+          "humanizer": null,
+          "analysis": 52.49399788298261,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:43.782Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 52.49399788298261,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:45.103Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 52.49399788298261,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:47.348Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 36.48831712315524
+        }
+      },
+      {
+        "date": "2025-12-31T07:35:51.568Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:07.181Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:10.561Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:11.811Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 36.800942065993766,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:13.396Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:17.579Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:19.623Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.07753128688319,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:21.749Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 37.33279730295804
+        }
+      },
+      {
+        "date": "2025-12-31T08:40:26.511Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:05.767Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:10.937Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:13.575Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 37.87147488564119,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:15.310Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 38.82305961421668,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:20.432Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 38.82305961421668,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:21.593Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 38.82305961421668,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.62341737440309,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:25.975Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 38.82305961421668,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.978935581452994,
+          "writing": 38.07792687337227
+        }
+      },
+      {
+        "date": "2025-12-31T08:42:29.592Z",
+        "cognitiveScore": null,
+        "expertise": {
+          "coding": null,
+          "intelligence": null,
+          "logic": null,
+          "creativity": 38.82305961421668,
+          "chat": null,
+          "humanizer": null,
+          "analysis": 53.978935581452994,
+          "writing": 38.740264269296034
+        }
       }
     ],
     "benchmarks": [
@@ -3198,11 +3528,149 @@
           }
         },
         "overallScore": null
+      },
+      {
+        "date": "2025-12-31T07:35:51.572Z",
+        "results": {
+          "coding": {
+            "responseTime": 10199,
+            "qualityScore": null,
+            "responseLength": 2227
+          },
+          "intelligence": {
+            "responseTime": 11127,
+            "qualityScore": null,
+            "responseLength": 1573
+          },
+          "logic": {
+            "responseTime": 2695,
+            "qualityScore": null,
+            "responseLength": 645
+          },
+          "creativity": {
+            "responseTime": 1456,
+            "qualityScore": 55,
+            "responseLength": 518
+          },
+          "chat": {
+            "responseTime": 3994,
+            "qualityScore": null,
+            "responseLength": 1510
+          },
+          "humanizer": {
+            "responseTime": 1317,
+            "qualityScore": null,
+            "responseLength": 416
+          },
+          "analysis": {
+            "responseTime": 2241,
+            "qualityScore": 70,
+            "responseLength": 816
+          },
+          "writing": {
+            "responseTime": 4216,
+            "qualityScore": 50,
+            "responseLength": 1516
+          }
+        },
+        "overallScore": null
+      },
+      {
+        "date": "2025-12-31T08:40:26.515Z",
+        "results": {
+          "coding": {
+            "responseTime": 10643,
+            "qualityScore": null,
+            "responseLength": 2136
+          },
+          "intelligence": {
+            "responseTime": 3376,
+            "qualityScore": null,
+            "responseLength": 1057
+          },
+          "logic": {
+            "responseTime": 1246,
+            "qualityScore": null,
+            "responseLength": 308
+          },
+          "creativity": {
+            "responseTime": 1580,
+            "qualityScore": 55,
+            "responseLength": 570
+          },
+          "chat": {
+            "responseTime": 4180,
+            "qualityScore": null,
+            "responseLength": 1516
+          },
+          "humanizer": {
+            "responseTime": 2040,
+            "qualityScore": null,
+            "responseLength": 685
+          },
+          "analysis": {
+            "responseTime": 2123,
+            "qualityScore": 70,
+            "responseLength": 728
+          },
+          "writing": {
+            "responseTime": 4758,
+            "qualityScore": 50,
+            "responseLength": 1723
+          }
+        },
+        "overallScore": null
+      },
+      {
+        "date": "2025-12-31T08:42:29.595Z",
+        "results": {
+          "coding": {
+            "responseTime": 9647,
+            "qualityScore": null,
+            "responseLength": 2257
+          },
+          "intelligence": {
+            "responseTime": 5167,
+            "qualityScore": null,
+            "responseLength": 1669
+          },
+          "logic": {
+            "responseTime": 2635,
+            "qualityScore": null,
+            "responseLength": 716
+          },
+          "creativity": {
+            "responseTime": 1731,
+            "qualityScore": 55,
+            "responseLength": 585
+          },
+          "chat": {
+            "responseTime": 5119,
+            "qualityScore": null,
+            "responseLength": 1864
+          },
+          "humanizer": {
+            "responseTime": 1157,
+            "qualityScore": null,
+            "responseLength": 393
+          },
+          "analysis": {
+            "responseTime": 4378,
+            "qualityScore": 65,
+            "responseLength": 1650
+          },
+          "writing": {
+            "responseTime": 3613,
+            "qualityScore": 50,
+            "responseLength": 1288
+          }
+        },
+        "overallScore": null
       }
     ],
-    "lastBenchmark": "2025-12-18T07:31:21.231Z",
-    "lastUpdated": "2025-12-18T12:01:48.555Z",
-    "lastActivity": "2025-12-18T12:01:48.555Z",
+    "lastBenchmark": "2025-12-31T08:42:29.595Z",
+    "lastUpdated": "2025-12-31T08:42:29.592Z",
+    "lastActivity": "2025-12-31T08:42:29.592Z",
     "decayAppliedAt": "2025-12-31T07:08:12.945Z"
   },
   "qwen-flash:latest": {
@@ -3235,7 +3703,7 @@
         "lastUpdated": "2025-12-18T04:12:53.895Z"
       },
       "creativity": {
-        "score": 41.52763839280233,
+        "score": 39.08548103419841,
         "samples": 9,
         "lastUpdated": "2025-12-18T04:12:54.804Z"
       },
@@ -3250,18 +3718,18 @@
         "lastUpdated": "2025-12-18T04:12:56.836Z"
       },
       "analysis": {
-        "score": 52.62882276872497,
+        "score": 49.533826959341795,
         "samples": 23,
         "lastUpdated": "2025-12-18T10:44:40.434Z"
       },
       "writing": {
-        "score": 34.8911405959786,
+        "score": 32.83926239981029,
         "samples": 9,
         "lastUpdated": "2025-12-18T04:13:05.201Z"
       }
     },
     "cognitive": {
-      "overallScore": 16.9,
+      "overallScore": 16,
       "learningRate": 0.022399999999999996,
       "consistency": 12.270814434419833,
       "adaptability": 0
@@ -5041,6 +5509,24 @@
         "cognitiveScore": 16.9,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.523Z",
+        "cognitiveScore": 16.6,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.780Z",
+        "cognitiveScore": 16.2,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.872Z",
+        "cognitiveScore": 16,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -5461,7 +5947,7 @@
     "lastBenchmark": "2025-12-18T04:13:05.203Z",
     "lastUpdated": "2025-12-18T12:02:45.219Z",
     "lastActivity": "2025-12-18T12:02:45.218Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.948Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.872Z"
   },
   "brain-7b:latest": {
     "modelName": "brain-7b:latest",
@@ -5493,7 +5979,7 @@
         "lastUpdated": "2025-12-18T04:23:23.426Z"
       },
       "creativity": {
-        "score": 32.31626226105739,
+        "score": 30.415807510009124,
         "samples": 24,
         "lastUpdated": "2025-12-18T04:23:32.491Z"
       },
@@ -5508,7 +5994,7 @@
         "lastUpdated": "2025-12-18T04:24:03.171Z"
       },
       "analysis": {
-        "score": 45.84738281679703,
+        "score": 43.15118992810683,
         "samples": 36,
         "lastUpdated": "2025-12-18T10:47:21.211Z"
       },
@@ -5519,7 +6005,7 @@
       }
     },
     "cognitive": {
-      "overallScore": 14.1,
+      "overallScore": 13.6,
       "learningRate": 0.018699999999999998,
       "consistency": 15.912902297677093,
       "adaptability": 0
@@ -8923,6 +9409,24 @@
         "cognitiveScore": 14.1,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.527Z",
+        "cognitiveScore": 13.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.788Z",
+        "cognitiveScore": 13.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.876Z",
+        "cognitiveScore": 13.6,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -10071,7 +10575,7 @@
     "lastBenchmark": "2025-12-18T04:25:03.583Z",
     "lastUpdated": "2025-12-18T12:05:35.039Z",
     "lastActivity": "2025-12-18T12:05:35.039Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.951Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.876Z"
   },
   "qwen2.5:7b": {
     "modelName": "qwen2.5:7b",
@@ -10103,7 +10607,7 @@
         "lastUpdated": "2025-12-18T04:20:02.835Z"
       },
       "creativity": {
-        "score": 34.37021134445803,
+        "score": 32.348967955713135,
         "samples": 7,
         "lastUpdated": "2025-12-18T04:20:09.990Z"
       },
@@ -10118,18 +10622,18 @@
         "lastUpdated": "2025-12-18T04:20:21.838Z"
       },
       "analysis": {
-        "score": 50.93072214730875,
+        "score": 47.93558823926982,
         "samples": 19,
         "lastUpdated": "2025-12-18T04:20:33.320Z"
       },
       "writing": {
-        "score": 30.289989396219948,
+        "score": 30,
         "samples": 7,
         "lastUpdated": "2025-12-18T04:20:51.674Z"
       }
     },
     "cognitive": {
-      "overallScore": 15.6,
+      "overallScore": 14.9,
       "learningRate": 0.0206,
       "consistency": 1.8883798931033766,
       "adaptability": 0
@@ -11615,6 +12119,24 @@
         "cognitiveScore": 15.6,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.531Z",
+        "cognitiveScore": 15.3,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.791Z",
+        "cognitiveScore": 15.1,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.880Z",
+        "cognitiveScore": 14.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -11943,7 +12465,7 @@
     "lastBenchmark": "2025-12-18T04:20:51.677Z",
     "lastUpdated": "2025-12-18T12:07:17.858Z",
     "lastActivity": "2025-12-18T12:07:17.857Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.954Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.880Z"
   },
   "qwen2.5:3b": {
     "modelName": "qwen2.5:3b",
@@ -11975,7 +12497,7 @@
         "lastUpdated": "2025-12-18T12:21:03.041Z"
       },
       "creativity": {
-        "score": 44.16291178381721,
+        "score": 41.56577926763448,
         "samples": 8,
         "lastUpdated": "2025-12-18T12:21:04.123Z"
       },
@@ -11990,18 +12512,18 @@
         "lastUpdated": "2025-12-18T12:21:09.649Z"
       },
       "analysis": {
-        "score": 53.34077861708204,
+        "score": 50.203914108168675,
         "samples": 22,
         "lastUpdated": "2025-12-18T12:21:12.519Z"
       },
       "writing": {
-        "score": 34.94268796271826,
+        "score": 32.88777836900672,
         "samples": 7,
         "lastUpdated": "2025-12-18T12:21:17.180Z"
       }
     },
     "cognitive": {
-      "overallScore": 15.9,
+      "overallScore": 14.9,
       "learningRate": null,
       "consistency": null,
       "adaptability": 0
@@ -13616,6 +14138,24 @@
         "cognitiveScore": 15.9,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.538Z",
+        "cognitiveScore": 15.6,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.795Z",
+        "cognitiveScore": 15.2,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.883Z",
+        "cognitiveScore": 14.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -13990,7 +14530,7 @@
     "lastBenchmark": "2025-12-18T12:21:17.184Z",
     "lastUpdated": "2025-12-18T12:21:17.180Z",
     "lastActivity": "2025-12-18T12:21:17.180Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.958Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.883Z"
   },
   "granite3.1-moe:1b": {
     "modelName": "granite3.1-moe:1b",
@@ -16590,48 +17130,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 55.301455590967265,
+        "score": 52.04928759057366,
         "samples": 21,
         "lastUpdated": "2025-12-23T09:11:09.563Z"
       },
       "humanizer": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 37.48682419165815,
+        "score": 35.28229903459512,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 39.2,
+      "overallScore": 36.9,
       "learningRate": -0.002600000000000001,
       "consistency": 91.19943183652327,
       "adaptability": 0
@@ -17139,13 +17679,31 @@
         "cognitiveScore": 39.2,
         "event": "skill_decay",
         "daysSinceActivity": 8
+      },
+      {
+        "date": "2025-12-31T07:54:01.542Z",
+        "cognitiveScore": 38.4,
+        "event": "skill_decay",
+        "daysSinceActivity": 8
+      },
+      {
+        "date": "2025-12-31T09:05:12.798Z",
+        "cognitiveScore": 37.6,
+        "event": "skill_decay",
+        "daysSinceActivity": 8
+      },
+      {
+        "date": "2025-12-31T09:07:31.886Z",
+        "cognitiveScore": 36.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 8
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2025-12-23T09:11:09.563Z",
     "lastActivity": "2025-12-23T09:11:09.563Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.964Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.886Z"
   },
   "[ANYTHINGLLM] gpt-4o": {
     "modelName": "[ANYTHINGLLM] gpt-4o",
@@ -17483,48 +18041,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 36.19596752452147,
+        "score": 34.0673550663394,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 36.2,
+      "overallScore": 34.1,
       "learningRate": 0,
       "consistency": 0,
       "adaptability": 0
@@ -17722,13 +18280,31 @@
         "cognitiveScore": 36.2,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.545Z",
+        "cognitiveScore": 35.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.802Z",
+        "cognitiveScore": 34.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.890Z",
+        "cognitiveScore": 34.1,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2025-12-18T08:30:34.260Z",
     "lastActivity": "2025-12-18T08:30:34.260Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.967Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.890Z"
   },
   "ddos-expert-33:latest": {
     "modelName": "ddos-expert-33:latest",
@@ -17760,7 +18336,7 @@
         "lastUpdated": "2025-12-18T08:09:32.692Z"
       },
       "creativity": {
-        "score": 41.51457177767334,
+        "score": 39.073182840571924,
         "samples": 4,
         "lastUpdated": "2025-12-18T08:09:34.047Z"
       },
@@ -17775,18 +18351,18 @@
         "lastUpdated": "2025-12-18T08:09:39.438Z"
       },
       "analysis": {
-        "score": 49.037477219527986,
+        "score": 46.153681259201974,
         "samples": 6,
         "lastUpdated": "2025-12-18T10:43:41.740Z"
       },
       "writing": {
-        "score": 34.86855262432931,
+        "score": 32.818002781597755,
         "samples": 4,
         "lastUpdated": "2025-12-18T08:09:53.464Z"
       }
     },
     "cognitive": {
-      "overallScore": 17.9,
+      "overallScore": 17,
       "learningRate": 0.0231,
       "consistency": 0,
       "adaptability": 0
@@ -18572,6 +19148,24 @@
         "cognitiveScore": 17.9,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.548Z",
+        "cognitiveScore": 17.6,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.806Z",
+        "cognitiveScore": 17.3,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.894Z",
+        "cognitiveScore": 17,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -18763,7 +19357,7 @@
     "lastBenchmark": "2025-12-18T08:09:53.468Z",
     "lastUpdated": "2025-12-18T12:01:02.201Z",
     "lastActivity": "2025-12-18T12:01:02.201Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.970Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.894Z"
   },
   "osint-shodan-33:latest": {
     "modelName": "osint-shodan-33:latest",
@@ -18795,7 +19389,7 @@
         "lastUpdated": "2025-12-18T08:09:58.970Z"
       },
       "creativity": {
-        "score": 43.18752309798462,
+        "score": 40.64775123963834,
         "samples": 2,
         "lastUpdated": "2025-12-18T08:09:59.864Z"
       },
@@ -18810,18 +19404,18 @@
         "lastUpdated": "2025-12-18T08:10:03.504Z"
       },
       "analysis": {
-        "score": 49.17390340059199,
+        "score": 46.282084489409975,
         "samples": 4,
         "lastUpdated": "2025-12-18T10:44:00.278Z"
       },
       "writing": {
-        "score": 36.512337547542835,
+        "score": 34.36512000104694,
         "samples": 2,
         "lastUpdated": "2025-12-18T08:10:11.318Z"
       }
     },
     "cognitive": {
-      "overallScore": 18.3,
+      "overallScore": 17.4,
       "learningRate": 0.0242,
       "consistency": 0,
       "adaptability": 0
@@ -19369,6 +19963,24 @@
         "cognitiveScore": 18.3,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.552Z",
+        "cognitiveScore": 18,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.810Z",
+        "cognitiveScore": 17.7,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.897Z",
+        "cognitiveScore": 17.4,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -19468,7 +20080,7 @@
     "lastBenchmark": "2025-12-18T08:10:11.323Z",
     "lastUpdated": "2025-12-18T12:01:34.866Z",
     "lastActivity": "2025-12-18T12:01:34.866Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.974Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.897Z"
   },
   "[ANYTHINGLLM] team-cybersecurite": {
     "modelName": "[ANYTHINGLLM] team-cybersecurite",
@@ -19485,48 +20097,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 36.5218559334843,
+        "score": 34.37407862974795,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 36.5,
+      "overallScore": 34.4,
       "learningRate": 0,
       "consistency": 0,
       "adaptability": 0
@@ -19718,13 +20330,31 @@
         "cognitiveScore": 36.5,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.555Z",
+        "cognitiveScore": 35.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.814Z",
+        "cognitiveScore": 35.1,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.900Z",
+        "cognitiveScore": 34.4,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2025-12-18T12:08:21.670Z",
     "lastActivity": "2025-12-18T12:08:21.670Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.977Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.900Z"
   },
   "[ANYTHINGLLM] team-agents-o-dot-s-dot-i-dot-n-dot-t": {
     "modelName": "[ANYTHINGLLM] team-agents-o-dot-s-dot-i-dot-n-dot-t",
@@ -19741,48 +20371,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 36.1625904783216,
+        "score": 34.03594085747246,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 36.2,
+      "overallScore": 34,
       "learningRate": 0,
       "consistency": 0,
       "adaptability": 0
@@ -19980,13 +20610,31 @@
         "cognitiveScore": 36.2,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.559Z",
+        "cognitiveScore": 35.4,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.817Z",
+        "cognitiveScore": 34.7,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.904Z",
+        "cognitiveScore": 34,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2025-12-18T08:08:34.764Z",
     "lastActivity": "2025-12-18T08:08:34.764Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.980Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.904Z"
   },
   "[GROQ] qwen/qwen3-32b": {
     "modelName": "[GROQ] qwen/qwen3-32b",
@@ -20003,48 +20651,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 36.19873018980355,
+        "score": 34.06995526480158,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 36.2,
+      "overallScore": 34.1,
       "learningRate": 0,
       "consistency": 0,
       "adaptability": 0
@@ -20228,13 +20876,31 @@
         "cognitiveScore": 36.2,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.562Z",
+        "cognitiveScore": 35.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.820Z",
+        "cognitiveScore": 34.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.907Z",
+        "cognitiveScore": 34.1,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2025-12-18T08:32:23.446Z",
     "lastActivity": "2025-12-18T08:32:23.446Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.983Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.907Z"
   },
   "granite3.1-flash:latest": {
     "modelName": "granite3.1-flash:latest",
@@ -20251,48 +20917,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 36.50876231665649,
+        "score": 34.36175502233854,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 36.50876231665649,
+        "score": 34.36175502233854,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 36.50876231665649,
+        "score": 34.36175502233854,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 36.50876231665649,
+        "score": 34.36175502233854,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 51.13599793882492,
+        "score": 48.1287921720385,
         "samples": 4,
         "lastUpdated": "2025-12-18T11:59:02.057Z"
       },
       "humanizer": {
-        "score": 36.50876231665649,
+        "score": 34.36175502233854,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 43.08033953365466,
+        "score": 40.54687092635949,
         "samples": 1,
         "lastUpdated": "2025-12-18T10:42:28.026Z"
       },
       "writing": {
-        "score": 36.50876231665649,
+        "score": 34.36175502233854,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 38.8,
+      "overallScore": 36.5,
       "learningRate": 0.003999999999999986,
       "consistency": 0,
       "adaptability": 0
@@ -20532,13 +21198,31 @@
         "cognitiveScore": 38.8,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.565Z",
+        "cognitiveScore": 38,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.824Z",
+        "cognitiveScore": 37.2,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.910Z",
+        "cognitiveScore": 36.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2025-12-18T11:59:02.057Z",
     "lastActivity": "2025-12-18T11:59:02.057Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.987Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.910Z"
   },
   "qwen2.5-flash:latest": {
     "modelName": "qwen2.5-flash:latest",
@@ -20570,7 +21254,7 @@
         "lastUpdated": "2025-12-18T12:07:41.898Z"
       },
       "creativity": {
-        "score": 38.58108277124832,
+        "score": 36.31220645563675,
         "samples": 1,
         "lastUpdated": "2025-12-18T12:07:43.519Z"
       },
@@ -20585,18 +21269,18 @@
         "lastUpdated": "2025-12-18T12:07:47.821Z"
       },
       "analysis": {
-        "score": 45.02343699393687,
+        "score": 42.37569871119743,
         "samples": 3,
         "lastUpdated": "2025-12-18T12:07:52.152Z"
       },
       "writing": {
-        "score": 36.521282441545175,
+        "score": 34.373538863722786,
         "samples": 1,
         "lastUpdated": "2025-12-18T12:07:57.178Z"
       }
     },
     "cognitive": {
-      "overallScore": 14.4,
+      "overallScore": 13.5,
       "learningRate": null,
       "consistency": null,
       "adaptability": 0
@@ -20951,6 +21635,24 @@
         "cognitiveScore": 14.4,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.569Z",
+        "cognitiveScore": 14.1,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.827Z",
+        "cognitiveScore": 13.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.913Z",
+        "cognitiveScore": 13.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -21004,7 +21706,7 @@
     "lastBenchmark": "2025-12-18T12:07:57.181Z",
     "lastUpdated": "2025-12-18T12:07:57.178Z",
     "lastActivity": "2025-12-18T12:07:57.178Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.990Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.913Z"
   },
   "granite3.1-dense:2b": {
     "modelName": "granite3.1-dense:2b",
@@ -21036,7 +21738,7 @@
         "lastUpdated": "2025-12-18T12:19:38.937Z"
       },
       "creativity": {
-        "score": 36.53805431078936,
+        "score": 34.38932441288046,
         "samples": 3,
         "lastUpdated": "2025-12-18T12:19:42.928Z"
       },
@@ -21051,18 +21753,18 @@
         "lastUpdated": "2025-12-18T12:19:46.846Z"
       },
       "analysis": {
-        "score": 46.818035891129945,
+        "score": 44.06476083644437,
         "samples": 4,
         "lastUpdated": "2025-12-18T12:19:48.638Z"
       },
       "writing": {
-        "score": 35.463835514052136,
+        "score": 33.37827827514175,
         "samples": 3,
         "lastUpdated": "2025-12-18T12:19:53.759Z"
       }
     },
     "cognitive": {
-      "overallScore": 14.3,
+      "overallScore": 13.4,
       "learningRate": null,
       "consistency": null,
       "adaptability": 0
@@ -21613,6 +22315,24 @@
         "cognitiveScore": 14.3,
         "event": "skill_decay",
         "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T07:54:01.572Z",
+        "cognitiveScore": 14,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:05:12.831Z",
+        "cognitiveScore": 13.7,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
+      },
+      {
+        "date": "2025-12-31T09:07:31.917Z",
+        "cognitiveScore": 13.4,
+        "event": "skill_decay",
+        "daysSinceActivity": 13
       }
     ],
     "benchmarks": [
@@ -21758,20 +22478,20 @@
     "lastBenchmark": "2025-12-18T12:19:53.762Z",
     "lastUpdated": "2025-12-18T12:19:53.759Z",
     "lastActivity": "2025-12-18T12:19:53.759Z",
-    "decayAppliedAt": "2025-12-31T07:08:12.993Z"
+    "decayAppliedAt": "2025-12-31T09:07:31.917Z"
   },
   "granite4:3b": {
     "modelName": "granite4:3b",
     "createdAt": "2025-12-31T07:15:56.684Z",
     "performance": {
-      "totalQueries": 1,
-      "successfulQueries": 1,
+      "totalQueries": 2,
+      "successfulQueries": 2,
       "failedQueries": 0,
-      "avgResponseTime": 4176,
+      "avgResponseTime": 4525,
       "minResponseTime": 4176,
-      "maxResponseTime": 4176,
-      "tokensPerSecond": 5.268199233716475,
-      "totalTokensGenerated": 22
+      "maxResponseTime": 4874,
+      "tokensPerSecond": 4.513746409519902,
+      "totalTokensGenerated": 44
     },
     "expertise": {
       "coding": {
@@ -21856,11 +22576,217 @@
           "analysis": 50,
           "writing": 50
         }
+      },
+      {
+        "date": "2025-12-31T08:06:45.181Z",
+        "cognitiveScore": 50,
+        "expertise": {
+          "coding": 50,
+          "intelligence": 50,
+          "logic": 50,
+          "creativity": 50,
+          "chat": 50,
+          "humanizer": 50,
+          "analysis": 50,
+          "writing": 50
+        }
       }
     ],
-    "benchmarks": [],
-    "lastBenchmark": null,
-    "lastUpdated": "2025-12-31T07:15:56.684Z",
-    "lastActivity": "2025-12-31T07:15:56.684Z"
+    "benchmarks": [
+      {
+        "date": "2025-12-31T08:40:37.240Z",
+        "results": {
+          "coding": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "intelligence": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "logic": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "creativity": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "chat": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "humanizer": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "analysis": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "writing": {
+            "error": "model requires more system memory (12.0 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          }
+        },
+        "overallScore": 50
+      }
+    ],
+    "lastBenchmark": "2025-12-31T08:40:37.240Z",
+    "lastUpdated": "2025-12-31T08:06:45.181Z",
+    "lastActivity": "2025-12-31T08:06:45.181Z"
+  },
+  "ministral-3:latest": {
+    "modelName": "ministral-3:latest",
+    "createdAt": "2025-12-31T07:34:01.602Z",
+    "performance": {
+      "totalQueries": 0,
+      "successfulQueries": 0,
+      "failedQueries": 0,
+      "avgResponseTime": 0,
+      "minResponseTime": null,
+      "maxResponseTime": 0,
+      "tokensPerSecond": 0,
+      "totalTokensGenerated": 0
+    },
+    "expertise": {
+      "coding": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "intelligence": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "logic": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "creativity": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "chat": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "humanizer": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "analysis": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      },
+      "writing": {
+        "score": 50,
+        "samples": 0,
+        "lastUpdated": null
+      }
+    },
+    "cognitive": {
+      "overallScore": 50,
+      "learningRate": 0,
+      "consistency": 0,
+      "adaptability": 0
+    },
+    "learning": {
+      "sessionsCompleted": 0,
+      "improvementTrend": 0,
+      "lastSessionScore": 0,
+      "averageSessionScore": 0,
+      "peakScore": 0,
+      "growthPercentage": 0
+    },
+    "strengths": [],
+    "weaknesses": [],
+    "history": [],
+    "benchmarks": [
+      {
+        "date": "2025-12-31T07:34:09.972Z",
+        "results": {
+          "coding": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "intelligence": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "logic": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "creativity": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "chat": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "humanizer": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "analysis": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "writing": {
+            "error": "model requires more system memory (19.5 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          }
+        },
+        "overallScore": 50
+      },
+      {
+        "date": "2025-12-31T08:40:36.945Z",
+        "results": {
+          "coding": {
+            "error": "model requires more system memory (20.1 GiB) than is available (8.6 GiB)",
+            "qualityScore": 0
+          },
+          "intelligence": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "logic": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "creativity": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.3 GiB)",
+            "qualityScore": 0
+          },
+          "chat": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "humanizer": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "analysis": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          },
+          "writing": {
+            "error": "model requires more system memory (20.1 GiB) than is available (10.2 GiB)",
+            "qualityScore": 0
+          }
+        },
+        "overallScore": 50
+      }
+    ],
+    "lastBenchmark": "2025-12-31T08:40:36.945Z",
+    "lastUpdated": "2025-12-31T07:34:01.602Z"
   }
 }

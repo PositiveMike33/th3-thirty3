@@ -124,7 +124,7 @@ class AnythingLLMWrapper {
             const ollama = new Ollama({ host: ollamaUrl });
 
             const response = await ollama.chat({
-                model: 'ministral-3:latest',
+                model: 'granite-flash:latest',
                 messages: [
                     {
                         role: 'system',
@@ -142,7 +142,7 @@ class AnythingLLMWrapper {
             const ollama = new Ollama({ host: ollamaUrl });
 
             const response = await ollama.chat({
-                model: 'ministral-3:latest',
+                model: 'granite-flash:latest',
                 messages: [
                     { role: 'system', content: 'You are Th3 Thirty3, a cybersecurity expert.' },
                     { role: 'user', content: message }

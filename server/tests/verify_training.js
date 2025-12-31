@@ -27,7 +27,7 @@ const BENCHMARK_PROMPTS = {
 const EXPERTISE_CATEGORIES = ['coding', 'intelligence', 'logic', 'creativity', 'chat', 'humanizer', 'analysis', 'writing'];
 
 // Modèle à tester (le plus rapide)
-const TEST_MODEL = 'ministral-3:latest';
+const TEST_MODEL = 'granite4:3b';
 
 async function callOllama(model, prompt, systemPrompt = '') {
     const response = await fetch(`${OLLAMA_API}/api/generate`, {
@@ -280,3 +280,4 @@ runVerificationTest()
         console.error('❌ Erreur fatale:', error);
         process.exit(1);
     });
+

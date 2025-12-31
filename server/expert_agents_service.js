@@ -40,8 +40,8 @@ class ExpertAgentsService {
             cybersec: {
                 name: 'Agent CyberSec',
                 emoji: '🔒',
-                model: 'ministral-3:latest',  // 6GB - General purpose
-                fallback: 'granite4:3b',
+                model: 'granite-flash:latest',  // 6GB - General purpose
+                fallback: 'granite-flash:latest',
                 domain: 'Cybersécurité et Ethical Hacking',
                 systemPrompt: `Tu es un expert en cybersécurité éthique et pentesting.
 EXPERTISE: OSINT, reconnaissance, scanning, exploitation, défense
@@ -54,8 +54,8 @@ RÈGLE: Toujours expliquer comment détecter et se défendre contre chaque attaq
             vpo: {
                 name: 'Agent VPO Expert',
                 emoji: '🏭',
-                model: 'ministral-3:latest',
-                fallback: 'granite4:3b',
+                model: 'granite-flash:latest',
+                fallback: 'granite-flash:latest',
                 domain: 'Excellence Opérationnelle VPO/WCM et KeelClip',
                 systemPrompt: `Tu es un expert senior VPO/WCM et spécialiste KeelClip.
 EXPERTISE: 5-Why, RCA, CIL, OPL, Centerline, audits VPO
@@ -68,8 +68,8 @@ VOCABULAIRE: Star Wheel, Lug Chain, Hot Melt Gun, encodeur, PLC, HMI`,
             marketing: {
                 name: 'Agent Marketing',
                 emoji: '📢',
-                model: 'ministral-3:latest',  // General purpose
-                fallback: 'granite4:3b',
+                model: 'granite-flash:latest',  // General purpose
+                fallback: 'granite-flash:latest',
                 domain: 'Marketing B2B et Copywriting',
                 systemPrompt: `Tu es un expert marketing B2B pour software manufacturier.
 EXPERTISE: Copywriting, pitch, landing pages, emails, LinkedIn
@@ -82,8 +82,8 @@ RÈGLE: ROI chiffré, pas de jargon vide, CTA clair`,
             dev: {
                 name: 'Agent DevOps',
                 emoji: '💻',
-                model: 'granite4:3b',  // Code specialist
-                fallback: 'ministral-3:latest',
+                model: 'granite-flash:latest',  // Code specialist
+                fallback: 'granite-flash:latest',
                 domain: 'Développement et DevOps',
                 systemPrompt: `Tu es un développeur senior full-stack et DevOps.
 EXPERTISE: Node.js, React, Python, Docker, CI/CD, architecture
@@ -96,8 +96,8 @@ RÈGLE: Toujours expliquer le code, proposer des tests`,
             osint: {
                 name: 'Agent OSINT',
                 emoji: '🔍',
-                model: 'ministral-3:latest',
-                fallback: 'granite4:3b',
+                model: 'granite-flash:latest',
+                fallback: 'granite-flash:latest',
                 domain: 'OSINT et Investigation',
                 systemPrompt: `Tu es un analyste OSINT et investigateur.
 EXPERTISE: Recherche web, analyse de données, profiling, vérification
@@ -110,8 +110,8 @@ RÈGLE: Vérifier les informations, croiser les sources`,
             finance: {
                 name: 'Agent Finance',
                 emoji: '💰',
-                model: 'ministral-3:latest',
-                fallback: 'granite4:3b',
+                model: 'granite-flash:latest',
+                fallback: 'granite-flash:latest',
                 domain: 'Finance et Investissement',
                 systemPrompt: `Tu es un analyste financier et conseiller investissement.
 EXPERTISE: Crypto, DeFi, analyse technique, levée de fonds
@@ -182,7 +182,7 @@ RÈGLE: Toujours mentionner les risques`,
      */
     async getModelForExpert(expertId) {
         const expert = this.experts[expertId];
-        if (!expert) return 'ministral-3:latest';
+        if (!expert) return 'granite-flash:latest';
 
         // Vérifier si le modèle principal est disponible
         if (await this.isModelAvailable(expert.model)) {
@@ -342,8 +342,8 @@ RÈGLE: Toujours mentionner les risques`,
      */
     getRecommendedModels() {
         return [
-            { name: 'ministral-3:latest', size: '6GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
-            { name: 'granite4:3b', size: '2.1GB', purpose: 'Code/DevOps expert, fast responses' },
+            { name: 'granite-flash:latest', size: '6GB', purpose: 'General expert (cybersec, VPO, OSINT, finance)' },
+            { name: 'granite-flash:latest', size: '2.1GB', purpose: 'Code/DevOps expert, fast responses' },
             { name: 'mxbai-embed-large', size: '669MB', purpose: 'Embeddings (primary)' },
             { name: 'snowflake-arctic-embed', size: '669MB', purpose: 'Embeddings (fallback)' }
         ];

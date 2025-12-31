@@ -3,8 +3,8 @@
  * Routes agents to optimal local models based on expertise
  * 
  * LOCAL MODELS (légers, rapides):
- * - ministral-3:latest (6GB) - Code & General
- * - ministral-3:latest (6GB) - Fast responses
+ * - granite-flash:latest (6GB) - Code & General
+ * - granite-flash:latest (6GB) - Fast responses
  * - mxbai-embed-large (669MB) - Embeddings
  * 
  * CLOUD MODELS (via API):
@@ -16,16 +16,16 @@
 // Local model configuration - GRANITE 4.0 + MINISTRAL 3
 // Optimized for minimal resource usage
 const LOCAL_MODELS = {
-    code: 'granite4:3b',             // IBM Granite 4.0 - Code/RAG
-    general: 'ministral-3:latest',   // Mistral Ministral 3 for general purpose
-    fast: 'granite4:3b',             // Granite 4.0 for fast responses
+    code: 'granite-flash:latest',             // IBM Granite 4.0 - Code/RAG
+    general: 'granite-flash:latest',   // Mistral Ministral 3 for general purpose
+    fast: 'granite-flash:latest',             // Granite 4.0 for fast responses
     embedding: 'mxbai-embed-large:latest' // Embeddings
 };
 
 // Models available for training rotation
 const ALL_LOCAL_MODELS = [
-    'granite4:3b',
-    'ministral-3:latest'
+    'granite-flash:latest',
+    'granite-flash:latest'
 ];
 
 // Cloud providers for heavy tasks
@@ -66,7 +66,7 @@ class ModelRouter {
         if (this.initialized) return true;
 
         console.log('[MODEL_ROUTER] Initializing (optimized local config)...');
-        console.log('[MODEL_ROUTER] Local models: granite4:3b, ministral-3:latest, mxbai-embed-large');
+        console.log('[MODEL_ROUTER] Local models: granite-flash:latest, granite-flash:latest, mxbai-embed-large');
         console.log('[MODEL_ROUTER] Cloud fallback: Groq, Gemini');
 
         try {
@@ -372,20 +372,20 @@ const modelRouter = new ModelRouter();
 // Granite 4.0 for code/technical, ministral-3 for general
 modelRouter.models = {
     orchestrator: {
-        primary: 'granite4:3b',           // IBM Granite 4.0
-        fallback: 'ministral-3:latest'
+        primary: 'granite-flash:latest',           // IBM Granite 4.0
+        fallback: 'granite-flash:latest'
     },
     technical: {
-        primary: 'granite4:3b',           // Granite 4.0 for code
-        fallback: 'ministral-3:latest'
+        primary: 'granite-flash:latest',           // Granite 4.0 for code
+        fallback: 'granite-flash:latest'
     },
     nlp: {
-        primary: 'ministral-3:latest',
-        fallback: 'granite4:3b'
+        primary: 'granite-flash:latest',
+        fallback: 'granite-flash:latest'
     },
     vision: {
-        primary: 'ministral-3:latest',
-        fallback: 'granite4:3b'
+        primary: 'granite-flash:latest',
+        fallback: 'granite-flash:latest'
     },
     embedding: {
         primary: 'mxbai-embed-large:latest',

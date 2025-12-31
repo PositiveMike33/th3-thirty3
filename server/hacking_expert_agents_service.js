@@ -13,8 +13,8 @@ class HackingExpertAgentsService {
     constructor() {
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.dataPath = path.join(__dirname, 'data', 'hacking_experts');
-        this.model = 'ministral-3:latest';
-        this.fallbackModel = 'granite4:3b';
+        this.model = 'granite-flash:latest';
+        this.fallbackModel = 'granite-flash:latest';
         this.kaliEnv = KALI_ENVIRONMENT;
 
         this.ensureDataFolder();

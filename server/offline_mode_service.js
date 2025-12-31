@@ -17,11 +17,11 @@ class OfflineModeService extends EventEmitter {
         // Configuration - OPTIMIZED FOR PERFORMANCE
         this.config = {
             checkIntervalMs: 15000,          // Vérifier toutes les 15 secondes (moins de checks)
-            offlineModel: 'granite4:3b',     // Granite 4.0 for offline (lightweight)
+            offlineModel: 'granite-flash:latest',     // Granite 4.0 for offline (lightweight)
             onlineModel: 'llama-3.3-70b-versatile', // Groq cloud model (ultrafast)
             onlineProvider: 'groq',           // Preferred cloud provider
             onlineFallback: 'llama-3.1-8b-instant', // Fast fallback
-            localFallback: 'ministral-3:latest', // Local fallback
+            localFallback: 'granite-flash:latest', // Local fallback
             testHosts: ['8.8.8.8', '1.1.1.1'],  // Reduced hosts for faster check
             energyMode: 'normal',             // 'normal', 'eco', 'ultra-eco'
             preferCloud: true                 // Use cloud when available for speed

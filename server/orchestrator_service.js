@@ -373,7 +373,7 @@ Réponds en JSON:
             }
 
             // [MANAGEMENT] Unload Expert Model to free VRAM for Synthesis
-            try { await modelManager.unloadModel('ministral-3:latest'); } catch (e) { }
+            try { await modelManager.unloadModel('granite-flash:latest'); } catch (e) { }
 
             // Phase 3: Synthèse
             mission.status = 'synthesizing';

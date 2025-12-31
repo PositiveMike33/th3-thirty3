@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import Avatar from './Avatar';
 import GoogleAuthPanel from './components/GoogleAuthPanel';
@@ -32,7 +32,7 @@ const ChatInterface = () => {
 
     // Model Selection State
     const [selectedProvider, setSelectedProvider] = useState('local');
-    const [selectedModel, setSelectedModel] = useState('granite4:3b');
+    const [selectedModel, setSelectedModel] = useState('granite-flash:latest');
 
     // Feedback State
     const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);

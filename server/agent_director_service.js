@@ -187,7 +187,7 @@ class AgentDirectorService extends EventEmitter {
                 const response = await this.llmService.generateOllamaResponse(
                     objective,
                     null,
-                    'ministral-3:latest',
+                    'granite-flash:latest',
                     agent.systemPrompt
                 );
                 return { agentId, agentName: agent.name, response, source: 'local' };
@@ -221,7 +221,7 @@ class AgentDirectorService extends EventEmitter {
             const response = await this.llmService.generateOllamaResponse(
                 objective,
                 null,
-                'ministral-3:latest',
+                'granite-flash:latest',
                 agent.systemPrompt
             );
             return { agentId, agentName: agent.name, response, source: 'local_fallback' };
@@ -261,7 +261,7 @@ Ta réponse:`;
                 );
             } else {
                 directorResponse = await this.llmService.generateOllamaResponse(
-                    analysisPrompt, null, 'ministral-3:latest', DIRECTOR_SYSTEM_PROMPT
+                    analysisPrompt, null, 'granite-flash:latest', DIRECTOR_SYSTEM_PROMPT
                 );
             }
 
@@ -297,7 +297,7 @@ Fournis une réponse consolidée à l'utilisateur.`;
                     );
                 } else {
                     finalResponse = await this.llmService.generateOllamaResponse(
-                        synthesisPrompt, null, 'ministral-3:latest', DIRECTOR_SYSTEM_PROMPT
+                        synthesisPrompt, null, 'granite-flash:latest', DIRECTOR_SYSTEM_PROMPT
                     );
                 }
 

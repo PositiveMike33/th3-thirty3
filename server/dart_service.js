@@ -7,9 +7,12 @@ const { OpenAPI, TaskService } = require('dart-tools');
  */
 class DartService {
     constructor() {
-        this.token = process.env.DART_API_TOKEN || 'dsa_529907c81c00a48724eb85e3d9b1a13f101567db0d8e8cbe7de5e1d36c1dfccc';
+        this.token = process.env.DART_API_TOKEN;
+        if (!this.token) {
+            console.warn('[DART] Warning: DART_API_TOKEN not set. DartAI features will be disabled.');
+        }
         this.workspaceId = 'kok90kMp4rU4';
-        
+
         // Configure SDK
         OpenAPI.HEADERS = {
             'Authorization': `Bearer ${this.token}`
@@ -35,7 +38,7 @@ class DartService {
                 workspaceId: this.workspaceId,
                 limit: 1
             });
-            
+
             console.log(`[DART] Auth confirmed (API responded)`);
             return {
                 id: 'unknown-sdk-user',
@@ -43,12 +46,12 @@ class DartService {
                 workspace: this.workspaceId
             };
         } catch (error) {
-             console.error('[DART] Authentication check failed:', error.message);
-             // Provide more context if it's an API error
-             if (error.status || error.body) {
-                 console.error('API Error Details:', error.body || error.status);
-             }
-             throw error;
+            console.error('[DART] Authentication check failed:', error.message);
+            // Provide more context if it's an API error
+            if (error.status || error.body) {
+                console.error('API Error Details:', error.body || error.status);
+            }
+            throw error;
         }
     }
 
@@ -60,17 +63,17 @@ class DartService {
             // dart-tools SDK expects: { item: TaskCreate }
             // Minimal required: title only (dartboard auto-assigned by API)
             const taskItem = { title: title.trim() };
-            
+
             // Add optional fields only if provided
             if (options.description) taskItem.description = options.description;
-            
+
             const requestBody = { item: taskItem };
-            
+
             console.log('[DART] Creating task via SDK...');
 
             const result = await TaskService.createTask(requestBody);
             const task = result.item || result;
-            
+
             console.log('[DART] Task created:', task.title);
 
             return {
@@ -80,8 +83,8 @@ class DartService {
             };
         } catch (error) {
             console.error('[DART] Create task failed:', error.message);
-             return {
-                success: false, 
+            return {
+                success: false,
                 error: error.message
             };
         }
@@ -94,24 +97,24 @@ class DartService {
         try {
             console.log(`[DART] Listing tasks for workspace ${this.workspaceId}`);
             // Assuming signature (query) or ({ workspaceId })
-            const response = await TaskService.listTasks({ 
-                workspaceId: this.workspaceId 
+            const response = await TaskService.listTasks({
+                workspaceId: this.workspaceId
             });
-            
+
             // Response might be { results: ... } or just Array
             return this._formatTaskList(response);
 
         } catch (error) {
-             console.error('[DART] List tasks failed:', error.message);
-             return { success: false, error: error.message };
+            console.error('[DART] List tasks failed:', error.message);
+            return { success: false, error: error.message };
         }
     }
 
     _formatTaskList(data) {
         // Handle array or pagination object
         const tasks = Array.isArray(data) ? data : (data.results || data.tasks || []);
-        
-        const taskList = tasks.map(t => 
+
+        const taskList = tasks.map(t =>
             `[${(t.status || 'todo').toUpperCase()}] ${t.title} (${t.priority || 'normal'}) - ${t.dart_id || t.id}`
         ).join('\n');
 
@@ -166,7 +169,7 @@ Note: Breakdown généré par le mock Dart AI
     async updateTask(taskId, updates = {}) {
         try {
             console.log(`[DART] Updating task ${taskId}...`);
-            
+
             // Build update payload - only include fields that are provided
             const updateBody = { id: taskId };
             if (updates.status) updateBody.status = updates.status;
@@ -176,7 +179,7 @@ Note: Breakdown généré par le mock Dart AI
 
             // Use SDK to update task
             const task = await TaskService.updateTask(updateBody);
-            
+
             console.log('[DART] Task updated:', task.title || taskId);
 
             return {
@@ -199,7 +202,7 @@ Note: Breakdown généré par le mock Dart AI
     async deleteTask(taskId) {
         try {
             console.log(`[DART] Deleting task ${taskId}...`);
-            
+
             // Use SDK to delete task
             await TaskService.deleteTask({ id: taskId });
 
@@ -224,10 +227,10 @@ Note: Breakdown généré par le mock Dart AI
     async getTask(taskId) {
         try {
             console.log(`[DART] Getting task ${taskId}...`);
-            
+
             // Use SDK to get task
             const task = await TaskService.getTask({ id: taskId });
-            
+
             return {
                 success: true,
                 task: task
@@ -247,16 +250,16 @@ Note: Breakdown généré par le mock Dart AI
     async getTasksByStatus(status) {
         try {
             console.log(`[DART] Getting tasks with status: ${status}...`);
-            
+
             // Use SDK to list tasks with filter
-            const response = await TaskService.listTasks({ 
+            const response = await TaskService.listTasks({
                 workspaceId: this.workspaceId,
-                status: status 
+                status: status
             });
-            
+
             // Format response
             const tasks = Array.isArray(response) ? response : (response.results || response.tasks || []);
-            
+
             return {
                 success: true,
                 tasks: tasks

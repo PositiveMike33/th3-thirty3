@@ -23,8 +23,8 @@ Utilise le joual quand approprié, mais reste professionnel pour les sujets tech
     // User accounts to manage
     accounts: ['th3thirty3@gmail.com', 'mikegauthierguillet@gmail.com', 'mgauthierguillet@gmail.com'],
 
-    // Default model if none specified
-    default_model: "ministral-3:latest",
+    // Default model if none specified (granite-flash:latest for RTX 4050 6GB VRAM)
+    default_model: "granite-flash:latest",
 
     // HackerGPT persona integration
     hackergpt: {

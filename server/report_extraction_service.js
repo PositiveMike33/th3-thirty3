@@ -13,9 +13,9 @@ class ReportExtractionService {
         this.tagsFile = path.join(this.dataPath, 'tags_database.json');
 
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        // Utiliser ministral-3:latest par défaut
+        // Utiliser granite-flash:latest par défaut
         this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        this.model = process.env.OLLAMA_MODEL || 'ministral-3:latest';
+        this.model = process.env.OLLAMA_MODEL || 'granite-flash:latest';
 
         this.ensureDataFolder();
         this.loadLearning();

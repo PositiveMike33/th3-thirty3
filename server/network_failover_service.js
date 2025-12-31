@@ -11,7 +11,7 @@
  * 
  * Architecture:
  * - Primary: Cloud models (Groq, OpenAI, Gemini, Anthropic)
- * - Fallback: Local Ollama models (ministral-3:latest, granite4:3b)
+ * - Fallback: Local Ollama models (granite-flash:latest, granite-flash:latest)
  * - Emergency: Cached responses / offline mode
  */
 
@@ -336,7 +336,7 @@ class NetworkFailoverService extends EventEmitter {
                 return {
                     provider: 'local',
                     reason: 'Local only mode',
-                    model: 'ministral-3:latest'
+                    model: 'granite-flash:latest'
                 };
 
             case FailoverMode.MANUAL:
@@ -358,8 +358,8 @@ class NetworkFailoverService extends EventEmitter {
                     return {
                         provider: 'local',
                         reason: 'Internet offline - failover active',
-                        model: 'ministral-3:latest',
-                        fallbackModel: 'granite4:3b'
+                        model: 'granite-flash:latest',
+                        fallbackModel: 'granite-flash:latest'
                     };
                 } else if (this.state === NetworkState.DEGRADED) {
                     return {
@@ -371,7 +371,7 @@ class NetworkFailoverService extends EventEmitter {
                     return {
                         provider: 'local',
                         reason: 'Unknown state - defaulting to local',
-                        model: 'ministral-3:latest'
+                        model: 'granite-flash:latest'
                     };
                 }
         }
@@ -448,9 +448,9 @@ class NetworkFailoverService extends EventEmitter {
         if (provider.provider === 'local') {
             // Local model recommendations
             const localModels = {
-                code: 'ministral-3:latest',
-                general: 'ministral-3:latest',
-                fast: 'granite4:3b',
+                code: 'granite-flash:latest',
+                general: 'granite-flash:latest',
+                fast: 'granite-flash:latest',
                 embedding: 'mxbai-embed-large:latest'
             };
             return {

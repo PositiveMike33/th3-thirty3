@@ -117,6 +117,20 @@ services:
     profiles:
       - with-ollama # Only start if explicitly requested
 
+  # ================================
+  # DartAI MCP Server
+  # ================================
+  dart-mcp:
+    image: mcp/dart
+    container_name: th3-dart-mcp
+    restart: unless-stopped
+    environment:
+      - DART_TOKEN=${DART_TOKEN} # Set in .env file
+    networks:
+      - th3-network
+    profiles:
+      - with-dart # Only start if explicitly requested
+
 networks:
   th3-network:
     driver: bridge

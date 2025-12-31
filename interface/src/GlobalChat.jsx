@@ -33,7 +33,7 @@ const GlobalChat = () => {
                     message: msgToSend,
                     sessionId: sessionId,
                     provider: 'local', // Default to local for speed in global chat
-                    model: 'granite4:3b'
+                    model: 'granite-flash:latest'
                 }),
             });
             const data = await response.json();
