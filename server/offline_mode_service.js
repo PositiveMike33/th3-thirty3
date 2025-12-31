@@ -14,13 +14,17 @@ class OfflineModeService extends EventEmitter {
         this.checkInterval = null;
         this.lastCheck = Date.now();
 
-        // Configuration
+        // Configuration - OPTIMIZED FOR PERFORMANCE
         this.config = {
-            checkIntervalMs: 10000,          // Vérifier toutes les 10 secondes
-            offlineModel: 'granite4:3b', // Granite 4.0 for offline (2.1GB)
-            onlineModel: 'ministral-3:latest',         // Ministral 3 for online
-            testHosts: ['8.8.8.8', '1.1.1.1', 'google.com'],
-            energyMode: 'normal'              // 'normal', 'eco', 'ultra-eco'
+            checkIntervalMs: 15000,          // Vérifier toutes les 15 secondes (moins de checks)
+            offlineModel: 'granite4:3b',     // Granite 4.0 for offline (lightweight)
+            onlineModel: 'llama-3.3-70b-versatile', // Groq cloud model (ultrafast)
+            onlineProvider: 'groq',           // Preferred cloud provider
+            onlineFallback: 'llama-3.1-8b-instant', // Fast fallback
+            localFallback: 'ministral-3:latest', // Local fallback
+            testHosts: ['8.8.8.8', '1.1.1.1'],  // Reduced hosts for faster check
+            energyMode: 'normal',             // 'normal', 'eco', 'ultra-eco'
+            preferCloud: true                 // Use cloud when available for speed
         };
 
         // Services désactivables en mode offline
@@ -233,6 +237,36 @@ class OfflineModeService extends EventEmitter {
             return this.config.offlineModel;
         }
         return this.config.onlineModel;
+    }
+
+    /**
+     * Obtenir les infos complètes du provider optimal
+     * @returns {Object} { model, provider, isLocal, reason }
+     */
+    getOptimalProvider() {
+        if (this.isOnline && this.config.preferCloud) {
+            return {
+                model: this.config.onlineModel,
+                provider: this.config.onlineProvider,
+                isLocal: false,
+                reason: 'Internet available - cloud mode for speed',
+                fallback: {
+                    model: this.config.onlineFallback,
+                    provider: this.config.onlineProvider
+                }
+            };
+        } else {
+            return {
+                model: this.config.offlineModel,
+                provider: 'ollama',
+                isLocal: true,
+                reason: this.isOnline ? 'Prefer local mode' : 'Offline - using local models',
+                fallback: {
+                    model: this.config.localFallback,
+                    provider: 'ollama'
+                }
+            };
+        }
     }
 
     /**

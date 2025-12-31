@@ -36,7 +36,7 @@ router.post('/check', async (req, res) => {
     if (!offlineService) {
         offlineService = new OfflineModeService();
     }
-    
+
     const isOnline = await offlineService.checkConnection();
     res.json({
         success: true,
@@ -52,7 +52,7 @@ router.post('/check', async (req, res) => {
  */
 router.post('/energy', (req, res) => {
     const { mode } = req.body;
-    
+
     if (!['normal', 'eco', 'ultra-eco'].includes(mode)) {
         return res.status(400).json({
             success: false,
@@ -79,7 +79,7 @@ router.post('/energy', (req, res) => {
  */
 router.post('/simulate', (req, res) => {
     const { online } = req.body;
-    
+
     if (typeof online !== 'boolean') {
         return res.status(400).json({
             success: false,
@@ -108,7 +108,7 @@ router.get('/model', (req, res) => {
     if (!offlineService) {
         offlineService = new OfflineModeService();
     }
-    
+
     res.json({
         success: true,
         model: offlineService.getOptimalModel(),
@@ -124,16 +124,62 @@ router.get('/model', (req, res) => {
  */
 router.get('/service/:serviceName', (req, res) => {
     const { serviceName } = req.params;
-    
+
     if (!offlineService) {
         offlineService = new OfflineModeService();
     }
-    
+
     res.json({
         success: true,
         service: serviceName,
         available: offlineService.isServiceAvailable(serviceName),
         isOnline: offlineService.isOnline
+    });
+});
+
+/**
+ * GET /api/offline-mode/provider
+ * Obtenir les infos complètes du provider optimal (cloud vs local)
+ */
+router.get('/provider', (req, res) => {
+    if (!offlineService) {
+        offlineService = new OfflineModeService();
+    }
+
+    res.json({
+        success: true,
+        ...offlineService.getOptimalProvider(),
+        isOnline: offlineService.isOnline,
+        energyMode: offlineService.config.energyMode
+    });
+});
+
+/**
+ * POST /api/offline-mode/preference
+ * Changer la préférence cloud/local
+ * @body {boolean} preferCloud - true pour préférer cloud, false pour local
+ */
+router.post('/preference', (req, res) => {
+    const { preferCloud } = req.body;
+
+    if (typeof preferCloud !== 'boolean') {
+        return res.status(400).json({
+            success: false,
+            error: 'Paramètre "preferCloud" (boolean) requis'
+        });
+    }
+
+    if (!offlineService) {
+        offlineService = new OfflineModeService();
+    }
+
+    offlineService.config.preferCloud = preferCloud;
+    console.log(`[OFFLINE-MODE] Preference changed to: ${preferCloud ? 'CLOUD' : 'LOCAL'}`);
+
+    res.json({
+        success: true,
+        preferCloud: offlineService.config.preferCloud,
+        ...offlineService.getOptimalProvider()
     });
 });
 

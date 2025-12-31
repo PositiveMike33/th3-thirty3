@@ -11,13 +11,15 @@ services:
       dockerfile: Dockerfile
     container_name: th3-gpu-trainer
     restart: unless-stopped
+    shm_size: '2gb'
     ports:
-      - "5000:5000"  # Training API
-      - "6006:6006"  # TensorBoard
+      - "5000:5000" # Training API
+      - "6006:6006" # TensorBoard
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - TF_FORCE_GPU_ALLOW_GROWTH=true
-      - TRAINING_MODE=both  # auto + on-demand
+      - TRAINING_MODE=manual
+      - TF_CPP_MIN_LOG_LEVEL=2
       - OLLAMA_URL=http://host.docker.internal:11434
       - SERVER_URL=http://host.docker.internal:3000
     volumes:
@@ -27,17 +29,19 @@ services:
       - gpu-cache:/root/.cache
     deploy:
       resources:
+        limits:
+          memory: 8G
         reservations:
           devices:
             - driver: nvidia
-              count: all
-              capabilities: [gpu, compute, utility]
+              count: 1
+              capabilities: [ gpu, compute, utility ]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
       - th3-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"]
+      test: [ "CMD", "python", "-c", "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -107,11 +111,11 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]
+              capabilities: [ gpu ]
     networks:
       - th3-network
     profiles:
-      - with-ollama  # Only start if explicitly requested
+      - with-ollama # Only start if explicitly requested
 
 networks:
   th3-network:

@@ -47,6 +47,17 @@ module.exports = function registerRoutes(app, { requireTier, requireFeature }) {
     const logsRoutes = require('../logs_routes');
 
     // ================================
+    // Health Check (for Docker)
+    // ================================
+    app.get('/health', (req, res) => {
+        res.json({
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime()
+        });
+    });
+
+    // ================================
     // Public Routes (no auth)
     // ================================
     app.use('/auth', authRoutes);

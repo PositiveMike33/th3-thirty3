@@ -53,7 +53,7 @@ class TrainingManager:
     def __init__(self):
         self.active_jobs = {}
         self.job_history = []
-        self.auto_training_enabled = os.environ.get('TRAINING_MODE', 'both') in ['auto', 'both']
+        self.auto_training_enabled = os.environ.get('TRAINING_MODE', 'manual') in ['auto', 'both']
         self.models_dir = '/app/trained_models'
         self.datasets_dir = '/app/datasets'
         self.ollama_url = os.environ.get('OLLAMA_URL', 'http://host.docker.internal:11434')
@@ -72,11 +72,11 @@ class TrainingManager:
         """Background thread for automatic training."""
         while True:
             try:
-                # Run training cycle every 30 minutes
-                time.sleep(1800)
+                # Run training cycle every 4 hours (14400s) - reduced frequency for performance
+                time.sleep(14400)
                 if not self.active_jobs:
                     logger.info("🔄 Starting automatic training cycle...")
-                    self.start_training('auto_cycle', 'security', iterations=3)
+                    self.start_training('auto_cycle', 'security', iterations=1)  # Only 1 iteration
             except Exception as e:
                 logger.error(f"Auto-training error: {e}")
     

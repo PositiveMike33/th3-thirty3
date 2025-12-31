@@ -1,4 +1,15 @@
-const lancedb = require('vectordb');
+// Try to load vectordb with graceful fallback
+let lancedb = null;
+let VECTORDB_AVAILABLE = false;
+try {
+    lancedb = require('vectordb');
+    VECTORDB_AVAILABLE = true;
+} catch (err) {
+    console.warn('[MEMORY] VectorDB/LanceDB failed to load - Memory service will be disabled');
+    console.warn('[MEMORY] Error:', err.message);
+    console.warn('[MEMORY] This is normal on some platforms. The app will continue without vector memory.');
+}
+
 const { Ollama } = require('ollama');
 const fs = require('fs');
 const path = require('path');
@@ -11,9 +22,17 @@ class MemoryService {
         this.table = null;
         this.tableName = 'memory_store';
         this.embedModel = 'mxbai-embed-large';
+        this.isAvailable = VECTORDB_AVAILABLE;
     }
 
     async initialize() {
+        // Skip initialization if vectordb is not available
+        if (!VECTORDB_AVAILABLE || !lancedb) {
+            console.warn('[MEMORY] VectorDB not available - Memory service disabled');
+            this.isAvailable = false;
+            return false;
+        }
+
         try {
             // Initialize DB in a local folder
             const dbPath = path.join(__dirname, 'data', 'lancedb');
@@ -30,8 +49,14 @@ class MemoryService {
             } catch (e) {
                 console.log(`[MEMORY] Table '${this.tableName}' not found. It will be created on first ingestion.`);
             }
+
+            this.isAvailable = true;
+            console.log('[MEMORY] Memory service initialized successfully');
+            return true;
         } catch (error) {
             console.error("[MEMORY] Initialization failed:", error);
+            this.isAvailable = false;
+            return false;
         }
     }
 
@@ -49,6 +74,11 @@ class MemoryService {
     }
 
     async addDocument(text, metadata = {}) {
+        // Check if memory service is available
+        if (!this.isAvailable || !this.db) {
+            return false;
+        }
+
         const embedding = await this.getEmbedding(text);
         if (!embedding) return false;
 
