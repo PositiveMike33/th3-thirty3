@@ -10,41 +10,41 @@ const PATTERN_DESCRIPTIONS_FR = {
     'analyze_prose': 'Analyse un texte en prose pour le style et le contenu',
     'analyze_threat_report': 'Analyse un rapport de menace cybersécurité',
     'analyze_incident': 'Analyse un incident de sécurité',
-    
+
     // Extraction
     'extract_wisdom': 'Extrait la sagesse et les insights d\'un contenu',
     'extract_ideas': 'Extrait les idées principales d\'un texte',
     'extract_insights': 'Extrait les insights stratégiques',
     'extract_recommendations': 'Extrait les recommandations d\'un contenu',
     'extract_article_wisdom': 'Extrait la sagesse d\'un article',
-    
+
     // Création
     'create_summary': 'Crée un résumé concis du contenu',
     'create_keynote': 'Génère une présentation keynote',
     'create_micro_summary': 'Crée un micro-résumé ultra-concis',
     'create_5_sentence_summary': 'Résumé en 5 phrases exactement',
     'create_report_finding': 'Crée un rapport de découvertes',
-    
+
     // Amélioration
     'improve_writing': 'Améliore la qualité de l\'écriture',
     'improve_prompt': 'Améliore un prompt pour de meilleurs résultats',
     'improve_academic_writing': 'Améliore le style académique',
-    
+
     // Sécurité & Hacking
     'write_nuclei_template_rule': 'Écrit une règle template Nuclei',
     'create_threat_scenarios': 'Crée des scénarios de menaces',
     'analyze_malware': 'Analyse un malware potentiel',
     'create_stride_threat_model': 'Modèle de menaces STRIDE',
-    
+
     // Productivité
     'summarize': 'Résume le contenu fourni',
     'summarize_meeting': 'Résume une réunion',
     'summarize_paper': 'Résume un article scientifique',
     'summarize_rpg_session': 'Résume une session de JDR',
-    
+
     // KeelClip / VPO
-    'keelclip_5why': 'Génère un rapport 5-Why pour KeelClip VPO',
-    
+
+
     // Autres
     'explain_code': 'Explique du code source',
     'explain_terms': 'Explique des termes techniques',
@@ -158,7 +158,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                                         const data = await res.json();
                                                         setPatternContent(data);
                                                     } catch {
-                                                        setPatternContent({ 
+                                                        setPatternContent({
                                                             system: 'Erreur de chargement',
                                                             user: 'Serveur non disponible. Démarrez le serveur pour voir le contenu.'
                                                         });
@@ -207,11 +207,11 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
 
             {/* Preview Modal */}
             {previewPattern && (
-                <div 
+                <div
                     className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
                     onClick={() => setPreviewPattern(null)}
                 >
-                    <div 
+                    <div
                         className="bg-gray-900 border-2 border-cyan-500 rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden shadow-[0_0_80px_rgba(8,145,178,0.5)]"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -219,14 +219,14 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                             <h3 className="text-lg font-bold text-cyan-300 font-mono">
                                 📄 {previewPattern}
                             </h3>
-                            <button 
+                            <button
                                 onClick={() => setPreviewPattern(null)}
                                 className="text-gray-400 hover:text-red-400 transition-colors"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         {loadingPreview ? (
                             <div className="p-8 text-center text-cyan-400 animate-pulse">
                                 Chargement du contenu...
@@ -241,7 +241,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                         {patternContent.system || 'Aucun prompt système disponible'}
                                     </div>
                                 </div>
-                                
+
                                 {patternContent.user && (
                                     <div>
                                         <div className="text-xs text-purple-400 uppercase tracking-wider mb-2 font-bold">

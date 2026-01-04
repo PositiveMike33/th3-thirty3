@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProjectDashboard from './ProjectDashboard';
 import OsintDashboard from './OsintDashboard';
-import ProfessionalPage from './ProfessionalPage';
+
 import CyberTrainingPage from './CyberTrainingPage';
 import KPIDashboard from './KPIDashboard';
 import OllamaTrainingDashboard from './OllamaTrainingDashboard';
@@ -67,12 +67,12 @@ function App() {
                   {/* Navigation */}
                   <nav className="p-4 bg-gray-900/80 border-b border-gray-800 text-white flex justify-center gap-8 backdrop-blur-md z-20 items-center">
                     <Link to="/" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">CHAT</Link>
-                    <Link to="/professional" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROFESSIONAL</Link>
+
                     <Link to="/unified" className="hover:text-emerald-400 transition-colors font-mono text-sm tracking-widest">📊 UNIFIED</Link>
                     <Link to="/projects" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROJECTS</Link>
                     <Link to="/simulator" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🎮 SIMULATOR</Link>
                     <Link to="/space" className="hover:text-blue-400 transition-colors font-mono text-sm tracking-widest"> SPACE</Link>
-                    <a href="/keelclip/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors font-mono text-sm tracking-widest"> KEELCLIP</a>
+
                     <Link to="/settings" className="hover:text-yellow-400 transition-colors font-mono text-sm tracking-widest"> SETTINGS</Link>
                     {/* Network Status Indicator - RISK-006 */}
                     <NetworkStatus compact={true} />
@@ -82,7 +82,7 @@ function App() {
                     <div className="flex-grow h-full overflow-y-auto overflow-x-hidden">
                       <Routes>
                         <Route path="/" element={<ChatInterface />} />
-                        <Route path="/professional" element={<ProfessionalPage />} />
+
                         <Route path="/unified" element={<UnifiedDashboard />} />
                         <Route path="/projects" element={<ProjectDashboard />} />
                         <Route path="/osint" element={<OsintDashboard />} />

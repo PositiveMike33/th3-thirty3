@@ -42,6 +42,19 @@ services:
       - th3-network
     restart: unless-stopped
 
+  # HackerGPT Agent
+  hackergpt:
+    image: node:lts
+    container_name: th3-hackergpt
+    command: npx @hackerai/local@latest --token ${HACKERGPT_TOKEN} --name "Kali" --image kalilinux/kali-rolling
+    environment:
+      - HACKERGPT_TOKEN=${HACKERGPT_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - th3-network
+    restart: always
+
 networks:
   th3-network:
     driver: bridge

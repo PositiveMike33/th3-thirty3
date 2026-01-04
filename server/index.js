@@ -45,7 +45,7 @@ app.use('/api/subscription', subscriptionRoutes);
 const paymentRoutes = require('./payment_routes');
 app.use('/api/payment', paymentRoutes);
 
-// Payment Dashboard Routes (Stats temps réel)
+// Payment Dashboard Routes (Stats temps rï¿½el)
 const paymentDashboardRoutes = require('./payment_dashboard_routes');
 app.use('/api/payment', paymentDashboardRoutes);
 
@@ -60,14 +60,14 @@ const IDENTITY = require('./config/identity');
 const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
 const ACCOUNTS = [
-    'mikegauthierguillet@gmail.com',  // Priorité
+    'mikegauthierguillet@gmail.com',  // Prioritï¿½
     'th3thirty3@gmail.com',
     'mgauthierguillet@gmail.com'
 ];
 
 // Model Configuration
 const modelName = IDENTITY.default_model;
-console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connecté : ${modelName}`);
+console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connectï¿½ : ${modelName}`);
 
 // Initialize Memory Service
 const memoryService = new MemoryService();
@@ -161,9 +161,9 @@ const sessionManager = new SessionManager();
 const VisionService = require('./vision_service');
 const visionService = new VisionService(llmService);
 
-// Initialize KeelClip Analyzer (5-Why Generator)
-const KeelClipAnalyzer = require('./keelclip_analyzer');
-const keelclipAnalyzer = new KeelClipAnalyzer(llmService);
+
+
+
 
 // Initialize Model Metrics Service (Training Dashboard)
 const ModelMetricsService = require('./model_metrics_service');
@@ -203,7 +203,7 @@ const AgentDirectorService = require('./agent_director_service');
 const agentDirectorRoutes = require('./agent_director_routes');
 const agentDirector = new AgentDirectorService(llmService, llmService.anythingLLMWrapper);
 agentDirectorRoutes.setAgentDirector(agentDirector);
-console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersécurité, OSINT, Agent Thirty3');
+console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersï¿½curitï¿½, OSINT, Agent Thirty3');
 console.log('[SYSTEM] Real Training Service initialized (Shodan + model training)');
 
 
@@ -233,14 +233,14 @@ const fetchGoogleContext = async (message) => {
                 .then(res => "\n\n[AGENDA]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
         }
 
-        if (msg.includes('tâche') || msg.includes('todo')) {
+        if (msg.includes('tï¿½che') || msg.includes('todo')) {
             checks.push(Promise.all(ACCOUNTS.map(email => googleService.listTasks(email).catch(e => `Error: ${e.message}`)))
                 .then(res => "\n\n[GOOGLE TASKS]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
         }
 
         if (msg.includes('drive') || msg.includes('fichiers')) {
             checks.push(Promise.all(ACCOUNTS.map(email => googleService.listDriveFiles(email).catch(e => `Error: ${e.message}`)))
-                .then(res => "\n\n[GOOGLE DRIVE (Récents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
+                .then(res => "\n\n[GOOGLE DRIVE (Rï¿½cents)]\n" + res.map((r, i) => `--- Compte: ${ACCOUNTS[i]} ---\n${r}\n`).join('')));
         }
 
         const results = await Promise.all(checks);
@@ -528,7 +528,7 @@ app.get('/auth/google/callback', async (req, res) => {
     const { code, state } = req.query; // state is the email
     if (code && state) {
         await googleService.handleCallback(code, state);
-        res.send("Connexion réussie ! Vous pouvez fermer cette fenêtre.");
+        res.send("Connexion rï¿½ussie ! Vous pouvez fermer cette fenï¿½tre.");
     } else {
         res.status(400).send("Erreur d'authentification.");
     }
@@ -643,7 +643,7 @@ app.get('/osint/spiderfoot/status', async (req, res) => {
 });
 
 
-// ===== KEELCLIP INCIDENT ANALYSIS ENDPOINTS =====
+
 
 /**
  * Analyze incident from image/video
@@ -661,11 +661,11 @@ app.post('/incident/analyze', async (req, res) => {
         console.log(`[INCIDENT] Analyzing ${mediaType}...`);
 
         // Step 1: Vision Analysis
-        const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
+
         console.log('[INCIDENT] Vision analysis complete');
 
         // Step 2: Generate Quick Summary
-        const summary = keelclipAnalyzer.generateQuickSummary(visionAnalysis);
+
 
         res.json({
             success: true,
@@ -695,10 +695,10 @@ app.post('/incident/generate-5why', async (req, res) => {
         console.log('[INCIDENT] Generating 5-Why report...');
 
         // Generate complete 5-Why report
-        const report = await keelclipAnalyzer.generate5Why(analysis, description);
+
 
         // Validate report quality
-        const validation = keelclipAnalyzer.validate5WhyReport(report);
+
 
         console.log(`[INCIDENT] Report generated - Score: ${validation.score}/100`);
 
@@ -730,15 +730,15 @@ app.post('/incident/complete', async (req, res) => {
         console.log(`[INCIDENT] Complete workflow: ${mediaType} ? 5-Why`);
 
         // Step 1: Vision Analysis
-        const visionAnalysis = await visionService.analyzeKeelClipIncident(media, mediaType);
+
         console.log('[INCIDENT] ? Vision analysis');
 
         // Step 2: Generate 5-Why
-        const report = await keelclipAnalyzer.generate5Why(visionAnalysis, description);
+
         console.log('[INCIDENT] ? 5-Why generated');
 
         // Step 3: Validate
-        const validation = keelclipAnalyzer.validate5WhyReport(report);
+
         console.log(`[INCIDENT] ? Validation: ${validation.score}/100`);
 
         res.json({
@@ -746,7 +746,7 @@ app.post('/incident/complete', async (req, res) => {
             analysis: visionAnalysis,
             report: report,
             validation: validation,
-            summary: keelclipAnalyzer.generateQuickSummary(visionAnalysis)
+
         });
 
     } catch (error) {
@@ -768,7 +768,7 @@ app.post('/incident/validate', (req, res) => {
             return res.status(400).json({ error: 'Report text required' });
         }
 
-        const validation = keelclipAnalyzer.validate5WhyReport(report);
+
 
         res.json({
             success: true,
@@ -864,7 +864,7 @@ app.post('/feedback', async (req, res) => {
         console.log(`[FEEDBACK] Received correction for: "${originalQuery}"`);
         await memoryService.addCorrection(originalQuery, wrongResponse, correction);
 
-        res.json({ success: true, message: "Correction mémorisée. Je ne ferai plus cette erreur." });
+        res.json({ success: true, message: "Correction mï¿½morisï¿½e. Je ne ferai plus cette erreur." });
     } catch (error) {
         console.error("Feedback error:", error);
         res.status(500).json({ error: error.message });
@@ -905,7 +905,7 @@ app.post('/chat', async (req, res) => {
         // PERMISSION CHECK: Model
         if (!userService.canUseModel(user, provider || 'local', model || '')) {
             return res.status(403).json({
-                reply: `? ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser le modèle ${model} (${provider}).`,
+                reply: `? ACCï¿½S REFUSï¿½ : Votre niveau (${user.tier}) ne permet pas d'utiliser le modï¿½le ${model} (${provider}).`,
                 error: "Insufficient Permissions"
             });
         }
@@ -913,7 +913,7 @@ app.post('/chat', async (req, res) => {
         // PERMISSION CHECK: Fabric Pattern
         if (pattern && !userService.canUseTool(user, `fabric_basic`)) {
             return res.status(403).json({
-                reply: `? ACCÈS REFUSÉ : Votre niveau (${user.tier}) ne permet pas d'utiliser la bibliothèque Fabric.`,
+                reply: `? ACCï¿½S REFUSï¿½ : Votre niveau (${user.tier}) ne permet pas d'utiliser la bibliothï¿½que Fabric.`,
                 error: "Insufficient Permissions"
             });
         }
@@ -936,19 +936,19 @@ app.post('/chat', async (req, res) => {
 
         // Handle Commands
         if (message.trim().toLowerCase() === '/clear') {
-            currentSession.messages = [{ role: "assistant", content: "Mémoire effacée. On repart à neuf." }];
+            currentSession.messages = [{ role: "assistant", content: "Mï¿½moire effacï¿½e. On repart ï¿½ neuf." }];
             sessionManager.saveSession(currentSession.id, currentSession);
-            return res.json({ reply: "Mémoire effacée.", sessionId: currentSession.id });
+            return res.json({ reply: "Mï¿½moire effacï¿½e.", sessionId: currentSession.id });
         }
 
         // Handle Ingest Command via Chat
         if (message.trim().toLowerCase() === '/ingest') {
             const vaultPath = process.env.OBSIDIAN_VAULT_PATH;
-            if (!vaultPath) return res.json({ reply: "Erreur: OBSIDIAN_VAULT_PATH non configuré." });
+            if (!vaultPath) return res.json({ reply: "Erreur: OBSIDIAN_VAULT_PATH non configurï¿½." });
 
             // Trigger async ingestion
             const count = await memoryService.ingestVault(vaultPath);
-            return res.json({ reply: `Ingestion terminée.J'ai digéré ${count} notes.` });
+            return res.json({ reply: `Ingestion terminï¿½e.J'ai digï¿½rï¿½ ${count} notes.` });
         }
 
         // Handle Feedback (Correction)
@@ -968,24 +968,24 @@ app.post('/chat', async (req, res) => {
                     console.log("[BYE] System Integrity Verified.");
                 } catch (err) {
                     console.error("[BYE] System Integrity Check Failed:", err.message);
-                    return res.json({ reply: "?? ATTENTION : Les tests de sécurité ont échoué. Vérifiez les logs avant de fermer." });
+                    return res.json({ reply: "?? ATTENTION : Les tests de sï¿½curitï¿½ ont ï¿½chouï¿½. Vï¿½rifiez les logs avant de fermer." });
                 }
 
                 await llmService.unloadModel(model || "dolphin-mistral:7b");
 
-                const byeResponse = `### SYSTÈME TH3 THIRTY3
+                const byeResponse = `### SYSTï¿½ME TH3 THIRTY3
 
-**PROTOCOLE DE SAUVEGARDE ACTIVÉ.**
+**PROTOCOLE DE SAUVEGARDE ACTIVï¿½.**
 
-Données enregistrées :
-*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arrêt Hémorragie.
-*   **Objectif Actuel (LOCK) :** Logistique de déploiement & Exécution du shift de travail (Cible : 484$).
-*   **Statut :** EN ATTENTE D'EXÉCUTION.
+Donnï¿½es enregistrï¿½es :
+*   **Plan Global :** Phase 1 - Stabilisation Cashflow & Arrï¿½t Hï¿½morragie.
+*   **Objectif Actuel (LOCK) :** Logistique de dï¿½ploiement & Exï¿½cution du shift de travail (Cible : 484$).
+*   **Statut :** EN ATTENTE D'EXï¿½CUTION.
 
-Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
+Je coupe les processus cognitifs. Libï¿½re ta mï¿½moire vive. Je garde la structure.
 
-À ton retour, la première chose que tu verras sera :
-> **RAPPEL OBJECTIF :** Shift Travail terminé ?
+ï¿½ ton retour, la premiï¿½re chose que tu verras sera :
+> **RAPPEL OBJECTIF :** Shift Travail terminï¿½ ?
 > **STATUS :** [YES/NO]
 
 **SERVER SHUTDOWN...**
@@ -995,7 +995,7 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
                 return res.json({ reply: byeResponse });
             } catch (e) {
                 console.error("Error unloading model:", e);
-                return res.json({ reply: "Erreur lors de la déconnexion du cerveau. Check la console." });
+                return res.json({ reply: "Erreur lors de la dï¿½connexion du cerveau. Check la console." });
             }
         }
 
@@ -1011,12 +1011,12 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
         const memoryResults = await memoryService.search(message, 3); // Top 3 relevant memories
         if (memoryResults.length > 0) {
             const memoryContext = memoryResults.map(m => m.text).join('\n---\n');
-            messageWithContext += `\n\n[MÉMOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tirées de ta mémoire (notes ou conversations passées) :\n${memoryContext}\n[FIN MÉMOIRE]\n`;
+            messageWithContext += `\n\n[Mï¿½MOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tirï¿½es de ta mï¿½moire (notes ou conversations passï¿½es) :\n${memoryContext}\n[FIN Mï¿½MOIRE]\n`;
             console.log(`[RAG] Injected ${memoryResults.length} memories.`);
         }
 
         // 1c. INCIDENT ANALYSIS (Auto-detect VPO context)
-        const vpoKeywords = ['panne', 'incident', 'keelclip', '5 why', '5why', 'ewo', 'rca', 'machine', 'emballage', 'maintenance', 'défaut', 'bourrage'];
+
         const isIncidentContext = vpoKeywords.some(keyword => message.toLowerCase().includes(keyword));
 
         let incidentAnalysis = null;
@@ -1024,8 +1024,8 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
             console.log("[CHAT] ?? VPO INCIDENT DETECTED - Analyzing image...");
             try {
                 // Analyze incident image
-                incidentAnalysis = await visionService.analyzeKeelClipIncident(image, 'image');
-                const summary = keelclipAnalyzer.generateQuickSummary(incidentAnalysis);
+
+
 
                 messageWithContext += `\n\n[ANALYSE VISUELLE INCIDENT]\n${summary}\n[FIN ANALYSE]\n`;
                 console.log("[CHAT] ? Incident analysis injected");
@@ -1033,15 +1033,15 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
                 // If user explicitly asks for 5-Why, generate it
                 if (message.toLowerCase().includes('5 why') || message.toLowerCase().includes('5why') || message.toLowerCase().includes('rapport')) {
                     console.log("[CHAT] ?? Generating 5-Why report...");
-                    const report = await keelclipAnalyzer.generate5Why(incidentAnalysis, message);
-                    const validation = keelclipAnalyzer.validate5WhyReport(report);
 
-                    messageWithContext += `\n\n[RAPPORT 5-WHY GÉNÉRÉ]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
+
+
+                    messageWithContext += `\n\n[RAPPORT 5-WHY Gï¿½Nï¿½Rï¿½]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
                     console.log(`[CHAT] ? 5-Why report generated (Score: ${validation.score})`);
                 }
             } catch (error) {
                 console.error("[CHAT] Incident analysis failed:", error.message);
-                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle échouée - ${error.message}]\n`;
+                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle ï¿½chouï¿½e - ${error.message}]\n`;
             }
         }
 
@@ -1083,10 +1083,10 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
             if (pattern) {
                 // MODE FABRIC
                 finalSystemPrompt += `
-\n[MODE EXPERT ACTIVÉ]
-1. **STYLE** : Français standard PROFESSIONNEL et TECHNIQUE.
-2. **FORMAT** : Réponse directe. Juste le résultat.
-3. **TON** : Efficacité maximale.
+\n[MODE EXPERT ACTIVï¿½]
+1. **STYLE** : Franï¿½ais standard PROFESSIONNEL et TECHNIQUE.
+2. **FORMAT** : Rï¿½ponse directe. Juste le rï¿½sultat.
+3. **TON** : Efficacitï¿½ maximale.
 \n[PATTERN: ${pattern.toUpperCase()}]\n${getPatternContent(pattern)}`;
             } else {
                 // MODE CHAT
@@ -1094,10 +1094,10 @@ Je coupe les processus cognitifs. Libère ta mémoire vive. Je garde la structure.
                 const styleInstructions = styleService.generateStylePrompt(styleProfile);
 
                 finalSystemPrompt += `
-\n[MODE APPRENTISSAGE ACTIVÉ]
+\n[MODE APPRENTISSAGE ACTIVï¿½]
 1. **OBJECTIF** : Analyse le style de l'utilisateur dans l'historique (vocabulaire, structure de phrase, jargon).
 2. **ADAPTATION** : Imite son style. Deviens son miroir.
-3. **ÉVOLUTION** : Plus tu parles avec lui, plus tu dois lui ressembler. Utilise ses expressions. Sois son extension numérique.
+3. **ï¿½VOLUTION** : Plus tu parles avec lui, plus tu dois lui ressembler. Utilise ses expressions. Sois son extension numï¿½rique.
 ${styleInstructions}`;
             }
         }
@@ -1137,7 +1137,7 @@ ${styleInstructions}`;
         console.error('CRITICAL ERROR:', error);
         require('fs').writeFileSync('server_error.log', `[${new Date().toISOString()}] ${error.stack}\n`, { flag: 'a' });
         res.status(500).json({
-            reply: "Erreur système critique.",
+            reply: "Erreur systï¿½me critique.",
             error: error.message
         });
     }
@@ -1270,6 +1270,9 @@ server.listen(port, async () => {
         console.log('[SYSTEM] ?? Tor check skipped:', error.message);
     }
 });
+
+
+
 
 
 

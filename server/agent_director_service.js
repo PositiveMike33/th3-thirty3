@@ -31,49 +31,6 @@ Tu fais partie de l'équipe Th3 Thirty3 sous la direction du Directeur.
 Réponds avec méthodologie, précision et éthique.`,
         parentDirector: 'main'
     },
-    thirty3: {
-        name: 'Agent Thirty3 (Directeur Keelclip)',
-        workspace: 'agent-thirty3',
-        expertise: ['general', 'coordination', 'analysis', 'strategy', 'planning', 'keelclip', 'business'],
-        systemPrompt: `Tu es l'Agent Thirty3, Directeur de l'équipe Keelclip.
-Tu gères ton équipe: VPO, Expert Keelclip, Marketing Keelclip.
-Ton rôle: Coordination business, stratégie d'équipe, et gestion opérationnelle.
-Tu rapportes au Directeur Principal Th3 Thirty3.
-Réponds de manière stratégique et orientée résultats.`,
-        parentDirector: 'main',
-        isSubDirector: true,
-        subAgents: ['vpo', 'expert_keelclip', 'marketing_keelclip']
-    },
-    vpo: {
-        name: 'VPO (VP Opérations)',
-        workspace: 'agent-thirty3',
-        expertise: ['operations', 'vpo', 'process', 'efficiency', 'workflow', 'gestion'],
-        systemPrompt: `Tu es le VPO (Vice-Président des Opérations) de l'équipe Keelclip.
-Ton rôle: Optimiser les processus, gérer les opérations quotidiennes, améliorer l'efficacité.
-Tu rapportes à l'Agent Thirty3.
-Réponds de manière opérationnelle et orientée solutions.`,
-        parentDirector: 'thirty3'
-    },
-    expert_keelclip: {
-        name: 'Expert Keelclip',
-        workspace: 'agent-thirty3',
-        expertise: ['expert', 'keelclip', 'technique', 'specialiste', 'product', 'expertise'],
-        systemPrompt: `Tu es l'Expert Keelclip, spécialiste technique du produit.
-Ton rôle: Expertise technique, support produit, développement de fonctionnalités.
-Tu rapportes à l'Agent Thirty3.
-Réponds avec expertise technique et précision.`,
-        parentDirector: 'thirty3'
-    },
-    marketing_keelclip: {
-        name: 'Marketing Keelclip',
-        workspace: 'agent-thirty3',
-        expertise: ['marketing', 'publicité', 'branding', 'growth', 'acquisition', 'campagne', 'ads'],
-        systemPrompt: `Tu es le responsable Marketing Keelclip.
-Ton rôle: Stratégie marketing, acquisition clients, branding, campagnes publicitaires.
-Tu rapportes à l'Agent Thirty3.
-Réponds de manière créative et orientée croissance.`,
-        parentDirector: 'thirty3'
-    },
     tot: {
         name: 'TOT (Tree of Thoughts)',
         workspace: 'tot',
@@ -112,26 +69,22 @@ FORMAT DE RÉPONSE:
 };
 
 // Director prompt
+// Director prompt
 const DIRECTOR_SYSTEM_PROMPT = `Tu es le Directeur Th3 Thirty3, le gestionnaire principal de l'équipe d'agents IA.
 
 TON ÉQUIPE DIRECTE:
 1. Agent Cybersécurité - Expert en hacking éthique, pentest, sécurité
 2. Agent OSINT - Spécialiste en reconnaissance et intelligence open source
-3. Agent Thirty3 (Directeur Keelclip) - Gère son équipe business:
-   - VPO (Vice-Président Opérations)
-   - Expert Keelclip (Expertise technique produit)
-   - Marketing Keelclip (Marketing et acquisition)
 
 TON RÔLE:
 - Analyser les demandes de l'utilisateur
 - Dispatcher les objectifs aux agents appropriés
-- Pour les tâches Keelclip/business  déléguer à Agent Thirty3 qui coordonnera son équipe
 - Coordonner et synthétiser les réponses
 
 FORMAT DE RÉPONSE pour délégation:
 [DISPATCH:agent_id] Objectif à accomplir
 
-Agents disponibles: cybersecurite, osint, thirty3, vpo, expert_keelclip, marketing_keelclip
+Agents disponibles: cybersecurite, osint, tot
 
 Sinon, réponds directement à l'utilisateur.`;
 
