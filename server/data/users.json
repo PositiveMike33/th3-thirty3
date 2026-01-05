@@ -25,6 +25,58 @@
         "searchCount": 0,
         "lastActive": "2025-12-30T04:38:31.227Z"
       }
+    },
+    {
+      "id": "00ddd75e-dba1-4e6b-8560-13b9973885ed",
+      "username": "testmapuser",
+      "email": "testmap@test.com",
+      "password": "$2b$12$v2RZcyzNB8ikhUnL/PDLHumqjeFtylJdLLbcDeXkmAN27DC7QLP42",
+      "tier": "initiate",
+      "key": "sk-8502d58fbc4345a2805e3b0ebcc6404c",
+      "createdAt": "2026-01-05T12:06:01.103Z",
+      "lastLogin": "2026-01-05T12:09:15.457Z",
+      "profile": {
+        "firstName": "Test",
+        "lastName": "Map",
+        "avatar": null,
+        "bio": ""
+      },
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "fr"
+      },
+      "usage": {
+        "chatCount": 0,
+        "searchCount": 0,
+        "lastActive": "2026-01-05T12:09:15.457Z"
+      }
+    },
+    {
+      "id": "7f191d38-548a-441e-b1c9-f9f447f0ded5",
+      "username": "mapadmin",
+      "email": "mapadmin@test.com",
+      "password": "$2b$12$5W2Mn5ebrMqTRgAC8er2s.k2s/DF3L/wpJjmaQEr5RXQZYk3WC2P6",
+      "tier": "architect",
+      "key": "sk-87107b7a3d804494938ff700af94e318",
+      "createdAt": "2026-01-05T12:10:35.272Z",
+      "lastLogin": "2026-01-05T12:14:54.094Z",
+      "profile": {
+        "firstName": "Map",
+        "lastName": "Admin",
+        "avatar": null,
+        "bio": ""
+      },
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "fr"
+      },
+      "usage": {
+        "chatCount": 0,
+        "searchCount": 0,
+        "lastActive": "2026-01-05T12:14:54.094Z"
+      }
     }
   ]
 }

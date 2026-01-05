@@ -20,6 +20,7 @@ const DEFAULTS = {
         openai: "",
         anthropic: "",
         perplexity: "",
+        gemini: "",
         anythingllm_url: "",
         anythingllm_key: ""
     }

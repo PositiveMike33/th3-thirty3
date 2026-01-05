@@ -251,7 +251,7 @@ class LLMService {
             // This is critical when running AnythingLLM or other heavy local apps alongside.
             if (providerId !== 'local') {
                 // We don't await this to avoid slowing down the request
-                this.unloadModel('granite-flash:latest').catch(e => console.log("[LLM] Background unload failed:", e.message));
+                this.unloadModel('granite4:latest').catch(e => console.log("[LLM] Background unload failed:", e.message));
             }
 
             let response;
@@ -459,7 +459,7 @@ class LLMService {
 
     async generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt) {
         // Fallback to default if no model specified
-        const model = modelId || 'granite-flash:latest';
+        const model = modelId || 'granite4:latest';
 
         const messages = [
             { role: 'system', content: systemPrompt },

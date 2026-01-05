@@ -43,7 +43,15 @@ class UserService {
     }
 
     canUseModel(user, provider, modelName) {
-        const allowedModels = user.tierConfig.models;
+        let allowedModels;
+        if (user.tierConfig) {
+            allowedModels = user.tierConfig.models;
+        } else {
+            // Fallback if tierConfig is missing (e.g. JWT Auth)
+            const tier = user.tier || 'initiate';
+            const config = TIERS[tier] || TIERS['initiate'];
+            allowedModels = config.models;
+        }
 
         if (allowedModels.includes('all')) return true;
 
@@ -117,9 +125,9 @@ class UserService {
         const oldTier = this.users[userIndex].tier;
         this.users[userIndex].tier = newTier;
         this.users[userIndex].lastUpdated = new Date().toISOString();
-        
+
         console.log(`[USER] Upgrading user ${this.users[userIndex].username} (${userId}) from ${oldTier} to ${newTier}`);
-        
+
         return this.saveUsers();
     }
 }

@@ -21,12 +21,18 @@ class AnythingLLMWrapper {
      */
     async initialize() {
         const settings = settingsService.getSettings();
-        this.baseUrl = settings.apiKeys.anythingllm_url || process.env.ANYTHING_LLM_URL;
+        let baseURL = settings.apiKeys.anythingllm_url || process.env.ANYTHING_LLM_URL;
         this.apiKey = settings.apiKeys.anythingllm_key || process.env.ANYTHING_LLM_KEY;
 
-        if (!this.baseUrl || !this.apiKey) {
+        if (!baseURL || !this.apiKey) {
             throw new Error('AnythingLLM configuration missing');
         }
+
+        // Ensure correct API endpoint structure
+        if (!baseURL.endsWith('/api/v1')) {
+            baseURL = baseURL.replace(/\/+$/, '') + '/api/v1';
+        }
+        this.baseUrl = baseURL;
 
         // Get workspace slug
         const res = await fetch(`${this.baseUrl}/workspaces`, {
@@ -38,8 +44,12 @@ class AnythingLLMWrapper {
         }
 
         const data = await res.json();
-        const preferred = data.workspaces.find(w => w.slug.includes('thirty3'));
-        this.workspaceSlug = preferred ? preferred.slug : data.workspaces[0].slug;
+        const preferred = data.workspaces.find(w => w.slug.includes('thirty3') || w.slug.includes('geo') || w.slug.includes('agent'));
+        this.workspaceSlug = preferred ? preferred.slug : (data.workspaces[0] ? data.workspaces[0].slug : null);
+
+        if (!this.workspaceSlug) {
+            throw new Error('No workspaces found in AnythingLLM');
+        }
 
         console.log(`[ANYTHINGLLM] Connected to workspace: ${this.workspaceSlug}`);
     }
@@ -54,6 +64,24 @@ class AnythingLLMWrapper {
 
         console.log(`[ANYTHINGLLM] Sending message to ${this.workspaceSlug}...`);
 
+        // INJECT MAP CONTROL PROTOCOL
+        // This instructs the model (regardless of its system prompt) on how to control the UI.
+        const mapProtocol = `
+[SYSTEM INSTRUCTION: INTERFACE CONTROLLER]
+You are a Voice-to-UI Controller for a tactical map dashboard.
+Your job is NOT to physically move or drive. Your job is to generate JSON commands that the dashboard interface interprets to show routes and locations.
+
+Valid JSON Commands:
+1. ROUTE: {"action": "route", "waypoints": ["Origin", "Waypoint 1", "Destination"]}
+2. HIGHLIGHT: {"action": "highlight", "location": "Exact Place Name", "description": "Short info"}
+
+RULES:
+- If the user asks for a route, DO NOT say "I cannot navigate". Instead, GENERATE the JSON for the route.
+- If the user asks to see a place, GENERATE the highlight JSON.
+- Always include the JSON block at the very end of your response.
+`;
+        const enrichedMessage = `${mapProtocol}\n\nUSER REQUEST: ${message}`;
+
         try {
             // Attempt normal chat
             const chatRes = await fetch(`${this.baseUrl}/workspace/${this.workspaceSlug}/chat`, {
@@ -63,7 +91,7 @@ class AnythingLLMWrapper {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message,
+                    message: enrichedMessage,
                     mode,
                     userId
                 })
@@ -85,8 +113,14 @@ class AnythingLLMWrapper {
             return chatData.textResponse;
 
         } catch (error) {
-            if (error.message.includes('Failed to embed') || error.message.includes('Connection error')) {
-                console.log('[ANYTHINGLLM] Network/Embedding error, using local fallback...');
+            // Updated error handling to catch all connection-related issues
+            const isConnectionError = error.message.includes('Failed to embed') ||
+                error.message.includes('Connection error') ||
+                error.message.includes('fetch failed') ||
+                error.message.includes('ECONNREFUSED');
+
+            if (isConnectionError) {
+                console.log(`[ANYTHINGLLM] Connection issue detected (${error.message}), using local fallback...`);
                 return await this._chatWithLocalEmbeddings(message, mode);
             }
             throw error;
@@ -109,6 +143,13 @@ class AnythingLLMWrapper {
         // 1. Get relevant documents using local embeddings
         const documents = await this._getWorkspaceDocuments();
 
+        const mapSystemPrompt = `You are Th3 Thirty3, a tactical AI assistant.
+[MAP PROTOCOL]
+To control the map, output JSON:
+- Route: {"action": "route", "waypoints": ["A", "B"]}
+- Highlight: {"action": "highlight", "location": "X"}
+`;
+
         if (documents.length > 0) {
             // 2. Find similar documents
             const relevant = await this.embeddingService.findSimilar(message, documents, 3, 'ollama');
@@ -124,11 +165,11 @@ class AnythingLLMWrapper {
             const ollama = new Ollama({ host: ollamaUrl });
 
             const response = await ollama.chat({
-                model: 'granite-flash:latest',
+                model: 'granite4:latest',
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are Th3 Thirty3, a cybersecurity expert. Answer based on the provided context.'
+                        content: mapSystemPrompt
                     },
                     { role: 'user', content: enhancedPrompt }
                 ]
@@ -142,9 +183,9 @@ class AnythingLLMWrapper {
             const ollama = new Ollama({ host: ollamaUrl });
 
             const response = await ollama.chat({
-                model: 'granite-flash:latest',
+                model: 'granite4:latest',
                 messages: [
-                    { role: 'system', content: 'You are Th3 Thirty3, a cybersecurity expert.' },
+                    { role: 'system', content: mapSystemPrompt },
                     { role: 'user', content: message }
                 ]
             });

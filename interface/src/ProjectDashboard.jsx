@@ -11,6 +11,7 @@ const ProjectDashboard = () => {
     // Project State
     const [_projects, setProjects] = useState([]);
     const [activeProject, setActiveProject] = useState(null);
+    const [mapUrl, setMapUrl] = useState("https://www.google.com/maps/embed/v1/view?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&center=45.5576996,-73.711873&zoom=12&maptype=satellite");
     // const [loading, setLoading] = useState(false); // Unused
     // const [loading, setLoading] = useState(false); // Removed unused state
     // Sidebar was removed - these states are kept for potential future use
@@ -336,26 +337,66 @@ const ProjectDashboard = () => {
                                         ANNULER
                                     </button>
                                     <button
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (!selectedAgent || !agentTask.trim()) return;
 
-                                            // Trigger Agent
-                                            fetch(`${API_URL}/chat`, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'x-api-key': localStorage.getItem('th3_api_key') || ''
-                                                },
-                                                body: JSON.stringify({
-                                                    message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
-                                                    provider: 'anythingllm',
-                                                    model: selectedAgent // Pass the selected workspace slug
-                                                })
-                                            }).catch(err => console.error("Agent trigger failed", err));
+                                            try {
+                                                // Trigger Agent
+                                                const res = await fetch(`${API_URL || 'http://localhost:3000'}/chat`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'x-api-key': localStorage.getItem('th3_api_key') || ''
+                                                    },
+                                                    body: JSON.stringify({
+                                                        message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
+                                                        provider: 'anythingllm',
+                                                        model: selectedAgent
+                                                    })
+                                                });
 
-                                            setShowAgentModal(false);
-                                            setAgentTask("");
-                                            alert("Agent déployé. Vérifiez le moniteur.");
+                                                const data = await res.json();
+                                                // Handle various response formats (AnythingLLM wrapper returns textResponse)
+                                                const responseText = data.textResponse || data.response || data.message || "";
+
+                                                // PARSE MAP PROTOCOL
+                                                // Extract JSON block: ```json ... ``` or just { ... }
+                                                const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || responseText.match(/({[\s\S]*"action"[\s\S]*})/);
+
+                                                if (jsonMatch) {
+                                                    console.log("Map Action Detected:", jsonMatch[0]);
+                                                    try {
+                                                        const jsonStr = jsonMatch[1] || jsonMatch[0];
+                                                        const action = JSON.parse(jsonStr);
+
+                                                        if (action.action === 'route' && action.waypoints) {
+                                                            const origin = action.waypoints[0];
+                                                            const destination = action.waypoints[action.waypoints.length - 1];
+                                                            const waypoints = action.waypoints.slice(1, -1).join('|');
+
+                                                            let newUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&mode=driving&maptype=satellite`;
+                                                            if (waypoints) newUrl += `&waypoints=${encodeURIComponent(waypoints)}`;
+
+                                                            setMapUrl(newUrl);
+                                                            alert(`🗺️ TRAJET DÉTECTÉ : ${origin} -> ${destination}`);
+                                                        }
+                                                        else if (action.action === 'highlight' && action.location) {
+                                                            const newUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&q=${encodeURIComponent(action.location)}&maptype=satellite`;
+                                                            setMapUrl(newUrl);
+                                                            alert(`📍 LIEU IDENTIFIÉ : ${action.location}`);
+                                                        }
+                                                    } catch (e) {
+                                                        console.error("Failed to parse map JSON:", e);
+                                                    }
+                                                }
+
+                                                setShowAgentModal(false);
+                                                setAgentTask("");
+                                                if (!jsonMatch) alert("Agent déployé. Vérifiez le moniteur.");
+                                            } catch (err) {
+                                                console.error("Agent trigger failed", err);
+                                                alert("Erreur lors de l'exécution de l'agent.");
+                                            }
                                         }}
                                         className="flex-1 bg-cyan-900 text-cyan-300 border border-cyan-700 py-2 rounded hover:bg-cyan-800 transition-colors font-bold"
                                     >
@@ -408,7 +449,7 @@ const ProjectDashboard = () => {
                             allowFullScreen
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
-                            src="https://www.google.com/maps/embed/v1/view?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&center=45.5576996,-73.711873&zoom=12&maptype=satellite"
+                            src={mapUrl}
                         ></iframe>
                     </div>
 

@@ -16,8 +16,12 @@ class EmbeddingService {
     constructor() {
         const ollamaHost = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
         this.ollama = new Ollama({ host: ollamaHost });
-        this.gemini = process.env.GEMINI_API_KEY
-            ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+        // Initialize Gemini from ENV or Settings
+        const settings = require('./settings_service').getSettings();
+        const geminiKey = process.env.GEMINI_API_KEY || settings.apiKeys.gemini;
+
+        this.gemini = geminiKey
+            ? new GoogleGenerativeAI(geminiKey)
             : null;
 
         // Cache for embeddings (reduces API calls)

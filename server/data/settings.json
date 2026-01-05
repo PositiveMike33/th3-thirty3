@@ -1,6 +1,6 @@
 {
   "darkMode": true,
-  "autoCorrect": true,
+  "autoCorrect": false,
   "computeMode": "cloud",
   "reflectionMode": "think",
   "socials": {
@@ -13,8 +13,9 @@
     "openai": "",
     "anthropic": "",
     "perplexity": "",
-    "anythingllm_url": "",
-    "anythingllm_key": ""
+    "gemini": "AIzaSyAdondiDHlQGdL5Mgy-TzsJGY23ay3IBJ0",
+    "anythingllm_url": "http://localhost:3001",
+    "anythingllm_key": "6Z9YM07-XK94Q8E-JV3W5HP-3NT6TYG"
   },
   "themeMode": "dark"
 }
