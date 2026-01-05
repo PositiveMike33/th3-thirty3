@@ -1,12 +1,15 @@
 /**
- * Model Router Service - CLOUD ONLY
- * Routes agents to optimal cloud models based on expertise
- * 
- * CLOUD MODELS (via API):
- * - Groq (Llama, Mixtral) - FAST
- * - Gemini (Flash, Pro) - SMART
- * - OpenAI (GPT-4o) - BEST
+ * Model Router Service - HYBRID (Cloud + Local)
+ * Routes agents the optimal model based on availability and task
  */
+
+// Local Ollama Models (User Requested)
+const LOCAL_MODELS = {
+    code: 'granite4:latest',      // IBM Granite 4.0 (?) - Code/General
+    general: 'granite4:latest',   // IBM Granite 4.0
+    fast: 'granite4:latest',      // Fast enough for general use
+    embedding: 'mxbai-embed-large:latest' // State-of-the-art embedding
+};
 
 // Cloud providers configuration
 const CLOUD_PROVIDERS = {
@@ -27,17 +30,31 @@ const CLOUD_PROVIDERS = {
 class ModelRouter {
     constructor() {
         this.initialized = false;
-        this.preferLocal = false; // Forced to false for Cloud Only
+        this.preferLocal = true; // Preferred for Privacy/Offline
     }
 
     /**
-     * Initialize the router - Check specific cloud connectivity if needed
+     * Initialize the router
      */
     async initialize() {
         if (this.initialized) return true;
 
-        console.log('[MODEL_ROUTER] Initializing (CLOUD ONLY mode)...');
-        console.log('[MODEL_ROUTER] Available Providers: Groq, Gemini, OpenAI, Anthropic');
+        console.log('[MODEL_ROUTER] Initializing (HYBRID mode)...');
+        console.log(`[MODEL_ROUTER] Local Models: ${LOCAL_MODELS.general}`);
+
+        // Verify Ollama connection
+        try {
+            const ollamaUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+            const response = await fetch(`${ollamaUrl}/api/tags`);
+            if (response.ok) {
+                console.log('[MODEL_ROUTER] ✅ Ollama connected');
+            } else {
+                console.warn('[MODEL_ROUTER] ⚠️ Ollama responding but error code', response.status);
+            }
+        } catch (e) {
+            console.warn('[MODEL_ROUTER] ⚠️ Ollama not detected. Falling back to Cloud-only.');
+            this.preferLocal = false;
+        }
 
         this.initialized = true;
         return true;
@@ -46,18 +63,29 @@ class ModelRouter {
     /**
      * Route to optimal model based on task
      * @param {string} domain - Task type (code, security, general, fast)
-     * @param {boolean} forceLocal - IGNORED in Cloud Only mode
-     * @param {boolean} forceCloud - Always true
+     * @param {boolean} forceLocal - Use local model if available
+     * @param {boolean} forceCloud - Force cloud usage
      * @returns {Object} - { model, isLocal, provider }
      */
-    async routeToModel(domain = 'general', forceLocal = false, forceCloud = true) {
+    async routeToModel(domain = 'general', forceLocal = false, forceCloud = false) {
         const normalizedDomain = domain.toLowerCase();
+
+        // 1. Force Local OR Prefer Local (if not forcing cloud)
+        if ((forceLocal || this.preferLocal) && !forceCloud) {
+            let model = LOCAL_MODELS.general;
+            if (normalizedDomain.includes('code') || normalizedDomain.includes('dev')) model = LOCAL_MODELS.code;
+            if (normalizedDomain.includes('embed')) return { model: LOCAL_MODELS.embedding, provider: 'ollama', isLocal: true };
+
+            return { model: model, provider: 'ollama', isLocal: true };
+        }
 
         // Check available API keys
         const hasGroq = !!process.env.GROQ_API_KEY;
         const hasGemini = !!process.env.GEMINI_API_KEY;
         const hasOpenAI = !!process.env.OPENAI_API_KEY;
         const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
+
+        console.log(`[ROUTER] Routing to Cloud for ${domain} (Local=${forceLocal}, Cloud=${forceCloud})`);
 
         // Default to Gemini Flash if available (Good balance)
         // Then Groq (Fast)
@@ -86,12 +114,11 @@ class ModelRouter {
         if (hasAnthropic) return { model: 'claude-3-opus-20240229', provider: 'claude', isLocal: false };
 
         // Fallback / No Keys
-        console.warn('[MODEL_ROUTER] ⚠️ No Cloud API Keys found! Defaulting to Mock/Error');
+        console.warn('[MODEL_ROUTER] ⚠️ No Cloud API Keys found! Fallback to Local.');
         return {
-            model: 'error-no-keys',
-            isLocal: false,
-            provider: 'error',
-            error: 'No Cloud API Keys configured'
+            model: LOCAL_MODELS.general,
+            provider: 'ollama',
+            isLocal: true
         };
     }
 

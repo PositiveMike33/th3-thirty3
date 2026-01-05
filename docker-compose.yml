@@ -19,9 +19,11 @@ services:
       - GROQ_API_KEY=${GROQ_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
     volumes:
       - ./server/data:/app/data  # Persist model metrics and settings
       - ./server/.env:/app/.env:ro  # Mount environment file
+      - ./server/credentials.json:/app/credentials.json  # Mount Google Credentials
     networks:
       - th3-network
     restart: unless-stopped

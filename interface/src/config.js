@@ -10,19 +10,24 @@
 const FORCE_PRODUCTION = false;
 
 // Détection automatique du mode (Vite uses import.meta.env)
-const IS_PRODUCTION = FORCE_PRODUCTION ||
+const IS_LOCALHOST = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const IS_PRODUCTION = !IS_LOCALHOST && (
+    FORCE_PRODUCTION ||
     import.meta.env.MODE === 'production' ||
     import.meta.env.PROD === true ||
-    (typeof window !== 'undefined' && window.location.hostname === 'nexus33.io');
+    (typeof window !== 'undefined' && window.location.hostname === 'nexus33.io')
+);
 
 // Configuration par environnement
 const ENVIRONMENTS = {
     development: {
-        API_URL: 'http://localhost:3001',
+        API_URL: 'http://localhost:3000',
         FRONTEND_URL: 'http://localhost:5173',
         OLLAMA_URL: 'http://localhost:11434',
-        ANYTHINGLLM_URL: 'http://localhost:3002',
-        WS_URL: 'ws://localhost:3001',
+        ANYTHINGLLM_URL: 'http://localhost:3001', // AnythingLLM usually 3001
+        WS_URL: 'ws://localhost:3000',
         DOMAIN: 'localhost'
     },
     production: {
