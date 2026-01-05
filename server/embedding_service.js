@@ -14,7 +14,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 class EmbeddingService {
     constructor() {
-        this.ollama = new Ollama({ host: 'http://localhost:11434' });
+        const ollamaHost = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+        this.ollama = new Ollama({ host: ollamaHost });
         this.gemini = process.env.GEMINI_API_KEY
             ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
             : null;

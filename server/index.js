@@ -1011,38 +1011,14 @@ Je coupe les processus cognitifs. Lib�re ta m�moire vive. Je garde la struct
         const memoryResults = await memoryService.search(message, 3); // Top 3 relevant memories
         if (memoryResults.length > 0) {
             const memoryContext = memoryResults.map(m => m.text).join('\n---\n');
-            messageWithContext += `\n\n[M�MOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tir�es de ta m�moire (notes ou conversations pass�es) :\n${memoryContext}\n[FIN M�MOIRE]\n`;
+            messageWithContext += `\n\n[MMOIRE LONG-TERME (RAG)]\nVoici des informations pertinentes tires de ta mmoire (notes ou conversations passes) :\n${memoryContext}\n[FIN MMOIRE]\n`;
             console.log(`[RAG] Injected ${memoryResults.length} memories.`);
         }
 
-        // 1c. INCIDENT ANALYSIS (Auto-detect VPO context)
-
-        const isIncidentContext = vpoKeywords.some(keyword => message.toLowerCase().includes(keyword));
-
-        let incidentAnalysis = null;
-        if (image && isIncidentContext) {
-            console.log("[CHAT] ?? VPO INCIDENT DETECTED - Analyzing image...");
-            try {
-                // Analyze incident image
-
-
-
-                messageWithContext += `\n\n[ANALYSE VISUELLE INCIDENT]\n${summary}\n[FIN ANALYSE]\n`;
-                console.log("[CHAT] ? Incident analysis injected");
-
-                // If user explicitly asks for 5-Why, generate it
-                if (message.toLowerCase().includes('5 why') || message.toLowerCase().includes('5why') || message.toLowerCase().includes('rapport')) {
-                    console.log("[CHAT] ?? Generating 5-Why report...");
-
-
-
-                    messageWithContext += `\n\n[RAPPORT 5-WHY G�N�R�]\n${report}\n\n[VALIDATION: ${validation.score}/100 - ${validation.recommendation}]\n`;
-                    console.log(`[CHAT] ? 5-Why report generated (Score: ${validation.score})`);
-                }
-            } catch (error) {
-                console.error("[CHAT] Incident analysis failed:", error.message);
-                messageWithContext += `\n\n[NOTE: Tentative d'analyse visuelle �chou�e - ${error.message}]\n`;
-            }
+        // 1c. IMAGE ANALYSIS (Generic - if image provided)
+        if (image) {
+            console.log("[CHAT] 🖼️ Image detected - Generic analysis available");
+            // Generic image analysis can be added here if needed
         }
 
         console.timeEnd("ContextInjection");

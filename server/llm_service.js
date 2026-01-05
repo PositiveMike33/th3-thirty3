@@ -7,7 +7,9 @@ const knowledgeBase = require('./knowledge_base_service');
 
 class LLMService {
     constructor() {
-        this.ollama = new Ollama();
+        const ollamaHost = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+        this.ollama = new Ollama({ host: ollamaHost });
+        console.log(`[LLM_SERVICE] Ollama configured at: ${ollamaHost}`);
         this.socketService = null;
         this.modelMetricsService = null;
         this.anythingLLMWrapper = new AnythingLLMWrapper();

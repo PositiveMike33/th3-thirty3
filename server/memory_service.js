@@ -17,7 +17,8 @@ const crypto = require('crypto');
 
 class MemoryService {
     constructor() {
-        this.ollama = new Ollama(); // Default host: http://127.0.0.1:11434
+        const ollamaHost = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+        this.ollama = new Ollama({ host: ollamaHost });
         this.db = null;
         this.table = null;
         this.tableName = 'memory_store';
