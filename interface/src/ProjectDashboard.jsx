@@ -288,8 +288,8 @@ const ProjectDashboard = () => {
             {/* MAIN CONTENT */}
             <div className="flex flex-col p-4 gap-6">
 
-                {/* SECTION 1: MAPS & INTELLIGENCE (Responsive Height & Layout) */}
-                <div className="flex flex-col lg:flex-row gap-4 w-full" style={{ height: '85dvh', minHeight: '600px' }}>
+                {/* SECTION 1: MAPS & INTELLIGENCE (Fixed 85vh Height) */}
+                <div className="flex flex-col lg:flex-row gap-4 w-full" style={{ height: '85vh' }}>
 
                     {/* AGENT MODAL */}
                     {showAgentModal && (
@@ -367,9 +367,10 @@ const ProjectDashboard = () => {
                     )}
 
                     {/* MAP (Mobile: 100%, Desktop: 80%) */}
+                    {/* ENFORCING HEIGHT: h-full is critical here to fill the 85vh parent */}
                     <div
-                        className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black flex-shrink-0"
-                        style={{ flexBasis: '80%' }}
+                        className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black flex-shrink-0 h-full"
+                        style={{ flex: '0 0 85%', height: '100%' }}
                     >
                         <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
                             <MapIcon size={12} /> GOOGLE MAPS
@@ -402,7 +403,7 @@ const ProjectDashboard = () => {
                         </div>
                         <iframe
                             className="absolute inset-0 w-full h-full"
-                            style={{ border: 0 }}
+                            style={{ border: 0, height: '100%', width: '100%' }}
                             title="Google Maps"
                             allowFullScreen
                             loading="lazy"
@@ -411,9 +412,9 @@ const ProjectDashboard = () => {
                         ></iframe>
                     </div>
 
-                    {/* SIDEBAR (Mobile: Hidden/Stacked, Desktop: Remaining ~20%) */}
+                    {/* SIDEBAR (Desktop: Remaining ~15%) */}
                     <div
-                        className="flex flex-col gap-3 overflow-hidden flex-1 min-w-[250px]"
+                        className="flex flex-col gap-3 overflow-hidden flex-1 min-w-[250px] h-full"
                     >
                         <div className="bg-gray-900/50 border border-cyan-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col h-full">
                             <ModelIntelligenceDashboard />
