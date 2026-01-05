@@ -260,12 +260,9 @@ const ProjectDashboard = () => {
     };
 
     return (
-        <div
-            className="flex flex-col w-full bg-transparent text-cyan-300 overflow-hidden"
-            style={{ height: 'calc(100vh - 130px)' }}
-        >
-            {/* HEADER - Fixed height */}
-            <div className="flex justify-between items-end border-b border-gray-800 p-4 flex-shrink-0">
+        <div className="flex flex-col w-full bg-transparent text-cyan-300 min-h-screen overflow-y-auto">
+            {/* HEADER */}
+            <div className="flex justify-between items-end border-b border-gray-800 p-4 flex-shrink-0 bg-black/50 backdrop-blur sticky top-0 z-50">
                 <div>
                     <h2 className="text-3xl font-bold text-white mb-1">{activeProject ? activeProject.name : "DASHBOARD"}</h2>
                     <p className="text-gray-500 text-sm font-mono">{activeProject ? activeProject.id : "Vue d'ensemble"}</p>
@@ -288,197 +285,158 @@ const ProjectDashboard = () => {
                 </div>
             </div>
 
-            {/* MAIN CONTENT - Takes remaining height */}
-            <div
-                className="flex gap-4 p-4"
-                style={{ height: 'calc(100vh - 200px)' }}
-            >
+            {/* MAIN CONTENT */}
+            <div className="flex flex-col p-4 gap-6">
 
-                {/* AGENT MODAL */}
-                {showAgentModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                        <div className="bg-gray-900 border border-cyan-500 rounded-lg p-6 w-96 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
-                            <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
-                                <Terminal size={20} /> DÉPLOIEMENT AGENT
-                            </h3>
+                {/* SECTION 1: MAPS & INTELLIGENCE (Responsive Height & Layout) */}
+                <div className="flex flex-col lg:flex-row gap-4 w-full" style={{ height: '85dvh', minHeight: '600px' }}>
 
-                            {/* Agent Selector */}
-                            <div className="mb-4">
-                                <label className="text-xs text-gray-500 block mb-1">SÉLECTIONNER L'AGENT (Workspace)</label>
-                                <select
-                                    value={selectedAgent}
-                                    onChange={(e) => setSelectedAgent(e.target.value)}
-                                    className="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white focus:border-cyan-500 outline-none"
-                                >
-                                    <option value="">-- Choisir un Agent --</option>
-                                    {agents.map(agent => (
-                                        <option key={agent.id} value={agent.id}>
-                                            {agent.name.replace('[AGENT] ', '')}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                    {/* AGENT MODAL */}
+                    {showAgentModal && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                            <div className="bg-gray-900 border border-cyan-500 rounded-lg p-6 w-96 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+                                <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
+                                    <Terminal size={20} /> DÉPLOIEMENT AGENT
+                                </h3>
 
-                            {/* Task Input */}
-                            <div className="mb-6">
-                                <label className="text-xs text-gray-500 block mb-1">MISSION</label>
-                                <textarea
-                                    value={agentTask}
-                                    onChange={(e) => setAgentTask(e.target.value)}
-                                    placeholder="Ex: Analyse ce projet et liste les risques..."
-                                    className="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white focus:border-cyan-500 outline-none h-24 resize-none"
-                                />
-                            </div>
+                                {/* Agent Selector */}
+                                <div className="mb-4">
+                                    <label className="text-xs text-gray-500 block mb-1">SÉLECTIONNER L'AGENT (Workspace)</label>
+                                    <select
+                                        value={selectedAgent}
+                                        onChange={(e) => setSelectedAgent(e.target.value)}
+                                        className="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white focus:border-cyan-500 outline-none"
+                                    >
+                                        <option value="">-- Choisir un Agent --</option>
+                                        {agents.map(agent => (
+                                            <option key={agent.id} value={agent.id}>
+                                                {agent.name.replace('[AGENT] ', '')}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                            {/* Actions */}
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowAgentModal(false)}
-                                    className="flex-1 bg-gray-800 text-gray-400 py-2 rounded hover:bg-gray-700 transition-colors"
-                                >
-                                    ANNULER
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        if (!selectedAgent || !agentTask.trim()) return;
+                                {/* Task Input */}
+                                <div className="mb-6">
+                                    <label className="text-xs text-gray-500 block mb-1">MISSION</label>
+                                    <textarea
+                                        value={agentTask}
+                                        onChange={(e) => setAgentTask(e.target.value)}
+                                        placeholder="Ex: Analyse ce projet et liste les risques..."
+                                        className="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white focus:border-cyan-500 outline-none h-24 resize-none"
+                                    />
+                                </div>
 
-                                        // Trigger Agent
-                                        fetch(`${API_URL}/chat`, {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'x-api-key': localStorage.getItem('th3_api_key') || ''
-                                            },
-                                            body: JSON.stringify({
-                                                message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
-                                                provider: 'anythingllm',
-                                                model: selectedAgent // Pass the selected workspace slug
-                                            })
-                                        }).catch(err => console.error("Agent trigger failed", err));
+                                {/* Actions */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowAgentModal(false)}
+                                        className="flex-1 bg-gray-800 text-gray-400 py-2 rounded hover:bg-gray-700 transition-colors"
+                                    >
+                                        ANNULER
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (!selectedAgent || !agentTask.trim()) return;
 
-                                        setShowAgentModal(false);
-                                        setAgentTask("");
-                                        alert("Agent déployé. Vérifiez le moniteur.");
-                                    }}
-                                    className="flex-1 bg-cyan-900 text-cyan-300 border border-cyan-700 py-2 rounded hover:bg-cyan-800 transition-colors font-bold"
-                                >
-                                    EXÉCUTER
-                                </button>
+                                            // Trigger Agent
+                                            fetch(`${API_URL}/chat`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'x-api-key': localStorage.getItem('th3_api_key') || ''
+                                                },
+                                                body: JSON.stringify({
+                                                    message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
+                                                    provider: 'anythingllm',
+                                                    model: selectedAgent // Pass the selected workspace slug
+                                                })
+                                            }).catch(err => console.error("Agent trigger failed", err));
+
+                                            setShowAgentModal(false);
+                                            setAgentTask("");
+                                            alert("Agent déployé. Vérifiez le moniteur.");
+                                        }}
+                                        className="flex-1 bg-cyan-900 text-cyan-300 border border-cyan-700 py-2 rounded hover:bg-cyan-800 transition-colors font-bold"
+                                    >
+                                        EXÉCUTER
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* MAPS (75% Width) - With Street View & Aerial View */}
-                <div
-                    className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black"
-                    style={{ width: '75%', height: '100%' }}
-                >
-                    <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
-                        <MapIcon size={12} /> GOOGLE MAPS
+                    {/* MAP (Mobile: 100%, Desktop: 80%) */}
+                    <div
+                        className="bg-gray-900/50 border border-gray-800 rounded-lg relative group overflow-hidden shadow-2xl shadow-black flex-shrink-0"
+                        style={{ flexBasis: '80%' }}
+                    >
+                        <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10 flex items-center gap-2 border border-gray-700">
+                            <MapIcon size={12} /> GOOGLE MAPS
+                        </div>
+                        <div className="absolute top-2 right-2 z-10 flex gap-2">
+                            <button
+                                onClick={() => {
+                                    window.open('https://www.google.com/maps/@45.5017,-73.5673,3a,75y,90t/data=!3m6!1e1!3m4!1s0x4cc91a541c64b70d:0x654e3138211fefef!2e0!4b1', '_blank');
+                                }}
+                                className="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded border border-green-500 shadow-lg"
+                            >
+                                🚶 Street View
+                            </button>
+                            <button
+                                onClick={() => {
+                                    window.open('https://www.google.com/maps/@45.5576996,-73.711873,5000m/data=!3m1!1e3', '_blank');
+                                }}
+                                className="bg-purple-600 hover:bg-purple-500 text-white text-xs px-2 py-1 rounded border border-purple-500 shadow-lg"
+                            >
+                                🛰️ Vue Aérienne
+                            </button>
+                            <button
+                                onClick={() => {
+                                    window.open('https://www.google.com/maps/@45.5576996,-73.711873,12z', '_blank');
+                                }}
+                                className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1 rounded border border-blue-500 shadow-lg"
+                            >
+                                🗺️ Ouvrir Maps
+                            </button>
+                        </div>
+                        <iframe
+                            className="absolute inset-0 w-full h-full"
+                            style={{ border: 0 }}
+                            title="Google Maps"
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed/v1/view?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&center=45.5576996,-73.711873&zoom=12&maptype=satellite"
+                        ></iframe>
                     </div>
-                    <div className="absolute top-2 right-2 z-10 flex gap-2">
-                        <button
-                            onClick={() => {
-                                // Open Street View
-                                window.open('https://www.google.com/maps/@45.5017,-73.5673,3a,75y,90t/data=!3m6!1e1!3m4!1s0x4cc91a541c64b70d:0x654e3138211fefef!2e0!4b1', '_blank');
-                            }}
-                            className="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded border border-green-500"
-                        >
-                            🚶 Street View
-                        </button>
-                        <button
-                            onClick={() => {
-                                // Open Satellite/Aerial View
-                                window.open('https://www.google.com/maps/@45.5576996,-73.711873,5000m/data=!3m1!1e3', '_blank');
-                            }}
-                            className="bg-purple-600 hover:bg-purple-500 text-white text-xs px-2 py-1 rounded border border-purple-500"
-                        >
-                            🛰️ Vue Aérienne
-                        </button>
-                        <button
-                            onClick={() => {
-                                window.open('https://www.google.com/maps/@45.5576996,-73.711873,12z', '_blank');
-                            }}
-                            className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1 rounded border border-blue-500"
-                        >
-                            🗺️ Ouvrir Maps
-                        </button>
+
+                    {/* SIDEBAR (Mobile: Hidden/Stacked, Desktop: Remaining ~20%) */}
+                    <div
+                        className="flex flex-col gap-3 overflow-hidden flex-1 min-w-[250px]"
+                    >
+                        <div className="bg-gray-900/50 border border-cyan-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col h-full">
+                            <ModelIntelligenceDashboard />
+                        </div>
                     </div>
-                    <iframe
-                        className="absolute inset-0 w-full h-full"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed/v1/view?key=AIzaSyCfzSECuzTC4kKTmwJeW_OskxxtNYF35IU&center=45.5576996,-73.711873&zoom=12&maptype=satellite"
-                    ></iframe>
                 </div>
 
-                {/* RIGHT SIDEBAR - Model Progress + Google Widgets (25% Width) */}
-                <div
-                    className="flex flex-col gap-3 overflow-hidden"
-                    style={{ width: '25%', height: '100%' }}
-                >
-
-                    {/* MODEL INTELLIGENCE DASHBOARD - Main Feature */}
-                    <div className="bg-gray-900/50 border border-cyan-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col min-h-[300px]">
-                        <ModelIntelligenceDashboard />
-                    </div>
-
-                    {/* CALENDAR - Compact */}
-                    <div className="bg-gray-900/50 border border-purple-900/50 rounded-lg p-3 backdrop-blur overflow-hidden flex flex-col max-h-[150px]">
-                        <div className="flex items-center gap-2 mb-2 text-purple-400 shrink-0">
-                            <Calendar size={14} />
-                            <h3 className="font-bold text-xs tracking-wider">AGENDA</h3>
-                            <span className="ml-auto text-xs text-gray-500">{googleData.events.length}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-900 flex-1">
-                            {googleData.events.length > 0 ? googleData.events.slice(0, 3).map((e, i) => (
-                                <div key={i} className="text-xs bg-black/40 p-2 rounded border-l-2 border-purple-500">
-                                    <div className="font-bold text-gray-300 truncate">{e.summary}</div>
-                                    <div className="text-gray-500 text-xs">{new Date(e.start.dateTime || e.start.date).toLocaleDateString()}</div>
-                                </div>
-                            )) : <div className="text-xs text-gray-500 italic">Rien de prévu.</div>}
-                        </div>
-                    </div>
-
-                    {/* EMAILS - Compact */}
-                    <div className="bg-gray-900/50 border border-red-900/50 rounded-lg p-3 backdrop-blur overflow-hidden flex flex-col max-h-[150px]">
-                        <div className="flex items-center gap-2 mb-2 text-red-400 shrink-0">
-                            <Mail size={14} />
-                            <h3 className="font-bold text-xs tracking-wider">GMAIL</h3>
-                            <span className="ml-auto text-xs text-gray-500">{googleData.emails.length}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-red-900 flex-1">
-                            {googleData.emails.length > 0 ? googleData.emails.slice(0, 3).map((e, i) => (
-                                <div key={i} className="text-xs bg-black/40 p-1.5 rounded border border-gray-800 hover:border-red-900 transition-colors">
-                                    <div className="font-bold text-gray-200 truncate text-xs">{e.from}</div>
-                                    <div className="text-gray-400 truncate text-xs">{e.subject}</div>
-                                </div>
-                            )) : <div className="text-xs text-gray-500 italic">Boîte vide.</div>}
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* KANBAN BOARD (Bottom Full Width) */}
+                {/* SECTION 2: KANBAN (Below the map fold) */}
                 {
                     activeProject ? (
-                        <div className="col-span-12 grid grid-cols-3 gap-4 h-fit">
+                        <div className="grid grid-cols-3 gap-4 min-h-[300px] mb-10">
                             {renderColumn("À FAIRE", 'todo', <Circle size={16} className="text-gray-500" />)}
                             {renderColumn("EN COURS", 'in-progress', <Loader size={16} className="text-blue-500 animate-spin-slow" />)}
                             {renderColumn("TERMINÉ", 'done', <CheckCircle size={16} className="text-green-500" />)}
                         </div>
                     ) : (
-                        <div className="col-span-12 flex flex-col items-center justify-center text-gray-600 border border-dashed border-gray-800 rounded-lg min-h-[200px]">
-                            <Briefcase size={48} className="mb-4 opacity-20" />
-                            <p>Sélectionnez un projet pour voir les tâches.</p>
+                        <div className="flex flex-col items-center justify-center text-gray-600 border border-dashed border-gray-800 rounded-lg min-h-[100px] mb-10">
+                            <Briefcase size={24} className="mb-2 opacity-20" />
+                            <p className="text-sm">Sélectionnez un projet.</p>
                         </div>
                     )
                 }
-
-            </div >
+            </div>
         </div >
     );
 };

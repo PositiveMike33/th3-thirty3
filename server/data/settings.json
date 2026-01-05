@@ -1,7 +1,7 @@
 {
   "darkMode": true,
   "autoCorrect": true,
-  "computeMode": "local",
+  "computeMode": "cloud",
   "reflectionMode": "think",
   "socials": {
     "facebook": false,

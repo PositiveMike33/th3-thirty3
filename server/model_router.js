@@ -4,11 +4,13 @@
  */
 
 // Local Ollama Models (User Requested)
+// Local Ollama Models (User Requested)
 const LOCAL_MODELS = {
     code: 'granite4:latest',      // IBM Granite 4.0 (?) - Code/General
     general: 'granite4:latest',   // IBM Granite 4.0
     fast: 'granite4:latest',      // Fast enough for general use
-    embedding: 'mxbai-embed-large:latest' // State-of-the-art embedding
+    embedding: 'mxbai-embed-large:latest', // Primary: State-of-the-art
+    fallback_embedding: 'snowflake-arctic-embed:latest' // Fallback: Snowflake
 };
 
 // Cloud providers configuration
@@ -169,8 +171,8 @@ modelRouter.models = {
         fallback: 'gemini-1.5-pro'
     },
     embedding: {
-        primary: 'text-embedding-3-small',
-        fallback: 'text-embedding-004'
+        primary: 'mxbai-embed-large:latest',
+        fallback: 'snowflake-arctic-embed:latest'
     }
 };
 

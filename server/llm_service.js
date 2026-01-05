@@ -4,6 +4,7 @@ const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
 const AnythingLLMWrapper = require('./anythingllm_wrapper');
 const knowledgeBase = require('./knowledge_base_service');
+const { hackerGPTService } = require('./hackergpt_persona');
 
 class LLMService {
     constructor() {
@@ -158,6 +159,30 @@ class LLMService {
             }
         }
 
+        // --- ALWAYS AVAILABLE SERVICES (regardless of computeMode) ---
+
+        // AnythingLLM - Always show if configured
+        if (process.env.ANYTHING_LLM_URL && process.env.ANYTHING_LLM_KEY) {
+            // Add a default AnythingLLM entry if no workspaces were fetched
+            const hasAnythingLLM = models.cloud.some(m => m.provider === 'anythingllm');
+            if (!hasAnythingLLM) {
+                models.cloud.push({
+                    id: 'anythingllm-default',
+                    name: '🤖 AnythingLLM Agent',
+                    provider: 'anythingllm'
+                });
+            }
+        }
+
+        // HackerGPT - Always show if token is configured
+        if (process.env.HACKERGPT_TOKEN) {
+            models.cloud.push({
+                id: 'hackergpt',
+                name: '🔓 HackerGPT (Security)',
+                provider: 'hackergpt'
+            });
+        }
+
         return models;
     }
 
@@ -256,6 +281,9 @@ class LLMService {
                     break;
                 case 'lmstudio':
                     response = await this.generateLMStudioResponse(augmentedPrompt, modelId, systemPrompt);
+                    break;
+                case 'hackergpt':
+                    response = await this.generateHackerGPTResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'local':
                 default:
@@ -453,6 +481,42 @@ class LLMService {
 
     setMCPService(mcpService) {
         this.mcpService = mcpService;
+    }
+
+    /**
+     * Generate response using HackerGPT persona
+     * Uses the HackerGPT security expert system prompt with local Ollama
+     */
+    async generateHackerGPTResponse(prompt, modelId, userSystemPrompt) {
+        console.log('[HACKERGPT] Generating security-focused response...');
+
+        // Get the HackerGPT security expert system prompt
+        const hackerGPTPrompt = hackerGPTService.getSystemPrompt();
+
+        // Combine with any user-provided system prompt
+        const fullSystemPrompt = userSystemPrompt
+            ? `${hackerGPTPrompt}\n\n--- Additional Instructions ---\n${userSystemPrompt}`
+            : hackerGPTPrompt;
+
+        // Use the local Ollama model (granite4 is the best for code/security tasks)
+        const targetModel = 'granite4:latest';
+
+        try {
+            const response = await this.ollama.chat({
+                model: targetModel,
+                messages: [
+                    { role: 'system', content: fullSystemPrompt },
+                    { role: 'user', content: prompt }
+                ]
+            });
+
+            console.log('[HACKERGPT] Response generated successfully');
+            return response.message.content;
+        } catch (error) {
+            console.error('[HACKERGPT] Error:', error.message);
+            // Fallback: If granite4 is not available, try any available Ollama model
+            throw new Error(`HackerGPT Error: ${error.message}. Ensure Ollama is running with granite4:latest model.`);
+        }
     }
 
 
