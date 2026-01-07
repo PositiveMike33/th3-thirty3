@@ -18,10 +18,13 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - TF_FORCE_GPU_ALLOW_GROWTH=true
+      - TF_GPU_ALLOCATOR=cuda_malloc_async
       - TRAINING_MODE=manual
       - TF_CPP_MIN_LOG_LEVEL=2
       - OLLAMA_URL=http://host.docker.internal:11434
       - SERVER_URL=http://host.docker.internal:3000
+      - GENERATION_MODEL=granite4:latest
+      - EMBEDDING_MODEL=mxbai-embed-large:latest
     volumes:
       - ./gpu_training:/app
       - ./server/data:/app/server_data

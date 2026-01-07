@@ -226,6 +226,116 @@ class SecurityDatasets:
             }
         ]
     
+    def get_cloud_security_scenarios(self) -> List[Dict[str, Any]]:
+        """Get Cloud Security (AWS/Azure/GCP) training data."""
+        return [
+            {
+                'category': 'cloud_misconfig',
+                'platform': 'AWS',
+                'issue': 'S3 Bucket Public Access',
+                'detection': 'aws s3api get-bucket-acl --bucket target',
+                'remediation': 'Enable "Block Public Access" at bucket or account level',
+                'severity': 'critical'
+            },
+            {
+                'category': 'cloud_iam',
+                'platform': 'AWS',
+                'issue': 'IAM Privilege Escalation',
+                'technique': 'iam:CreatePolicyVersion',
+                'description': 'User can set default policy version to a new permissive one',
+                'tool': 'Pacu'
+            },
+            {
+                'category': 'cloud_azure',
+                'platform': 'Azure',
+                'issue': 'Azure AD Guest User Enumeration',
+                'technique': 'Guessing valid emails via login prompts',
+                'remediation': 'Disable "Member can invite" and "Guest user access restrictions"'
+            },
+            {
+                'category': 'cloud_container',
+                'platform': 'Kubernetes',
+                'issue': 'Privileged Pod Container',
+                'detection': 'kubectl get pods -o jsonpath="{.items[*].spec.containers[*].securityContext.privileged}"',
+                'risk': 'Container escape to host node'
+            }
+        ]
+
+    def get_wireless_attacks(self) -> List[Dict[str, Any]]:
+        """Get Wireless Network attack scenarios."""
+        return [
+            {
+                'technique': 'WPA2 Handshake Capture',
+                'tools': ['airodump-ng', 'aireplay-ng'],
+                'command_sequence': [
+                    'airmon-ng start wlan0',
+                    'airodump-ng --bssid TARGET -c CHANNEL -w capture wlan0mon',
+                    'aireplay-ng -0 10 -a TARGET wlan0mon'
+                ],
+                'goal': 'Capture EAPOL 4-way handshake for cracking'
+            },
+            {
+                'technique': 'Evil Twin AP',
+                'tools': ['hostapd', 'dnsmasq', 'wifi-pumpkin'],
+                'description': 'Create rogue AP with same SSID to intercept credentials',
+                'defense': 'Use WPA3-Enterprise, VPN, Certificate pinning'
+            },
+            {
+                'technique': 'Bluetooth Low Energy (BLE) Spoofing',
+                'tools': ['hcitool', 'gatttool', 'bleah'],
+                'risk': 'IoT device hijacking'
+            }
+        ]
+
+    def get_mobile_security(self) -> List[Dict[str, Any]]:
+        """Get Mobile Application Security data."""
+        return [
+            {
+                'platform': 'Android',
+                'vulnerability': 'Insecure Intent',
+                'tool': 'drozer',
+                'command': 'run app.activity.start --component com.example .VulnerableActivity',
+                'risk': 'Bypass authentication, access protected components'
+            },
+            {
+                'platform': 'iOS',
+                'vulnerability': 'Insecure Data Storage',
+                'check': 'Analyze Plist files and NSUserDefaults for plain text secrets',
+                'tool': 'objection'
+            },
+            {
+                'technique': 'Frida Hooking',
+                'description': 'Dynamic instrumentation to bypass SSL pinning',
+                'code_snippet': 'Java.perform(function() { ... })'
+            }
+        ]
+
+    def get_advanced_ad_attacks(self) -> List[Dict[str, Any]]:
+        """Get Advanced Active Directory attack vectors."""
+        return [
+            {
+                'attack': 'Kerberoasting',
+                'description': 'Request TGS for services with SPN to crack offline',
+                'tools': ['Rubeus', 'GetUserSPNs.py'],
+                'detection': 'Monitor Event ID 4769 with RC4 encryption'
+            },
+            {
+                'attack': 'AS-REP Roasting',
+                'description': 'Target users with "Do not require Kerberos pre-authentication"',
+                'remediation': 'Enforce pre-auth for all users'
+            },
+            {
+                'attack': 'Golden Ticket',
+                'description': 'Forge TGT using krbtgt hash for unlimited persistence',
+                'impact': 'Complete domain compromise'
+            },
+            {
+                'attack': 'DCSync',
+                'description': 'Simulate Domain Controller to replicate password hashes',
+                'privilege_needed': 'Replicating Directory Changes'
+            }
+        ]
+
     def get_defense_strategies(self) -> List[Dict[str, Any]]:
         """Get defense strategy training data."""
         return [
@@ -324,7 +434,11 @@ class SecurityDatasets:
             'pentesting': self.get_pentesting_techniques(),
             'osint': self.get_osint_techniques(),
             'defense': self.get_defense_strategies(),
-            'cves': self.get_cve_training_data()
+            'cves': self.get_cve_training_data(),
+            'cloud': self.get_cloud_security_scenarios(),
+            'wireless': self.get_wireless_attacks(),
+            'mobile': self.get_mobile_security(),
+            'active_directory': self.get_advanced_ad_attacks()
         }
 
 
@@ -338,3 +452,7 @@ if __name__ == '__main__':
     print(f"OSINT techniques: {len(all_data['osint'])}")
     print(f"Defense strategies: {len(all_data['defense'])}")
     print(f"CVE data: {len(all_data['cves'])}")
+    print(f"Cloud scenarios: {len(all_data['cloud'])}")
+    print(f"Wireless attacks: {len(all_data['wireless'])}")
+    print(f"Mobile security: {len(all_data['mobile'])}")
+    print(f"Active Directory: {len(all_data['active_directory'])}")

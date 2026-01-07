@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from './config';
+import DartAI from './DartAI';
 
 const CyberTrainingPage = () => {
   const [selectedModule, setSelectedModule] = useState('recon');
   const [terminalOutput, setTerminalOutput] = useState('> Agent prêt pour entraînement...\n');
   const [isTraining, setIsTraining] = useState(false);
   const [agentResponse, setAgentResponse] = useState('');
-  
+
   // Aikido Security State
   const [aikidoData, setAikidoData] = useState(null);
   const [aikidoLoading, setAikidoLoading] = useState(false);
@@ -165,7 +166,7 @@ const CyberTrainingPage = () => {
 
   const executeCommand = async (cmd) => {
     setTerminalOutput(prev => prev + `\n$ ${cmd}\n`);
-    
+
     try {
       const response = await fetch(`${API_URL}/api/cyber-training/explain`, {
         method: 'POST',
@@ -211,11 +212,10 @@ const CyberTrainingPage = () => {
               <button
                 key={key}
                 onClick={() => setSelectedModule(key)}
-                className={`w-full p-4 rounded-xl border transition-all duration-300 text-left ${
-                  selectedModule === key 
-                    ? `bg-gradient-to-r ${mod.color} border-white/30 shadow-lg shadow-${mod.color.split('-')[1]}-500/30` 
-                    : 'bg-gray-800/50 border-gray-700 hover:border-gray-500'
-                }`}
+                className={`w-full p-4 rounded-xl border transition-all duration-300 text-left ${selectedModule === key
+                  ? `bg-gradient-to-r ${mod.color} border-white/30 shadow-lg shadow-${mod.color.split('-')[1]}-500/30`
+                  : 'bg-gray-800/50 border-gray-700 hover:border-gray-500'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{mod.icon}</span>
@@ -234,7 +234,7 @@ const CyberTrainingPage = () => {
               <span className="text-2xl">{modules[selectedModule].icon}</span>
               {modules[selectedModule].title}
             </h3>
-            
+
             {/* Aikido Security Dashboard */}
             {selectedModule === 'aikido' ? (
               <div className="space-y-4">
@@ -244,14 +244,14 @@ const CyberTrainingPage = () => {
                     <p className="text-gray-400">Chargement des données Aikido...</p>
                   </div>
                 )}
-                
+
                 {aikidoError && (
                   <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4">
                     <p className="text-red-400 text-sm">⚠️ {aikidoError}</p>
                     <p className="text-gray-500 text-xs mt-2">
                       Vérifiez vos credentials dans .env (AIKIDO_CLIENT_ID et AIKIDO_CLIENT_SECRET)
                     </p>
-                    <button 
+                    <button
                       onClick={loadAikidoData}
                       className="mt-3 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm"
                     >
@@ -259,7 +259,7 @@ const CyberTrainingPage = () => {
                     </button>
                   </div>
                 )}
-                
+
                 {aikidoData && !aikidoLoading && (
                   <>
                     {/* Workspace Info */}
@@ -268,7 +268,7 @@ const CyberTrainingPage = () => {
                       <p className="text-white font-bold">{aikidoData.workspace}</p>
                       <p className="text-gray-500 text-xs mt-1">{aikidoData.repoCount} repos scannés</p>
                     </div>
-                    
+
                     {/* Security Stats */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-red-900/30 rounded-lg p-3 border border-red-500/30 text-center">
@@ -288,13 +288,13 @@ const CyberTrainingPage = () => {
                         <p className="text-xs text-gray-400">Low</p>
                       </div>
                     </div>
-                    
+
                     {/* Total */}
                     <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-lg p-4 border border-purple-500/30 text-center">
                       <p className="text-4xl font-bold text-white">{aikidoData.stats.total}</p>
                       <p className="text-purple-400">Issues de sécurité détectés</p>
                     </div>
-                    
+
                     {/* Recent Issues */}
                     {aikidoData.recentIssues?.length > 0 && (
                       <div className="space-y-2">
@@ -309,7 +309,7 @@ const CyberTrainingPage = () => {
                     )}
                   </>
                 )}
-                
+
                 <button
                   onClick={loadAikidoData}
                   disabled={aikidoLoading}
@@ -317,10 +317,10 @@ const CyberTrainingPage = () => {
                 >
                   {aikidoLoading ? '⏳ Chargement...' : '🔄 Actualiser les données'}
                 </button>
-                
-                <a 
-                  href="https://app.aikido.dev" 
-                  target="_blank" 
+
+                <a
+                  href="https://app.aikido.dev"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full text-center py-2 text-purple-400 hover:text-purple-300 text-sm"
                 >
@@ -332,7 +332,7 @@ const CyberTrainingPage = () => {
               <>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {modules[selectedModule].commands?.map((cmd, i) => (
-                    <div 
+                    <div
                       key={i}
                       className="bg-gray-900/80 border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 transition-all cursor-pointer group"
                       onClick={() => executeCommand(cmd.cmd)}
@@ -348,11 +348,10 @@ const CyberTrainingPage = () => {
                 <button
                   onClick={() => trainAgent(selectedModule)}
                   disabled={isTraining}
-                  className={`w-full mt-6 py-3 rounded-lg font-bold text-white transition-all ${
-                    isTraining 
-                      ? 'bg-gray-600 cursor-not-allowed' 
-                      : `bg-gradient-to-r ${modules[selectedModule].color} hover:shadow-lg hover:scale-105`
-                  }`}
+                  className={`w-full mt-6 py-3 rounded-lg font-bold text-white transition-all ${isTraining
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : `bg-gradient-to-r ${modules[selectedModule].color} hover:shadow-lg hover:scale-105`
+                    }`}
                 >
                   {isTraining ? '⏳ Entraînement en cours...' : `🎯 Entraîner l'Agent sur ${modules[selectedModule].title}`}
                 </button>
@@ -424,6 +423,46 @@ const CyberTrainingPage = () => {
                 <li>• EternalBlue</li>
                 <li>• reverse shells</li>
               </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Random Training Button */}
+        <div className="mt-6 mb-8 text-center">
+          <button
+            onClick={() => {
+              const categories = ['cloud', 'mobile', 'wireless', 'active_directory', 'vulnerabilities', 'pentesting', 'defense'];
+              const randomCat = categories[Math.floor(Math.random() * categories.length)];
+              // Use the custom backend API for GPU training if available, or fallback to standard
+              // Here we trigger the GPU trainer specifically as requested
+              fetch(`${API_URL}/api/train/start`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category: randomCat, iterations: 1 })
+              })
+                .then(res => res.json())
+                .then(data => {
+                  setTerminalOutput(prev => prev + `\n🎲 Random Session Started: ${randomCat}\n> Job ID: ${data.job_id}\n`);
+                })
+                .catch(err => setTerminalOutput(prev => prev + `\n❌ Error starting random session: ${err}\n`));
+            }}
+            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-full font-bold text-white shadow-lg transform hover:scale-105 transition-all flex items-center gap-3 mx-auto"
+          >
+            <span className="text-2xl">🎲</span>
+            TRAIN RANDOM AI AGENT SESSION
+          </button>
+          <p className="text-gray-500 text-sm mt-2">Lancer une session imprévue pour tester l'adaptabilité de Granite & Dart</p>
+        </div>
+
+        {/* Dart AI Integration Section */}
+        <div className="mt-12 pt-8 border-t border-gray-800">
+          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 mb-6 flex items-center gap-3">
+            <span className="text-3xl">🧠</span>
+            Dart AI Interface (Live Interaction)
+          </h2>
+          <div className="h-[800px] border border-gray-700 rounded-2xl overflow-hidden shadow-2xl bg-black/50 backdrop-blur-sm relative">
+            <div className="absolute inset-0 overflow-auto">
+              <DartAI />
             </div>
           </div>
         </div>
