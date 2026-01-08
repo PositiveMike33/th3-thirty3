@@ -1,9 +1,9 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
-import { 
-    Activity, Brain, TrendingUp, RefreshCw, 
+import {
+    Activity, Brain, TrendingUp, RefreshCw,
     Zap, Clock, Target, Award, AlertTriangle, Cloud, Monitor, MessageCircle, Send
 } from 'lucide-react';
-import { 
+import {
     RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar, Legend
@@ -72,6 +72,27 @@ const isEmbeddingModel = (modelName) => {
     return embeddingKeywords.some(keyword => modelName.toLowerCase().includes(keyword));
 };
 
+// Helper: Strict filter for allowed models in training dashboard
+// Helper: Strict filter for allowed models in training dashboard
+const isAllowedModel = (modelName) => {
+    const lowerName = modelName.toLowerCase();
+
+    // 1. Granite4 (Exact match or variants)
+    if (lowerName.includes('granite4')) return true;
+
+    // 2. HackerGPT
+    if (lowerName.includes('hackergpt')) return true;
+
+    // 3. AnythingLLM (Strict Filter)
+    // Only allow the main workspace 'th3-thirty3' or the generic default
+    // This blocks keys like "[ANYTHINGLLM] gpt-4o", "[ANYTHINGLLM] team-xxx"
+    if (lowerName.includes('anythingllm')) {
+        return lowerName.includes('th3-thirty3') || lowerName.includes('default');
+    }
+
+    return false;
+};
+
 const OllamaTrainingDashboard = () => {
     const [metrics, setMetrics] = useState({});
     const [loading, setLoading] = useState(true);
@@ -82,7 +103,7 @@ const OllamaTrainingDashboard = () => {
     const [selectedModels, setSelectedModels] = useState([]);
     const [availableModels, setAvailableModels] = useState({ local: [], cloud: [] });
     const [benchmarkModel, setBenchmarkModel] = useState('');
-    
+
     // LLM Commentary state
     const [commentary, setCommentary] = useState(null);
     const [recentCommentaries, setRecentCommentaries] = useState([]);
@@ -93,12 +114,21 @@ const OllamaTrainingDashboard = () => {
         try {
             const res = await fetch(`${API_URL}/models/metrics`);
             const data = await res.json();
-            setMetrics(data);
+
+            // Filter metrics to only keep allowed models
+            const filteredData = Object.keys(data)
+                .filter(key => isAllowedModel(key))
+                .reduce((obj, key) => {
+                    obj[key] = data[key];
+                    return obj;
+                }, {});
+
+            setMetrics(filteredData);
             setLastUpdate(new Date());
-            
-            // Auto-select first model if none selected
-            if (!selectedModel && Object.keys(data).length > 0) {
-                setSelectedModel(Object.keys(data)[0]);
+
+            // Auto-select first model if none selected or if selected one is now hidden
+            if ((!selectedModel || !filteredData[selectedModel]) && Object.keys(filteredData).length > 0) {
+                setSelectedModel(Object.keys(filteredData)[0]);
             }
         } catch (error) {
             console.error('Failed to fetch metrics:', error);
@@ -113,18 +143,21 @@ const OllamaTrainingDashboard = () => {
         const interval = setInterval(fetchMetrics, 5000);
         return () => clearInterval(interval);
     }, [fetchMetrics]);
-    
+
     // Fetch ALL Ollama models ONCE on mount (for benchmark selector)
+    // Filtered to show only allowed models as per user request
     useEffect(() => {
         fetch(`${OLLAMA_URL}/api/tags`)
             .then(res => res.json())
             .then(data => {
-                const ollamaModels = (data.models || []).map(m => m.name);
+                const ollamaModels = (data.models || [])
+                    .map(m => m.name)
+                    .filter(name => isAllowedModel(name)); // Apply strict filter
                 setAvailableModels({ local: ollamaModels, cloud: [] });
             })
             .catch(err => console.error('Failed to load Ollama models:', err));
     }, []); // Empty dependency = run once on mount
-    
+
     // Fetch existing commentaries ONCE on mount
     useEffect(() => {
         fetch(`${API_URL}/training/commentary`)
@@ -178,18 +211,18 @@ const OllamaTrainingDashboard = () => {
 
     // Toggle model in comparison selection
     const toggleCompareModel = (name) => {
-        setSelectedModels(prev => 
-            prev.includes(name) 
+        setSelectedModels(prev =>
+            prev.includes(name)
                 ? prev.filter(m => m !== name)
                 : [...prev, name]
         );
     };
 
-    const modelNames = Object.keys(metrics).filter(name => !isEmbeddingModel(name));
+    const modelNames = Object.keys(metrics); // Already filtered in fetchMetrics
     const currentModel = selectedModel ? metrics[selectedModel] : null;
 
     // Prepare radar chart data - with null safety
-    const radarData = (currentModel && currentModel.expertise) ? 
+    const radarData = (currentModel && currentModel.expertise) ?
         Object.entries(currentModel.expertise)
             .filter(([, value]) => value !== null && value !== undefined)
             .map(([key, value]) => ({
@@ -233,17 +266,16 @@ const OllamaTrainingDashboard = () => {
                     <div className="text-xs text-gray-500">
                         Dernie�re MAJ: {lastUpdate?.toLocaleTimeString('fr-CA')}
                     </div>
-                    <button 
+                    <button
                         onClick={() => setCompareMode(!compareMode)}
-                        className={`px-3 py-1.5 text-xs rounded border transition-colors ${
-                            compareMode 
-                                ? 'bg-purple-900/50 border-purple-500 text-purple-300'
-                                : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-purple-500'
-                        }`}
+                        className={`px-3 py-1.5 text-xs rounded border transition-colors ${compareMode
+                            ? 'bg-purple-900/50 border-purple-500 text-purple-300'
+                            : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-purple-500'
+                            }`}
                     >
                         {compareMode ? ' Comparaison' : ' Comparer'}
                     </button>
-                    <button 
+                    <button
                         onClick={fetchMetrics}
                         className="p-2 bg-gray-800 border border-gray-700 rounded hover:border-cyan-500 transition-colors"
                     >
@@ -259,7 +291,7 @@ const OllamaTrainingDashboard = () => {
                     Lancer un Benchmark sur n'importe quel mode�le
                 </h3>
                 <div className="flex gap-3 flex-wrap">
-                    <select 
+                    <select
                         value={benchmarkModel}
                         onChange={(e) => setBenchmarkModel(e.target.value)}
                         className="flex-1 min-w-[200px] bg-black border border-gray-700 rounded px-3 py-2 text-sm text-gray-300"
@@ -303,7 +335,7 @@ const OllamaTrainingDashboard = () => {
                     {compareMode && (
                         <div className="mb-6 p-4 bg-gray-900/50 border border-purple-800 rounded-xl">
                             <h3 className="text-sm font-bold text-purple-400 mb-3">
-                                 Comparaison des Mode�les ({selectedModels.length} se�lectionne�s)
+                                Comparaison des Mode�les ({selectedModels.length} se�lectionne�s)
                             </h3>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {modelNames.map(name => {
@@ -311,16 +343,15 @@ const OllamaTrainingDashboard = () => {
                                     const providerInfo = getProviderInfo(name);
                                     const ProviderIcon = providerInfo.Icon;
                                     return (
-                                        <label 
+                                        <label
                                             key={name}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                                isChecked 
-                                                    ? 'bg-purple-900/50 border-purple-500' 
-                                                    : 'bg-gray-800 border-gray-700 hover:border-purple-700'
-                                            }`}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isChecked
+                                                ? 'bg-purple-900/50 border-purple-500'
+                                                : 'bg-gray-800 border-gray-700 hover:border-purple-700'
+                                                }`}
                                         >
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={isChecked}
                                                 onChange={() => toggleCompareModel(name)}
                                                 className="accent-purple-500"
@@ -335,7 +366,7 @@ const OllamaTrainingDashboard = () => {
                             </div>
                             {selectedModels.length > 0 && (
                                 <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart 
+                                    <BarChart
                                         data={selectedModels.map(name => ({
                                             name: name.replace(/^\[[^\]]+\]\s*/, '').split(':')[0],
                                             score: Math.round(metrics[name]?.cognitive?.overallScore || 0),
@@ -345,16 +376,16 @@ const OllamaTrainingDashboard = () => {
                                         margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                        <XAxis 
-                                            dataKey="name" 
-                                            stroke="#666" 
-                                            fontSize={10} 
-                                            angle={-45} 
+                                        <XAxis
+                                            dataKey="name"
+                                            stroke="#666"
+                                            fontSize={10}
+                                            angle={-45}
                                             textAnchor="end"
                                             height={60}
                                         />
                                         <YAxis stroke="#666" fontSize={10} />
-                                        <Tooltip 
+                                        <Tooltip
                                             contentStyle={{ background: '#1a1a2e', border: '1px solid #333' }}
                                         />
                                         <Legend />
@@ -378,11 +409,10 @@ const OllamaTrainingDashboard = () => {
                                 <button
                                     key={name}
                                     onClick={() => setSelectedModel(name)}
-                                    className={`flex-shrink-0 p-3 rounded-lg border transition-all ${
-                                        isSelected 
-                                            ? 'bg-cyan-900/50 border-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.3)]'
-                                            : 'bg-gray-900/50 border-gray-700 hover:border-cyan-700'
-                                    }`}
+                                    className={`flex-shrink-0 p-3 rounded-lg border transition-all ${isSelected
+                                        ? 'bg-cyan-900/50 border-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.3)]'
+                                        : 'bg-gray-900/50 border-gray-700 hover:border-cyan-700'
+                                        }`}
                                 >
                                     <div className="flex items-center gap-2">
                                         <ProviderIcon size={16} className={providerInfo.color} />
@@ -391,10 +421,9 @@ const OllamaTrainingDashboard = () => {
                                         </span>
                                     </div>
                                     <div className="mt-1 flex items-center gap-2">
-                                        <span className={`text-2xl font-bold ${
-                                            calculateOverallScore(model) >= 70 ? 'text-green-400' :
+                                        <span className={`text-2xl font-bold ${calculateOverallScore(model) >= 70 ? 'text-green-400' :
                                             calculateOverallScore(model) >= 50 ? 'text-yellow-400' : 'text-red-400'
-                                        }`}>
+                                            }`}>
                                             {Math.round(calculateOverallScore(model))}
                                         </span>
                                         <span className="text-xs text-gray-500">pts</span>
@@ -429,17 +458,17 @@ const OllamaTrainingDashboard = () => {
                                             {benchmarking ? 'Test en cours...' : ' Lancer Benchmark'}
                                         </button>
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-6">
                                         <div className="text-6xl font-bold text-purple-400">
                                             {Math.round(calculateOverallScore(currentModel))}
                                         </div>
                                         <div className="flex-1">
                                             <div className="h-4 bg-gray-800 rounded-full overflow-hidden">
-                                                <div 
-                                                className="h-full bg-gradient-to-r from-purple-600 to-cyan-500 transition-all duration-500"
-                                                style={{ width: `${calculateOverallScore(currentModel)}%` }}
-                                            />
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-purple-600 to-cyan-500 transition-all duration-500"
+                                                    style={{ width: `${calculateOverallScore(currentModel)}%` }}
+                                                />
                                             </div>
                                             <div className="flex justify-between text-xs text-gray-500 mt-1">
                                                 <span>0</span>
@@ -451,10 +480,9 @@ const OllamaTrainingDashboard = () => {
                                     <div className="grid grid-cols-3 gap-4 mt-4">
                                         <div className="bg-black/40 p-3 rounded-lg">
                                             <div className="text-xs text-gray-500 mb-1">Taux Apprentissage</div>
-                                            <div className={`text-lg font-bold ${
-                                                (currentModel.cognitive?.learningRate || 0) > 0 ? 'text-green-400' : 
+                                            <div className={`text-lg font-bold ${(currentModel.cognitive?.learningRate || 0) > 0 ? 'text-green-400' :
                                                 (currentModel.cognitive?.learningRate || 0) < 0 ? 'text-red-400' : 'text-gray-400'
-                                            }`}>
+                                                }`}>
                                                 {(currentModel.cognitive?.learningRate || 0) > 0 ? '+' : ''}
                                                 {((currentModel.cognitive?.learningRate || 0) * 100).toFixed(1)}%
                                             </div>
@@ -479,7 +507,7 @@ const OllamaTrainingDashboard = () => {
                                     <div className="bg-yellow-900/20 border border-yellow-800/50 rounded-lg p-3 flex items-start gap-2">
                                         <AlertTriangle size={16} className="text-yellow-500 flex-shrink-0 mt-0.5" />
                                         <p className="text-xs text-yellow-300">
-                                            <strong>Note:</strong> Le score cognitif global est calcule a partir de la moyenne des expertises disponibles (*). 
+                                            <strong>Note:</strong> Le score cognitif global est calcule a partir de la moyenne des expertises disponibles (*).
                                             Plus de requetes permettront un calcul plus precis.
                                         </p>
                                     </div>
@@ -491,21 +519,21 @@ const OllamaTrainingDashboard = () => {
                                         <TrendingUp className="text-cyan-500" />
                                         Progression (24h)
                                     </h3>
-                                    
+
                                     {chartHistory.length > 0 ? (
                                         <ResponsiveContainer width="100%" height={200}>
                                             <LineChart data={chartHistory}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                                                 <XAxis dataKey="time" stroke="#666" fontSize={10} />
                                                 <YAxis domain={[0, 100]} stroke="#666" fontSize={10} />
-                                                <Tooltip 
+                                                <Tooltip
                                                     contentStyle={{ background: '#1a1a2e', border: '1px solid #333' }}
                                                     labelStyle={{ color: '#888' }}
                                                 />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="score" 
-                                                    stroke="#22d3ee" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="score"
+                                                    stroke="#22d3ee"
                                                     strokeWidth={2}
                                                     dot={false}
                                                 />
@@ -533,12 +561,11 @@ const OllamaTrainingDashboard = () => {
                                         </div>
                                         <div className="bg-black/40 p-3 rounded-lg text-center">
                                             <div className="text-xs text-gray-500 mb-1">Tendance</div>
-                                            <div className={`text-xl font-bold ${
-                                                (currentModel.learning?.improvementTrend || 0) > 0 ? 'text-green-400' : 
+                                            <div className={`text-xl font-bold ${(currentModel.learning?.improvementTrend || 0) > 0 ? 'text-green-400' :
                                                 (currentModel.learning?.improvementTrend || 0) < 0 ? 'text-red-400' : 'text-yellow-400'
-                                            }`}>
-                                                {(currentModel.learning?.improvementTrend || 0) > 0 ? '+' : 
-                                                 (currentModel.learning?.improvementTrend || 0) < 0 ? '-' : '='}
+                                                }`}>
+                                                {(currentModel.learning?.improvementTrend || 0) > 0 ? '+' :
+                                                    (currentModel.learning?.improvementTrend || 0) < 0 ? '-' : '='}
                                                 {Math.abs((currentModel.learning?.improvementTrend || 0) * 100).toFixed(0)}%
                                             </div>
                                         </div>
@@ -556,9 +583,8 @@ const OllamaTrainingDashboard = () => {
                                         </div>
                                         <div className="bg-black/40 p-3 rounded-lg text-center">
                                             <div className="text-xs text-gray-500 mb-1">Croissance</div>
-                                            <div className={`text-xl font-bold ${
-                                                (currentModel.learning?.growthPercentage || 0) >= 0 ? 'text-green-400' : 'text-red-400'
-                                            }`}>
+                                            <div className={`text-xl font-bold ${(currentModel.learning?.growthPercentage || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                                                }`}>
                                                 {(currentModel.learning?.growthPercentage || 0) >= 0 ? '+' : ''}
                                                 {Math.round(currentModel.learning?.growthPercentage || 0)}%
                                             </div>
@@ -572,7 +598,7 @@ const OllamaTrainingDashboard = () => {
                                         <Activity className="text-green-500" />
                                         Performance
                                     </h3>
-                                    
+
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div className="bg-black/40 p-4 rounded-lg">
                                             <Clock size={20} className="text-blue-400 mb-2" />
@@ -592,7 +618,7 @@ const OllamaTrainingDashboard = () => {
                                             <Target size={20} className="text-green-400 mb-2" />
                                             <div className="text-xs text-gray-500">Taux Succe�s</div>
                                             <div className="text-xl font-bold text-white">
-                                                {currentModel.performance.totalQueries > 0 
+                                                {currentModel.performance.totalQueries > 0
                                                     ? Math.round((currentModel.performance.successfulQueries / currentModel.performance.totalQueries) * 100)
                                                     : 0}%
                                             </div>
@@ -616,18 +642,18 @@ const OllamaTrainingDashboard = () => {
                                         <Target className="text-cyan-500" />
                                         Expertise par Domaine
                                     </h3>
-                                    
+
                                     <ResponsiveContainer width="100%" height={250}>
                                         <RadarChart data={radarData}>
                                             <PolarGrid stroke="#333" />
                                             <PolarAngleAxis dataKey="category" tick={{ fill: '#888', fontSize: 10 }} />
                                             <PolarRadiusAxis domain={[0, 100]} tick={{ fill: '#666', fontSize: 8 }} />
-                                            <Radar 
-                                                name="Score" 
-                                                dataKey="score" 
-                                                stroke="#22d3ee" 
-                                                fill="#22d3ee" 
-                                                fillOpacity={0.3} 
+                                            <Radar
+                                                name="Score"
+                                                dataKey="score"
+                                                stroke="#22d3ee"
+                                                fill="#22d3ee"
+                                                fillOpacity={0.3}
                                             />
                                         </RadarChart>
                                     </ResponsiveContainer>
@@ -639,7 +665,7 @@ const OllamaTrainingDashboard = () => {
                                         <Award className="text-green-500" size={16} />
                                         FORCES
                                     </h3>
-                                    
+
                                     {currentModel.strengths?.length > 0 ? (
                                         <div className="space-y-2">
                                             {currentModel.strengths.map((s, i) => (
@@ -660,7 +686,7 @@ const OllamaTrainingDashboard = () => {
                                         <AlertTriangle className="text-red-500" size={16} />
                                         FAIBLESSES
                                     </h3>
-                                    
+
                                     {currentModel.weaknesses?.length > 0 ? (
                                         <div className="space-y-2">
                                             {currentModel.weaknesses.map((w, i) => (
@@ -679,7 +705,7 @@ const OllamaTrainingDashboard = () => {
                                 <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4">
                                     <div className="text-xs text-gray-500 mb-1">Dernier Benchmark</div>
                                     <div className="text-sm text-gray-300">
-                                        {currentModel.lastBenchmark 
+                                        {currentModel.lastBenchmark
                                             ? new Date(currentModel.lastBenchmark).toLocaleString('fr-CA')
                                             : 'Jamais exe�cute�'}
                                     </div>
@@ -705,11 +731,11 @@ const OllamaTrainingDashboard = () => {
                                             )}
                                         </button>
                                     </div>
-                                    
+
                                     {commentary ? (
                                         <div className="space-y-2">
                                             <div className="text-xs text-gray-400 mb-2">
-                                                 Mistral - {new Date(commentary.timestamp).toLocaleString('fr-CA')}
+                                                Mistral - {new Date(commentary.timestamp).toLocaleString('fr-CA')}
                                             </div>
                                             <p className="text-sm text-amber-200 italic leading-relaxed">
                                                 "{commentary.commentary}"
@@ -718,11 +744,10 @@ const OllamaTrainingDashboard = () => {
                                                 <span className="px-2 py-0.5 bg-purple-900/50 rounded text-purple-300">
                                                     Score: {commentary.cognitiveScore}/100
                                                 </span>
-                                                <span className={`px-2 py-0.5 rounded ${
-                                                    commentary.learningRate > 0 
-                                                        ? 'bg-green-900/50 text-green-300' 
-                                                        : 'bg-red-900/50 text-red-300'
-                                                }`}>
+                                                <span className={`px-2 py-0.5 rounded ${commentary.learningRate > 0
+                                                    ? 'bg-green-900/50 text-green-300'
+                                                    : 'bg-red-900/50 text-red-300'
+                                                    }`}>
                                                     {commentary.learningRate > 0 ? '+' : ''}{commentary.learningRate}
                                                 </span>
                                             </div>
@@ -732,7 +757,7 @@ const OllamaTrainingDashboard = () => {
                                             Cliquez sur  pour ge�ne�rer une analyse par Mistral
                                         </p>
                                     )}
-                                    
+
                                     {recentCommentaries.length > 1 && (
                                         <div className="mt-3 pt-3 border-t border-gray-800">
                                             <div className="text-xs text-gray-500 mb-2">
