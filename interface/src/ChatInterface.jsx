@@ -228,6 +228,18 @@ const ChatInterface = () => {
         try {
             setIsAgentSpeaking(true);
             const startTime = Date.now(); // Track response time for metrics
+
+            // Show specific message for HackerGPT (Gemini-based, can be slow)
+            if (selectedProvider === 'hackergpt') {
+                const infoMsg = {
+                    id: messages.length + 1.5, // Temporary ID between user and response
+                    sender: 'agent',
+                    text: '⏳ HackerGPT analyse en cours avec Gemini... (Fallback: AnythingLLM th3-thirty3)',
+                    isTemp: true
+                };
+                setMessages(prev => [...prev, infoMsg]);
+            }
+
             const response = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
                 headers: {
@@ -285,7 +297,9 @@ const ChatInterface = () => {
             // Let's assume for now we reload or just accept the temp ID until reload.
             // actually, let's update the last user message with the real ID
             setMessages(prev => {
-                const newMsgs = [...prev];
+                // Remove temporary "waiting" messages
+                let newMsgs = prev.filter(m => !m.isTemp);
+
                 const lastUserMsgIndex = newMsgs.findIndex(m => m.text === input && m.sender === 'user'); // Simple heuristic
                 if (lastUserMsgIndex !== -1) {
                     newMsgs[lastUserMsgIndex].id = data.userMsgId;

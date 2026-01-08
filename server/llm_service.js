@@ -174,11 +174,11 @@ class LLMService {
             }
         }
 
-        // HackerGPT - Always show if token is configured
-        if (process.env.HACKERGPT_TOKEN) {
+        // HackerGPT + Gemini - Always show if Gemini key is configured
+        if (process.env.GEMINI_API_KEY) {
             models.cloud.push({
                 id: 'hackergpt',
-                name: '🔓 HackerGPT (Security)',
+                name: '🔓 HackerGPT + Gemini (Security)',
                 provider: 'hackergpt'
             });
         }
@@ -485,10 +485,10 @@ class LLMService {
 
     /**
      * Generate response using HackerGPT persona
-     * Uses the HackerGPT security expert system prompt with local Ollama
+     * Uses the HackerGPT security expert system prompt with Gemini (primary) or Ollama (fallback)
      */
     async generateHackerGPTResponse(prompt, modelId, userSystemPrompt) {
-        console.log('[HACKERGPT] Generating security-focused response...');
+        console.log('[HACKERGPT] Generating security-focused response with Gemini...');
 
         // Get the HackerGPT security expert system prompt
         const hackerGPTPrompt = hackerGPTService.getSystemPrompt();
@@ -498,24 +498,71 @@ class LLMService {
             ? `${hackerGPTPrompt}\n\n--- Additional Instructions ---\n${userSystemPrompt}`
             : hackerGPTPrompt;
 
-        // Use the local Ollama model (granite4 is the best for code/security tasks)
-        const targetModel = 'granite4:latest';
+        // PRIMARY: Use Gemini 2.5 Flash for fast, powerful security responses
+        if (process.env.GEMINI_API_KEY) {
+            try {
+                console.log('[HACKERGPT] Using Gemini 2.5 Flash as backend...');
+                console.log('[HACKERGPT] ⏳ Contacting Gemini API... This may take 10-30 seconds.');
+                const { GoogleGenerativeAI } = require('@google/generative-ai');
+                const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+                const geminiModel = genAI.getGenerativeModel({
+                    model: modelId || 'gemini-2.5-flash-preview-05-20',
+                    systemInstruction: fullSystemPrompt
+                });
+
+                // Add timeout wrapper (30 seconds)
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Gemini API timeout après 30 secondes')), 30000)
+                );
+
+                const geminiPromise = geminiModel.generateContent(prompt);
+
+                const result = await Promise.race([geminiPromise, timeoutPromise]);
+                console.log('[HACKERGPT+GEMINI] ✅ Response generated successfully');
+                return result.response.text();
+            } catch (geminiError) {
+                console.error('[HACKERGPT] ❌ Gemini error, falling back to Ollama:', geminiError.message);
+                if (this.socketService) {
+                    this.socketService.emitAgentStatus("Gemini slow, switching to local Ollama...");
+                }
+            }
+        }
+
+        // FALLBACK: Use AnythingLLM (th3-thirty3 workspace with knowledge base)
+        console.log('[HACKERGPT] 🔄 Gemini unavailable, switching to AnythingLLM (th3-thirty3)...');
+
+        if (this.socketService) {
+            this.socketService.emitAgentStatus("Utilisation d'AnythingLLM avec base de connaissances th3-thirty3...");
+        }
 
         try {
-            const response = await this.ollama.chat({
-                model: targetModel,
-                messages: [
-                    { role: 'system', content: fullSystemPrompt },
-                    { role: 'user', content: prompt }
-                ]
-            });
+            // Use AnythingLLM with the full HackerGPT system prompt
+            const response = await this.anythingLLMWrapper.chat(
+                `${fullSystemPrompt}\n\n---\n\nUSER REQUEST: ${prompt}`,
+                'chat'
+            );
 
-            console.log('[HACKERGPT] Response generated successfully');
-            return response.message.content;
-        } catch (error) {
-            console.error('[HACKERGPT] Error:', error.message);
-            // Fallback: If granite4 is not available, try any available Ollama model
-            throw new Error(`HackerGPT Error: ${error.message}. Ensure Ollama is running with granite4:latest model.`);
+            console.log('[HACKERGPT+ANYTHINGLLM] ✅ Response generated from th3-thirty3 workspace');
+            return response;
+        } catch (anythingError) {
+            // Last resort: Try Ollama
+            console.error('[HACKERGPT] AnythingLLM failed, trying Ollama as last resort:', anythingError.message);
+
+            try {
+                const ollamaResponse = await this.ollama.chat({
+                    model: 'granite4:latest',
+                    messages: [
+                        { role: 'system', content: fullSystemPrompt },
+                        { role: 'user', content: prompt }
+                    ]
+                });
+                console.log('[HACKERGPT+OLLAMA] ⚠️ Fallback to local Ollama successful');
+                return ollamaResponse.message.content;
+            } catch (ollamaError) {
+                console.error('[HACKERGPT] All backends failed:', ollamaError.message);
+                throw new Error(`HackerGPT Error: Tous les backends ont échoué. Gemini: timeout/erreur, AnythingLLM: ${anythingError.message}, Ollama: ${ollamaError.message}`);
+            }
         }
     }
 

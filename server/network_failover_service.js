@@ -25,8 +25,11 @@ const CONNECTIVITY_ENDPOINTS = [
     { url: 'https://cloudflare.com/cdn-cgi/trace', name: 'Cloudflare', timeout: 2000 }
 ];
 
-// Local Ollama endpoint
-const OLLAMA_ENDPOINT = 'http://localhost:11434/api/tags';
+// Local Ollama endpoint (use env var or host.docker.internal for Docker)
+// OLLAMA_BASE_URL typically ends with just the host:port (e.g. http://host.docker.internal:11434)
+const OLLAMA_HOST = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434';
+// Remove trailing slash if present, then append /api/tags
+const OLLAMA_ENDPOINT = OLLAMA_HOST.replace(/\/$/, '') + '/api/tags';
 
 // Network states
 const NetworkState = {

@@ -1,8 +1,8 @@
 {
   "darkMode": true,
-  "autoCorrect": false,
+  "autoCorrect": true,
   "computeMode": "cloud",
-  "reflectionMode": "think",
+  "reflectionMode": "ultra",
   "socials": {
     "facebook": false,
     "instagram": false,
