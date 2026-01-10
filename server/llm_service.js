@@ -5,6 +5,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const AnythingLLMWrapper = require('./anythingllm_wrapper');
 const knowledgeBase = require('./knowledge_base_service');
 const { hackerGPTService } = require('./hackergpt_persona');
+const settingsService = require('./settings_service');
 
 class LLMService {
     constructor() {
@@ -77,10 +78,33 @@ class LLMService {
 
         // --- CLOUD MODE ---
         if (computeMode === 'cloud') {
-            // Gemini
-            if (process.env.GEMINI_API_KEY) {
-                models.cloud.push({ id: 'gemini-2.5-flash-preview-05-20', name: '⚡ Gemini 2.5 Flash', provider: 'gemini' });
-                models.cloud.push({ id: 'gemini-2.5-pro-preview-05-06', name: '🧠 Gemini 2.5 Pro', provider: 'gemini' });
+            const settings = settingsService.getSettings();
+
+            // Google Gemini - All Available Models
+            const geminiKey = process.env.GEMINI_API_KEY || settings.apiKeys?.gemini;
+            if (geminiKey) {
+                // Gemini 3 Series (Newest - Nov/Dec 2025)
+                models.cloud.push({ id: 'gemini-3-pro-preview', name: '🔥 Gemini 3 Pro (1M Context)', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-3-flash-preview', name: '⚡ Gemini 3 Flash', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-3-pro-image-preview', name: '🎨 Gemini 3 Pro Image', provider: 'gemini' });
+
+                // Gemini 2.5 Series (Thinking Models)
+                models.cloud.push({ id: 'gemini-2.5-flash-preview-05-20', name: '⚡ Gemini 2.5 Flash (Thinking)', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-2.5-pro-preview-05-06', name: '🧠 Gemini 2.5 Pro (Thinking)', provider: 'gemini' });
+
+                // Gemini 2.0 Series
+                models.cloud.push({ id: 'gemini-2.0-flash', name: '⚡ Gemini 2.0 Flash', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-2.0-flash-lite', name: '💨 Gemini 2.0 Flash Lite', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-2.0-flash-thinking-exp', name: '🧠 Gemini 2.0 Flash Thinking', provider: 'gemini' });
+
+                // Gemini 1.5 Series (Stable)
+                models.cloud.push({ id: 'gemini-1.5-pro', name: '🔵 Gemini 1.5 Pro (2M Context)', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-1.5-flash', name: '🔵 Gemini 1.5 Flash', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-1.5-flash-8b', name: '💨 Gemini 1.5 Flash 8B', provider: 'gemini' });
+
+                // Embedding & Specialized
+                models.cloud.push({ id: 'text-embedding-004', name: '📊 Gemini Text Embedding', provider: 'gemini' });
+                models.cloud.push({ id: 'gemini-embedding-exp', name: '📊 Gemini Embedding Exp', provider: 'gemini' });
             }
 
             // OpenAI - All Available Models
@@ -174,14 +198,15 @@ class LLMService {
             }
         }
 
-        // HackerGPT + Gemini - Always show if Gemini key is configured
-        if (process.env.GEMINI_API_KEY) {
-            models.cloud.push({
-                id: 'hackergpt',
-                name: '🔓 HackerGPT + Gemini (Security)',
-                provider: 'hackergpt'
-            });
-        }
+        // HackerGPT - Always show (has fallbacks to AnythingLLM and Ollama)
+        // Uses Gemini as primary, AnythingLLM as secondary, Ollama as tertiary
+        models.cloud.push({
+            id: 'hackergpt',
+            name: process.env.GEMINI_API_KEY
+                ? '🔓 HackerGPT + Gemini (Security)'
+                : '🔓 HackerGPT (Security Expert)',
+            provider: 'hackergpt'
+        });
 
         return models;
     }
@@ -370,10 +395,13 @@ class LLMService {
     }
 
     async generateGeminiResponse(prompt, modelId, systemPrompt) {
-        if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY missing");
+        const settings = settingsService.getSettings();
+        const geminiKey = process.env.GEMINI_API_KEY || settings.apiKeys?.gemini;
+
+        if (!geminiKey) throw new Error("GEMINI_API_KEY missing - configure in Settings");
 
         const { GoogleGenerativeAI } = require('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const genAI = new GoogleGenerativeAI(geminiKey);
 
         const model = genAI.getGenerativeModel({
             model: modelId || "gemini-2.5-flash-preview-05-20",
