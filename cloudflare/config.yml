@@ -1,0 +1,50 @@
+# ===================================
+# Cloudflare Tunnel Configuration
+# Th3 Thirty3 / Nexus33 Production
+# ===================================
+
+tunnel: nexus33
+credentials-file: C:\Users\th3th\.cloudflared\d8ae3918-ff1f-484d-85f3-ce9c3169bf52.json
+
+# Ingress rules for routing traffic
+ingress:
+  # Frontend - nexus33.io
+  - hostname: nexus33.io
+    service: http://localhost:5173
+    originRequest:
+      noTLSVerify: true
+      
+  - hostname: www.nexus33.io
+    service: http://localhost:5173
+    originRequest:
+      noTLSVerify: true
+  
+  # API Backend - api.nexus33.io
+  - hostname: api.nexus33.io
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      
+  # Ollama API - ollama.nexus33.io  
+  - hostname: ollama.nexus33.io
+    service: http://localhost:11434
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 60s
+      
+  # AnythingLLM - llm.nexus33.io
+  - hostname: llm.nexus33.io
+    service: http://localhost:3001
+    originRequest:
+      noTLSVerify: true
+      
+  # WebSocket Support for real-time features
+  - hostname: ws.nexus33.io
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+      httpHostHeader: "localhost"
+
+  # Catch-all (required) - returns 404 for unknown subdomains
+  - service: http_status:404

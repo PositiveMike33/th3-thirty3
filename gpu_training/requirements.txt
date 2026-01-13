@@ -1,0 +1,6 @@
+# GPU Training Dependencies - Core only
+# Flask and basic utilities only - rest comes from TF base image
+
+flask-cors
+python-dotenv
+tqdm

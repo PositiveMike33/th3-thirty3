@@ -1,0 +1,31 @@
+{
+    "sujet": "Attaques Zero-Click et Agents IA",
+    "ce_que_cest": {
+        "definition": "Une cyberattaque qui compromet un appareil sans aucune interaction de l'utilisateur (aucun clic, tapotement ou téléchargement n'est requis).",
+        "origine": "Elle exploite des bugs ou vulnérabilités logicielles existants que l'attaquant utilise pour pénétrer le système.",
+        "vecteurs": "Peut passer par des MMS, des appels VoIP (WhatsApp), des iMessages ou être amplifiée par des agents IA autonomes."
+    },
+    "ce_que_ca_fait": {
+        "execution_code_distance": "L'attaquant envoie et exécute du code malveillant sur l'appareil sans permission.",
+        "surveillance_totale": "Permet un contrôle à distance complet : écoute via le microphone, activation de la caméra, lecture des messages/courriels et enregistrement des frappes clavier.",
+        "exfiltration_via_IA": "Dans le cas des agents IA, une 'injection de prompt indirecte' (texte invisible dans un courriel) peut forcer l'IA à voler et envoyer des données confidentielles automatiquement."
+    },
+    "comment_defendre": {
+        "fondamentaux": "Maintenir impérativement tous les logiciels à jour pour que les correctifs de sécurité des vendeurs soient appliqués.",
+        "strategie_zero_trust": "Ne jamais faire confiance par défaut. Supposer que tout ce qui touche au système (texte, code, URL) est hostile jusqu'à vérification.",
+        "securite_specifique_IA": [
+            {
+                "principe": "Moindre privilège",
+                "action": "Limiter l'autonomie de l'agent IA et désactiver les capacités non essentielles."
+            },
+            {
+                "principe": "Sandboxing",
+                "action": "Isoler les agents IA dans un environnement restreint pour qu'ils ne puissent pas accéder à tout le système."
+            },
+            {
+                "principe": "Pare-feu IA",
+                "action": "Scanner les entrées pour détecter les injections de prompt et bloquer les sorties de données sensibles."
+            }
+        ]
+    }
+}

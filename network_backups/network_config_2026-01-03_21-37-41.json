@@ -1,0 +1,319 @@
+﻿{
+    "ComputerName":  "THIRTY3",
+    "DefaultRoutes":  {
+                          "InterfaceAlias":  "Wi-Fi",
+                          "NextHop":  "192.168.1.1",
+                          "RouteMetric":  0
+                      },
+    "IPAddresses":  [
+                        {
+                            "InterfaceAlias":  "vEthernet (WSL (Hyper-V firewall))",
+                            "IPAddress":  "fe80::143f:1416:5ce5:ab9d%45",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Connexion au réseau local* 2",
+                            "IPAddress":  "fe80::425c:5e00:9651:13a%11",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Connexion réseau Bluetooth",
+                            "IPAddress":  "fe80::4dae:d68f:880:e437%5",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Connexion au réseau local* 1",
+                            "IPAddress":  "fe80::525a:251d:d939:e893%16",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Wi-Fi",
+                            "IPAddress":  "fe80::3425:3366:a821:f72a%9",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Wi-Fi",
+                            "IPAddress":  "fdb0:e79b:2b07:0:ea2c:6dff:0:1a8",
+                            "AddressFamily":  23,
+                            "PrefixLength":  128,
+                            "PrefixOrigin":  3,
+                            "SuffixOrigin":  3
+                        },
+                        {
+                            "InterfaceAlias":  "Wi-Fi",
+                            "IPAddress":  "fdb0:e79b:2b07:0:d8c7:e5ff:393f:932a",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  4,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Wi-Fi",
+                            "IPAddress":  "fdb0:e79b:2b07:0:14cd:9886:a07d:2d0",
+                            "AddressFamily":  23,
+                            "PrefixLength":  128,
+                            "PrefixOrigin":  4,
+                            "SuffixOrigin":  5
+                        },
+                        {
+                            "InterfaceAlias":  "Ethernet",
+                            "IPAddress":  "fe80::c0c4:7469:1322:48a7%8",
+                            "AddressFamily":  23,
+                            "PrefixLength":  64,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+                            "IPAddress":  "::1",
+                            "AddressFamily":  23,
+                            "PrefixLength":  128,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  2
+                        },
+                        {
+                            "InterfaceAlias":  "vEthernet (WSL (Hyper-V firewall))",
+                            "IPAddress":  "172.22.96.1",
+                            "AddressFamily":  2,
+                            "PrefixLength":  20,
+                            "PrefixOrigin":  1,
+                            "SuffixOrigin":  1
+                        },
+                        {
+                            "InterfaceAlias":  "Connexion au réseau local* 2",
+                            "IPAddress":  "169.254.77.196",
+                            "AddressFamily":  2,
+                            "PrefixLength":  16,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Connexion réseau Bluetooth",
+                            "IPAddress":  "169.254.155.199",
+                            "AddressFamily":  2,
+                            "PrefixLength":  16,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Connexion au réseau local* 1",
+                            "IPAddress":  "169.254.107.82",
+                            "AddressFamily":  2,
+                            "PrefixLength":  16,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Wi-Fi",
+                            "IPAddress":  "192.168.1.147",
+                            "AddressFamily":  2,
+                            "PrefixLength":  24,
+                            "PrefixOrigin":  3,
+                            "SuffixOrigin":  3
+                        },
+                        {
+                            "InterfaceAlias":  "Ethernet",
+                            "IPAddress":  "169.254.188.177",
+                            "AddressFamily":  2,
+                            "PrefixLength":  16,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  4
+                        },
+                        {
+                            "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+                            "IPAddress":  "127.0.0.1",
+                            "AddressFamily":  2,
+                            "PrefixLength":  8,
+                            "PrefixOrigin":  2,
+                            "SuffixOrigin":  2
+                        }
+                    ],
+    "Adapters":  [
+                     {
+                         "Name":  "vEthernet (WSL (Hyper-V firewall))",
+                         "InterfaceDescription":  "Hyper-V Virtual Ethernet Adapter",
+                         "Status":  "Up",
+                         "MacAddress":  "00-15-5D-13-37-5E",
+                         "LinkSpeed":  "10 Gbps"
+                     },
+                     {
+                         "Name":  "Wi-Fi",
+                         "InterfaceDescription":  "Intel(R) Wi-Fi 6 AX201 160MHz",
+                         "Status":  "Up",
+                         "MacAddress":  "EE-84-CF-62-4F-2D",
+                         "LinkSpeed":  "866.7 Mbps"
+                     },
+                     {
+                         "Name":  "Ethernet",
+                         "InterfaceDescription":  "Realtek PCIe GbE Family Controller",
+                         "Status":  "Disconnected",
+                         "MacAddress":  "BC-FC-E7-EE-F9-2F",
+                         "LinkSpeed":  "0 bps"
+                     },
+                     {
+                         "Name":  "Connexion réseau Bluetooth",
+                         "InterfaceDescription":  "Bluetooth Device (Personal Area Network)",
+                         "Status":  "Disconnected",
+                         "MacAddress":  "28-92-00-53-CB-30",
+                         "LinkSpeed":  "3 Mbps"
+                     }
+                 ],
+    "ProxySettings":  {
+                          "AutoConfigURL":  null,
+                          "ProxyEnabled":  0,
+                          "ProxyServer":  null
+                      },
+    "DNSServers":  [
+                       {
+                           "InterfaceAlias":  "Ethernet",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+                                                   "192.168.1.1"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Ethernet",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Connexion au réseau local* 1",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Connexion au réseau local* 1",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+                                                   "fec0:0:0:ffff::1",
+                                                   "fec0:0:0:ffff::2",
+                                                   "fec0:0:0:ffff::3"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Connexion au réseau local* 2",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Connexion au réseau local* 2",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+                                                   "fec0:0:0:ffff::1",
+                                                   "fec0:0:0:ffff::2",
+                                                   "fec0:0:0:ffff::3"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Wi-Fi",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+                                                   "192.168.1.1"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Wi-Fi",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+                                                   "fe80::ea2c:6dff:fed5:de81",
+                                                   "fe80::ea2c:6dff:fed5:de81"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Connexion réseau Bluetooth",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Connexion réseau Bluetooth",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+                                                   "fec0:0:0:ffff::1",
+                                                   "fec0:0:0:ffff::2",
+                                                   "fec0:0:0:ffff::3"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+                                                   "fec0:0:0:ffff::1",
+                                                   "fec0:0:0:ffff::2",
+                                                   "fec0:0:0:ffff::3"
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "vEthernet (WSL (Hyper-V firewall))",
+                           "AddressFamily":  2,
+                           "ServerAddresses":  [
+
+                                               ]
+                       },
+                       {
+                           "InterfaceAlias":  "vEthernet (WSL (Hyper-V firewall))",
+                           "AddressFamily":  23,
+                           "ServerAddresses":  [
+                                                   "fec0:0:0:ffff::1",
+                                                   "fec0:0:0:ffff::2",
+                                                   "fec0:0:0:ffff::3"
+                                               ]
+                       }
+                   ],
+    "Timestamp":  "2026-01-03_21-37-41",
+    "IPConfiguration":  [
+                            {
+                                "InterfaceAlias":  "vEthernet (WSL (Hyper-V firewall))",
+                                "IPv4Address":  "172.22.96.1",
+                                "IPv4Gateway":  null,
+                                "DNSServer":  "fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3"
+                            },
+                            {
+                                "InterfaceAlias":  "Wi-Fi",
+                                "IPv4Address":  "192.168.1.147",
+                                "IPv4Gateway":  "192.168.1.1",
+                                "DNSServer":  "fe80::ea2c:6dff:fed5:de81,fe80::ea2c:6dff:fed5:de81,192.168.1.1"
+                            },
+                            {
+                                "InterfaceAlias":  "Connexion réseau Bluetooth",
+                                "IPv4Address":  "169.254.155.199",
+                                "IPv4Gateway":  null,
+                                "DNSServer":  "fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3"
+                            },
+                            {
+                                "InterfaceAlias":  "Ethernet",
+                                "IPv4Address":  "169.254.188.177",
+                                "IPv4Gateway":  null,
+                                "DNSServer":  "192.168.1.1"
+                            }
+                        ]
+}

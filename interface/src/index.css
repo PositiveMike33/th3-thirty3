@@ -1,0 +1,414 @@
+/* 
+   !!! CORE THEME FILE - DO NOT MODIFY !!!
+   This file contains the stable, approved visual identity (Ascended 33).
+   Any changes here may corrupt the application's aesthetic.
+   Last Verified: 2025-12-09
+   Version: 2.1 - Optimized with modern CSS features
+*/
+
+/* Google Fonts - Inter (Multiple weights for better typography) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Tailwind CSS v4 - Use @import syntax */
+@import "tailwindcss";
+
+/* =====================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ===================================== */
+:root {
+  /* Colors */
+  --bg-color: #0a0a0a;
+  --text-color: #e0e0e0;
+  --primary-color: #00ff41; /* Matrix Green */
+  --secondary-color: #008f11;
+  --accent-color: #ff0055; /* For errors/alerts */
+  --success-color: #00ff41;
+  --warning-color: #ffa500;
+  --info-color: #00bfff;
+  
+  /* Glass Morphism */
+  --glass-bg: rgba(20, 20, 20, 0.8);
+  --glass-border: rgba(0, 255, 65, 0.2);
+  --glass-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+  
+  /* Typography */
+  --font-mono: 'Courier New', Courier, monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-modal: 2000;
+  --z-toast: 3000;
+  --z-tooltip: 4000;
+  --z-skip-link: 10000;
+}
+
+/* Force Dark Mode by default - App manages its own theme */
+/* Remove system preference detection to avoid conflicts */
+
+/* =====================================
+   BASE STYLES
+   ===================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    url('/bg-logo.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Offline Mode Indicator */
+body.offline::before {
+  content: '⚠️ Mode Hors Ligne';
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--warning-color);
+  color: var(--bg-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: var(--z-toast);
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: block;
+  isolation: isolate; /* Create stacking context */
+}
+
+/* =====================================
+   UTILITY CLASSES
+   ===================================== */
+.glitch-text {
+  position: relative;
+  color: var(--primary-color);
+  font-family: var(--font-mono);
+  text-shadow: 0 0 5px var(--secondary-color);
+  will-change: transform; /* Performance hint */
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+  transition: border-color var(--transition-normal);
+}
+
+.glass-panel:hover {
+  border-color: var(--primary-color);
+}
+
+/* =====================================
+   SCROLLBAR STYLES - ALWAYS VISIBLE
+   ===================================== */
+/* WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 14px !important;
+  height: 14px !important;
+  -webkit-appearance: none;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a !important;
+  border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #22d3ee !important;
+  border-radius: 10px;
+  border: 3px solid #1a1a1a;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #06b6d4 !important;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.8);
+}
+
+::-webkit-scrollbar-corner {
+  background: #1a1a1a;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: auto !important;
+  scrollbar-color: #22d3ee #1a1a1a !important;
+}
+
+/* =====================================
+   ACCESSIBILITY & PERFORMANCE
+   ===================================== */
+/* Focus States - Keyboard Navigation */
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip to Content Link (a11y) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  background: var(--primary-color);
+  color: var(--bg-color);
+  font-weight: 600;
+  z-index: var(--z-skip-link);
+  border-radius: 0 0 8px 8px;
+  transition: top var(--transition-normal);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Reduced Motion - Respect User Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .glitch-text {
+    will-change: auto;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --glass-bg: rgba(0, 0, 0, 0.95);
+    --glass-border: rgba(0, 255, 65, 0.5);
+  }
+  
+  .glass-panel {
+    border-width: 2px;
+  }
+  
+  :focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* Smooth scrolling (when motion allowed) */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Selection Color */
+::selection {
+  background: var(--primary-color);
+  color: var(--bg-color);
+}
+
+::-moz-selection {
+  background: var(--primary-color);
+  color: var(--bg-color);
+}
+
+/* =====================================
+   INTERACTIVE ELEMENTS
+   ===================================== */
+/* Better Touch Targets (WCAG AAA) */
+button, 
+a, 
+input, 
+select, 
+textarea {
+  min-height: 44px; /* WCAG minimum touch target */
+  touch-action: manipulation; /* Prevent double-tap zoom */
+}
+
+/* Improve clickable area for links */
+a {
+  text-decoration-skip-ink: auto;
+}
+
+/* Form elements consistency */
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Disabled state */
+:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =====================================
+   PRINT STYLES
+   ===================================== */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .glass-panel {
+    background: white !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+  
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+  
+  /* Hide interactive elements */
+  button,
+  video,
+  audio {
+    display: none !important;
+  }
+}
+
+/* =====================================
+   PERFORMANCE OPTIMIZATIONS
+   ===================================== */
+/* GPU acceleration for animations */
+@media (prefers-reduced-motion: no-preference) {
+  .glass-panel,
+  .glitch-text {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Contain layout shifts */
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve scrolling performance */
+@supports (content-visibility: auto) {
+  .lazy-loaded {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+  }
+}
+/* =====================================
+   TRAINING DASHBOARD LAYOUT FIX
+   ===================================== */
+/* Prevent horizontal overflow on Training page */
+[class*='OllamaTraining'],
+.training-dashboard {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Fix right-side content overflow */
+div[class*='flex-1'][class*='p-6'] {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure grid containers don't overflow */
+.grid {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Commentary section fix */
+div[class*='commentaires'],
+div[class*='commentary'] {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Benchmark and action buttons container */
+div[class*='benchmark'],
+div[class*='actions'] {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+/* Charts should not cause overflow */
+.recharts-wrapper,
+.recharts-responsive-container {
+  max-width: 100% !important;
+  width: 100% !important;
+}

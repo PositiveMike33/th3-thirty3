@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "start": "node server/index.js",
+    "restart": "powershell -ExecutionPolicy Bypass -File ./restart_session.ps1",
+    "test": "node tests/verify_pieces.js && node tests/verify_memory.js && node tests/verify_fabric.js"
+  },
+  "dependencies": {
+    "eventsource": "^4.1.0",
+    "socks-proxy-agent": "^8.0.5"
+  }
+}

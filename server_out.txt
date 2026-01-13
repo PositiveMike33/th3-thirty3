@@ -1,0 +1,129 @@
+[KNOWLEDGE] Loaded osint_tools.json (5 entries)
+[KNOWLEDGE] Loaded security_trends_2025.json (3 entries)
+[KNOWLEDGE] Loaded opsec_scenarios.json (3 entries)
+[KNOWLEDGE] Loaded cyber_physical_systems.json (4 entries)
+[KNOWLEDGE] Loaded kinetic_osint.json (4 entries)
+[HACKERGPT] Service initialized - Offensive Security Companion ready
+[LLM_SERVICE] Ollama configured at: http://localhost:11434
+[EMBEDDING] Service initialized
+[EMBEDDING] Local priority: mxbai-embed-large
+[EMBEDDING] Gemini available: true
+[PROJECT] Service initialized (MongoDB Mode)
+[AUTH] Loaded 3 users
+[AUTH] Service initialized
+[USER] Loaded 3 users.
+[SUBSCRIPTION] Service initialized with 3 tiers
+[SECURITY] Service initialized - Level: HIGH
+[ISOLATION] Security Zone Service initialized
+[ISOLATION] Zones configured: public, chat, osint, finance, admin
+[DART] Warning: DART_API_TOKEN not set. Features like Sync will be disabled.
+[DART] Service initialized (LLM: true)
+[HEXSTRIKE] Bridge initialized: http://localhost:8888
+[TOR] Service initialized
+[SYSTEM] HexStrike AI integration loaded (150+ security tools)
+[SYSTEM] Th3 Thirty3 v1.3.0 connect´┐¢ : granite-flash:latest
+[SYSTEM] Loading API Keys from Settings...
+[MCP] Connecting to pieces via SSE (http://host.docker.internal:39300/model_context_protocol/2024-11-05/sse?sessionId=9efb886d-bba3-44e8-b543-1792b8aedb02)...
+[PiecesTransport] Starting connection to http://host.docker.internal:39300/model_context_protocol/2024-11-05/sse?sessionId=9efb886d-bba3-44e8-b543-1792b8aedb02
+[SHODAN] Service initialized
+[SYSTEM] Shodan Service initialized (API training integration)
+[VISION] Service initialized (AnythingLLM mode)
+[MODEL_METRICS] Loaded metrics for 25 models
+[MODEL_METRICS] Skill decay checker started (decay after 3 days inactive)
+[SYSTEM] Model Metrics Service initialized (5s refresh, hourly benchmarks)
+[SYSTEM] Training Commentary Service initialized (Mistral, FR, email archive)
+[REAL_TRAINING] Service initialized with Shodan integration
+[REAL_TRAINING] Shodan service connected
+[PROJECT] Service initialized (MongoDB Mode)
+[CLOUD_OPTIMIZER] Starting auto-optimization every 60 minutes
+[AGENT_DIRECTOR] Service initialized - Th3 Thirty3 Director ready
+[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybers´┐¢curit´┐¢, OSINT, Agent Thirty3
+[SYSTEM] Real Training Service initialized (Shodan + model training)
+[CYBER-TRAINING] Service initialized (Ollama: http://localhost:11434)
+[AIKIDO] Service DISABLED - No valid token configured
+[TRACKING] Service initialized
+[TRACKING] Service initialized
+[EMAIL] Reminder service initialized
+[EXPERTS] Multi-Agent Expert Service initialized (Ollama: http://localhost:11434)
+[OSINT-EXPERTS] Service initialized with 12 tool experts on Kali Linux
+[HACKING-EXPERTS] Service initialized with 19 tool experts on Kali Linux
+[AGENT-MEMORY] Loaded 1 embedding collections
+[AGENT-MEMORY] Embedding service initialized (Ollama: http://localhost:11434)
+[OFFLINE-MODE] Service initialized
+[OFFLINE-MODE] Network monitoring started
+[OLLAMA] Model Manager initialized (http://localhost:11434)
+[DART] Warning: DART_API_TOKEN not set. Features like Sync will be disabled.
+[DART] Service initialized (LLM: false)
+[ORCHESTRATOR] ­ƒÄ» DartAI sync enabled
+[ORCHESTRATOR] ­ƒÄ» Chef d'├ëquipe initialized - Managing 37 agents
+[AIKIDO] Service DISABLED - No valid token configured
+[KPI-DASHBOARD] Service initialized
+[TOR] Service initialized
+[SYSTEM] Shodan routes mounted at /api/shodan
+[VPN] SOCKS proxy agent loaded (TOR support enabled)
+[VPN] Service initialized with TOR support
+[SYSTEM] VPN routes mounted at /api/vpn
+[NETWORK_FAILOVER] Service initialized
+[NETWORK_FAILOVER] Starting connectivity monitoring...
+[NETWORK_FAILOVER] Mode: AUTO, Interval: 10000ms
+[NETWORK_ROUTES] Network Failover Service started
+[SYSTEM] Network Failover routes mounted at /api/network (RISK-006)
+[HACKERGPT] API Routes loaded
+[HACKERGPT] Routes registered at /api/hackergpt
+[SYSTEM] Logs routes mounted at /api/logs (Internal Console)
+[SOCKET] Service initialized
+Server running on port 3000
+System ready. Identity: Th3 Thirty3
+
+[SYSTEM] Running automatic Tor verification...
+
+==================================================
+­ƒºà TOR STARTUP CHECK - Th3 Thirty3
+==================================================
+
+[TOR] Checking port 9050...
+[ORCHESTRATOR] ­ƒôª mxbai-embed-large preloaded successfully
+ÔØî MongoDB Connection Error: MongooseError: The `uri` parameter to `openUri()` must be a string, got "undefined". Make sure the first parameter to `mongoose.connect()` or `mongoose.createConnection()` is a string.
+    at NativeConnection.createClient (C:\Users\th3th\th3-thirty3\server\node_modules\mongoose\lib\drivers\node-mongodb-native\connection.js:230:11)
+    at NativeConnection.openUri (C:\Users\th3th\th3-thirty3\server\node_modules\mongoose\lib\connection.js:1075:34)
+    at Mongoose.connect (C:\Users\th3th\th3-thirty3\server\node_modules\mongoose\lib\mongoose.js:451:15)
+    at Object.<anonymous> (C:\Users\th3th\th3-thirty3\server\index.js:17:10)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Object..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+[GEMINI-HEXSTRIKE] ÔÜá´©Å Tor not detected. Requests will likely fail (Geo-IP block).
+[GEMINI-HEXSTRIKE] Ô£à Agent initialized with gemini-3-pro-preview
+[TOR] ÔÜá´©Å Port 9050 not listening - attempting to start Tor...
+[TOR] ­ƒÜÇ Starting tor.exe...
+[TOR] ÔÅ│ Waiting for Tor to establish circuits...
+[MEMORY] Table 'memory_store' opened.
+[MEMORY] Memory service initialized successfully
+[LLM] Request: Provider=openai, Model=gpt-4o-mini
+[OSINT] Docker is running.
+[SOCKET] Client connected: dfkaKTDzTb2-J0DmAAAB
+[NETWORK_FAILOVER] ­ƒƒí DEGRADED: Online but Ollama unavailable
+[NETWORK_FAILOVER] ­ƒƒí DEGRADED: Online but Ollama unavailable
+[CLOUD_OPTIMIZER] Failed to store in AnythingLLM: fetch failed
+[PiecesTransport] Request error: Error: connect ETIMEDOUT 192.168.1.213:39300
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '192.168.1.213',
+  port: 39300
+}
+[MCP] Failed to connect to pieces: Error: connect ETIMEDOUT 192.168.1.213:39300
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '192.168.1.213',
+  port: 39300
+}
+[NETWORK_FAILOVER] ­ƒƒí DEGRADED: Online but Ollama unavailable
+[MODEL_METRICS] Skill decay applied to granite-flash:latest (5 days inactive)
+[MODEL_METRICS] Skill decay applied to [ANYTHINGLLM] th3-thirty3 (5 days inactive)
+[NETWORK_FAILOVER] ­ƒƒí DEGRADED: Online but Ollama unavailable

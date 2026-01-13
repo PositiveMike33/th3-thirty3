@@ -1,0 +1,22 @@
+
+🔍 TH3 THIRTY3 SYSTEM DIAGNOSTICS
+=================================
+
+[1] Checking Ports...
+[31m[CLOSED/BLOCKED] Backend API (Port 3000)[0m
+[31m[CLOSED/BLOCKED] Frontend (Port 5173)[0m
+[32m[OPEN] HexStrike AI (Port 8888)[0m
+[31m[CLOSED/BLOCKED] GPU Trainer (Port 5000)[0m
+[31m[CLOSED/BLOCKED] Tor Proxy (Port 9050)[0m
+
+[2] Checking Services...
+[31m[ERROR: connect ECONNREFUSED 127.0.0.1:3000] Backend Health - http://localhost:3000/health[0m
+    Error Details: No response data
+[31m[ERROR: connect ECONNREFUSED 127.0.0.1:3000] Backend Models - http://localhost:3000/api/models[0m
+    Error Details: No response data
+[32m[200] HexStrike Health - http://localhost:8888/health[0m
+[31m[ERROR: connect ECONNREFUSED 127.0.0.1:5000] Trainer Health - http://localhost:5000/health[0m
+    Error Details: No response data
+
+=================================
+🏁 Diagnostics Complete

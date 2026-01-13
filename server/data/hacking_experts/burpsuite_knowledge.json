@@ -1,0 +1,13 @@
+{
+  "interactions": 1,
+  "techniques": [],
+  "codeSnippets": [],
+  "successfulExploits": [],
+  "defenseStrategies": [],
+  "trainingHistory": [
+    {
+      "question": "OBJECTIF: Execute a non‑intrusive network scan and basic web endpoint enumeration on the discovered ",
+      "timestamp": "2025-12-13T22:46:04.226Z"
+    }
+  ]
+}

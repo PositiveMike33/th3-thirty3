@@ -1,0 +1,21 @@
+# Th3 Thirty3 - Safe Tor Configuration
+# NE MODIFIE PAS les parametres systeme
+
+# Ecoute UNIQUEMENT sur localhost (pas 0.0.0.0)
+SocksPort 127.0.0.1:9050
+ControlPort 127.0.0.1:9051
+
+# Data dans le dossier projet (pas systeme)
+DataDirectory C:\Users\th3th\th3-thirty3\.tor-data
+
+# Logs locaux
+Log notice file C:\Users\th3th\th3-thirty3\.tor-data\tor.log
+
+# Securite
+CookieAuthentication 1
+AvoidDiskWrites 1
+DisableDebuggerAttachment 0
+
+# PAS de DNSPort (evite de modifier les DNS systeme)
+# PAS de TransPort (evite le routing transparent)
+# PAS de modifications reseau systeme

@@ -1,0 +1,56 @@
+Sat Jan 10 20:01:40 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 591.59                 Driver Version: 591.59         CUDA Version: 13.1     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4050 ...  WDDM  |   00000000:01:00.0  On |                  N/A |
+| N/A   48C    P8              4W /  107W |    2113MiB /   6141MiB |      9%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A             444    C+G   ...64__exjhdjd23jn9w\FM@2019.exe      N/A      |
+|    0   N/A  N/A            1556    C+G   ...r\frontend\Docker Desktop.exe      N/A      |
+|    0   N/A  N/A            2652    C+G   ...0.3650.139\msedgewebview2.exe      N/A      |
+|    0   N/A  N/A            3284    C+G   ...\cef.win64\steamwebhelper.exe      N/A      |
+|    0   N/A  N/A            7544    C+G   ...icrosoft.AAD.BrokerPlugin.exe      N/A      |
+|    0   N/A  N/A           11376    C+G   ...em32\ApplicationFrameHost.exe      N/A      |
+|    0   N/A  N/A           12064    C+G   C:\Windows\explorer.exe               N/A      |
+|    0   N/A  N/A           12356    C+G   ...indows\System32\ShellHost.exe      N/A      |
+|    0   N/A  N/A           12844    C+G   ...2txyewy\CrossDeviceResume.exe      N/A      |
+|    0   N/A  N/A           14064    C+G   ...0_x64__8j3eq9eme6ctt\IGCC.exe      N/A      |
+|    0   N/A  N/A           14176    C+G   ...IA app\CEF\NVIDIA Overlay.exe      N/A      |
+|    0   N/A  N/A           15012    C+G   ..._cw5n1h2txyewy\SearchHost.exe      N/A      |
+|    0   N/A  N/A           15056    C+G   ...y\StartMenuExperienceHost.exe      N/A      |
+|    0   N/A  N/A           16284    C+G   ...0_x64__8wekyb3d8bbwe\Todo.exe      N/A      |
+|    0   N/A  N/A           16756    C+G   ...0.3650.139\msedgewebview2.exe      N/A      |
+|    0   N/A  N/A           17696    C+G   ...xyewy\ShellExperienceHost.exe      N/A      |
+|    0   N/A  N/A           17920    C+G   ...mba6cd70vzyy\ArmouryCrate.exe      N/A      |
+|    0   N/A  N/A           18192    C+G   ...8bbwe\PhoneExperienceHost.exe      N/A      |
+|    0   N/A  N/A           18264    C+G   ...__84gz00a5z79wr\os_server.exe      N/A      |
+|    0   N/A  N/A           19056    C+G   ...IA app\CEF\NVIDIA Overlay.exe      N/A      |
+|    0   N/A  N/A           19528    C+G   ...App_cw5n1h2txyewy\LockApp.exe      N/A      |
+|    0   N/A  N/A           21464    C+G   ...s\Antigravity\Antigravity.exe      N/A      |
+|    0   N/A  N/A           24332    C+G   ...Chrome\Application\chrome.exe      N/A      |
+|    0   N/A  N/A           26420    C+G   ...3d8bbwe\YourPhoneAppProxy.exe      N/A      |
+|    0   N/A  N/A           26788    C+G   ...t\Edge\Application\msedge.exe      N/A      |
+|    0   N/A  N/A           27440    C+G   ...s\Antigravity\Antigravity.exe      N/A      |
+|    0   N/A  N/A           27836    C+G   ...cd70vzyy\GlideXBackground.exe      N/A      |
+|    0   N/A  N/A           28112    C+G   ...Chrome\Application\chrome.exe      N/A      |
+|    0   N/A  N/A           28192    C+G   ...crosoft\OneDrive\OneDrive.exe      N/A      |
+|    0   N/A  N/A           29064    C+G   ...nmj9wpt2a\Raycast\Raycast.exe      N/A      |
+|    0   N/A  N/A           29940    C+G   ...0.3650.139\msedgewebview2.exe      N/A      |
+|    0   N/A  N/A           32376    C+G   ...yb3d8bbwe\WindowsTerminal.exe      N/A      |
+|    0   N/A  N/A           33712    C+G   ...Chrome\Application\chrome.exe      N/A      |
+|    0   N/A  N/A           36560    C+G   ...4gz00a5z79wr\pieces_for_x.exe      N/A      |
+|    0   N/A  N/A           37812    C+G   ...Chrome\Application\chrome.exe      N/A      |
+|    0   N/A  N/A           38776    C+G   ...s\AnythingLLM\AnythingLLM.exe      N/A      |
+|    0   N/A  N/A           42496    C+G   ...0.3650.139\msedgewebview2.exe      N/A      |
++-----------------------------------------------------------------------------------------+
