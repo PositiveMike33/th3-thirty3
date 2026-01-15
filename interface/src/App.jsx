@@ -24,6 +24,7 @@ import NetworkStatus from './NetworkStatus';
 import ServerConsole from './ServerConsole';
 import LoginPage from './LoginPage';
 import UnifiedDashboard from './UnifiedDashboard';
+import EmailDetailPage from './EmailDetailPage';
 import { API_URL } from './config';
 import './index.css';
 
@@ -99,6 +100,7 @@ function App() {
                           <Route path="/risks" element={<RiskDashboard />} />
                           <Route path="/subscription" element={<SubscriptionPage />} />
                           <Route path="/payment" element={<PaymentDashboard />} />
+                          <Route path="/email/:id" element={<EmailDetailPage />} />
                         </Routes>
                       </div>
 

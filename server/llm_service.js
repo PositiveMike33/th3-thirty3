@@ -11,7 +11,7 @@ class LLMService {
         console.log(`[LLM_SERVICE] Running in CLOUD-ONLY mode.`);
         this.socketService = null;
         this.modelMetricsService = null;
-        this.anythingLLMWrapper = new AnythingLLMWrapper();
+        this.anythingLLMWrapper = AnythingLLMWrapper;
         this.knowledgeBase = knowledgeBase; // RAG Knowledge Base
         this.providers = {
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },

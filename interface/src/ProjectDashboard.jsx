@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useSocket } from './contexts/SocketContext'; // Import Socket Hook
 import ModelIntelligenceDashboard from './components/ModelIntelligenceDashboard';
+import GmailSidebar from './components/GmailSidebar';
 import WWTMapComponent from './components/WWTMapComponent';
 import { API_URL } from './config';
 
@@ -508,12 +509,12 @@ const ProjectDashboard = () => {
                         )}
                     </div>
 
-                    {/* SIDEBAR (Desktop: Remaining ~15%) */}
+                    {/* SIDEBAR (Desktop: Remaining ~15%) - GMAIL INBOX */}
                     <div
                         className="flex flex-col gap-3 overflow-hidden flex-1 min-w-[250px] h-full"
                     >
-                        <div className="bg-gray-900/50 border border-cyan-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col h-full">
-                            <ModelIntelligenceDashboard />
+                        <div className="bg-gray-900/50 border border-red-900/50 rounded-lg p-4 backdrop-blur flex-1 overflow-hidden flex flex-col h-full">
+                            <GmailSidebar />
                         </div>
                     </div>
                 </div>

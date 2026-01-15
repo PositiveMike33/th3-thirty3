@@ -8,13 +8,24 @@ import SecurityDashboard from './pages/SecurityDashboard';
 import DartAI from './DartAI';
 import AgentMonitor from './AgentMonitor';
 import ModelIntelligenceDashboard from './components/ModelIntelligenceDashboard';
-import OllamaTrainingDashboard from './OllamaTrainingDashboard';
+// OllamaTrainingDashboard removed - Cloud Only Mode
 import FineTuningDashboard from './FineTuningDashboard';
 import CyberTrainingPage from './CyberTrainingPage';
 import NetworkStatus from './NetworkStatus';
 import ServerConsole from './ServerConsole';
 import ProjectDashboard from './ProjectDashboard';
 import PaymentDashboard from './PaymentDashboard';
+
+// Placeholder for removed Ollama Training
+const CloudOnlyPlaceholder = () => (
+    <div className="flex items-center justify-center h-full bg-gray-900">
+        <div className="text-center p-8">
+            <div className="text-6xl mb-4">☁️</div>
+            <h2 className="text-2xl font-bold text-cyan-400 mb-2">CLOUD ONLY MODE</h2>
+            <p className="text-gray-500">Local training désactivé - Utilisez les modèles Cloud.</p>
+        </div>
+    </div>
+);
 
 /**
  * UnifiedDashboard - Central hub for all dashboards
@@ -51,7 +62,7 @@ const UnifiedDashboard = () => {
             label: 'Training',
             color: 'orange',
             tabs: [
-                { name: 'Ollama Training', component: <OllamaTrainingDashboard /> },
+                { name: 'Cloud Training', component: <CloudOnlyPlaceholder /> },
                 { name: 'Fine-Tuning', component: <FineTuningDashboard /> },
                 { name: 'Cyber Training', component: <CyberTrainingPage /> }
             ]

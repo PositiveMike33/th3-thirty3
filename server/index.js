@@ -12,6 +12,21 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 3000;
 
+// Initialize Settings & Load Keys (MOVED TO TOP)
+const settingsService = require('./settings_service');
+const currentSettings = settingsService.getSettings();
+if (currentSettings.apiKeys) {
+    console.log("[SYSTEM] Loading API Keys from Settings...");
+
+    if (currentSettings.apiKeys.openai) process.env.OPENAI_API_KEY = currentSettings.apiKeys.openai;
+    if (currentSettings.apiKeys.anthropic) process.env.ANTHROPIC_API_KEY = currentSettings.apiKeys.anthropic;
+    if (currentSettings.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = currentSettings.apiKeys.perplexity;
+    if (currentSettings.apiKeys.anythingllm_url) process.env.ANYTHING_LLM_URL = currentSettings.apiKeys.anythingllm_url;
+    if (currentSettings.apiKeys.anythingllm_key) process.env.ANYTHING_LLM_KEY = currentSettings.apiKeys.anythingllm_key;
+    if (currentSettings.apiKeys.gemini) process.env.GEMINI_API_KEY = currentSettings.apiKeys.gemini;
+    if (!process.env.GEMINI_API_KEY && currentSettings.apiKeys.google) process.env.GEMINI_API_KEY = currentSettings.apiKeys.google;
+}
+
 // Connect to MongoDB
 const mongoose = require('mongoose');
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/th3-thirty3';
@@ -170,6 +185,110 @@ app.get('/models', async (req, res) => {
     }
 });
 
+// Settings Endpoints (PUBLIC - needed for settings page before login)
+app.get('/settings', (req, res) => {
+    const settings = settingsService.getSettings();
+    res.json(settings);
+});
+
+app.post('/settings', (req, res) => {
+    try {
+        const updated = settingsService.saveSettings(req.body);
+
+        // Apply API Keys to Env
+        if (updated.apiKeys) {
+            if (updated.apiKeys.openai) process.env.OPENAI_API_KEY = updated.apiKeys.openai;
+            if (updated.apiKeys.anthropic) process.env.ANTHROPIC_API_KEY = updated.apiKeys.anthropic;
+            if (updated.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = updated.apiKeys.perplexity;
+            if (updated.apiKeys.anythingllm_url) process.env.ANYTHING_LLM_URL = updated.apiKeys.anythingllm_url;
+            if (updated.apiKeys.anythingllm_key) process.env.ANYTHING_LLM_KEY = updated.apiKeys.anythingllm_key;
+            if (updated.apiKeys.gemini) process.env.GEMINI_API_KEY = updated.apiKeys.gemini;
+        }
+
+        res.json(updated);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to save settings" });
+    }
+});
+
+// Google Data Routes (PUBLIC - for Gmail sidebar)
+// Account list for Google services
+const ACCOUNTS_PUBLIC = [
+    'th3thirty3@gmail.com',
+    'mikegauthierguillet@gmail.com',
+    'mgauthierguillet@gmail.com'
+];
+
+app.get('/google/status', async (req, res) => {
+    const status = {};
+    for (const email of ACCOUNTS_PUBLIC) {
+        try {
+            const client = await googleService.getClient(email);
+            status[email] = !!client;
+        } catch (e) {
+            status[email] = false;
+        }
+    }
+    res.json(status);
+});
+
+app.get('/google/emails', async (req, res) => {
+    const email = req.query.email || ACCOUNTS_PUBLIC[0];
+    try {
+        const emails = await googleService.getUnreadEmails(email);
+        res.json({ emails: emails || [] });
+    } catch (error) {
+        console.error('[GOOGLE] Email fetch error:', error.message);
+        res.json({ emails: [], error: error.message });
+    }
+});
+
+app.get('/google/emails/:id', async (req, res) => {
+    const email = req.query.email || ACCOUNTS_PUBLIC[0];
+    const messageId = req.params.id;
+    try {
+        const emailData = await googleService.getEmailById(email, messageId);
+        if (emailData) {
+            res.json(emailData);
+        } else {
+            res.status(404).json({ error: 'Email not found' });
+        }
+    } catch (error) {
+        console.error('[GOOGLE] Email detail error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/google/calendar', async (req, res) => {
+    const email = req.query.email || ACCOUNTS_PUBLIC[0];
+    try {
+        const events = await googleService.getUpcomingEvents(email);
+        res.json({ events: events || [] });
+    } catch (error) {
+        res.json({ events: [], error: error.message });
+    }
+});
+
+app.get('/google/tasks', async (req, res) => {
+    const email = req.query.email || ACCOUNTS_PUBLIC[0];
+    try {
+        const tasks = await googleService.getTasks(email);
+        res.json({ tasks: tasks || [] });
+    } catch (error) {
+        res.json({ tasks: [], error: error.message });
+    }
+});
+
+app.get('/google/drive', async (req, res) => {
+    const email = req.query.email || ACCOUNTS_PUBLIC[0];
+    try {
+        const files = await googleService.getDriveFiles(email);
+        res.json({ files: files || [] });
+    } catch (error) {
+        res.json({ files: [], error: error.message });
+    }
+});
+
 // Auth Middleware (Applied to all routes AFTER public routes)
 const { authMiddleware, requireTier, requireFeature } = require('./middleware/auth');
 const userService = require('./user_service');
@@ -217,8 +336,8 @@ const IDENTITY = require('./config/identity');
 const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
 const ACCOUNTS = [
-    'mikegauthierguillet@gmail.com',  // Priorit�
-    'th3thirty3@gmail.com',
+    'th3thirty3@gmail.com',           // PRIORITÉ - Compte principal
+    'mikegauthierguillet@gmail.com',
     'mgauthierguillet@gmail.com'
 ];
 
@@ -230,20 +349,7 @@ console.log(`[SYSTEM] ${IDENTITY.name} v${IDENTITY.version} connect� : ${model
 const memoryService = new MemoryService();
 memoryService.initialize();
 
-// Initialize Settings & Load Keys
-const settingsService = require('./settings_service');
-const currentSettings = settingsService.getSettings();
-if (currentSettings.apiKeys) {
-    console.log("[SYSTEM] Loading API Keys from Settings...");
 
-    if (currentSettings.apiKeys.openai) process.env.OPENAI_API_KEY = currentSettings.apiKeys.openai;
-    if (currentSettings.apiKeys.anthropic) process.env.ANTHROPIC_API_KEY = currentSettings.apiKeys.anthropic;
-    if (currentSettings.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = currentSettings.apiKeys.perplexity;
-    if (currentSettings.apiKeys.anythingllm_url) process.env.ANYTHING_LLM_URL = currentSettings.apiKeys.anythingllm_url;
-    if (currentSettings.apiKeys.anythingllm_key) process.env.ANYTHING_LLM_KEY = currentSettings.apiKeys.anythingllm_key;
-    if (currentSettings.apiKeys.gemini) process.env.GEMINI_API_KEY = currentSettings.apiKeys.gemini;
-    if (!process.env.GEMINI_API_KEY && currentSettings.apiKeys.google) process.env.GEMINI_API_KEY = currentSettings.apiKeys.google;
-}
 
 // Initialize MCP Service (Protocol Nexus)
 const MCPService = require('./mcp_service');
@@ -978,31 +1084,7 @@ app.post('/feedback', async (req, res) => {
     }
 });
 
-// Settings Endpoints
-app.get('/settings', (req, res) => {
-    const settings = settingsService.getSettings();
-    res.json(settings);
-});
-
-app.post('/settings', (req, res) => {
-    try {
-        const updated = settingsService.saveSettings(req.body);
-
-        // Apply API Keys to Env
-        if (updated.apiKeys) {
-
-            if (updated.apiKeys.openai) process.env.OPENAI_API_KEY = updated.apiKeys.openai;
-            if (updated.apiKeys.anthropic) process.env.ANTHROPIC_API_KEY = updated.apiKeys.anthropic;
-            if (updated.apiKeys.perplexity) process.env.PERPLEXITY_API_KEY = updated.apiKeys.perplexity;
-            if (updated.apiKeys.anythingllm_url) process.env.ANYTHING_LLM_URL = updated.apiKeys.anythingllm_url;
-            if (updated.apiKeys.anythingllm_key) process.env.ANYTHING_LLM_KEY = updated.apiKeys.anythingllm_key;
-        }
-
-        res.json(updated);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to save settings" });
-    }
-});
+// Settings Endpoints - MOVED TO PUBLIC ROUTES SECTION (before authMiddleware)
 
 app.post('/chat', async (req, res) => {
     try {

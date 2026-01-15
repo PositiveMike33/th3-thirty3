@@ -34,8 +34,11 @@ const SettingsPage = () => {
         userApiKey: '' // New field for SaaS Key
     });
 
+    const [isLoading, setIsLoading] = useState(true);
+
     // Load Settings & Status on Mount
     useEffect(() => {
+        setIsLoading(true);
         // 1. Get Settings
         fetch(`${API_URL}/settings`)
             .then(res => res.json())
@@ -49,8 +52,12 @@ const SettingsPage = () => {
                         ...data.apiKeys
                     }));
                 }
+                setIsLoading(false); // Data loaded, enable UI
             })
-            .catch(err => console.error("Failed to load settings", err));
+            .catch(err => {
+                console.error("Failed to load settings", err);
+                setIsLoading(false); // Enable UI even on error to allow retry
+            });
 
         // 2. Get Google Status
         fetch(`${API_URL}/google/status`)
@@ -98,8 +105,11 @@ const SettingsPage = () => {
     };
 
     // Backend Save Call
-    // Backend Save Call
     const saveSettings = (newSettings) => {
+        if (isLoading) {
+            console.warn("[FRONTEND] Save prevented: Settings still loading.");
+            return;
+        }
         console.log("[FRONTEND] Saving settings payload:", newSettings);
         fetch(`${API_URL}/settings`, {
             method: 'POST',
@@ -109,13 +119,24 @@ const SettingsPage = () => {
             .then(res => res.json())
             .then(data => {
                 console.log("[FRONTEND] Save response:", data);
-                window.alert("✅ Configuration sauvegardée avec succès !");
+                // window.alert("✅ Configuration sauvegardée avec succès !"); // Too invasive on auto-save
             })
             .catch(err => {
                 console.error("[FRONTEND] Save error:", err);
                 window.alert("❌ Erreur lors de la sauvegarde : " + err.message);
             });
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex-1 p-8 bg-black text-cyan-300 flex items-center justify-center font-mono">
+                <div className="text-center animate-pulse">
+                    <Activity size={48} className="mx-auto mb-4 text-cyan-500" />
+                    <h2 className="text-xl tracking-[0.2em]">INITIALISATION DU SYSTÈME...</h2>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex-1 p-8 bg-black text-cyan-300 overflow-y-auto bg-[url('/grid.png')] notranslate" translate="no">
@@ -139,8 +160,8 @@ const SettingsPage = () => {
                                     key={mode}
                                     onClick={() => updateSetting('reflectionMode', mode)}
                                     className={`p-3 rounded border text-center transition-all ${settings.reflectionMode === mode
-                                        ? 'bg-cyan-900/80 border-cyan-400 text-white shadow-[0_0_15px_rgba(34,211,238,0.3)]'
-                                        : 'bg-black/40 border-gray-700 text-gray-500 hover:border-cyan-700'
+                                        ? 'bg-green-900/30 border-green-500 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)] font-bold'
+                                        : 'bg-black/40 border-gray-700 text-gray-500 hover:border-green-900 hover:text-green-300'
                                         }`}
                                 >
                                     <div className="text-xs uppercase font-bold mb-1">{mode}</div>
@@ -165,8 +186,8 @@ const SettingsPage = () => {
                                     key={mode}
                                     onClick={() => updateSetting('themeMode', mode)}
                                     className={`p-2 rounded border text-center transition-all ${settings.themeMode === mode
-                                        ? 'bg-pink-900/80 border-pink-400 text-white'
-                                        : 'bg-black/40 border-gray-700 text-gray-500 hover:border-pink-700'
+                                        ? 'bg-green-900/30 border-green-500 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.3)] font-bold'
+                                        : 'bg-black/40 border-gray-700 text-gray-500 hover:border-green-900 hover:text-green-300'
                                         }`}
                                 >
                                     <div className="text-xs uppercase font-bold">{mode === 'paint' ? 'Sur Mesure' : mode}</div>

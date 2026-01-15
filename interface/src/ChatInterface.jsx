@@ -10,7 +10,7 @@ import Dashboard from './Dashboard';
 import SpaceDashboard from './SpaceDashboard';
 import ProjectDashboard from './ProjectDashboard';
 import SettingsPage from './SettingsPage';
-import OllamaTrainingDashboard from './OllamaTrainingDashboard';
+// OllamaTrainingDashboard removed - Cloud Only Mode
 import { APP_CONFIG, API_URL } from './config';
 import FabricLibrary from './components/FabricLibrary';
 import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase, BookOpen, X, Brain, Facebook, Youtube, Linkedin, Instagram, Twitter } from 'lucide-react';
@@ -396,7 +396,13 @@ const ChatInterface = () => {
                 ) : currentView === 'settings' ? (
                     <div className="flex-1 overflow-hidden"><SettingsPage /></div>
                 ) : currentView === 'training' ? (
-                    <div className="flex-1 overflow-hidden"><OllamaTrainingDashboard /></div>
+                    <div className="flex-1 overflow-hidden flex items-center justify-center bg-gray-900">
+                        <div className="text-center p-8">
+                            <div className="text-6xl mb-4">☁️</div>
+                            <h2 className="text-2xl font-bold text-cyan-400 mb-2">CLOUD ONLY MODE</h2>
+                            <p className="text-gray-500">Local training désactivé - Utilisez les modèles Cloud.</p>
+                        </div>
+                    </div>
                 ) : (
                     <>
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-cyan-900 scrollbar-track-black">

@@ -1,90 +1,132 @@
 const fs = require('fs');
 const path = require('path');
 
-const SETTINGS_PATH = path.join(__dirname, 'data', 'settings.json');
+// 1. Définition des Chemins Absolus (Vital pour éviter les erreurs de path)
+const DATA_DIR = path.join(__dirname, 'data');
+const SETTINGS_PATH = path.join(DATA_DIR, 'settings.json');
 
-// Default Settings
-const DEFAULTS = {
-    darkMode: true,
-    autoCorrect: true,
-    computeMode: 'cloud', // 'local' | 'cloud'
-    reflectionMode: 'think', // 'rapide' | 'think' | 'ultra'
-    socials: {
-        facebook: false,
-        instagram: false,
-        x: false,
-        telegram: false
-    },
+// 2. Configuration par défaut (Fallback)
+const DEFAULT_SETTINGS = {
+    themeMode: 'dark',
+    language: 'fr-CA',
+    autoCorrection: true,
     apiKeys: {
-
-        openai: "",
-        anthropic: "",
-        perplexity: "",
-        gemini: "",
-        anythingllm_url: "",
-        anythingllm_key: "J7SYKN6-9P4M3SG-GY35K69-B8NVZ9M",
-        extension_url: "http://localhost:63436/api",
-        extension_key: "brx-AET5FA5-HYZM8FQ-KDTKC5V-MDG3WM8"
+        openai: '',
+        anthropic: '',
+        gemini: '',
+        groq: '',
+        anythingllm: '',
+        anythingllmUrl: 'http://localhost:3001/api/v1'
+    },
+    system: {
+        autoSaveInterval: 60000,
+        logLevel: 'info'
     }
 };
 
 class SettingsService {
     constructor() {
-        this.ensureDataDir();
-        if (!fs.existsSync(SETTINGS_PATH)) {
-            console.log("[SETTINGS] Initializing default settings file.");
-            this.saveSettings(DEFAULTS);
+        this.settingsPath = SETTINGS_PATH;
+        this.initialize();
+    }
+
+    /**
+     * Initialisation Robuste : Crée le dossier et le fichier si absents
+     */
+    initialize() {
+        try {
+            // Vérifier/Créer le dossier 'data'
+            if (!fs.existsSync(DATA_DIR)) {
+                console.log(`[SETTINGS] Dossier data introuvable. Création : ${DATA_DIR}`);
+                fs.mkdirSync(DATA_DIR, { recursive: true });
+            }
+
+            // Vérifier si le fichier settings existe
+            if (!fs.existsSync(this.settingsPath)) {
+                console.log('[SETTINGS] Fichier introuvable. Création avec valeurs par défaut.');
+                this.writeSettingsToDisk(DEFAULT_SETTINGS);
+            } else {
+                // Test de lecture pour vérifier la corruption
+                try {
+                    const content = fs.readFileSync(this.settingsPath, 'utf8');
+                    JSON.parse(content); // Juste pour tester la validité
+                    console.log(`[SETTINGS] Chargé avec succès depuis : ${this.settingsPath}`);
+                } catch (parseError) {
+                    console.error('[SETTINGS] ⚠️ Fichier corrompu détecté. Réinitialisation (Backup créé).');
+                    fs.copyFileSync(this.settingsPath, `${this.settingsPath}.bak`); // Backup
+                    this.writeSettingsToDisk(DEFAULT_SETTINGS);
+                }
+            }
+        } catch (error) {
+            console.error('[SETTINGS] Erreur critique initialisation:', error);
         }
     }
 
-    ensureDataDir() {
-        const dataDir = path.join(__dirname, 'data');
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir, { recursive: true });
-        }
-    }
-
+    /**
+     * Lecture : Fusionne toujours avec les Defaults pour éviter les champs manquants
+     */
     getSettings() {
         try {
-            if (!fs.existsSync(SETTINGS_PATH)) {
-                return DEFAULTS;
+            if (!fs.existsSync(this.settingsPath)) {
+                return DEFAULT_SETTINGS;
             }
-            const data = fs.readFileSync(SETTINGS_PATH, 'utf8');
-            const parsed = JSON.parse(data);
+            const fileContent = fs.readFileSync(this.settingsPath, 'utf8');
+            const userSettings = JSON.parse(fileContent);
 
-            // Deep merge with defaults to ensure all fields exist
-            return {
-                ...DEFAULTS,
-                ...parsed,
-                socials: { ...DEFAULTS.socials, ...(parsed.socials || {}) },
-                apiKeys: { ...DEFAULTS.apiKeys, ...(parsed.apiKeys || {}) }
-            };
+            // Merge profond simple : Defaults <- UserSettings
+            // Cela garantit que si tu ajoutes une nouvelle option dans le code, 
+            // elle n'est pas "undefined" pour l'utilisateur existant.
+            return { ...DEFAULT_SETTINGS, ...userSettings, apiKeys: { ...DEFAULT_SETTINGS.apiKeys, ...userSettings.apiKeys } };
         } catch (error) {
-            console.error("[SETTINGS] Error reading settings:", error);
-            return DEFAULTS;
+            console.error('[SETTINGS] Erreur lecture:', error);
+            return DEFAULT_SETTINGS;
         }
     }
 
+    /**
+     * Sauvegarde : "Atomic Merge"
+     * Ne remplace que ce qui est modifié, garde le reste.
+     */
     saveSettings(newSettings) {
         try {
-            const current = this.getSettings();
+            const currentSettings = this.getSettings();
 
-            // Merge carefully
-            const updated = {
-                ...current,
+            // Fusion des données existantes avec les nouvelles
+            const updatedSettings = {
+                ...currentSettings,
                 ...newSettings,
-                socials: { ...current.socials, ...(newSettings.socials || {}) },
-                apiKeys: { ...current.apiKeys, ...(newSettings.apiKeys || {}) }
+                // Gestion spécifique pour les objets imbriqués comme apiKeys
+                apiKeys: {
+                    ...(currentSettings.apiKeys || {}),
+                    ...(newSettings.apiKeys || {})
+                }
             };
 
-            fs.writeFileSync(SETTINGS_PATH, JSON.stringify(updated, null, 2));
-            console.log("[SETTINGS] Settings saved successfully.");
-            return updated;
+            this.writeSettingsToDisk(updatedSettings);
+            return updatedSettings;
         } catch (error) {
-            console.error("[SETTINGS] Error saving settings:", error);
-            throw error;
+            console.error('[SETTINGS] Erreur sauvegarde:', error);
+            throw new Error('Impossible de sauvegarder les paramètres');
         }
+    }
+
+    /**
+     * Helper interne pour l'écriture disque
+     */
+    writeSettingsToDisk(data) {
+        fs.writeFileSync(this.settingsPath, JSON.stringify(data, null, 2), 'utf8');
+    }
+
+    /**
+     * Mise à jour d'une seule clé (utilitaire rapide)
+     */
+    updateKey(key, value) {
+        const settings = this.getSettings();
+        settings[key] = value;
+        return this.saveSettings(settings);
     }
 }
 
-module.exports = new SettingsService();
+// Singleton pour éviter les conflits d'accès fichier
+const settingsService = new SettingsService();
+module.exports = settingsService;

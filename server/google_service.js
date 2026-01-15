@@ -52,10 +52,10 @@ class GoogleService {
         this.clients[email] = oAuth2Client;
 
         return oAuth2Client.generateAuthUrl({
-            access_type: 'offline',
+            access_type: 'offline', // OBLIGATOIRE pour avoir le refresh_token
             scope: SCOPES,
             state: email,
-            prompt: 'consent'
+            prompt: 'consent' // Force la génération du refresh_token même si déjà autorisé
         });
     }
 
@@ -189,6 +189,58 @@ class GoogleService {
         } catch (error) {
             console.error(`Error fetching emails for ${email}:`, error);
             return [];
+        }
+    }
+
+    async getEmailById(email, messageId) {
+        const auth = await this.getClient(email);
+        if (!auth) return null;
+
+        const gmail = google.gmail({ version: 'v1', auth });
+        try {
+            const msg = await gmail.users.messages.get({
+                userId: 'me',
+                id: messageId,
+                format: 'full'
+            });
+
+            const headers = msg.data.payload.headers;
+            const subject = headers.find(h => h.name === 'Subject')?.value || '(Sans sujet)';
+            const from = headers.find(h => h.name === 'From')?.value || '(Inconnu)';
+            const to = headers.find(h => h.name === 'To')?.value || '';
+            const date = headers.find(h => h.name === 'Date')?.value;
+
+            // Extract body
+            let body = '';
+            const payload = msg.data.payload;
+
+            if (payload.body && payload.body.data) {
+                body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
+            } else if (payload.parts) {
+                // Multipart email
+                for (const part of payload.parts) {
+                    if (part.mimeType === 'text/html' && part.body.data) {
+                        body = Buffer.from(part.body.data, 'base64').toString('utf-8');
+                        break;
+                    } else if (part.mimeType === 'text/plain' && part.body.data) {
+                        body = Buffer.from(part.body.data, 'base64').toString('utf-8');
+                    }
+                }
+            }
+
+            return {
+                id: messageId,
+                subject,
+                from,
+                to,
+                date,
+                snippet: msg.data.snippet,
+                body: body,
+                labelIds: msg.data.labelIds
+            };
+        } catch (error) {
+            console.error(`Error fetching email ${messageId}:`, error);
+            return null;
         }
     }
 
