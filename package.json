@@ -1,10 +1,17 @@
 {
   "scripts": {
     "start": "node server/index.js",
-    "restart": "powershell -ExecutionPolicy Bypass -File ./restart_session.ps1",
-    "test": "node tests/verify_pieces.js && node tests/verify_memory.js && node tests/verify_fabric.js"
+    "dev": "nodemon server/index.js",
+    "util:analyze": "node scripts/analyze_pack.js",
+    "util:creds": "node scripts/check_creds.js",
+    "win:start": "scripts\\start.bat",
+    "test:server": "node server/tests/verify_pieces.js",
+    "clean": "rm -rf node_modules && npm install"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "colors": "^1.4.0",
+    "dotenv": "^17.2.3",
     "eventsource": "^4.1.0",
     "socks-proxy-agent": "^8.0.5"
   }

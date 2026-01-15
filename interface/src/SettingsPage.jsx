@@ -10,7 +10,7 @@ const SettingsPage = () => {
         customWallpaper: '', // URL for 'paint' mode
         language: 'fr-QC', // 'fr-QC' | 'en-US' | 'fr-FR'
         autoCorrect: true,
-        computeMode: 'local',
+        computeMode: 'cloud',
         reflectionMode: 'think'
     });
 
@@ -208,26 +208,15 @@ const SettingsPage = () => {
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <Cpu size={20} /> PUISSANCE DE CALCUL
                         </h3>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => updateSetting('computeMode', 'local')}
-                                className={`flex-1 p-4 rounded border flex items-center justify-center gap-2 transition-all ${settings.computeMode === 'local'
-                                    ? 'bg-purple-900/80 border-purple-400 text-white'
-                                    : 'bg-black/40 border-gray-700 text-gray-500'
-                                    }`}
-                            >
-                                <Zap size={18} /> LOCAL (Privé)
-                            </button>
-                            <button
-                                onClick={() => updateSetting('computeMode', 'cloud')}
-                                className={`flex-1 p-4 rounded border flex items-center justify-center gap-2 transition-all ${settings.computeMode === 'cloud'
-                                    ? 'bg-blue-900/80 border-blue-400 text-white'
-                                    : 'bg-black/40 border-gray-700 text-gray-500'
-                                    }`}
-                            >
-                                <Cloud size={18} /> CLOUD (Puissant)
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => updateSetting('computeMode', 'cloud')}
+                            className={`flex-1 p-4 rounded border flex items-center justify-center gap-2 transition-all ${settings.computeMode === 'cloud'
+                                ? 'bg-blue-900/80 border-blue-400 text-white'
+                                : 'bg-black/40 border-gray-700 text-gray-500'
+                                }`}
+                        >
+                            <Cloud size={18} /> CLOUD (Puissant) - Mode Unique
+                        </button>
                     </div>
 
                     {/* AUTO-CORRECTION */}

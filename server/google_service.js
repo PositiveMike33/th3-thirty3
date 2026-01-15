@@ -71,38 +71,19 @@ class GoogleService {
         const { tokens } = await oAuth2Client.getToken(code);
         oAuth2Client.setCredentials(tokens);
 
-        // Try to save token to MongoDB, fallback to local file if DB is down
-        let savedToDb = false;
+        // Save token to MongoDB
         try {
-            // Set a short timeout to avoid hanging
-            const savePromise = User.findOneAndUpdate(
+            await User.findOneAndUpdate(
                 { email: email },
                 { $set: { googleTokens: tokens } },
-                { upsert: true, new: true, maxTimeMS: 5000 }
+                { upsert: true, new: true }
             );
-
-            await savePromise;
-            savedToDb = true;
-            console.log(`[GOOGLE] ✅ Token stored in DB for ${email}`);
+            console.log(`[GOOGLE] Token stored in DB for ${email}`);
         } catch (err) {
-            console.error(`[GOOGLE] ⚠️ Failed to save token to DB for ${email}:`, err.message);
-
-            // FALLBACK: Save to local file if MongoDB is down
-            try {
-                const tokensDir = path.join(__dirname, 'tokens');
-                if (!fs.existsSync(tokensDir)) {
-                    fs.mkdirSync(tokensDir, { recursive: true });
-                }
-                const tokenPath = path.join(tokensDir, `${email.replace(/[@.]/g, '_')}.json`);
-                fs.writeFileSync(tokenPath, JSON.stringify(tokens, null, 2));
-                console.log(`[GOOGLE] ✅ Token saved to local file (fallback): ${tokenPath}`);
-            } catch (fileErr) {
-                console.error(`[GOOGLE] ❌ Failed to save token to file:`, fileErr.message);
-                throw new Error(`Cannot save Google token: DB down and file fallback failed`);
-            }
+            console.error(`[GOOGLE] Failed to save token to DB for ${email}:`, err);
         }
 
-        return { success: true, savedToDb };
+        return true;
     }
 
     async getClient(email) {
@@ -117,40 +98,16 @@ class GoogleService {
             }
         }
 
-        // Try to fetch from MongoDB first, then fallback to local file
-        let tokens = null;
-
-        try {
-            const user = await User.findOne({ email }).maxTimeMS(3000);
-            if (user && user.googleTokens) {
-                tokens = user.googleTokens;
-                console.log(`[GOOGLE] Loaded token from DB for ${email}`);
-            }
-        } catch (dbError) {
-            console.warn(`[GOOGLE] DB lookup failed for ${email}:`, dbError.message);
-        }
-
-        // FALLBACK: Try local file if DB failed or no token in DB
-        if (!tokens) {
-            try {
-                const tokenPath = path.join(__dirname, 'tokens', `${email.replace(/[@.]/g, '_')}.json`);
-                if (fs.existsSync(tokenPath)) {
-                    const tokenContent = fs.readFileSync(tokenPath, 'utf-8');
-                    tokens = JSON.parse(tokenContent);
-                    console.log(`[GOOGLE] ✅ Loaded token from local file (fallback) for ${email}`);
-                }
-            } catch (fileErr) {
-                console.warn(`[GOOGLE] File fallback failed for ${email}:`, fileErr.message);
-            }
-        }
-
-        if (!tokens) return null;
+        // Fetch from MongoDB
+        const user = await User.findOne({ email });
+        if (!user || !user.googleTokens) return null;
         if (!this.credentials) return null;
 
         const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
         const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
         try {
+            const tokens = user.googleTokens;
             oAuth2Client.setCredentials(tokens);
 
             // Check if token needs refresh
@@ -160,21 +117,13 @@ class GoogleService {
                     const { credentials: newTokens } = await oAuth2Client.refreshAccessToken();
                     oAuth2Client.setCredentials(newTokens);
 
-                    // Try to save refreshed token to DB, fallback to file
+                    // Save refreshed token to DB
                     const updatedTokens = { ...tokens, ...newTokens };
-                    try {
-                        await User.findOneAndUpdate(
-                            { email },
-                            { $set: { googleTokens: updatedTokens } },
-                            { maxTimeMS: 3000 }
-                        );
-                        console.log(`[GOOGLE] Token refreshed and saved to DB for ${email}`);
-                    } catch (saveErr) {
-                        // Fallback to file
-                        const tokenPath = path.join(__dirname, 'tokens', `${email.replace(/[@.]/g, '_')}.json`);
-                        fs.writeFileSync(tokenPath, JSON.stringify(updatedTokens, null, 2));
-                        console.log(`[GOOGLE] Token refreshed and saved to file (fallback) for ${email}`);
-                    }
+                    await User.findOneAndUpdate(
+                        { email },
+                        { $set: { googleTokens: updatedTokens } }
+                    );
+                    console.log(`[GOOGLE] Token refreshed and saved for ${email}`);
                 } catch (refreshError) {
                     console.error(`[GOOGLE] Token refresh failed for ${email}:`, refreshError.message);
                     // Token is invalid, needs re-auth

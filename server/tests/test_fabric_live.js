@@ -1,4 +1,4 @@
-const { getPatterns, getPatternContent } = require('./server/fabric_service');
+const { getPatterns, getPatternContent } = require('../fabric_service');
 
 console.log("Testing Fabric Service...");
 const patterns = getPatterns();

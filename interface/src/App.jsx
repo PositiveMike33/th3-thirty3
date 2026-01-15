@@ -8,7 +8,7 @@ import OsintDashboard from './OsintDashboard';
 
 import CyberTrainingPage from './CyberTrainingPage';
 import KPIDashboard from './KPIDashboard';
-import OllamaTrainingDashboard from './OllamaTrainingDashboard';
+
 import AgentMonitor from './AgentMonitor';
 import ChatInterface from './ChatInterface';
 import SettingsPage from './SettingsPage';
@@ -89,7 +89,7 @@ function App() {
                           <Route path="/projects" element={<ProjectDashboard />} />
                           <Route path="/osint" element={<OsintDashboard />} />
                           <Route path="/cyber-training" element={<CyberTrainingPage />} />
-                          <Route path="/training" element={<OllamaTrainingDashboard />} />
+
                           <Route path="/dashboard" element={<KPIDashboard />} />
                           <Route path="/dart" element={<DartAI />} />
                           <Route path="/finetuning" element={<FineTuningDashboard />} />

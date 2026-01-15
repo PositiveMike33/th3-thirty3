@@ -10,19 +10,17 @@ try {
     console.warn('[MEMORY] This is normal on some platforms. The app will continue without vector memory.');
 }
 
-const { Ollama } = require('ollama');
+const EmbeddingService = require('./embedding_service');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
 class MemoryService {
     constructor() {
-        const ollamaHost = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-        this.ollama = new Ollama({ host: ollamaHost });
+        this.embeddingService = new EmbeddingService();
         this.db = null;
         this.table = null;
         this.tableName = 'memory_store';
-        this.embedModel = 'mxbai-embed-large';
         this.isAvailable = VECTORDB_AVAILABLE;
     }
 
@@ -63,11 +61,9 @@ class MemoryService {
 
     async getEmbedding(text) {
         try {
-            const response = await this.ollama.embeddings({
-                model: this.embedModel,
-                prompt: text,
-            });
-            return response.embedding;
+            // Use Gemini via EmbeddingService
+            const embedding = await this.embeddingService.embed(text);
+            return embedding;
         } catch (error) {
             console.error("[MEMORY] Embedding generation failed:", error);
             return null;
@@ -195,11 +191,7 @@ class MemoryService {
                 const relativePath = path.relative(vaultPath, filePath);
                 const stat = await fsPromises.stat(filePath);
 
-                // Deduplication: Remove old chunks for this file
-                if (this.table) {
-                    // Future implementation: Delete old chunks before adding new ones
-                    // await this.table.delete(`source = '${relativePath}'`); 
-                }
+                // Deduplication can be handled here if needed in future
 
                 const chunks = this.chunkText(content);
 

@@ -35,45 +35,6 @@ const ProjectDashboard = () => {
         files: []
     });
     const [googleLoading, setGoogleLoading] = useState(false);
-    const [gmailConnected, setGmailConnected] = useState(false);
-
-    // Check Google authentication status
-    const checkGoogleStatus = React.useCallback(async () => {
-        try {
-            const res = await fetch(`${API_URL}/google/status`);
-            const status = await res.json();
-            // Check if the main account is connected
-            const isConnected = status && status['th3thirty3@gmail.com'] === true;
-            setGmailConnected(isConnected);
-            return isConnected;
-        } catch (error) {
-            console.error("Error checking Google status:", error);
-            setGmailConnected(false);
-            return false;
-        }
-    }, []);
-
-    // Handle Gmail connection with popup
-    const handleConnectGmail = React.useCallback(() => {
-        const authUrl = `${API_URL}/auth/google?email=th3thirty3@gmail.com`;
-        const popup = window.open(authUrl, 'Gmail Auth', 'width=500,height=600,scrollbars=yes');
-
-        // Poll for popup close and check status
-        const pollTimer = setInterval(async () => {
-            if (popup && popup.closed) {
-                clearInterval(pollTimer);
-                // Wait a moment for the backend to process the callback
-                setTimeout(async () => {
-                    const isNowConnected = await checkGoogleStatus();
-                    if (isNowConnected) {
-                        console.log('[GMAIL] Connection successful!');
-                        // Trigger a re-fetch of Google data by dispatching a custom event
-                        window.dispatchEvent(new Event('gmail-connected'));
-                    }
-                }, 500);
-            }
-        }, 500);
-    }, [checkGoogleStatus]);
 
     // Agent State
     const [agents, setAgents] = useState([]);
@@ -153,7 +114,6 @@ const ProjectDashboard = () => {
 
         const initData = async () => {
             if (isMounted) {
-                await checkGoogleStatus(); // Check Gmail connection status first
                 await fetchGoogleData();
                 await fetchAgents();
             }
@@ -163,36 +123,14 @@ const ProjectDashboard = () => {
 
         // Real-time refresh every 30s
         const interval = setInterval(() => {
-            if (isMounted) {
-                fetchGoogleData();
-                checkGoogleStatus(); // Also refresh connection status periodically
-            }
+            if (isMounted) fetchGoogleData();
         }, 30000);
-
-        // Listen for Gmail connection success event (from custom events)
-        const handleGmailConnected = () => {
-            console.log('[GMAIL] Connection event received, refreshing data...');
-            fetchGoogleData();
-        };
-        window.addEventListener('gmail-connected', handleGmailConnected);
-
-        // Listen for postMessage from popup (direct confirmation from callback)
-        const handlePostMessage = (event) => {
-            if (event.data && event.data.type === 'gmail-auth-success') {
-                console.log('[GMAIL] postMessage received from popup:', event.data.email);
-                checkGoogleStatus();
-                fetchGoogleData();
-            }
-        };
-        window.addEventListener('message', handlePostMessage);
 
         return () => {
             isMounted = false;
             clearInterval(interval);
-            window.removeEventListener('gmail-connected', handleGmailConnected);
-            window.removeEventListener('message', handlePostMessage);
         };
-    }, [fetchGoogleData, fetchAgents, checkGoogleStatus]);
+    }, [fetchGoogleData, fetchAgents]);
 
     // --- SOCKET LISTENERS ---
     useEffect(() => {
@@ -365,15 +303,11 @@ const ProjectDashboard = () => {
                         SYNC
                     </button>
                     <button
-                        onClick={handleConnectGmail}
-                        disabled={gmailConnected}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-bold transition-all duration-300 ${gmailConnected
-                            ? 'bg-green-600 hover:bg-green-600 text-white border border-green-500 cursor-default shadow-[0_0_15px_rgba(34,197,94,0.4)]'
-                            : 'bg-red-600 hover:bg-red-500 text-white border border-red-500'
-                            }`}
+                        onClick={() => window.location.href = `${API_URL}/auth/google?email=th3thirty3@gmail.com`}
+                        className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded text-sm border border-red-500 font-bold"
                     >
                         <Mail size={14} />
-                        {gmailConnected ? '✓ GMAIL CONNECTED' : 'CONNECT GMAIL'}
+                        CONNECT GMAIL
                     </button>
                     <button
                         onClick={() => {

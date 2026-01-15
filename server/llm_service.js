@@ -1,5 +1,4 @@
 
-const { Ollama } = require('ollama');
 const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
 const AnythingLLMWrapper = require('./anythingllm_wrapper');
@@ -9,20 +8,16 @@ const settingsService = require('./settings_service');
 
 class LLMService {
     constructor() {
-        const ollamaHost = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-        this.ollama = new Ollama({ host: ollamaHost });
-        console.log(`[LLM_SERVICE] Ollama configured at: ${ollamaHost}`);
+        console.log(`[LLM_SERVICE] Running in CLOUD-ONLY mode.`);
         this.socketService = null;
         this.modelMetricsService = null;
         this.anythingLLMWrapper = new AnythingLLMWrapper();
         this.knowledgeBase = knowledgeBase; // RAG Knowledge Base
         this.providers = {
-            local: { name: 'Local (Ollama)', type: 'local' },
             openai: { name: 'OpenAI (ChatGPT)', type: 'cloud' },
             claude: { name: 'Anthropic Claude', type: 'cloud' },
             groq: { name: 'Groq (Ultra-Fast)', type: 'cloud' },
             gemini: { name: 'Google Gemini', type: 'cloud' },
-            lmstudio: { name: 'LM Studio (Private)', type: 'local' },
             anythingllm: { name: 'AnythingLLM (Agents)', type: 'cloud' }
         };
     }
@@ -36,108 +31,66 @@ class LLMService {
     }
 
     /**
-     * Lists all available models (Local + Cloud + Agents).
+     * Lists all available models (Cloud + Agents).
      */
-    async listModels(computeMode = 'local') {
-        // Note: Called frequently by frontend polling, avoid verbose logging
+    async listModels(computeMode = 'cloud') {
+        // Force cloud mode
         const models = { local: [], cloud: [] };
+        const settings = settingsService.getSettings();
 
-        // --- LOCAL MODE (Always Available) ---
-        // 1. Ollama
-        try {
-            // Wrap Ollama call in a timeout promise
-            const list = await Promise.race([
-                this.ollama.list(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("Ollama Timeout")), 2000))
-            ]);
-            models.local = list.models.map(m => m.name);
-        } catch (e) {
-            console.error("Failed to list local models:", e.message);
-            models.local = ["Ollama Offline"];
+        // --- CLOUD MODE MODELS ---
+
+        // Claude (Anthropic)
+        if (process.env.ANTHROPIC_API_KEY) {
+            models.cloud.push({ id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'claude' });
+            models.cloud.push({ id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'claude' });
         }
 
-        // 2. LM Studio
-        if (process.env.LM_STUDIO_URL) {
+        // Groq (Ultra-fast)
+        if (process.env.GROQ_API_KEY) {
+            models.cloud.push({ id: 'llama-3.3-70b-versatile', name: '⚡ Llama 3.3 70B Versatile', provider: 'groq' });
+            models.cloud.push({ id: 'llama-3.1-8b-instant', name: '⚡ Llama 3.1 8B Instant', provider: 'groq' });
+            models.cloud.push({ id: 'qwen/qwen3-32b', name: '⚡ Qwen 3 32B', provider: 'groq' });
+            models.cloud.push({ id: 'groq/compound', name: '⚡ Groq Compound', provider: 'groq' });
+        }
+
+        // Perplexity
+        if (process.env.PERPLEXITY_API_KEY) {
+            models.cloud.push({ id: 'sonar', name: '🔍 Perplexity Sonar', provider: 'perplexity' });
+            models.cloud.push({ id: 'sonar-pro', name: '🔍 Perplexity Sonar Pro', provider: 'perplexity' });
+            models.cloud.push({ id: 'sonar-reasoning', name: '🧠 Perplexity Sonar Reasoning', provider: 'perplexity' });
+        }
+
+        // AnythingLLM (Agents)
+        if (process.env.ANYTHING_LLM_URL && process.env.ANYTHING_LLM_KEY) {
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
 
-                const response = await fetch(`${process.env.LM_STUDIO_URL}/models`, { signal: controller.signal });
+                const response = await fetch(`${process.env.ANYTHING_LLM_URL}/openai/models`, {
+                    headers: { 'Authorization': `Bearer ${process.env.ANYTHING_LLM_KEY}` },
+                    signal: controller.signal
+                });
                 clearTimeout(timeoutId);
 
                 if (response.ok) {
                     const data = await response.json();
-                    const lmModels = data.data.map(m => `[LMS] ${m.id}`);
-                    models.local.push(...lmModels);
+                    if (data && data.data) {
+                        const agents = data.data.map(m => ({
+                            id: m.id,
+                            name: `[AGENT] ${m.id}`,
+                            provider: 'anythingllm'
+                        }));
+                        models.cloud.push(...agents);
+                    }
                 }
             } catch (e) {
-                // console.log("LM Studio offline");
-                models.local.push("[LMS] Offline");
+                console.error("Failed to list AnythingLLM agents:", e.message);
+                // Fail silently for listing
             }
         }
 
-        // --- CLOUD MODE ---
-        if (computeMode === 'cloud') {
-            const settings = settingsService.getSettings();
-
-
-
-
-
-            // Claude (Anthropic)
-            if (process.env.ANTHROPIC_API_KEY) {
-                models.cloud.push({ id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'claude' });
-                models.cloud.push({ id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'claude' });
-            }
-
-            // Groq (Ultra-fast) - Modèles actuels vérifiés
-            if (process.env.GROQ_API_KEY) {
-                models.cloud.push({ id: 'llama-3.3-70b-versatile', name: '⚡ Llama 3.3 70B Versatile', provider: 'groq' });
-                models.cloud.push({ id: 'llama-3.1-8b-instant', name: '⚡ Llama 3.1 8B Instant', provider: 'groq' });
-                models.cloud.push({ id: 'qwen/qwen3-32b', name: '⚡ Qwen 3 32B', provider: 'groq' });
-                models.cloud.push({ id: 'groq/compound', name: '⚡ Groq Compound', provider: 'groq' });
-            }
-
-            // Perplexity
-            if (process.env.PERPLEXITY_API_KEY) {
-                models.cloud.push({ id: 'sonar', name: '🔍 Perplexity Sonar', provider: 'perplexity' });
-                models.cloud.push({ id: 'sonar-pro', name: '🔍 Perplexity Sonar Pro', provider: 'perplexity' });
-                models.cloud.push({ id: 'sonar-reasoning', name: '🧠 Perplexity Sonar Reasoning', provider: 'perplexity' });
-            }
-
-            // AnythingLLM (Agents)
-            if (process.env.ANYTHING_LLM_URL && process.env.ANYTHING_LLM_KEY) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
-
-                    const response = await fetch(`${process.env.ANYTHING_LLM_URL}/openai/models`, {
-                        headers: { 'Authorization': `Bearer ${process.env.ANYTHING_LLM_KEY}` },
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.data) {
-                            const agents = data.data.map(m => ({
-                                id: m.id,
-                                name: `[AGENT] ${m.id}`,
-                                provider: 'anythingllm'
-                            }));
-                            models.cloud.push(...agents);
-                        }
-                    }
-                } catch (e) {
-                    console.error("Failed to list AnythingLLM agents (Timeout/Error):", e.message);
-                }
-            }
-        }
-
-        // --- ALWAYS AVAILABLE SERVICES (regardless of computeMode) ---
-
-        // Google Gemini - Gemini 3 Series ONLY (User Request)
-        const settings = settingsService.getSettings(); // Reload settings to be sure
+        // Google Gemini - Gemini 1.5 Series (User Request)
         const geminiKey = process.env.GEMINI_API_KEY || settings.apiKeys?.gemini;
         if (geminiKey) {
             models.cloud.push({ id: 'gemini-3-pro-preview', name: '🔥 Gemini 3 Pro (1M Context)', provider: 'gemini' });
@@ -145,49 +98,17 @@ class LLMService {
             models.cloud.push({ id: 'gemini-3-pro-image-preview', name: '🎨 Gemini 3 Pro Image', provider: 'gemini' });
         }
 
-        // OpenAI - All Available Models (Always Available if API Key Present)
+        // OpenAI - All Available Models
         const openaiKey = process.env.OPENAI_API_KEY || settings.apiKeys?.openai;
         if (openaiKey) {
-            // GPT-4o Series
             models.cloud.push({ id: 'gpt-4o', name: '🟢 GPT-4o (Flagship)', provider: 'openai' });
             models.cloud.push({ id: 'gpt-4o-mini', name: '🟢 GPT-4o Mini', provider: 'openai' });
-            models.cloud.push({ id: 'chatgpt-4o-latest', name: '🟢 ChatGPT-4o Latest', provider: 'openai' });
-
-            // O1 Reasoning Series
             models.cloud.push({ id: 'o1', name: '🧠 O1 (Reasoning)', provider: 'openai' });
             models.cloud.push({ id: 'o1-mini', name: '🧠 O1 Mini', provider: 'openai' });
-            models.cloud.push({ id: 'o1-preview', name: '🧠 O1 Preview', provider: 'openai' });
-
-            // O3 Series (Latest)
             models.cloud.push({ id: 'o3-mini', name: '⚡ O3 Mini (Fast)', provider: 'openai' });
-
-            // GPT-4 Turbo
-            models.cloud.push({ id: 'gpt-4-turbo', name: '🔵 GPT-4 Turbo', provider: 'openai' });
-            models.cloud.push({ id: 'gpt-4-turbo-preview', name: '🔵 GPT-4 Turbo Preview', provider: 'openai' });
-
-            // GPT-4 Classic
-            models.cloud.push({ id: 'gpt-4', name: '🔵 GPT-4', provider: 'openai' });
-
-            // GPT-3.5
-            models.cloud.push({ id: 'gpt-3.5-turbo', name: '⚪ GPT-3.5 Turbo', provider: 'openai' });
         }
 
-
-        // AnythingLLM - Always show if configured
-        if (process.env.ANYTHING_LLM_URL && process.env.ANYTHING_LLM_KEY) {
-            // Add a default AnythingLLM entry if no workspaces were fetched
-            const hasAnythingLLM = models.cloud.some(m => m.provider === 'anythingllm');
-            if (!hasAnythingLLM) {
-                models.cloud.push({
-                    id: 'anythingllm-default',
-                    name: '🤖 AnythingLLM Agent',
-                    provider: 'anythingllm'
-                });
-            }
-        }
-
-        // HackerGPT - Always show (has fallbacks to AnythingLLM and Ollama)
-        // Uses Gemini as primary, AnythingLLM as secondary, Ollama as tertiary
+        // HackerGPT
         models.cloud.push({
             id: 'hackergpt',
             name: process.env.GEMINI_API_KEY
@@ -200,9 +121,9 @@ class LLMService {
     }
 
     /**
-     * Analyzes OSINT tool output using a specific Expert Persona.
+     * Analyzes OSINT tool output.
      */
-    async analyzeOsintResult(toolId, output, provider = 'local', model = 'gemini-3-pro-preview') {
+    async analyzeOsintResult(toolId, output, provider = 'cloud', model = 'gemini-3-pro-preview') {
         const personas = {
             sherlock: `You are 'Ghost', an Elite Social Engineer and Profiler with 20+ years of experience in tracking targets across the digital footprint. 
             Analyze the provided Sherlock username search results. 
@@ -229,17 +150,15 @@ class LLMService {
         const systemPrompt = personas[toolId] || personas.default;
         const prompt = `[TOOL OUTPUT START]\n${output}\n[TOOL OUTPUT END]\n\nAnalyze this data based on your persona.`;
 
-        // Use the requested provider/model, or fallback to a smart default if not specified
-        // For analysis, we prefer a smarter model if available (e.g., Gemini Flash/Pro)
-        let targetProvider = provider;
-        let targetModel = model;
+        let targetProvider = 'gemini';
+        let targetModel = 'gemini-3-pro-preview';
 
         if (process.env.GEMINI_API_KEY) {
             targetProvider = 'gemini';
-            targetModel = 'gemini-3-pro-preview'; // Default used for Expert Analysis
-        } else if (process.env.ANYTHING_LLM_KEY && provider === 'local') {
+            targetModel = 'gemini-3-pro-preview';
+        } else if (process.env.ANYTHING_LLM_KEY) {
             targetProvider = 'anythingllm';
-            targetModel = 'gpt-4o'; // Default to a strong model via AnythingLLM
+            targetModel = 'gpt-4o';
         }
 
         return await this.generateResponse(prompt, null, targetProvider, targetModel, systemPrompt);
@@ -258,21 +177,12 @@ class LLMService {
 
         if (this.socketService) {
             this.socketService.emitAgentStart({ provider: providerId, model: modelId, prompt: augmentedPrompt });
-            this.socketService.emitAgentStatus("Thinking...");
+            this.socketService.emitAgentStatus("Checking Cloud Services...");
         }
 
         try {
-            // RESOURCE MANAGEMENT:
-            // If we are NOT using local/ollama, ensure we unload any loaded local models to free VRAM
-            // This is critical when running AnythingLLM or other heavy local apps alongside.
-            if (providerId !== 'local') {
-                // We don't await this to avoid slowing down the request
-                this.unloadModel('granite4:latest').catch(e => console.log("[LLM] Background unload failed:", e.message));
-            }
-
             let response;
             switch (providerId) {
-
                 case 'openai':
                     response = await this.generateOpenAIResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
@@ -292,7 +202,7 @@ class LLMService {
                     response = await this.generateOpenRouterResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
                     break;
                 case 'anythingllm':
-                case 'cloud': // Force Cloud mode to AnythingLLM
+                case 'cloud':
                     response = await this.generateAnythingLLMResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'lmstudio':
@@ -302,9 +212,14 @@ class LLMService {
                     response = await this.generateHackerGPTResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'local':
+                    return "⚠️ ERREUR: Mode Local désactivé. Veuillez sélectionner un modèle Cloud.";
                 default:
-                    response = await this.generateOllamaResponse(augmentedPrompt, imageBase64, modelId, systemPrompt);
-                    break;
+                    // Default fallback to Gemini if available, else AnythingLLM
+                    if (process.env.GEMINI_API_KEY) {
+                        return await this.generateGeminiResponse(augmentedPrompt, 'gemini-3-flash-preview', systemPrompt);
+                    } else {
+                        return "⚠️ ERREUR: Aucun fournisseur Cloud configuré et mode Local désactivé.";
+                    }
             }
 
             if (this.socketService) {
@@ -325,7 +240,7 @@ class LLMService {
     async generateOpenAICompatibleResponse(prompt, imageBase64, modelId, systemPrompt, config) {
         const { apiKey, baseURL, extraHeaders, providerName } = config;
 
-        if (!apiKey && providerName !== 'lmstudio') { // LM Studio doesn't strictly need a key but SDK might
+        if (!apiKey && providerName !== 'lmstudio') {
             throw new Error(`${providerName.toUpperCase()}_API_KEY missing`);
         }
 
@@ -338,7 +253,7 @@ class LLMService {
             { role: "system", content: systemPrompt },
             {
                 role: "user",
-                content: imageBase64 && providerName === 'openai' // Only OpenAI supports standard image_url in this specific way for now
+                content: imageBase64 && providerName === 'openai'
                     ? [
                         { type: "text", text: prompt },
                         { type: "image_url", image_url: { url: imageBase64 } }
@@ -394,13 +309,27 @@ class LLMService {
         const { GoogleGenerativeAI } = require('@google/generative-ai');
         const genAI = new GoogleGenerativeAI(geminiKey);
 
+        const { HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
+
+        const safetySettings = [
+            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        ];
+
         const model = genAI.getGenerativeModel({
             model: modelId || "gemini-3-flash-preview",
-            systemInstruction: systemPrompt
+            systemInstruction: systemPrompt,
+            safetySettings: safetySettings
         });
 
         const result = await model.generateContent(prompt);
-        return result.response.text();
+        const text = result.response.text();
+        if (!text) {
+            throw new Error("Empty response from Gemini");
+        }
+        return text;
     }
 
     async generateOpenRouterResponse(prompt, imageBase64, modelId, systemPrompt) {
@@ -417,7 +346,7 @@ class LLMService {
 
     async generateAnythingLLMResponse(prompt, modelId, systemPrompt) {
         if (this.socketService) {
-            this.socketService.emitAgentStatus("Accessing Private Web (AnythingLLM with Hybrid Embeddings)...");
+            this.socketService.emitAgentStatus("Accessing Private Web (AnythingLLM)...");
         }
 
         const startTime = Date.now();
@@ -425,11 +354,9 @@ class LLMService {
         const metricsModelName = `[ANYTHINGLLM] ${workspaceName}`;
 
         try {
-            // Use the wrapper which handles Gemini → nomic-embed-text fallback automatically
             const response = await this.anythingLLMWrapper.chat(prompt, 'chat');
             const responseTime = Date.now() - startTime;
 
-            // Record metrics for Training Dashboard
             if (this.modelMetricsService) {
                 const tokensEstimate = Math.floor((response?.length || 0) / 4);
                 this.modelMetricsService.recordQuery(metricsModelName, {
@@ -437,32 +364,12 @@ class LLMService {
                     tokensGenerated: tokensEstimate,
                     success: true,
                     category: 'chat',
-                    qualityScore: Math.min(85, 50 + Math.floor(tokensEstimate / 10)) // Base score + length bonus
+                    qualityScore: 80
                 });
-                console.log(`[ANYTHINGLLM] Metrics recorded: ${metricsModelName} | ${responseTime}ms | ${tokensEstimate} tokens`);
-            }
-
-            // Log stats periodically
-            const stats = this.anythingLLMWrapper.getStats();
-            if (stats.total_requests % 10 === 0) {
-                console.log('[ANYTHINGLLM] Stats:', stats);
             }
 
             return response;
         } catch (error) {
-            const responseTime = Date.now() - startTime;
-
-            // Record failed query
-            if (this.modelMetricsService) {
-                this.modelMetricsService.recordQuery(metricsModelName, {
-                    responseTime,
-                    tokensGenerated: 0,
-                    success: false,
-                    category: 'chat',
-                    qualityScore: 0
-                });
-            }
-
             console.error("[ANYTHINGLLM] Error:", error);
             return `⚠️ Erreur AnythingLLM: ${error.message}`;
         }
@@ -476,116 +383,45 @@ class LLMService {
         });
     }
 
-    async generateOllamaResponse(prompt, imageBase64, modelId, systemPrompt) {
-        // Fallback to default if no model specified
-        const model = modelId || 'granite4:latest';
-
-        const messages = [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-        ];
-
-        // Note: Most local models are text-only unless specified (llava)
-        if (imageBase64 && !model.includes('llava') && !model.includes('vision')) {
-            console.warn("[LLM] Image ignored for non-vision local model.");
-        }
-
-        const response = await this.ollama.chat({
-            model: model,
-            messages: messages,
-            images: (imageBase64 && (model.includes('llava') || model.includes('vision'))) ? [imageBase64] : undefined
-        });
-        return response.message.content;
-    }
-
     setMCPService(mcpService) {
         this.mcpService = mcpService;
     }
 
     /**
      * Generate response using HackerGPT persona
-     * Uses the HackerGPT security expert system prompt with Gemini (primary) or Ollama (fallback)
+     * STRICTLY uses Gemini or AnythingLLM. NO OLLAMA FALLBACK.
      */
     async generateHackerGPTResponse(prompt, modelId, userSystemPrompt) {
         console.log('[HACKERGPT] Generating security-focused response with Gemini...');
 
-        // Get the HackerGPT security expert system prompt
         const hackerGPTPrompt = hackerGPTService.getSystemPrompt();
-
-        // Combine with any user-provided system prompt
         const fullSystemPrompt = userSystemPrompt
             ? `${hackerGPTPrompt}\n\n--- Additional Instructions ---\n${userSystemPrompt}`
             : hackerGPTPrompt;
 
-        // PRIMARY: Use Gemini 2.5 Flash for fast, powerful security responses
+        // PRIMARY: Gemini
         if (process.env.GEMINI_API_KEY) {
             try {
-                console.log('[HACKERGPT] Using Gemini 3 Flash as backend...');
-                console.log('[HACKERGPT] ⏳ Contacting Gemini API... This may take 10-30 seconds.');
-                const { GoogleGenerativeAI } = require('@google/generative-ai');
-                const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-                const geminiModel = genAI.getGenerativeModel({
-                    model: modelId || 'gemini-3-flash-preview',
-                    systemInstruction: fullSystemPrompt
-                });
-
-                // Add timeout wrapper (30 seconds)
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Gemini API timeout après 30 secondes')), 30000)
-                );
-
-                const geminiPromise = geminiModel.generateContent(prompt);
-
-                const result = await Promise.race([geminiPromise, timeoutPromise]);
-                console.log('[HACKERGPT+GEMINI] ✅ Response generated successfully');
-                return result.response.text();
+                return await this.generateGeminiResponse(prompt, 'gemini-3-flash-preview', fullSystemPrompt);
             } catch (geminiError) {
-                console.error('[HACKERGPT] ❌ Gemini error, falling back to Ollama:', geminiError.message);
+                console.error('[HACKERGPT] ❌ Gemini error:', geminiError.message);
                 if (this.socketService) {
-                    this.socketService.emitAgentStatus("Gemini slow, switching to local Ollama...");
+                    this.socketService.emitAgentStatus("Gemini failed, trying AnythingLLM...");
                 }
             }
         }
 
-        // FALLBACK: Use AnythingLLM (th3-thirty3 workspace with knowledge base)
-        console.log('[HACKERGPT] 🔄 Gemini unavailable, switching to AnythingLLM (th3-thirty3)...');
-
-        if (this.socketService) {
-            this.socketService.emitAgentStatus("Utilisation d'AnythingLLM avec base de connaissances th3-thirty3...");
-        }
-
+        // FALLBACK: AnythingLLM
+        console.log('[HACKERGPT] 🔄 Switching to AnythingLLM...');
         try {
-            // Use AnythingLLM with the full HackerGPT system prompt
-            const response = await this.anythingLLMWrapper.chat(
+            return await this.anythingLLMWrapper.chat(
                 `${fullSystemPrompt}\n\n---\n\nUSER REQUEST: ${prompt}`,
                 'chat'
             );
-
-            console.log('[HACKERGPT+ANYTHINGLLM] ✅ Response generated from th3-thirty3 workspace');
-            return response;
         } catch (anythingError) {
-            // Last resort: Try Ollama
-            console.error('[HACKERGPT] AnythingLLM failed, trying Ollama as last resort:', anythingError.message);
-
-            try {
-                const ollamaResponse = await this.ollama.chat({
-                    model: 'granite4:latest',
-                    messages: [
-                        { role: 'system', content: fullSystemPrompt },
-                        { role: 'user', content: prompt }
-                    ]
-                });
-                console.log('[HACKERGPT+OLLAMA] ⚠️ Fallback to local Ollama successful');
-                return ollamaResponse.message.content;
-            } catch (ollamaError) {
-                console.error('[HACKERGPT] All backends failed:', ollamaError.message);
-                throw new Error(`HackerGPT Error: Tous les backends ont échoué. Gemini: timeout/erreur, AnythingLLM: ${anythingError.message}, Ollama: ${ollamaError.message}`);
-            }
+            throw new Error(`HackerGPT Error: Tous les backends Cloud ont échoué. Gemini & AnythingLLM inaccessibles.`);
         }
     }
-
-
 
     async generateClaudeResponse(prompt, imageBase64, modelId, systemPrompt) {
         if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY missing");
@@ -616,8 +452,8 @@ class LLMService {
     }
 
     async unloadModel(modelName) {
-        // Only relevant for local Ollama
-        await this.ollama.chat({ model: modelName, messages: [], keep_alive: 0 });
+        // No-op in Cloud Mode
+        return true;
     }
 }
 

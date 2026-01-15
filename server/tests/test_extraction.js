@@ -4,9 +4,11 @@
  */
 
 require('dotenv').config();
-const ReportExtractionService = require('./report_extraction_service');
+const LLMService = require('../llm_service');
+const ReportExtractionService = require('../report_extraction_service');
 
-const extraction = new ReportExtractionService();
+const llmService = new LLMService();
+const extraction = new ReportExtractionService(llmService);
 
 async function runTest() {
     console.log('🔬 === TEST EXTRACTION LLAMA 3.2 ===\n');
@@ -63,8 +65,8 @@ async function runTest() {
     } catch (error) {
         console.error('❌ Erreur:', error.message);
         console.log('\n💡 Vérifiez que:');
-        console.log('   1. Ollama est démarré (ollama serve)');
-        console.log('   2. Llama 3.2 Vision est installé (ollama pull llama3.2-vision:11b)');
+        console.log('   1. Cloud LLM service is available');
+        console.log('   2. API Keys are configured in .env');
     }
 
     console.log('\n✅ Test terminé');

@@ -188,7 +188,11 @@ class MCPService {
             console.log(`[MCP] Connected to ${name} successfully.`);
             return true;
         } catch (error) {
-            console.error(`[MCP] Failed to connect to ${name}:`, error);
+            if (name === 'pieces' && (error.message && (error.message.includes('404') || error.message.includes('Refused') || error.code === 'ECONNREFUSED'))) {
+                console.log(`[MCP] Pieces OS not detected (Optional). Integration disabled/skipped.`);
+            } else {
+                console.error(`[MCP] Failed to connect to ${name}:`, error);
+            }
             return false;
         }
     }

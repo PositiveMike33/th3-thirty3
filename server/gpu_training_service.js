@@ -4,7 +4,6 @@
  * Provides GPU-accelerated training and embeddings for Th3 Thirty3
  */
 
-const fetch = require('node-fetch');
 const EventEmitter = require('events');
 
 class GpuTrainingService extends EventEmitter {

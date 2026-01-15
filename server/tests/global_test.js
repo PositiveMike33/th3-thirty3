@@ -1,6 +1,6 @@
 /**
  * Script de Test Global - Th3 Thirty3
- * Teste tous les systèmes: Director, Agents, Optimizer, Training
+ * Teste tous les systï¿½mes: Director, Agents, Optimizer, Training
  */
 
 // API Key for authentication (Admin key)
@@ -26,7 +26,7 @@ async function runGlobalTest() {
         const res = await fetch('http://localhost:3000/api/director/status', { headers: HEADERS });
         const data = await res.json();
         if (data.success && data.agents.length >= 7) {
-            console.log('    PASS - 7 agents configurés');
+            console.log('    PASS - 7 agents configurï¿½s');
             console.log(`    Agents: ${data.agents.map(a => a.name).join(', ')}`);
             results.tests.push({ name: 'Director Status', status: 'PASS' });
             results.passed++;
@@ -65,7 +65,7 @@ async function runGlobalTest() {
         const res = await fetch('http://localhost:3000/api/real-training/commentary?limit=3', { headers: HEADERS });
         const data = await res.json();
         if (data.success) {
-            console.log(`    PASS - ${data.count} commentaires trouvés`);
+            console.log(`    PASS - ${data.count} commentaires trouvï¿½s`);
             results.tests.push({ name: 'Training Commentary', status: 'PASS' });
             results.passed++;
         } else {
@@ -88,7 +88,7 @@ async function runGlobalTest() {
         const data = await res.json();
         if (data.success && data.response) {
             console.log(`    PASS - Type: ${data.type}`);
-            console.log(`    Réponse: ${data.response.substring(0, 100)}...`);
+            console.log(`    Rï¿½ponse: ${data.response.substring(0, 100)}...`);
             results.tests.push({ name: 'Director Chat Security', status: 'PASS' });
             results.passed++;
         } else {
@@ -107,7 +107,7 @@ async function runGlobalTest() {
         const data = await res.json();
         const modelCount = Object.keys(data).length;
         if (modelCount > 0) {
-            console.log(`    PASS - ${modelCount} modèles trackés`);
+            console.log(`    PASS - ${modelCount} modï¿½les trackï¿½s`);
             Object.entries(data).slice(0, 3).forEach(([name, metrics]) => {
                 console.log(`    ${name}: Score ${metrics.cognitive?.overallScore || 'N/A'}`);
             });
@@ -124,7 +124,7 @@ async function runGlobalTest() {
 
     // Summary
     console.log('\n' + '='.repeat(50));
-    console.log(` RÉSULTATS: ${results.passed} PASS / ${results.failed} FAIL`);
+    console.log(` Rï¿½SULTATS: ${results.passed} PASS / ${results.failed} FAIL`);
     console.log('='.repeat(50) + '\n');
 
     return results;

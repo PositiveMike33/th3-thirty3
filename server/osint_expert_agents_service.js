@@ -1,26 +1,26 @@
 /**
- * OSINT Expert Agents Service
+ * OSINT Expert Agents Service - Cloud Enabled
  * Agents spécialisés par outil OSINT avec apprentissage indépendant
- * Chaque agent devient EXPERT de son outil spécifique
- * ENVIRONNEMENT: Kali Linux 2024.1
+ * Utilise LLM Cloud pour l'analyse
  */
 
 const fs = require('fs');
 const path = require('path');
 const KALI_ENVIRONMENT = require('./config/kali_environment');
+const LLMService = require('./llm_service');
 
 class OsintExpertAgentsService {
     constructor() {
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.dataPath = path.join(__dirname, 'data', 'osint_experts');
         this.model = 'gemini-3-pro-preview';
-        this.fallbackModel = 'gemini-3-pro-preview';
         this.kaliEnv = KALI_ENVIRONMENT;
+
+        this.llmService = new LLMService();
 
         this.ensureDataFolder();
         this.initializeAgents();
 
-        console.log(`[OSINT-EXPERTS] Service initialized with ${Object.keys(this.agents).length} tool experts on ${this.kaliEnv.os}`);
+        console.log(`[OSINT-EXPERTS] Service initialized (Cloud Mode) with ${Object.keys(this.agents).length} experts`);
     }
 
     ensureDataFolder() {
@@ -40,6 +40,7 @@ class OsintExpertAgentsService {
                 emoji: '🔍',
                 category: 'Search Engines',
                 tool: 'Shodan',
+                provider: 'gemini',
                 description: 'Expert en recherche de dispositifs connectés, IoT, services exposés',
                 commands: [
                     'shodan search "apache"',
@@ -60,6 +61,7 @@ RÈGLE: Toujours expliquer les risques de sécurité découverts`
                 emoji: '🌾',
                 category: 'Email/Domain OSINT',
                 tool: 'TheHarvester',
+                provider: 'gemini',
                 description: 'Expert en récolte d\'emails, sous-domaines, IPs, noms',
                 commands: [
                     'theHarvester -d example.com -b google',
@@ -79,6 +81,7 @@ RÈGLE: Technique de validation des emails trouvés`
                 emoji: '🕸️',
                 category: 'Link Analysis',
                 tool: 'Maltego',
+                provider: 'gemini',
                 description: 'Expert en visualisation de liens, graphes relationnels',
                 commands: [
                     'maltego: Transform Domain to DNS Names',
@@ -98,6 +101,7 @@ RÈGLE: Construire la chaîne de liens logique entre entités`
                 emoji: '🔬',
                 category: 'Reconnaissance Framework',
                 tool: 'Recon-ng',
+                provider: 'gemini',
                 description: 'Expert en framework de reconnaissance modulaire',
                 commands: [
                     'recon-ng: marketplace search',
@@ -118,6 +122,7 @@ RÈGLE: Chaîner les modules pour enrichissement progressif`
                 emoji: '🕷️',
                 category: 'Automated OSINT',
                 tool: 'SpiderFoot',
+                provider: 'gemini',
                 description: 'Expert en OSINT automatisé, scans complets',
                 commands: [
                     'spiderfoot: New scan > Target: domain.com',
@@ -137,6 +142,7 @@ RÈGLE: Interpréter les résultats, prioriser les findings`
                 emoji: '📡',
                 category: 'DNS Enumeration',
                 tool: 'OWASP Amass',
+                provider: 'gemini',
                 description: 'Expert en énumération DNS et mapping attack surface',
                 commands: [
                     'amass enum -d example.com',
@@ -157,6 +163,7 @@ RÈGLE: Mapper l'attack surface complète, identifier shadow IT`
                 emoji: '📚',
                 category: 'Resource Directory',
                 tool: 'OSINT Framework',
+                provider: 'gemini',
                 description: 'Expert en navigation des ressources OSINT',
                 commands: [
                     'osintframework.com: Username search tools',
@@ -176,6 +183,7 @@ RÈGLE: Recommander le bon outil pour chaque tâche spécifique`
                 emoji: '📱',
                 category: 'Social Networks',
                 tool: 'Social Media Tools',
+                provider: 'gemini',
                 description: 'Expert en investigation réseaux sociaux',
                 commands: [
                     'sherlock username',
@@ -196,6 +204,7 @@ RÈGLE: Respecter vie privée, focus sur informations publiques`
                 emoji: '🗺️',
                 category: 'Geospatial Intelligence',
                 tool: 'GEOINT Tools',
+                provider: 'gemini',
                 description: 'Expert en géolocalisation et imagerie satellite',
                 commands: [
                     'Google Earth Pro: Historical imagery',
@@ -216,6 +225,7 @@ RÈGLE: Triangulation multi-sources pour confirmer localisation`
                 emoji: '🌑',
                 category: 'Dark Web Intelligence',
                 tool: 'Dark Web Tools',
+                provider: 'gemini',
                 description: 'Expert en investigation dark web et leaks',
                 commands: [
                     'Ahmia.fi search',
@@ -236,6 +246,7 @@ RÈGLE: Légalité, éthique, ne pas acheter sur dark web`
                 emoji: '🖼️',
                 category: 'Image Analysis',
                 tool: 'Image OSINT Tools',
+                provider: 'gemini',
                 description: 'Expert en rétro-ingénierie d\'images',
                 commands: [
                     'TinEye reverse image search',
@@ -256,6 +267,7 @@ RÈGLE: Vérifier authenticité, détecter modifications`
                 emoji: '₿',
                 category: 'Blockchain Intelligence',
                 tool: 'Blockchain OSINT',
+                provider: 'gemini',
                 description: 'Expert en traçage blockchain et crypto',
                 commands: [
                     'Etherscan address lookup',
@@ -313,7 +325,7 @@ RÈGLE: Suivre le flux, identifier les exchanges, wallet profiling`
             throw new Error(`OSINT Expert "${agentId}" not found`);
         }
 
-        console.log(`[OSINT-EXPERTS] ${agent.emoji} ${agent.name} analyzing...`);
+        console.log(`[OSINT-EXPERTS] ${agent.emoji} ${agent.name} analyzing (via Gemini)...`);
 
         // Construire le contexte avec les connaissances apprises
         let learnedContext = '';
@@ -341,35 +353,15 @@ QUESTION: ${question}
 Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et donne des commandes compatibles Kali.`;
 
         try {
-            const response = await fetch(`${this.ollamaUrl}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.model,
-                    prompt: fullPrompt,
-                    stream: false,
-                    options: { temperature: 0.4, num_predict: 2000 }
-                })
-            });
+            const response = await this.llmService.generateResponse(
+                fullPrompt,
+                null,
+                agent.provider || 'gemini',
+                this.model,
+                'Tu es un expert en Cybersécurité et OSINT sur Kali Linux.'
+            );
 
-            if (!response.ok) {
-                // Fallback model
-                const fallbackResponse = await fetch(`${this.ollamaUrl}/api/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: this.fallbackModel,
-                        prompt: fullPrompt,
-                        stream: false,
-                        options: { temperature: 0.4, num_predict: 2000 }
-                    })
-                });
-                const data = await fallbackResponse.json();
-                return this.processResponse(agent, agentId, question, data.response, this.fallbackModel);
-            }
-
-            const data = await response.json();
-            return this.processResponse(agent, agentId, question, data.response, this.model);
+            return this.processResponse(agent, agentId, question, response, this.model);
 
         } catch (error) {
             console.error(`[OSINT-EXPERTS] ${agent.name} error:`, error.message);
@@ -586,26 +578,6 @@ Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et don
             investigations: agent.knowledge.investigations.length
         })).sort((a, b) => b.interactions - a.interactions);
     }
-
-    /**
-     * Lister les experts par catégorie
-     */
-    getExpertsByCategory() {
-        const categories = {};
-        for (const [id, agent] of Object.entries(this.agents)) {
-            if (!categories[agent.category]) {
-                categories[agent.category] = [];
-            }
-            categories[agent.category].push({
-                id,
-                name: agent.name,
-                emoji: agent.emoji,
-                tool: agent.tool
-            });
-        }
-        return categories;
-    }
 }
 
 module.exports = OsintExpertAgentsService;
-

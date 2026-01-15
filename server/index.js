@@ -14,7 +14,8 @@ const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
 const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI)
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/th3-thirty3';
+mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
@@ -82,62 +83,7 @@ app.get('/api/models', async (req, res) => {
     }
 });
 
-// Sync all Ollama models with metrics system and remove obsolete ones (PUBLIC for internal use)
-app.post('/models/sync-ollama', async (req, res) => {
-    try {
-        // Init metrics service if not ready (lazy load safety)
-        if (!modelMetricsService) {
-            return res.status(500).json({ error: 'Metrics service not ready' });
-        }
-
-        // Fetch all Ollama models
-        const ollamaUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-        const response = await fetch(`${ollamaUrl}/api/tags`);
-        const data = await response.json();
-        const validModels = (data.models || [])
-            .map(m => m.name)
-            .filter(n => !n.includes('embed')); // Keep embeddings out of training dashboard
-
-        // 1. Add new models
-        let addedCount = 0;
-        for (const modelName of validModels) {
-            if (!modelMetricsService.getModelMetrics(modelName)) {
-                modelMetricsService.getOrCreateModelMetrics(modelName);
-                addedCount++;
-            }
-        }
-
-        // 2. Remove obsolete models (User Request)
-        const allMetrics = modelMetricsService.getAllMetrics();
-        let deletedCount = 0;
-        const deletedModels = [];
-
-        for (const trackedModel of Object.keys(allMetrics)) {
-            if (!validModels.includes(trackedModel)) {
-                // Safeguard against deleting non-Ollama models
-                if (trackedModel.startsWith('[') || trackedModel.includes('gpt') || trackedModel.includes('claude') || trackedModel.includes('gemini')) {
-                    continue;
-                }
-
-                modelMetricsService.deleteModelMetrics(trackedModel);
-                deletedModels.push(trackedModel);
-                deletedCount++;
-            }
-        }
-
-        console.log(`[METRICS] Sync complete: +${addedCount} added, -${deletedCount} removed`);
-        res.json({
-            success: true,
-            message: 'Models synced',
-            added: addedCount,
-            removed: deletedCount,
-            removedModels: deletedModels,
-            currentTotal: validModels.length
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
+// Ollama Sync Endpoint Removed (Cloud Only Mode)
 
 // ============================================
 // AUTH ROUTES (Public - No middleware required)
@@ -173,26 +119,6 @@ app.get('/auth/google/callback', async (req, res) => {
     } else {
         res.redirect('http://localhost:5173?google_auth=error&message=missing_params');
     }
-});
-
-// Google Status Route (PUBLIC - needed for Gmail button status)
-const ACCOUNTS = [
-    'mikegauthierguillet@gmail.com',
-    'th3thirty3@gmail.com',
-    'mgauthierguillet@gmail.com'
-];
-
-app.get('/google/status', async (req, res) => {
-    const status = {};
-    for (const email of ACCOUNTS) {
-        try {
-            const client = await googleService.getClient(email);
-            status[email] = !!client;
-        } catch (e) {
-            status[email] = false;
-        }
-    }
-    res.json(status);
 });
 
 // ============================================
@@ -290,7 +216,11 @@ const IDENTITY = require('./config/identity');
 
 const { PERSONA, MINIMAL_PERSONA } = require('./config/prompts');
 
-// ACCOUNTS is defined earlier in the public section (line ~179)
+const ACCOUNTS = [
+    'mikegauthierguillet@gmail.com',  // Priorit�
+    'th3thirty3@gmail.com',
+    'mgauthierguillet@gmail.com'
+];
 
 // Model Configuration
 const modelName = IDENTITY.default_model;
@@ -338,6 +268,38 @@ const contextService = new ContextService(memoryService, mcpService);
 // } else {
 //     console.warn("[MCP] OBSIDIAN_VAULT_PATH not set. Skipping Obsidian connection.");
 // }
+
+// Connect to Desktop Commander (Docker)
+// Mounts the project root to /workspace for file management capabilities
+const projectRoot = path.join(__dirname, '..');
+mcpService.connectStdio(
+    'desktop-commander',
+    'docker',
+    [
+        'run', '-i', '--rm',
+        '-v', `${projectRoot}:/workspace`,
+        'mcp/desktop-commander:latest'
+    ]
+).then(() => console.log(`[MCP] Desktop Commander connected (workspace: ${projectRoot})`))
+    .catch(err => console.error("[MCP] Failed to connect to Desktop Commander:", err));
+
+// Connect to Stripe MCP (Docker)
+// Uses API keys from .env
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+if (stripeKey) {
+    mcpService.connectStdio(
+        'stripe',
+        'docker',
+        [
+            'run', '-i', '--rm',
+            '-e', `STRIPE_SECRET_KEY=${stripeKey}`,
+            'mcp/stripe:latest'
+        ]
+    ).then(() => console.log("[MCP] Stripe MCP connected"))
+        .catch(err => console.error("[MCP] Failed to connect to Stripe:", err));
+} else {
+    console.warn("[MCP] STRIPE_SECRET_KEY not set. Skipping Stripe connection.");
+}
 
 // Connect to Pieces MCP Server
 const PIECES_HOST = process.env.PIECES_HOST || 'localhost';
@@ -672,69 +634,10 @@ app.get('/auth/google', (req, res) => {
 app.get('/auth/google/callback', async (req, res) => {
     const { code, state } = req.query; // state is the email
     if (code && state) {
-        try {
-            const result = await googleService.handleCallback(code, state);
-            // Send a response that auto-closes the popup and notifies the parent window
-            res.send(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Connexion reussie</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #eee; }
-                        .container { text-align: center; padding: 40px; background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid #22c55e; }
-                        h1 { color: #22c55e; font-size: 2em; margin-bottom: 10px; }
-                        p { color: #aaa; font-size: 1.1em; }
-                        .checkmark { font-size: 64px; margin-bottom: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="checkmark">✅</div>
-                        <h1>Connexion reussie !</h1>
-                        <p>Compte: ${state}</p>
-                        <p>${result.savedToDb ? '💾 Token sauvegarde en base de donnees' : '📁 Token sauvegarde localement (fallback)'}</p>
-                        <p style="margin-top: 20px; font-size: 0.9em;">Cette fenetre va se fermer automatiquement...</p>
-                    </div>
-                    <script>
-                        // Notify opener window that auth succeeded
-                        if (window.opener) {
-                            window.opener.postMessage({ type: 'gmail-auth-success', email: '${state}' }, '*');
-                        }
-                        // Auto-close after 2 seconds
-                        setTimeout(() => window.close(), 2000);
-                    </script>
-                </body>
-                </html>
-            `);
-        } catch (error) {
-            console.error('[AUTH] Google callback error:', error);
-            res.status(500).send(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Erreur authentification</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #eee; }
-                        .container { text-align: center; padding: 40px; background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid #ef4444; }
-                        h1 { color: #ef4444; font-size: 2em; margin-bottom: 10px; }
-                        p { color: #aaa; font-size: 1.1em; }
-                        .error-icon { font-size: 64px; margin-bottom: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="error-icon">❌</div>
-                        <h1>Erreur authentification</h1>
-                        <p>${error.message}</p>
-                        <p style="margin-top: 20px; font-size: 0.9em;">Veuillez reessayer ou verifier que MongoDB est demarre.</p>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
+        await googleService.handleCallback(code, state);
+        res.send("Connexion r�ussie ! Vous pouvez fermer cette fen�tre.");
     } else {
-        res.status(400).send("Erreur d'authentification: parametres manquants.");
+        res.status(400).send("Erreur d'authentification.");
     }
 });
 
@@ -1338,8 +1241,8 @@ app.post('/osint/analyze', async (req, res) => {
 });
 
 // Cyber Training Routes (Ethical Hacking Agent Training)
-const cyberTrainingRoutes = require('./cyber_training_routes');
-app.use('/api/cyber-training', requireTier('operator'), cyberTrainingRoutes); // PREMIUM+
+const createCyberTrainingRoutes = require('./cyber_training_routes');
+app.use('/api/cyber-training', requireTier('operator'), createCyberTrainingRoutes(llmService)); // PREMIUM+
 
 // Tracking Routes (5-Why Incident Tracking)
 const trackingRoutes = require('./tracking_routes');
@@ -1431,23 +1334,23 @@ server.listen(port, async () => {
     console.log(`Server running on port ${port}`);
     console.log(`System ready. Identity: ${IDENTITY.name}`);
 
-    // Automatic Tor Detection at Startup (PASSIVE - does not start Tor)
+    // Automatic Tor Verification at Startup
     try {
         const torStartupCheck = require('./tor_startup_check');
         console.log('\n[SYSTEM] Running automatic Tor verification...');
         const torResult = await torStartupCheck.performStartupCheck();
 
-        if (torResult.mode === 'tor' && torResult.isTor) {
-            console.log('[SYSTEM] 🧅 Tor is ACTIVE and VERIFIED');
-            console.log(`[SYSTEM] 🌍 Exit IP: ${torResult.ip}`);
-        } else if (torResult.mode === 'tor') {
-            console.log(`[SYSTEM] ⚡ ${torResult.name} detected but Tor connection unverified`);
+        if (torResult.isTor) {
+            console.log('[SYSTEM] ? Tor is ACTIVE and VERIFIED');
+            console.log(`[SYSTEM] ?? Exit IP: ${torResult.ip}`);
+        } else if (torResult.portOpen) {
+            console.log('[SYSTEM] ?? Port 9050 active but NOT connected to Tor network');
+            console.log('[SYSTEM] ?? This may be Tor Browser - for best results use standalone tor.exe');
         } else {
-            console.log('[SYSTEM] 🌐 Direct Connection mode - Tor not detected');
-            console.log('[SYSTEM] 💡 To use Tor: Open Tor Browser before starting the server');
+            console.log('[SYSTEM] ?? Tor not available - OSINT requests will use direct connection');
         }
     } catch (error) {
-        console.log('[SYSTEM] ⚠️ Tor check skipped:', error.message);
+        console.log('[SYSTEM] ?? Tor check skipped:', error.message);
     }
 });
 

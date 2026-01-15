@@ -21,7 +21,7 @@ class OfflineModeService extends EventEmitter {
             onlineModel: 'llama-3.3-70b-versatile', // Groq cloud model (ultrafast)
             onlineProvider: 'groq',           // Preferred cloud provider
             onlineFallback: 'llama-3.1-8b-instant', // Fast fallback
-            localFallback: 'granite4:latest', // Local fallback
+            localFallback: null, // No local fallback (Cloud Only)
             testHosts: ['8.8.8.8', '1.1.1.1'],  // Reduced hosts for faster check
             energyMode: 'normal',             // 'normal', 'eco', 'ultra-eco'
             preferCloud: true                 // Use cloud when available for speed
@@ -255,16 +255,12 @@ class OfflineModeService extends EventEmitter {
                     provider: this.config.onlineProvider
                 }
             };
-        } else {
             return {
-                model: this.config.offlineModel,
-                provider: 'ollama',
-                isLocal: true,
-                reason: this.isOnline ? 'Prefer local mode' : 'Offline - using local models',
-                fallback: {
-                    model: this.config.localFallback,
-                    provider: 'ollama'
-                }
+                model: null,
+                provider: 'none',
+                isLocal: false,
+                reason: 'Offline - Cloud services unavailable',
+                fallback: null
             };
         }
     }

@@ -1,18 +1,7 @@
 /**
- * Network Failover Service - RISK-006 Mitigation
- * Monitors internet connectivity and automatically switches between cloud and local models
- * 
- * Features:
- * - Real-time connectivity monitoring with multiple endpoint checks
- * - Automatic failover from cloud to local models when internet is down
- * - Automatic recovery when internet is restored
- * - Event-based notifications for UI updates
- * - Configurable check intervals and timeout thresholds
- * 
- * Architecture:
- * - Primary: Cloud models (Groq, OpenAI, Gemini, Anthropic)
- * - Fallback: Local Ollama models (gemini-3-pro-preview, gemini-3-pro-preview)
- * - Emergency: Cached responses / offline mode
+ * Network Monitor Service - Cloud Only
+ * Monitors internet connectivity and ensures Cloud Models are reachable.
+ * Replaces the deprecated Network Failover Service.
  */
 
 const EventEmitter = require('events');
@@ -25,27 +14,22 @@ const CONNECTIVITY_ENDPOINTS = [
     { url: 'https://cloudflare.com/cdn-cgi/trace', name: 'Cloudflare', timeout: 2000 }
 ];
 
-// Local Ollama endpoint (use env var or host.docker.internal for Docker)
-// OLLAMA_BASE_URL typically ends with just the host:port (e.g. http://host.docker.internal:11434)
-const OLLAMA_HOST = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434';
-// Remove trailing slash if present, then append /api/tags
-const OLLAMA_ENDPOINT = OLLAMA_HOST.replace(/\/$/, '') + '/api/tags';
+// Cloud-Only Mode: No local Ollama endpoint needed
+const OLLAMA_ENDPOINT = null;
 
 // Network states
 const NetworkState = {
     ONLINE: 'ONLINE',           // Internet available, cloud models active
-    OFFLINE: 'OFFLINE',         // Internet down, local models active
-    DEGRADED: 'DEGRADED',       // Partial connectivity, hybrid mode
+    OFFLINE: 'OFFLINE',         // Internet down
     CHECKING: 'CHECKING',       // Currently checking connectivity
     UNKNOWN: 'UNKNOWN'          // Initial state
 };
 
-// Failover modes
+// Failover modes - Simplified for Cloud Only
 const FailoverMode = {
-    AUTO: 'AUTO',               // Automatic switching (recommended)
-    CLOUD_ONLY: 'CLOUD_ONLY',   // Never failover to local (will fail if offline)
-    LOCAL_ONLY: 'LOCAL_ONLY',   // Always use local (no cloud dependency)
-    MANUAL: 'MANUAL'            // User-controlled switching
+    AUTO: 'AUTO',               // Automatic switching (Monitor only)
+    CLOUD_ONLY: 'CLOUD_ONLY',   // Strict Cloud Mode
+    MANUAL: 'MANUAL'            // User-controlled
 };
 
 class NetworkFailoverService extends EventEmitter {
@@ -54,7 +38,7 @@ class NetworkFailoverService extends EventEmitter {
 
         this.state = NetworkState.UNKNOWN;
         this.previousState = NetworkState.UNKNOWN;
-        this.mode = FailoverMode.AUTO;
+        this.mode = FailoverMode.CLOUD_ONLY;
         this.isOnline = false;
         this.isOllamaAvailable = false;
 
@@ -85,7 +69,7 @@ class NetworkFailoverService extends EventEmitter {
         // Endpoint status cache
         this.endpointStatus = {};
 
-        console.log('[NETWORK_FAILOVER] Service initialized');
+        console.log('[NETWORK_MONITOR] Service initialized (Cloud-Only)');
     }
 
     /**
@@ -93,12 +77,11 @@ class NetworkFailoverService extends EventEmitter {
      */
     start() {
         if (this.checkInterval) {
-            console.log('[NETWORK_FAILOVER] Already running');
+            console.log('[NETWORK_MONITOR] Already running');
             return;
         }
 
-        console.log('[NETWORK_FAILOVER] Starting connectivity monitoring...');
-        console.log(`[NETWORK_FAILOVER] Mode: ${this.mode}, Interval: ${this.checkIntervalMs}ms`);
+        console.log('[NETWORK_MONITOR] Starting connectivity monitoring...');
 
         // Initial check
         this.performConnectivityCheck();
@@ -118,7 +101,7 @@ class NetworkFailoverService extends EventEmitter {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
-            console.log('[NETWORK_FAILOVER] Monitoring stopped');
+            console.log('[NETWORK_MONITOR] Monitoring stopped');
             this.emit('stopped');
         }
     }
@@ -137,18 +120,17 @@ class NetworkFailoverService extends EventEmitter {
             // Check internet connectivity (at least 1 endpoint must respond)
             const internetResults = await this.checkInternetConnectivity();
 
-            // Check local Ollama availability
-            const ollamaResult = await this.checkOllamaAvailability();
+            // Cloud Only Mode - Ollama is irrelevant/unavailable
+            const ollamaResult = { available: false };
 
             const latency = Date.now() - startTime;
             this.updateLatencyStats(latency);
 
             // Determine new state
             const wasOnline = this.isOnline;
-            const wasOllamaAvailable = this.isOllamaAvailable;
 
             this.isOnline = internetResults.online;
-            this.isOllamaAvailable = ollamaResult.available;
+            this.isOllamaAvailable = false; // Cloud Only Mode
 
             // Update consecutive counters
             if (this.isOnline) {
@@ -162,13 +144,13 @@ class NetworkFailoverService extends EventEmitter {
             }
 
             // Determine actual state based on thresholds
-            this.updateNetworkState(wasOnline, wasOllamaAvailable);
+            this.updateNetworkState(wasOnline);
 
             // Emit status update
             this.emit('statusUpdate', this.getStatus());
 
         } catch (error) {
-            console.error('[NETWORK_FAILOVER] Check error:', error.message);
+            console.error('[NETWORK_MONITOR] Check error:', error.message);
             this.consecutiveFailures++;
             this.emit('error', error);
         }
@@ -245,73 +227,41 @@ class NetworkFailoverService extends EventEmitter {
     }
 
     /**
-     * Check local Ollama availability
+     * Check local Ollama availability (Disabled for Cloud Only)
      */
     async checkOllamaAvailability() {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-            const startTime = Date.now();
-            const response = await fetch(OLLAMA_ENDPOINT, {
-                signal: controller.signal
-            });
-
-            clearTimeout(timeoutId);
-
-            if (response.ok) {
-                const data = await response.json();
-                return {
-                    available: true,
-                    modelsCount: data.models?.length || 0,
-                    latency: Date.now() - startTime
-                };
-            }
-
-            return { available: false, error: 'Bad response' };
-        } catch (error) {
-            return { available: false, error: error.message };
-        }
+        return { available: false, error: 'Cloud Only Mode' };
     }
 
     /**
      * Update network state based on thresholds
      */
-    updateNetworkState(wasOnline, wasOllamaAvailable) {
+    updateNetworkState(wasOnline) {
         this.previousState = this.state;
 
-        // Determine new state
-        if (this.isOnline && this.isOllamaAvailable) {
+        // Cloud Only Logic
+        if (this.isOnline) {
             if (this.consecutiveSuccesses >= this.onlineThreshold || this.state === NetworkState.ONLINE) {
                 this.state = NetworkState.ONLINE;
 
-                // Recovery event
                 if (!wasOnline && this.previousState === NetworkState.OFFLINE) {
                     this.lastOnline = new Date();
                     this.stats.recoveries++;
-                    console.log('[NETWORK_FAILOVER] 🟢 RECOVERY: Internet restored, switching to cloud models');
+                    console.log('[NETWORK_MONITOR] 🟢 CONNECTED: Cloud services reachable');
                     this.emit('recovery', { timestamp: this.lastOnline });
                 }
             }
-        } else if (!this.isOnline && this.isOllamaAvailable) {
+        } else {
             if (this.consecutiveFailures >= this.offlineThreshold || this.state === NetworkState.OFFLINE) {
                 this.state = NetworkState.OFFLINE;
 
-                // Failover event
                 if (wasOnline && this.previousState === NetworkState.ONLINE) {
                     this.lastOffline = new Date();
-                    this.stats.failovers++;
-                    console.log('[NETWORK_FAILOVER] 🔴 FAILOVER: Internet down, switching to local models');
+                    this.stats.failovers++; // Count outage as failover stat for consistency
+                    console.log('[NETWORK_MONITOR] 🔴 DISCONNECTED: Cloud services unreachable');
                     this.emit('failover', { timestamp: this.lastOffline });
                 }
             }
-        } else if (this.isOnline && !this.isOllamaAvailable) {
-            this.state = NetworkState.DEGRADED;
-            console.log('[NETWORK_FAILOVER] 🟡 DEGRADED: Online but Ollama unavailable');
-        } else {
-            // Both offline - critical state
-            this.state = NetworkState.OFFLINE;
-            console.log('[NETWORK_FAILOVER] ⚠️ CRITICAL: No connectivity, no local models');
         }
     }
 
@@ -331,62 +281,27 @@ class NetworkFailoverService extends EventEmitter {
      * Get the optimal provider based on current state and mode
      */
     getOptimalProvider() {
-        switch (this.mode) {
-            case FailoverMode.CLOUD_ONLY:
-                return { provider: 'cloud', reason: 'Cloud only mode' };
-
-            case FailoverMode.LOCAL_ONLY:
-                return {
-                    provider: 'local',
-                    reason: 'Local only mode',
-                    model: 'gemini-3-pro-preview'
-                };
-
-            case FailoverMode.MANUAL:
-                // Return current preference (set externally)
-                return {
-                    provider: this.isOnline ? 'cloud' : 'local',
-                    reason: 'Manual mode'
-                };
-
-            case FailoverMode.AUTO:
-            default:
-                if (this.state === NetworkState.ONLINE) {
-                    return {
-                        provider: 'cloud',
-                        reason: 'Internet available',
-                        preferredCloud: 'gemini' // Gemini as primary provider
-                    };
-                } else if (this.state === NetworkState.OFFLINE) {
-                    return {
-                        provider: 'local',
-                        reason: 'Internet offline - failover active',
-                        model: 'gemini-3-pro-preview',
-                        fallbackModel: 'gemini-3-pro-preview'
-                    };
-                } else if (this.state === NetworkState.DEGRADED) {
-                    return {
-                        provider: 'cloud',
-                        reason: 'Degraded connectivity',
-                        useRetry: true
-                    };
-                } else {
-                    return {
-                        provider: 'local',
-                        reason: 'Unknown state - defaulting to local',
-                        model: 'gemini-3-pro-preview'
-                    };
-                }
+        if (this.state === NetworkState.ONLINE) {
+            return {
+                provider: 'cloud',
+                reason: 'Online (Cloud Mode)',
+                preferredCloud: 'gemini'
+            };
+        } else {
+            return {
+                provider: 'none',
+                reason: 'Offline - Check internet connection'
+            };
         }
     }
 
     /**
-     * Set failover mode
+     * Set failover mode (No-op in Cloud Only, or limited)
      */
     setMode(mode) {
         if (Object.values(FailoverMode).includes(mode)) {
             this.mode = mode;
-            console.log(`[NETWORK_FAILOVER] Mode changed to: ${mode}`);
+            console.log(`[NETWORK_MONITOR] Mode changed to: ${mode}`);
             this.emit('modeChanged', mode);
         }
     }
@@ -446,38 +361,20 @@ class NetworkFailoverService extends EventEmitter {
      * Get recommended model based on network state
      */
     getRecommendedModel(domain = 'general') {
-        const provider = this.getOptimalProvider();
-
-        if (provider.provider === 'local') {
-            // Local model recommendations
-            const localModels = {
-                code: 'gemini-3-pro-preview',
-                general: 'gemini-3-pro-preview',
-                fast: 'gemini-3-pro-preview',
-                embedding: 'mxbai-embed-large:latest'
-            };
-            return {
-                model: localModels[domain] || localModels.general,
-                provider: 'ollama',
-                isLocal: true,
-                reason: provider.reason
-            };
-        } else {
-            // Cloud model recommendations (prefer Gemini)
-            const cloudModels = {
-                code: { model: 'gemini-3-pro-preview', provider: 'gemini' },
-                general: { model: 'gemini-3-pro-preview', provider: 'gemini' },
-                fast: { model: 'gemini-3-flash-preview', provider: 'gemini' },
-                embedding: { model: 'text-embedding-3-small', provider: 'openai' }
-            };
-            const selected = cloudModels[domain] || cloudModels.general;
-            return {
-                model: selected.model,
-                provider: selected.provider,
-                isLocal: false,
-                reason: provider.reason
-            };
-        }
+        // Always return Cloud Models
+        const cloudModels = {
+            code: { model: 'gemini-3-pro-preview', provider: 'gemini' },
+            general: { model: 'gemini-3-pro-preview', provider: 'gemini' },
+            fast: { model: 'gemini-3-flash-preview', provider: 'gemini' },
+            embedding: { model: 'text-embedding-3-small', provider: 'openai' }
+        };
+        const selected = cloudModels[domain] || cloudModels.general;
+        return {
+            model: selected.model,
+            provider: selected.provider,
+            isLocal: false,
+            reason: 'Cloud Only Mode'
+        };
     }
 }
 

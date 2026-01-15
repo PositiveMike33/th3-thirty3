@@ -1,225 +1,150 @@
-/**
- * ANYTHINGLLM WRAPPER WITH EMBEDDING FALLBACK
- * 
- * Intercepts AnythingLLM requests and handles embedding errors gracefully
- * by falling back to local embeddings when Gemini is unavailable
- */
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const EmbeddingService = require('./embedding_service');
-const settingsService = require('./settings_service');
+// Initialize Gemini
+// Ensure process.env.GEMINI_API_KEY is available (loaded by index.js or dotenv)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Model Configuration - STRICTLY GEMINI 3 AS REQUESTED
+const MODELS = {
+    fast: "gemini-3-flash-preview",
+    complex: "gemini-3-pro-preview",
+    image: "gemini-3-pro-image-preview", // or gemini-3-pro-preview if multimodal
+    // Fallbacks (User requested ONLY Gemini 3, but keeping structural fallback to same version just in case)
+    fallback_fast: "gemini-3-flash-preview",
+    fallback_complex: "gemini-3-pro-preview"
+};
 
 class AnythingLLMWrapper {
     constructor() {
-        this.embeddingService = new EmbeddingService();
-        this.baseUrl = null;
-        this.apiKey = null;
-        this.workspaceSlug = null;
+        if (!process.env.GEMINI_API_KEY) {
+            console.error("❌ GEMINI_API_KEY is missing in environment variables!");
+        }
+        this.models = MODELS;
     }
 
     /**
-     * Initialize connection to AnythingLLM
+     * Generate text response
+     * @param {string} prompt - User input
+     * @param {string} type - 'fast' | 'complex' | 'image'
+     * @returns {Promise<string>}
      */
-    async initialize() {
-        const settings = settingsService.getSettings();
-        let baseURL = settings.apiKeys.anythingllm_url || process.env.ANYTHING_LLM_URL;
-        this.apiKey = settings.apiKeys.anythingllm_key || process.env.ANYTHING_LLM_KEY;
-
-        if (!baseURL || !this.apiKey) {
-            throw new Error('AnythingLLM configuration missing');
-        }
-
-        // Ensure correct API endpoint structure
-        if (!baseURL.endsWith('/api/v1')) {
-            baseURL = baseURL.replace(/\/+$/, '') + '/api/v1';
-        }
-        this.baseUrl = baseURL;
-
-        // Get workspace slug
-        const res = await fetch(`${this.baseUrl}/workspaces`, {
-            headers: { 'Authorization': `Bearer ${this.apiKey}` }
-        });
-
-        if (!res.ok) {
-            throw new Error(`Failed to fetch workspaces: ${res.status}`);
-        }
-
-        const data = await res.json();
-        const preferred = data.workspaces.find(w => w.slug.includes('thirty3') || w.slug.includes('geo') || w.slug.includes('agent'));
-        this.workspaceSlug = preferred ? preferred.slug : (data.workspaces[0] ? data.workspaces[0].slug : null);
-
-        if (!this.workspaceSlug) {
-            throw new Error('No workspaces found in AnythingLLM');
-        }
-
-        console.log(`[ANYTHINGLLM] Connected to workspace: ${this.workspaceSlug}`);
-    }
-
-    /**
-     * Send chat message with automatic embedding fallback
-     */
-    async chat(message, mode = 'chat', userId = null) {
-        if (!this.workspaceSlug) {
-            await this.initialize();
-        }
-
-        console.log(`[ANYTHINGLLM] Sending message to ${this.workspaceSlug}...`);
-
-        // INJECT MAP CONTROL PROTOCOL
-        // This instructs the model (regardless of its system prompt) on how to control the UI.
-        const mapProtocol = `
-[SYSTEM INSTRUCTION: INTERFACE CONTROLLER]
-You are a Voice-to-UI Controller for a tactical map dashboard.
-Your job is NOT to physically move or drive. Your job is to generate JSON commands that the dashboard interface interprets to show routes and locations.
-
-Valid JSON Commands:
-1. ROUTE: {"action": "route", "waypoints": ["Origin", "Waypoint 1", "Destination"]}
-2. HIGHLIGHT: {"action": "highlight", "location": "Exact Place Name", "description": "Short info"}
-
-RULES:
-- If the user asks for a route, DO NOT say "I cannot navigate". Instead, GENERATE the JSON for the route.
-- If the user asks to see a place, GENERATE the highlight JSON.
-- Always include the JSON block at the very end of your response.
-`;
-        const enrichedMessage = `${mapProtocol}\n\nUSER REQUEST: ${message}`;
-
+    async generateResponse(prompt, type = 'fast') {
+        const modelName = this.models[type] || this.models.fast;
         try {
-            // Attempt normal chat
-            const chatRes = await fetch(`${this.baseUrl}/workspace/${this.workspaceSlug}/chat`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: enrichedMessage,
-                    mode,
-                    userId
-                })
-            });
+            const model = genAI.getGenerativeModel({ model: modelName });
 
-            if (!chatRes.ok) {
-                const errorBody = await chatRes.text();
-
-                // Check if it's an embedding error
-                if (errorBody.includes('Failed to embed') || errorBody.includes('Gemini Failed to embed')) {
-                    console.log('[ANYTHINGLLM] Embedding error detected, using fallback strategy...');
-                    return await this._chatWithLocalEmbeddings(message, mode);
-                }
-
-                throw new Error(`AnythingLLM chat failed: ${chatRes.status} - ${errorBody}`);
-            }
-
-            const chatData = await chatRes.json();
-            return chatData.textResponse;
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
 
         } catch (error) {
-            // Updated error handling to catch all connection-related issues
-            const isConnectionError = error.message.includes('Failed to embed') ||
-                error.message.includes('Connection error') ||
-                error.message.includes('fetch failed') ||
-                error.message.includes('ECONNREFUSED');
+            console.error(`❌ Gemini Error (${modelName}):`, error.message);
 
-            if (isConnectionError) {
-                console.log(`[ANYTHINGLLM] Connection issue detected (${error.message}), using local fallback...`);
-                return await this._chatWithLocalEmbeddings(message, mode);
+            // Limit fallback logic to "not found" or "404"
+            if (error.message && (error.message.includes('not found') || error.message.includes('404'))) {
+                console.log("⚠️ Retrying with fallback model...");
+                const fallbackName = type === 'complex' ? this.models.fallback_complex : this.models.fallback_fast;
+                try {
+                    const fallbackModel = genAI.getGenerativeModel({ model: fallbackName });
+                    const result = await fallbackModel.generateContent(prompt);
+                    return result.response.text();
+                } catch (retryError) {
+                    throw new Error(`Fallback failed: ${retryError.message}`);
+                }
             }
             throw error;
         }
     }
 
     /**
-     * Fallback: Use local embeddings + local LLM when AnythingLLM embeddings fail
+     * Generate response with image input (Vision)
+     * @param {string} prompt - Text prompt
+     * @param {string} imageData - Base64 string
+     * @param {string} mimeType - e.g. 'image/jpeg'
      */
-    async _chatWithLocalEmbeddings(message, mode) {
-        console.log('[FALLBACK] Using local embeddings + RAG');
+    async generateVisionResponse(prompt, imageData, mimeType = 'image/jpeg') {
+        const model = genAI.getGenerativeModel({ model: this.models.image });
 
-        // Get Ollama URL from settings
-        const settings = settingsService.getSettings();
-        const apiKeys = settings.apiKeys || {};
-        const ollamaUrl = apiKeys.ollama_use_proxy
-            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
-            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
-
-        // 1. Get relevant documents using local embeddings
-        const documents = await this._getWorkspaceDocuments();
-
-        const mapSystemPrompt = `You are Th3 Thirty3, a tactical AI assistant.
-[MAP PROTOCOL]
-To control the map, output JSON:
-- Route: {"action": "route", "waypoints": ["A", "B"]}
-- Highlight: {"action": "highlight", "location": "X"}
-`;
-
-        if (documents.length > 0) {
-            // 2. Find similar documents
-            const relevant = await this.embeddingService.findSimilar(message, documents, 3, 'ollama');
-
-            // 3. Build context-enhanced prompt
-            const context = relevant.map(doc => doc.text).join('\n\n');
-            const enhancedPrompt = `Context from knowledge base:\n${context}\n\nUser question: ${message}`;
-
-            console.log(`[FALLBACK] Found ${relevant.length} relevant documents`);
-
-            // 4. Use Ollama for response (via proxy or direct)
-            const { Ollama } = require('ollama');
-            const ollama = new Ollama({ host: ollamaUrl });
-
-            const response = await ollama.chat({
-                model: 'granite4:latest',
-                messages: [
-                    {
-                        role: 'system',
-                        content: mapSystemPrompt
-                    },
-                    { role: 'user', content: enhancedPrompt }
-                ]
-            });
-
-            return `[OFFLINE MODE - Local RAG] ${response.message.content}`;
-        } else {
-            // No documents available, use plain local LLM
-            console.log('[FALLBACK] No documents available, using plain local LLM');
-            const { Ollama } = require('ollama');
-            const ollama = new Ollama({ host: ollamaUrl });
-
-            const response = await ollama.chat({
-                model: 'granite4:latest',
-                messages: [
-                    { role: 'system', content: mapSystemPrompt },
-                    { role: 'user', content: message }
-                ]
-            });
-
-            return `[OFFLINE MODE] ${response.message.content}`;
-        }
-    }
-
-    /**
-     * Fetch workspace documents (simplified - you may need to adapt based on your setup)
-     */
-    async _getWorkspaceDocuments() {
         try {
-            const docsRes = await fetch(`${this.baseUrl}/workspace/${this.workspaceSlug}/documents`, {
-                headers: { 'Authorization': `Bearer ${this.apiKey}` }
-            });
+            const imagePart = {
+                inlineData: {
+                    data: imageData,
+                    mimeType: mimeType
+                }
+            };
 
-            if (docsRes.ok) {
-                const data = await docsRes.json();
-                return data.documents || [];
-            }
-        } catch (e) {
-            console.log('[FALLBACK] Could not fetch workspace documents:', e.message);
+            const result = await model.generateContent([prompt, imagePart]);
+            return result.response.text();
+        } catch (error) {
+            console.error("❌ Gemini Vision Error:", error.message);
+            throw error;
         }
+    }
 
-        return [];
+    // Health check
+    async ping() {
+        try {
+            await this.generateResponse("Hello", "fast");
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
     /**
-     * Get embedding service stats
+     * Chat method for compatibility
+     * @param {Array} messages - [{role, content}]
+     * @param {string} type - 'fast' | 'complex'
      */
-    getStats() {
-        return this.embeddingService.getStats();
+    async chat(messages, type = 'fast') {
+        // Convert 'system' role to part of prompt or use systemInstruction if verified supported
+        // For simplicity in wrapper, we'll concatenate for now or use chatSession if possible.
+        // But the prompt pattern is simpler.
+        // Let's use startChat for better context if messages > 1.
+
+        const modelName = this.models[type] || this.models.fast;
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        // Transform messages for Gemini (user/model roles)
+        // Gemini uses 'user' and 'model'. OpenAssistant/Ollama uses 'user', 'assistant', 'system'.
+
+        let systemPrompt = '';
+        const history = [];
+        let lastUserMsg = '';
+
+        for (const msg of messages) {
+            if (msg.role === 'system') {
+                systemPrompt += msg.content + '\n';
+            } else if (msg.role === 'user') {
+                if (lastUserMsg) { // If multiple user msgs in a row (rare but possible)
+                    history.push({ role: 'user', parts: [{ text: lastUserMsg }] });
+                }
+                lastUserMsg = msg.content;
+            } else if (msg.role === 'assistant') {
+                if (lastUserMsg) {
+                    history.push({ role: 'user', parts: [{ text: lastUserMsg }] });
+                    lastUserMsg = '';
+                }
+                history.push({ role: 'model', parts: [{ text: msg.content }] });
+            }
+        }
+
+        // If system prompt exists, pre-pend it or strict it.
+        // Experimental models support systemInstruction.
+
+        try {
+            const chat = model.startChat({
+                history: history,
+                systemInstruction: systemPrompt ? { role: 'system', parts: [{ text: systemPrompt }] } : undefined
+            });
+
+            const result = await chat.sendMessage(lastUserMsg);
+            return result.response.text();
+        } catch (e) {
+            // Fallback to simple generation if chat fails
+            return this.generateResponse((systemPrompt ? `System: ${systemPrompt}\n\n` : '') + messages.map(m => `${m.role}: ${m.content}`).join('\n'), type);
+        }
     }
 }
 
-module.exports = AnythingLLMWrapper;
+module.exports = new AnythingLLMWrapper();

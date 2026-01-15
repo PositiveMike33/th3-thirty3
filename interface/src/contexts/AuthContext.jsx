@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
                         }
                     });
                     const data = await response.json();
-                    
+
                     if (data.success && data.user) {
                         setUser(data.user);
                         setToken(savedToken);

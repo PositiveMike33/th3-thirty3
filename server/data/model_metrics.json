@@ -2819,14 +2819,14 @@
     "modelName": "granite4:latest",
     "createdAt": "2026-01-05T02:29:23.169Z",
     "performance": {
-      "totalQueries": 16,
-      "successfulQueries": 16,
+      "totalQueries": 26,
+      "successfulQueries": 26,
       "failedQueries": 0,
-      "avgResponseTime": 15349.375,
+      "avgResponseTime": 15795.153846153846,
       "minResponseTime": 123,
       "maxResponseTime": 63452,
-      "tokensPerSecond": 49.43767572633552,
-      "totalTokensGenerated": 9664
+      "tokensPerSecond": 43.03525093348522,
+      "totalTokensGenerated": 17419
     },
     "expertise": {
       "coding": {
@@ -2850,9 +2850,9 @@
         "lastUpdated": null
       },
       "chat": {
-        "score": 71.44545454545454,
-        "samples": 11,
-        "lastUpdated": "2026-01-13T17:48:42.668Z"
+        "score": 73.61428571428571,
+        "samples": 21,
+        "lastUpdated": "2026-01-13T23:30:07.669Z"
       },
       "humanizer": {
         "score": 30,
@@ -2871,9 +2871,9 @@
       }
     },
     "cognitive": {
-      "overallScore": 35.7,
-      "learningRate": 0.003400000000000006,
-      "consistency": 87.96463544382638,
+      "overallScore": 35.9,
+      "learningRate": 0.00019999999999999573,
+      "consistency": 99.4,
       "adaptability": 0
     },
     "learning": {
@@ -2887,7 +2887,7 @@
     "strengths": [
       {
         "category": "chat",
-        "score": 71,
+        "score": 74,
         "label": "chat"
       }
     ],
@@ -3391,6 +3391,146 @@
           "analysis": 43.5,
           "writing": 30
         }
+      },
+      {
+        "date": "2026-01-13T18:18:36.889Z",
+        "cognitiveScore": 35.8,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 72.57499999999999,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T18:29:40.651Z",
+        "cognitiveScore": 35.8,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 72.76153846153846,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T18:42:08.860Z",
+        "cognitiveScore": 35.8,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 72.56428571428572,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T19:42:29.226Z",
+        "cognitiveScore": 35.8,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 72.39333333333335,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T20:42:11.462Z",
+        "cognitiveScore": 35.8,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 72.24375,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T21:42:11.763Z",
+        "cognitiveScore": 35.8,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 72.7,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T22:04:24.787Z",
+        "cognitiveScore": 35.9,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 73.10555555555555,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T22:46:43.047Z",
+        "cognitiveScore": 35.9,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 73.46842105263158,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T23:22:59.486Z",
+        "cognitiveScore": 35.9,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 73.545,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
+      },
+      {
+        "date": "2026-01-13T23:30:07.669Z",
+        "cognitiveScore": 35.9,
+        "expertise": {
+          "coding": 30,
+          "intelligence": 30,
+          "logic": 30,
+          "creativity": 30,
+          "chat": 73.61428571428571,
+          "humanizer": 30,
+          "analysis": 43.5,
+          "writing": 30
+        }
       }
     ],
     "benchmarks": [
@@ -3510,8 +3650,8 @@
       }
     ],
     "lastBenchmark": "2026-01-08T10:18:04.163Z",
-    "lastUpdated": "2026-01-13T17:48:42.668Z",
-    "lastActivity": "2026-01-13T17:48:42.668Z",
+    "lastUpdated": "2026-01-13T23:30:07.670Z",
+    "lastActivity": "2026-01-13T23:30:07.669Z",
     "decayAppliedAt": "2026-01-12T12:45:15.554Z"
   },
   "[HACKERGPT] hackergpt": {
@@ -3951,48 +4091,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 57.87280146446785,
+        "score": 51.77884380473091,
         "samples": 4,
         "lastUpdated": "2026-01-08T12:41:54.242Z"
       },
       "humanizer": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 38.354298803411645,
+        "score": 34.31562317233143,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 40.2,
+      "overallScore": 36,
       "learningRate": 0.00400000000000001,
       "consistency": 0,
       "adaptability": 0
@@ -4290,13 +4430,67 @@
         "cognitiveScore": 40.2,
         "event": "skill_decay",
         "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T18:18:27.477Z",
+        "cognitiveScore": 39.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T18:29:39.824Z",
+        "cognitiveScore": 39.3,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T18:42:10.697Z",
+        "cognitiveScore": 38.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T22:04:19.518Z",
+        "cognitiveScore": 38.4,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T22:46:36.113Z",
+        "cognitiveScore": 37.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T23:22:54.541Z",
+        "cognitiveScore": 37.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-13T23:30:01.674Z",
+        "cognitiveScore": 37,
+        "event": "skill_decay",
+        "daysSinceActivity": 5
+      },
+      {
+        "date": "2026-01-14T04:01:36.549Z",
+        "cognitiveScore": 36.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 6
+      },
+      {
+        "date": "2026-01-14T13:46:45.419Z",
+        "cognitiveScore": 36,
+        "event": "skill_decay",
+        "daysSinceActivity": 6
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2026-01-08T12:41:54.242Z",
     "lastActivity": "2026-01-08T12:41:54.242Z",
-    "decayAppliedAt": "2026-01-13T17:48:35.607Z"
+    "decayAppliedAt": "2026-01-14T13:46:45.419Z"
   },
   "[ANYTHINGLLM] anythingllm-default": {
     "modelName": "[ANYTHINGLLM] anythingllm-default",
@@ -4313,48 +4507,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 50,
+        "score": 49.48202311195867,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 50,
+      "overallScore": 49.5,
       "learningRate": 0,
       "consistency": 100,
       "adaptability": 0
@@ -4478,12 +4672,67 @@
           "analysis": 50,
           "writing": 50
         }
+      },
+      {
+        "date": "2026-01-13T18:18:27.480Z",
+        "cognitiveScore": 50,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-13T18:29:39.826Z",
+        "cognitiveScore": 50,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-13T18:42:10.698Z",
+        "cognitiveScore": 50,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-13T22:04:19.521Z",
+        "cognitiveScore": 49.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-13T22:46:36.115Z",
+        "cognitiveScore": 49.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-13T23:22:54.545Z",
+        "cognitiveScore": 49.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-13T23:30:01.676Z",
+        "cognitiveScore": 49.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-14T04:01:36.550Z",
+        "cognitiveScore": 49.7,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-14T13:46:45.420Z",
+        "cognitiveScore": 49.5,
+        "event": "skill_decay",
+        "daysSinceActivity": 4
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2026-01-10T18:07:26.977Z",
-    "lastActivity": "2026-01-10T18:07:26.977Z"
+    "lastActivity": "2026-01-10T18:07:26.977Z",
+    "decayAppliedAt": "2026-01-14T13:46:45.420Z"
   },
   "[GEMINI] gemini-3-pro-preview": {
     "modelName": "[GEMINI] gemini-3-pro-preview",
@@ -4500,48 +4749,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 50,
+        "score": 49.928563449074076,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 50,
+      "overallScore": 49.9,
       "learningRate": 0,
       "consistency": 100,
       "adaptability": 0
@@ -4665,12 +4914,19 @@
           "analysis": 50,
           "writing": 50
         }
+      },
+      {
+        "date": "2026-01-14T13:46:45.421Z",
+        "cognitiveScore": 49.9,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2026-01-11T06:55:16.949Z",
-    "lastActivity": "2026-01-11T06:55:16.949Z"
+    "lastActivity": "2026-01-11T06:55:16.949Z",
+    "decayAppliedAt": "2026-01-14T13:46:45.421Z"
   },
   "[GEMINI] gemini-3-flash-preview": {
     "modelName": "[GEMINI] gemini-3-flash-preview",
@@ -4687,48 +4943,48 @@
     },
     "expertise": {
       "coding": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "intelligence": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "logic": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "creativity": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "chat": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "humanizer": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "analysis": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       },
       "writing": {
-        "score": 50,
+        "score": 49.82691309003313,
         "samples": 0,
         "lastUpdated": null
       }
     },
     "cognitive": {
-      "overallScore": 50,
+      "overallScore": 49.8,
       "learningRate": 0,
       "consistency": 0,
       "adaptability": 0
@@ -4782,12 +5038,25 @@
           "analysis": 50,
           "writing": 50
         }
+      },
+      {
+        "date": "2026-01-14T04:01:36.551Z",
+        "cognitiveScore": 50,
+        "event": "skill_decay",
+        "daysSinceActivity": 3
+      },
+      {
+        "date": "2026-01-14T13:46:45.422Z",
+        "cognitiveScore": 49.8,
+        "event": "skill_decay",
+        "daysSinceActivity": 4
       }
     ],
     "benchmarks": [],
     "lastBenchmark": null,
     "lastUpdated": "2026-01-11T00:35:24.571Z",
-    "lastActivity": "2026-01-11T00:35:24.571Z"
+    "lastActivity": "2026-01-11T00:35:24.571Z",
+    "decayAppliedAt": "2026-01-14T13:46:45.422Z"
   },
   "[ANYTHINGLLM] osint": {
     "modelName": "[ANYTHINGLLM] osint",

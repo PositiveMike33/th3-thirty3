@@ -3,7 +3,7 @@
  * Verify TensorFlow GPU integration is working
  */
 
-const fetch = require('node-fetch');
+// Native fetch used in Node 18+
 
 const GPU_TRAINER_URL = process.env.GPU_TRAINER_URL || 'http://localhost:5000';
 

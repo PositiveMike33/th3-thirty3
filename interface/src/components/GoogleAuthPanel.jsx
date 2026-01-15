@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
+import { api } from '../services/apiService';
 
 const GoogleAuthPanel = () => {
     const [googleStatus, setGoogleStatus] = useState({});
     const ACCOUNTS = ['th3thirty3@gmail.com', 'mikegauthierguillet@gmail.com', 'mgauthierguillet@gmail.com'];
 
     useEffect(() => {
-        // Check Google Status
-        fetch(`${API_URL}/google/status`)
-            .then(res => res.json())
+        // Check Google Status using API Service
+        api.get('/google/status')
             .then(setGoogleStatus)
-            .catch(console.error);
+            .catch(err => console.error("Status check failed:", err));
     }, []);
 
     const connectGoogle = (email) => {

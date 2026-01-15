@@ -3,8 +3,8 @@
  * Entraîne l'agent cybersec avec les connaissances sur les attaques zero-click
  */
 
-const ExpertAgentsService = require('./expert_agents_service');
-const AgentMemoryService = require('./agent_memory_service');
+const ExpertAgentsService = require('../../expert_agents_service');
+const AgentMemoryService = require('../../agent_memory_service');
 const fs = require('fs');
 const path = require('path');
 

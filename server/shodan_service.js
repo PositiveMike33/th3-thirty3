@@ -14,7 +14,7 @@ class ShodanService extends EventEmitter {
         this.baseUrl = 'https://api.shodan.io';
         this.cache = new Map();
         this.cacheExpiry = 15 * 60 * 1000; // 15 minutes
-        
+
         // Training data categories
         this.trainingCategories = {
             vulnerability_analysis: [],
@@ -23,7 +23,7 @@ class ShodanService extends EventEmitter {
             threat_intelligence: [],
             exploit_research: []
         };
-        
+
         console.log('[SHODAN] Service initialized');
     }
 
@@ -33,7 +33,7 @@ class ShodanService extends EventEmitter {
     async makeRequest(endpoint, params = {}) {
         const url = new URL(`${this.baseUrl}${endpoint}`);
         url.searchParams.append('key', this.apiKey);
-        
+
         for (const [key, value] of Object.entries(params)) {
             url.searchParams.append(key, value);
         }
@@ -140,7 +140,7 @@ class ShodanService extends EventEmitter {
      */
     async generateTrainingData(category = 'all') {
         console.log(`[SHODAN] Generating training data for category: ${category}`);
-        
+
         const trainingData = [];
 
         try {
@@ -317,9 +317,9 @@ Format your response as a professional threat intelligence report.`;
      */
     async createTrainingSession(modelName, realTrainingService) {
         console.log(`[SHODAN] Creating training session for ${modelName}`);
-        
+
         const trainingData = await this.generateTrainingData();
-        
+
         // Add Shodan scenarios to the training service
         const shodanScenarios = {
             shodan_vuln: trainingData
@@ -346,7 +346,7 @@ Format your response as a professional threat intelligence report.`;
      */
     async runShodanTrainingIteration(modelName, llmService, category = 'vulnerability_analysis') {
         const trainingData = await this.generateTrainingData(category);
-        
+
         if (trainingData.length === 0) {
             return { success: false, error: 'No training data available' };
         }
@@ -356,11 +356,12 @@ Format your response as a professional threat intelligence report.`;
 
         try {
             const systemPrompt = this.getSystemPromptForCategory(category);
-            
-            const response = await llmService.generateOllamaResponse(
+
+            const response = await llmService.generateResponse(
                 scenario.prompt,
                 null,
-                modelName,
+                'hackergpt', // Force Cloud provider
+                'gemini-3-flash-preview',
                 systemPrompt
             );
 
@@ -393,24 +394,24 @@ Format your response as a professional threat intelligence report.`;
             vulnerability_analysis: `You are an expert cybersecurity analyst specializing in vulnerability assessment. 
 Provide detailed, professional security analysis. Consider CVSS scores, exploit availability, 
 and real-world impact. Your analysis should be actionable and suitable for security teams.`,
-            
+
             network_reconnaissance: `You are an experienced penetration tester conducting authorized security assessments.
 Provide methodical reconnaissance strategies. Explain your thought process and prioritize 
 based on risk. Always emphasize ethical and legal considerations.`,
-            
+
             threat_intelligence: `You are a senior threat intelligence analyst at a security operations center.
 Produce clear, executive-ready threat briefings. Include context about threat actors,
 TTPs (Tactics, Techniques, Procedures), and actionable recommendations.`,
-            
+
             service_identification: `You are a network security specialist skilled in service fingerprinting.
 Identify services, versions, and potential misconfigurations. Provide security implications
 for each finding.`,
-            
+
             exploit_research: `You are a security researcher studying vulnerabilities for defensive purposes.
 Explain exploitation techniques conceptually to help defenders understand and prevent attacks.
 Focus on detection and mitigation strategies.`
         };
-        
+
         return prompts[category] || prompts.vulnerability_analysis;
     }
 
@@ -444,7 +445,7 @@ Focus on detection and mitigation strategies.`
 
         const categoryKeywords = keywords[category] || keywords.vulnerability_analysis;
         let keywordMatches = 0;
-        
+
         for (const keyword of categoryKeywords) {
             if (response.toLowerCase().includes(keyword.toLowerCase())) {
                 keywordMatches++;
@@ -470,7 +471,7 @@ Focus on detection and mitigation strategies.`
      */
     startPeriodicRefresh(intervalMinutes = 60) {
         console.log(`[SHODAN] Starting periodic data refresh every ${intervalMinutes} minutes`);
-        
+
         this.refreshInterval = setInterval(async () => {
             try {
                 await this.generateTrainingData('all');

@@ -1,8 +1,7 @@
 /**
- * Real Training Service for Ollama Models
- * Provides ACTUAL training through repeated interactions and benchmark challenges
- * Connects with TOR container for real-world OSINT/Hacking training scenarios
- * Integrates with Shodan API for real cybersecurity data
+ * Real Training Service for Cloud Models
+ * Provides TRAINING through repeated interactions and benchmark challenges
+ * Connects with Shodan API for real cybersecurity data
  */
 
 const EventEmitter = require('events');
@@ -14,11 +13,11 @@ class RealTrainingService extends EventEmitter {
         this.llmService = llmService;
         this.socketService = socketService;
         this.shodanService = null; // Set via setShodanService()
-        
+
         this.trainingInProgress = {};
         this.trainingQueue = [];
         this.torEnabled = false;
-        
+
         // Training scenarios for real skill development
         this.trainingScenarios = {
             coding: [
@@ -73,8 +72,8 @@ class RealTrainingService extends EventEmitter {
                 "Analyze the threat landscape for organizations with exposed Industrial Control Systems (ICS)."
             ]
         };
-        
-        console.log('[REAL_TRAINING] Service initialized with Shodan integration');
+
+        console.log('[REAL_TRAINING] Service initialized with Shodan integration (Cloud Mode)');
     }
 
     /**
@@ -96,7 +95,7 @@ class RealTrainingService extends EventEmitter {
 
         try {
             const trainingData = await this.shodanService.generateTrainingData('all');
-            
+
             // Update scenarios with fresh Shodan data
             const vulnPrompts = trainingData
                 .filter(d => d.category === 'vulnerability_analysis')
@@ -129,9 +128,9 @@ class RealTrainingService extends EventEmitter {
      */
     async startTrainingSession(modelName, category = 'all', iterations = 5) {
         if (this.trainingInProgress[modelName]) {
-            return { 
-                success: false, 
-                error: `Training already in progress for ${modelName}` 
+            return {
+                success: false,
+                error: `Training already in progress for ${modelName}`
             };
         }
 
@@ -145,14 +144,14 @@ class RealTrainingService extends EventEmitter {
         };
 
         this.emit('trainingStarted', { modelName, category, iterations });
-        
+
         try {
             const results = await this.runTrainingLoop(modelName, category, iterations);
-            
+
             delete this.trainingInProgress[modelName];
-            
+
             this.emit('trainingCompleted', { modelName, results });
-            
+
             return {
                 success: true,
                 modelName,
@@ -171,10 +170,10 @@ class RealTrainingService extends EventEmitter {
      * Run the actual training loop
      */
     async runTrainingLoop(modelName, category, iterations) {
-        const categories = category === 'all' 
+        const categories = category === 'all'
             ? Object.keys(this.trainingScenarios)
             : [category];
-        
+
         const results = {
             totalIterations: 0,
             scores: [],
@@ -187,11 +186,11 @@ class RealTrainingService extends EventEmitter {
 
         for (let i = 0; i < iterations; i++) {
             this.trainingInProgress[modelName].currentIteration = i + 1;
-            
+
             for (const cat of categories) {
                 const scenarios = this.trainingScenarios[cat] || [];
                 const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-                
+
                 if (!scenario) continue;
 
                 const iterationResult = await this.runSingleIteration(modelName, cat, scenario);
@@ -210,7 +209,7 @@ class RealTrainingService extends EventEmitter {
                     });
                 }
 
-                // Small delay between iterations to avoid overwhelming the model
+                // Small delay between iterations
                 await new Promise(r => setTimeout(r, 1000));
             }
         }
@@ -234,14 +233,16 @@ class RealTrainingService extends EventEmitter {
      */
     async runSingleIteration(modelName, category, prompt) {
         const startTime = Date.now();
-        
+
         try {
             // Build the training prompt
             const systemPrompt = this.getTrainingSystemPrompt(category);
-            
-            const response = await this.llmService.generateOllamaResponse(
+
+            // Use LLM Service (Cloud) instead of deprecated Ollama call
+            const response = await this.llmService.generateResponse(
                 prompt,
                 null,
+                'gemini', // Ensure provider is set (default Gemini)
                 modelName,
                 systemPrompt
             );
@@ -299,7 +300,7 @@ class RealTrainingService extends EventEmitter {
         const mapping = {
             coding: 'coding',
             security: 'analysis',
-            osint: 'analysis', 
+            osint: 'analysis',
             logic: 'logic',
             creativity: 'creativity'
         };
@@ -331,12 +332,12 @@ class RealTrainingService extends EventEmitter {
         // Category-specific evaluation
         switch (category) {
             case 'coding':
-                if (response.includes('function') || response.includes('const') || 
+                if (response.includes('function') || response.includes('const') ||
                     response.includes('def ') || response.includes('class ')) score += 15;
                 if (response.includes('```')) score += 5; // Code block
                 break;
             case 'security':
-                if (response.toLowerCase().includes('vulnerability') || 
+                if (response.toLowerCase().includes('vulnerability') ||
                     response.toLowerCase().includes('exploit')) score += 10;
                 if (response.toLowerCase().includes('mitigation') ||
                     response.toLowerCase().includes('prevention')) score += 10;
@@ -368,7 +369,7 @@ class RealTrainingService extends EventEmitter {
      */
     updateLearningMetrics(modelName, results) {
         const model = this.modelMetrics.getOrCreateModelMetrics(modelName);
-        
+
         if (!model.learning) {
             model.learning = {
                 sessionsCompleted: 0,
@@ -383,21 +384,21 @@ class RealTrainingService extends EventEmitter {
         const learning = model.learning;
         learning.sessionsCompleted++;
         learning.lastSessionScore = results.averageScore;
-        
+
         // Update rolling average
         const oldAvg = learning.averageSessionScore;
         learning.averageSessionScore = (oldAvg * (learning.sessionsCompleted - 1) + results.averageScore) / learning.sessionsCompleted;
-        
+
         // Update peak
         learning.peakScore = Math.max(learning.peakScore, results.averageScore);
-        
+
         // Calculate improvement trend
         if (results.improvement > 0.5) {
             learning.improvementTrend = Math.min(1, learning.improvementTrend + 0.1);
         } else if (results.improvement < -0.5) {
             learning.improvementTrend = Math.max(-1, learning.improvementTrend - 0.1);
         }
-        
+
         // Calculate growth percentage
         const baseScore = 50;
         learning.growthPercentage = ((model.cognitive.overallScore - baseScore) / baseScore) * 100;
@@ -434,38 +435,8 @@ class RealTrainingService extends EventEmitter {
         return { success: false, error: 'No training in progress for this model' };
     }
 
-    /**
-     * Start training all local models
-     */
-    async trainAllLocalModels(iterations = 3) {
-        console.log('[REAL_TRAINING] Starting training for ALL local models...');
-        
-        try {
-            const models = await this.llmService.ollama.list();
-            const localModels = (models.models || [])
-                .filter(m => !m.name.includes('embed'))
-                .map(m => m.name);
-
-            const results = [];
-            
-            for (const modelName of localModels) {
-                console.log(`[REAL_TRAINING] Training ${modelName}...`);
-                const result = await this.startTrainingSession(modelName, 'all', iterations);
-                results.push(result);
-                // Wait between models
-                await new Promise(r => setTimeout(r, 2000));
-            }
-
-            return {
-                success: true,
-                modelsTraining: localModels.length,
-                results
-            };
-        } catch (error) {
-            console.error('[REAL_TRAINING] Train all failed:', error.message);
-            return { success: false, error: error.message };
-        }
-    }
+    // trainAllLocalModels REMOVED for Cloud Enforcing Policy
+    // Only manual training of specific (cloud) models is now allowed.
 }
 
 module.exports = RealTrainingService;

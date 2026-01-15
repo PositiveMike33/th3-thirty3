@@ -20,7 +20,7 @@ async function checkServer() {
 
         // Test embedding service if available
         try {
-            const EmbeddingService = require('./server/embedding_service');
+            const EmbeddingService = require('../server/embedding_service');
             const embSvc = new EmbeddingService();
             
             console.log("\n🧪 Testing Hybrid Embedding System...");

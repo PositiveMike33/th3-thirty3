@@ -1,4 +1,4 @@
-const { Ollama } = require('../server/node_modules/ollama');
+const { Ollama } = require('../node_modules/ollama');
 
 async function verifyMemory() {
     console.log("[TEST] Verifying Memory Service Dependencies...");

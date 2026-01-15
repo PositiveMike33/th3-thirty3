@@ -97,30 +97,53 @@ class TorStartupCheck {
 
         try {
             const { SocksProxyAgent } = require('socks-proxy-agent');
+            const https = require('https');
             const agent = new SocksProxyAgent(`socks5h://${TOR_CONFIG.host}:${this.activePort}`);
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            return new Promise((resolve) => {
+                const req = https.get('https://check.torproject.org/api/ip', { agent }, (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => data += chunk);
+                    res.on('end', () => {
+                        try {
+                            const json = JSON.parse(data);
+                            this.isTorVerified = json.IsTor || false;
+                            this.currentIP = json.IP || null;
+                            resolve({
+                                isTor: this.isTorVerified,
+                                ip: this.currentIP,
+                                message: this.isTorVerified
+                                    ? `✅ Connected via Tor (Exit IP: ${this.currentIP})`
+                                    : `⚠️ Port open but not Tor (IP: ${this.currentIP})`
+                            });
+                        } catch (e) {
+                            resolve({
+                                isTor: false,
+                                ip: null,
+                                message: `⚠️ Invalid response from Tor check: ${e.message}`
+                            });
+                        }
+                    });
+                });
 
-            const response = await fetch('https://check.torproject.org/api/ip', {
-                agent,
-                signal: controller.signal
+                req.on('error', (err) => {
+                    resolve({
+                        isTor: false,
+                        ip: null,
+                        error: err.message,
+                        message: `⚠️ Cannot verify Tor: ${err.message}`
+                    });
+                });
+
+                req.setTimeout(10000, () => {
+                    req.destroy();
+                    resolve({
+                        isTor: false,
+                        ip: null,
+                        message: `⚠️ Tor verification timeout`
+                    });
+                });
             });
-
-            clearTimeout(timeoutId);
-
-            const data = await response.json();
-
-            this.isTorVerified = data.IsTor || false;
-            this.currentIP = data.IP || null;
-
-            return {
-                isTor: this.isTorVerified,
-                ip: this.currentIP,
-                message: this.isTorVerified
-                    ? `✅ Connected via Tor (Exit IP: ${this.currentIP})`
-                    : `⚠️ Port open but not Tor (IP: ${this.currentIP})`
-            };
         } catch (error) {
             return {
                 isTor: false,

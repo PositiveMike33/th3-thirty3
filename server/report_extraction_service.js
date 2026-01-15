@@ -1,5 +1,5 @@
 /**
- * Service d'Extraction et Apprentissage 5-Why avec Llama 3.2
+ * Service d'Extraction et Apprentissage 5-Why avec Cloud LLM
  * Retient les patterns, apprend les tags, génère les 5P formatés
  */
 
@@ -7,20 +7,17 @@ const fs = require('fs');
 const path = require('path');
 
 class ReportExtractionService {
-    constructor() {
+    constructor(llmService) {
         this.dataPath = path.join(__dirname, 'data');
         this.learningFile = path.join(this.dataPath, 'learned_patterns.json');
         this.tagsFile = path.join(this.dataPath, 'tags_database.json');
 
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        // Utiliser gemini-3-pro-preview par défaut
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        this.model = process.env.OLLAMA_MODEL || 'gemini-3-pro-preview';
+        this.llmService = llmService;
 
         this.ensureDataFolder();
         this.loadLearning();
 
-        console.log('[EXTRACTION] Service initialisé avec Llama 3.2');
+        console.log('[EXTRACTION] Service initialisé (Cloud Mode)');
     }
 
     ensureDataFolder() {
@@ -77,44 +74,27 @@ class ReportExtractionService {
     }
 
     /**
-     * Envoyer une requête à Llama 3.2 via Ollama
+     * Envoyer une requête au Cloud LLM
      */
     async queryLlama(prompt, systemPrompt = null) {
-        // Construire le prompt complet
-        let fullPrompt = '';
-        if (systemPrompt) {
-            fullPrompt = `${systemPrompt}\n\n${prompt}`;
-        } else {
-            fullPrompt = prompt;
-        }
-
         try {
-            // Utiliser l'endpoint /api/generate pour llama3.2-vision
-            const response = await fetch(`${this.ollamaUrl}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.model,
-                    prompt: fullPrompt,
-                    stream: false,
-                    options: {
-                        temperature: 0.3,
-                        num_predict: 2000
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('[EXTRACTION] Ollama response:', errorText);
-                throw new Error(`Ollama error: ${response.status} - ${errorText}`);
+            if (!this.llmService) {
+                throw new Error("LLMService not initialized in ReportExtractionService");
             }
 
-            const data = await response.json();
-            return data.response;
+            // Utiliser Gemini Pro pour l'extraction (plus intelligent)
+            const response = await this.llmService.generateResponse(
+                prompt,
+                null,
+                'gemini', // Provider preferences
+                'gemini-3-pro-preview', // Model preference
+                systemPrompt
+            );
+
+            return response;
 
         } catch (error) {
-            console.error('[EXTRACTION] Erreur Llama:', error.message);
+            console.error('[EXTRACTION] Erreur LLM:', error.message);
             throw error;
         }
     }
@@ -155,7 +135,9 @@ Extrait les informations structurées.`;
 
         try {
             // Parser le JSON de la réponse
-            const jsonMatch = result.match(/\{[\s\S]*\}/);
+            // Clean markdown code blocks if present
+            const cleanResult = result.replace(/```json\n?|```/g, '');
+            const jsonMatch = cleanResult.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
             }
@@ -238,6 +220,7 @@ P5 │ POURQUOI [P4]?
    │    [CIL incomplet | OPL manquante | Centerline non défini |
    │     Formation insuffisante | Standard absent]
    │
+
 ───────────────────────────────────────────────────────────────
 
 ───────────────────────────────────────────────────────────────

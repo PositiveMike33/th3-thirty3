@@ -149,6 +149,9 @@ class AuthService {
      * Login user
      */
     async login(emailOrUsername, password) {
+        // Reload users to ensure we have the latest data (e.g. if password was reset manually)
+        this.loadUsers();
+
         if (!emailOrUsername || !password) {
             throw new Error('Email/username and password are required');
         }
@@ -164,7 +167,13 @@ class AuthService {
         }
 
         // Check password
+        console.log(`[AUTH DEBUG] Attempting login for ${user.email}`);
+        console.log(`[AUTH DEBUG] Stored Hash: ${user.password.substring(0, 10)}...`);
+        console.log(`[AUTH DEBUG] Input Password: ${password}`); // CAREFUL: Only for debugging, remove later
+
         const isValid = await bcrypt.compare(password, user.password);
+        console.log(`[AUTH DEBUG] isValid: ${isValid}`);
+
         if (!isValid) {
             throw new Error('Invalid credentials');
         }

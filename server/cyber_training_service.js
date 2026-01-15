@@ -1,6 +1,6 @@
 /**
  * Cyber Training Service - Entraînement d'agents cybersécurité
- * Supporte AnythingLLM et Ollama local/proxy en fallback
+ * Uses Centralized Cloud LLM Service (Gemini/AnythingLLM)
  * ENVIRONNEMENT: Kali Linux 2024.1
  */
 
@@ -8,93 +8,10 @@ const KALI_ENVIRONMENT = require('./config/kali_environment');
 const settingsService = require('./settings_service');
 
 class CyberTrainingService {
-    constructor() {
-        // Load settings
-        const settings = settingsService.getSettings();
-        const apiKeys = settings.apiKeys || {};
-
-        this.anythingLLMUrl = apiKeys.anythingllm_url || process.env.ANYTHING_LLM_URL || 'http://localhost:3001/api/v1';
-        this.apiKey = apiKeys.anythingllm_key || process.env.ANYTHING_LLM_KEY;
-        this.workspace = 'team-cybersecurite';
-
-        // Ollama URL from settings (proxy or direct)
-        this.ollamaUrl = apiKeys.ollama_use_proxy
-            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
-            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
-
-        this.model = 'gemini-3-pro-preview';
-        this.fallbackModel = 'gemini-3-pro-preview';
+    constructor(llmService) {
+        this.llmService = llmService;
         this.kaliEnv = KALI_ENVIRONMENT;
-
-        console.log(`[CYBER-TRAINING] Service initialized (Ollama: ${this.ollamaUrl})`);
-    }
-
-    /**
-     * Appel Ollama local (fallback fiable)
-     */
-    async callOllama(prompt) {
-        try {
-            const response = await fetch(`${this.ollamaUrl}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.model,
-                    prompt: prompt,
-                    stream: false,
-                    options: { temperature: 0.4, num_predict: 2000 }
-                })
-            });
-
-            if (!response.ok) {
-                // Try fallback model
-                const fallbackResponse = await fetch(`${this.ollamaUrl}/api/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: this.fallbackModel,
-                        prompt: prompt,
-                        stream: false,
-                        options: { temperature: 0.4, num_predict: 2000 }
-                    })
-                });
-                const data = await fallbackResponse.json();
-                return data.response;
-            }
-
-            const data = await response.json();
-            return data.response;
-
-        } catch (error) {
-            console.error('[CYBER-TRAINING] Ollama error:', error.message);
-            throw error;
-        }
-    }
-
-    /**
-     * Appel AnythingLLM (si disponible)
-     */
-    async callAnythingLLM(prompt) {
-        try {
-            const response = await fetch(`${this.anythingLLMUrl}/workspace/${this.workspace}/chat`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ message: prompt, mode: 'chat' })
-            });
-
-            if (!response.ok) {
-                throw new Error(`AnythingLLM error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.textResponse;
-
-        } catch (error) {
-            console.log('[CYBER-TRAINING] AnythingLLM unavailable, using Ollama fallback');
-            return await this.callOllama(prompt);
-        }
+        console.log(`[CYBER-TRAINING] Service initialized (Cloud Only)`);
     }
 
     /**
@@ -104,8 +21,9 @@ class CyberTrainingService {
         const trainingPrompt = this.generateTrainingPrompt(module, commands);
 
         try {
-            // Essayer Ollama directement (plus fiable)
-            const response = await this.callOllama(trainingPrompt);
+            // Use Cloud LLM Service (Provider: hackergpt or gemini)
+            const response = await this.llmService.generateResponse(trainingPrompt, null, 'hackergpt', null, this.kaliEnv.getSystemPrompt());
+
             return {
                 success: true,
                 response: response,
@@ -162,7 +80,7 @@ Explique:
 Réponds de manière technique et concise.`;
 
         try {
-            const response = await this.callOllama(prompt);
+            const response = await this.llmService.generateResponse(prompt, null, 'hackergpt', null, this.kaliEnv.getSystemPrompt());
             return {
                 success: true,
                 explanation: response,
@@ -196,7 +114,7 @@ Génère brièvement:
 Format concis comme un CTF.`;
 
         try {
-            const response = await this.callOllama(prompt);
+            const response = await this.llmService.generateResponse(prompt, null, 'hackergpt', null, this.kaliEnv.getSystemPrompt());
             return {
                 success: true,
                 scenario: response,
@@ -220,7 +138,7 @@ Format concis comme un CTF.`;
 Réponds de manière précise et concise.`;
 
         try {
-            const response = await this.callOllama(prompt);
+            const response = await this.llmService.generateResponse(prompt, null, 'gemini', 'gemini-3-flash-preview', this.kaliEnv.getSystemPrompt());
             return {
                 success: true,
                 answers: response,
@@ -233,4 +151,3 @@ Réponds de manière précise et concise.`;
 }
 
 module.exports = CyberTrainingService;
-

