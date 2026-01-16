@@ -23,7 +23,7 @@ import RiskDashboard from './RiskDashboard';
 import NetworkStatus from './NetworkStatus';
 import ServerConsole from './ServerConsole';
 import LoginPage from './LoginPage';
-import UnifiedDashboard from './UnifiedDashboard';
+import ToolsPage from './ToolsPage';
 import EmailDetailPage from './EmailDetailPage';
 import { API_URL } from './config';
 import './index.css';
@@ -71,7 +71,7 @@ function App() {
                     <nav className="p-4 bg-gray-900/80 border-b border-gray-800 text-white flex justify-center gap-8 backdrop-blur-md z-20 items-center">
                       <Link to="/" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">CHAT</Link>
 
-                      <Link to="/unified" className="hover:text-emerald-400 transition-colors font-mono text-sm tracking-widest">📊 UNIFIED</Link>
+                      <Link to="/tools" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🛡️ OUTILS</Link>
                       <Link to="/projects" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROJECTS</Link>
                       <Link to="/simulator" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🎮 SIMULATOR</Link>
                       <Link to="/space" className="hover:text-blue-400 transition-colors font-mono text-sm tracking-widest"> SPACE</Link>
@@ -86,7 +86,7 @@ function App() {
                         <Routes>
                           <Route path="/" element={<ChatInterface />} />
 
-                          <Route path="/unified" element={<UnifiedDashboard />} />
+                          <Route path="/tools" element={<ToolsPage />} />
                           <Route path="/projects" element={<ProjectDashboard />} />
                           <Route path="/osint" element={<OsintDashboard />} />
                           <Route path="/cyber-training" element={<CyberTrainingPage />} />

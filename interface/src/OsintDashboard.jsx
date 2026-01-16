@@ -13,15 +13,30 @@ const OsintDashboard = () => {
     const [spiderfootStatus, setSpiderfootStatus] = useState("Unknown");
 
     useEffect(() => {
+        const defaultTools = [
+            { id: 'sherlock', name: 'Sherlock', description: 'Find usernames across social networks' },
+            { id: 'theharvester', name: 'TheHarvester', description: 'Gather emails, subdomains, hosts' },
+            { id: 'nslookup', name: 'NSLookup', description: 'Query DNS records' },
+            { id: 'whois', name: 'Whois', description: 'Domain registration info' }
+        ];
+
         fetch(`${API_URL}/osint/tools`)
             .then(res => res.json())
             .then(data => {
-                // Ensure data is an array before setting
                 const toolsArray = Array.isArray(data) ? data : (data.tools || []);
-                setTools(toolsArray);
-                if (toolsArray.length > 0) setSelectedTool(toolsArray[0].id);
+                if (toolsArray.length > 0) {
+                    setTools(toolsArray);
+                    setSelectedTool(toolsArray[0].id);
+                } else {
+                    setTools(defaultTools);
+                    setSelectedTool(defaultTools[0].id);
+                }
             })
-            .catch(err => console.error("Failed to load tools:", err));
+            .catch(err => {
+                console.warn("Failed to load tools from backend, using defaults:", err);
+                setTools(defaultTools);
+                setSelectedTool(defaultTools[0].id);
+            });
 
         checkSpiderfootStatus();
     }, []);
@@ -52,6 +67,8 @@ const OsintDashboard = () => {
     const [analysis, setAnalysis] = useState("");
     const [analyzing, setAnalyzing] = useState(false);
 
+    const BRIDGE_API_URL = "http://localhost:8000";
+
     const handleRun = async () => {
         if (!target || !selectedTool) {
             setOutput(prev => prev + `\n[WARNING] Please enter a target and select a tool.\n`);
@@ -62,6 +79,60 @@ const OsintDashboard = () => {
         setAnalysis(""); // Clear previous analysis
         setOutput(prev => prev + `\n> Running ${selectedTool} on ${target}...\n`);
 
+        // --- NEW: Python Bridge Logic for Specific Tools ---
+        if (['sherlock', 'theharvester'].includes(selectedTool)) {
+            try {
+                let endpoint = "";
+                let payload = {};
+
+                if (selectedTool === 'sherlock') {
+                    endpoint = "/scan/sherlock";
+                    payload = { username: target };
+                } else if (selectedTool === 'theharvester') {
+                    endpoint = "/scan/theharvester";
+                    payload = { domain: target, limit: 100, source: "all" };
+                }
+
+                const response = await fetch(`${BRIDGE_API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`Bridge Error: ${response.statusText}`);
+
+                // Real-time Streaming Reader
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let toolOutput = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    toolOutput += chunk;
+
+                    // Direct state update for real-time effect
+                    setOutput(prev => prev + chunk);
+                }
+
+                // Append newline at end
+                setOutput(prev => prev + "\n[SCAN COMPLETED]\n\n");
+
+                // Trigger Analysis if successful
+                triggerAnalysis(selectedTool, toolOutput);
+
+            } catch (err) {
+                console.error("Bridge Connection Error:", err);
+                setOutput(prev => prev + `\n[ERROR] Could not connect to OSINT Bridge. Is the Python service running?\n${err.message}\n\n`);
+            } finally {
+                setLoading(false);
+            }
+            return; // Exit early, do not run legacy logic
+        }
+
+        // --- OLD: Node.js Legacy Logic ---
         try {
             // 1. Run the Tool
             const res = await fetch(`${API_URL}/osint/run`, {
@@ -79,31 +150,14 @@ const OsintDashboard = () => {
             const toolOutput = data.result || data.error || '[No output received]';
             setOutput(prev => prev + toolOutput + "\n\n");
 
-            // 2. Only trigger Expert Analysis if tool succeeded (no error in output)
             if (!toolOutput.includes('[ERROR]')) {
-                setAnalyzing(true);
-                try {
-                    const analyzeRes = await fetch(`${API_URL}/osint/analyze`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ toolId: selectedTool, output: toolOutput })
-                    });
-
-                    if (analyzeRes.ok) {
-                        const analyzeData = await analyzeRes.json();
-                        setAnalysis(analyzeData.analysis || 'Analysis completed.');
-                    }
-                } catch (analyzeError) {
-                    console.warn('Expert analysis unavailable:', analyzeError.message);
-                    // Don't show analysis error to user - it's optional
-                }
+                triggerAnalysis(selectedTool, toolOutput);
             }
 
         } catch (error) {
             console.error('OSINT Error:', error);
             let errorMessage = error.message;
 
-            // User-friendly error messages
             if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
                 errorMessage = 'Cannot connect to server. Please ensure the backend is running.';
             }
@@ -111,6 +165,26 @@ const OsintDashboard = () => {
             setOutput(prev => prev + `[ERROR] ${errorMessage}\n\n`);
         }
         setLoading(false);
+        setAnalyzing(false);
+    };
+
+    // Helper for Analysis (extracted to avoid code duplication)
+    const triggerAnalysis = async (tool, outputText) => {
+        setAnalyzing(true);
+        try {
+            const analyzeRes = await fetch(`${API_URL}/osint/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ toolId: tool, output: outputText })
+            });
+
+            if (analyzeRes.ok) {
+                const analyzeData = await analyzeRes.json();
+                setAnalysis(analyzeData.analysis || 'Analysis completed.');
+            }
+        } catch (analyzeError) {
+            console.warn('Expert analysis unavailable:', analyzeError.message);
+        }
         setAnalyzing(false);
     };
 

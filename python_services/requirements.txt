@@ -6,3 +6,6 @@ jupyterlab
 wwt_kernel_data_relay
 ipyevents
 duckduckgo-search
+fastapi
+uvicorn
+docker

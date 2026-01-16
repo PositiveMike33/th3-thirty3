@@ -140,23 +140,83 @@ class GoogleService {
         }
     }
 
-    async listUnreadEmails(email) {
-        const messages = await this.getUnreadEmails(email);
-        if (!messages || messages.length === 0) return "Aucun email non lu.";
+    /**
+     * Centralized request execution with 401 retry logic
+     */
+    async _executeWithRetry(email, apiCallFn) {
+        try {
+            // First attempt
+            const auth = await this.getClient(email);
+            if (!auth) throw new Error("Authentification impossible (token manquant ou expiré)");
+            return await apiCallFn(auth);
+        } catch (error) {
+            // Check if error is 401 (Unauthorized) or 400 with "invalid_grant"
+            const isAuthError = error.code === 401 ||
+                (error.response && error.response.status === 401) ||
+                (error.message && error.message.includes('invalid_grant'));
 
-        let summary = "";
-        messages.forEach(msg => {
-            summary += `- De: ${msg.from} | Sujet: ${msg.subject}\n`;
-        });
-        return summary;
+            if (isAuthError) {
+                console.log(`[GOOGLE] Auth error detected for ${email}. Forcing token refresh...`);
+
+                // 1. Invalidate memory cache
+                if (this.clients[email]) {
+                    delete this.clients[email];
+                }
+
+                // 2. Force refresh via getClient (it will see no cache and load from DB/Refresh)
+                // We might need to force a refresh even if DB says it's valid if it was revoked
+                const user = await User.findOne({ email });
+                if (user && user.googleTokens && user.googleTokens.refresh_token) {
+                    try {
+                        const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
+                        const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+                        oAuth2Client.setCredentials(user.googleTokens);
+
+                        console.log(`[GOOGLE] Attempting hard refresh for ${email}...`);
+                        const { credentials } = await oAuth2Client.refreshAccessToken();
+
+                        // Update DB
+                        const updatedTokens = { ...user.googleTokens, ...credentials };
+                        await User.findOneAndUpdate(
+                            { email },
+                            { $set: { googleTokens: updatedTokens } }
+                        );
+
+                        // Update Cache
+                        oAuth2Client.setCredentials(updatedTokens);
+                        this.clients[email] = oAuth2Client;
+
+                        console.log(`[GOOGLE] Hard refresh successful. Retrying request...`);
+                        return await apiCallFn(oAuth2Client);
+
+                    } catch (refreshError) {
+                        console.error(`[GOOGLE] Hard refresh failed:`, refreshError.message);
+                        throw new Error("Session expirée. Veuillez vous reconnecter via /settings");
+                    }
+                }
+            }
+            throw error;
+        }
+    }
+
+    async listUnreadEmails(email) {
+        try {
+            const messages = await this.getUnreadEmails(email);
+            if (!messages || messages.length === 0) return "Aucun email non lu.";
+
+            let summary = "";
+            messages.forEach(msg => {
+                summary += `- De: ${msg.from} | Sujet: ${msg.subject}\n`;
+            });
+            return summary;
+        } catch (error) {
+            return `Erreur: ${error.message}`;
+        }
     }
 
     async getUnreadEmails(email) {
-        const auth = await this.getClient(email);
-        if (!auth) return [];
-
-        const gmail = google.gmail({ version: 'v1', auth });
-        try {
+        return this._executeWithRetry(email, async (auth) => {
+            const gmail = google.gmail({ version: 'v1', auth });
             const res = await gmail.users.messages.list({
                 userId: 'me',
                 q: 'is:unread',
@@ -186,18 +246,12 @@ class GoogleService {
                 });
             }
             return emailData;
-        } catch (error) {
-            console.error(`Error fetching emails for ${email}:`, error);
-            return [];
-        }
+        });
     }
 
     async getEmailById(email, messageId) {
-        const auth = await this.getClient(email);
-        if (!auth) return null;
-
-        const gmail = google.gmail({ version: 'v1', auth });
-        try {
+        return this._executeWithRetry(email, async (auth) => {
+            const gmail = google.gmail({ version: 'v1', auth });
             const msg = await gmail.users.messages.get({
                 userId: 'me',
                 id: messageId,
@@ -217,7 +271,6 @@ class GoogleService {
             if (payload.body && payload.body.data) {
                 body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
             } else if (payload.parts) {
-                // Multipart email
                 for (const part of payload.parts) {
                     if (part.mimeType === 'text/html' && part.body.data) {
                         body = Buffer.from(part.body.data, 'base64').toString('utf-8');
@@ -238,30 +291,28 @@ class GoogleService {
                 body: body,
                 labelIds: msg.data.labelIds
             };
-        } catch (error) {
-            console.error(`Error fetching email ${messageId}:`, error);
-            return null;
-        }
+        });
     }
 
     async listUpcomingEvents(email) {
-        const events = await this.getUpcomingEvents(email);
-        if (!events || events.length === 0) return "Aucun événement à venir.";
+        try {
+            const events = await this.getUpcomingEvents(email);
+            if (!events || events.length === 0) return "Aucun événement à venir.";
 
-        let summary = "";
-        events.forEach(event => {
-            const start = event.start.dateTime || event.start.date;
-            summary += `- ${start} : ${event.summary}\n`;
-        });
-        return summary;
+            let summary = "";
+            events.forEach(event => {
+                const start = event.start.dateTime || event.start.date;
+                summary += `- ${start} : ${event.summary}\n`;
+            });
+            return summary;
+        } catch (error) {
+            return `Erreur: ${error.message}`;
+        }
     }
 
     async getUpcomingEvents(email) {
-        const auth = await this.getClient(email);
-        if (!auth) return [];
-
-        const calendar = google.calendar({ version: 'v3', auth });
-        try {
+        return this._executeWithRetry(email, async (auth) => {
+            const calendar = google.calendar({ version: 'v3', auth });
             const res = await calendar.events.list({
                 calendarId: 'primary',
                 timeMin: (new Date()).toISOString(),
@@ -270,29 +321,27 @@ class GoogleService {
                 orderBy: 'startTime',
             });
             return res.data.items || [];
-        } catch (error) {
-            console.error(`Error fetching calendar for ${email}:`, error);
-            return [];
-        }
+        });
     }
 
     async listTasks(email) {
-        const tasks = await this.getTasks(email);
-        if (!tasks || tasks.length === 0) return "Aucune tâche à faire.";
+        try {
+            const tasks = await this.getTasks(email);
+            if (!tasks || tasks.length === 0) return "Aucune tâche à faire.";
 
-        let summary = "";
-        tasks.forEach(t => {
-            summary += `- [ ] ${t.title} (Due: ${t.due ? t.due.split('T')[0] : 'Pas de date'})\n`;
-        });
-        return summary;
+            let summary = "";
+            tasks.forEach(t => {
+                summary += `- [ ] ${t.title} (Due: ${t.due ? t.due.split('T')[0] : 'Pas de date'})\n`;
+            });
+            return summary;
+        } catch (error) {
+            return `Erreur: ${error.message}`;
+        }
     }
 
     async getTasks(email) {
-        const auth = await this.getClient(email);
-        if (!auth) return [];
-
-        const service = google.tasks({ version: 'v1', auth });
-        try {
+        return this._executeWithRetry(email, async (auth) => {
+            const service = google.tasks({ version: 'v1', auth });
             const taskLists = await service.tasklists.list({ maxResults: 1 });
             if (!taskLists.data.items || taskLists.data.items.length === 0) return [];
 
@@ -303,52 +352,47 @@ class GoogleService {
                 showCompleted: false
             });
             return res.data.items || [];
-        } catch (error) {
-            console.error(`Error fetching tasks for ${email}:`, error);
-            return [];
-        }
+        });
     }
 
     async listDriveFiles(email) {
-        const files = await this.getDriveFiles(email);
-        if (!files || files.length === 0) return "Aucun fichier récent.";
+        try {
+            const files = await this.getDriveFiles(email);
+            if (!files || files.length === 0) return "Aucun fichier récent.";
 
-        let summary = "";
-        files.forEach(f => {
-            summary += `- [${f.mimeType.split('/').pop()}] ${f.name} (Modifié: ${f.modifiedTime})\n`;
-        });
-        return summary;
+            let summary = "";
+            files.forEach(f => {
+                summary += `- [${f.mimeType.split('/').pop()}] ${f.name} (Modifié: ${f.modifiedTime})\n`;
+            });
+            return summary;
+        } catch (error) {
+            return `Erreur: ${error.message}`;
+        }
     }
 
     async getDriveFiles(email) {
-        const auth = await this.getClient(email);
-        if (!auth) return [];
-
-        const drive = google.drive({ version: 'v3', auth });
-        try {
+        return this._executeWithRetry(email, async (auth) => {
+            const drive = google.drive({ version: 'v3', auth });
             const res = await drive.files.list({
                 pageSize: 10,
                 fields: 'nextPageToken, files(id, name, mimeType, modifiedTime, webViewLink)',
                 orderBy: 'modifiedTime desc'
             });
             return res.data.files || [];
-        } catch (error) {
-            console.error(`Error fetching drive files for ${email}:`, error);
-            return [];
-        }
+        });
     }
-    async archiveEmail(email, messageId) {
-        const auth = await this.getClient(email);
-        if (!auth) return false;
 
-        const gmail = google.gmail({ version: 'v1', auth });
+    async archiveEmail(email, messageId) {
         try {
-            await gmail.users.messages.modify({
-                userId: 'me',
-                id: messageId,
-                requestBody: {
-                    removeLabelIds: ['INBOX']
-                }
+            await this._executeWithRetry(email, async (auth) => {
+                const gmail = google.gmail({ version: 'v1', auth });
+                await gmail.users.messages.modify({
+                    userId: 'me',
+                    id: messageId,
+                    requestBody: {
+                        removeLabelIds: ['INBOX']
+                    }
+                });
             });
             return true;
         } catch (error) {

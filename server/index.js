@@ -329,6 +329,19 @@ const hexstrikeRoutes = require('./hexstrike_routes');
 app.use('/api/hexstrike', hexstrikeRoutes);
 console.log('[SYSTEM] HexStrike AI integration loaded (150+ security tools)');
 
+// Docker Container Routes (Kali, Tor, Security Tools)
+const dockerRoutes = require('./docker_routes');
+app.use('/api/docker', dockerRoutes);
+console.log('[SYSTEM] Docker Container Routes loaded (Kali-Tor, OSINT, Cyber)');
+
+// Initialize Tools Standby Service (auto-start tools except Tor)
+const toolsStandby = require('./tools_standby_service');
+toolsStandby.initialize().then(status => {
+    console.log('[SYSTEM] Tools Standby Service initialized:', Object.keys(status.tools).map(t => `${t}:${status.tools[t].status}`).join(', '));
+}).catch(err => {
+    console.error('[SYSTEM] Tools Standby init failed:', err.message);
+});
+
 
 // Model Configuration
 const IDENTITY = require('./config/identity');
