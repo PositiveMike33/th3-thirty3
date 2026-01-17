@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { 
-    Terminal, X, Maximize2, Minimize2, 
+import {
+    Terminal, X, Maximize2, Minimize2,
     ChevronDown, ChevronUp, Trash2, GripHorizontal,
     Wifi, Server, AlertTriangle, CheckCircle
 } from 'lucide-react';
 import { API_URL } from './config';
+import api from './services/apiService';
 import { io } from 'socket.io-client';
 
 /**
@@ -21,12 +22,12 @@ const ServerConsole = ({ initialExpanded = false }) => {
     const [autoScroll, setAutoScroll] = useState(true);
     const [, setConnected] = useState(false); // Used for status tracking
     const [socketConnected, setSocketConnected] = useState(false);
-    
+
     // Drag state
     const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 470 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-    
+
     const logEndRef = useRef(null);
     const socketRef = useRef(null);
     const consoleRef = useRef(null);
@@ -57,7 +58,7 @@ const ServerConsole = ({ initialExpanded = false }) => {
         const message = logEntry.message || logEntry;
         const type = parseLogType(message);
         const style = logTypes[type] || logTypes.default;
-        
+
         return {
             id: logEntry.id || Date.now() + Math.random(),
             message,
@@ -84,10 +85,10 @@ const ServerConsole = ({ initialExpanded = false }) => {
 
     const handleMouseMove = useCallback((e) => {
         if (!isDragging) return;
-        
+
         const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - 700));
         const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - 450));
-        
+
         setPosition({ x: newX, y: newY });
     }, [isDragging, dragOffset]);
 
@@ -110,7 +111,7 @@ const ServerConsole = ({ initialExpanded = false }) => {
     // Add demo logs (defined before useEffect)
     const addDemoLogs = useCallback(() => {
         const demoLogs = [
-            { message: '[SYSTEM] Th3 Thirty3 v1.2.0 initialized', level: 'log' },
+            { message: '[SYSTEM] Th3 Thirty3 v1.2.1-debug initialized', level: 'log' },
             { message: '[SOCKET] Real-time streaming enabled', level: 'log' }
         ].map((log, idx) => ({
             ...log,
@@ -149,17 +150,13 @@ const ServerConsole = ({ initialExpanded = false }) => {
             setLogs([]);
         });
 
-        // Fetch initial logs
         const fetchInitialLogs = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/logs/recent?limit=100`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.logs?.length > 0) {
-                        setLogs(data.logs.map(log => formatLog(log)));
-                    }
-                    setConnected(true);
+                const data = await api.get('/api/logs/recent?limit=100');
+                if (data.logs?.length > 0) {
+                    setLogs(data.logs.map(log => formatLog(log)));
                 }
+                setConnected(true);
             } catch {
                 addDemoLogs();
             }
@@ -180,7 +177,7 @@ const ServerConsole = ({ initialExpanded = false }) => {
     const filteredLogs = filter === 'all' ? logs : logs.filter(log => log.type === filter);
 
     const clearLogs = async () => {
-        try { await fetch(`${API_URL}/api/logs/clear`, { method: 'DELETE' }); } catch { /* Ignore */ }
+        try { await api.delete('/api/logs/clear'); } catch { /* Ignore */ }
         setLogs([]);
     };
 
@@ -251,7 +248,7 @@ const ServerConsole = ({ initialExpanded = false }) => {
                 onMouseDown={handleMouseDown}
                 style={{
                     padding: '0.75rem 1rem',
-                    background: socketConnected 
+                    background: socketConnected
                         ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.2), rgba(99, 102, 241, 0.2))'
                         : 'linear-gradient(90deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2))',
                     borderBottom: '1px solid rgba(99, 102, 241, 0.3)',

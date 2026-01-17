@@ -13,23 +13,23 @@ const EventEmitter = require('events');
 class TorNetworkService extends EventEmitter {
     constructor() {
         super();
-        
+
         // Configuration Tor
         this.torHost = process.env.TOR_HOST || '127.0.0.1';
         this.torSocksPort = parseInt(process.env.TOR_SOCKS_PORT) || 9050;
         this.torControlPort = parseInt(process.env.TOR_CONTROL_PORT) || 9051;
         this.torControlPassword = process.env.TOR_CONTROL_PASSWORD || '';
-        
+
         // État du service
         this.isConnected = false;
         this.currentIP = null;
         this.circuitChanges = 0;
         this.lastCircuitChange = null;
-        
+
         // Configuration du proxy SOCKS5
         this.proxyUrl = `socks5h://${this.torHost}:${this.torSocksPort}`;
         this.agent = null;
-        
+
         // Stats
         this.stats = {
             requestsMade: 0,
@@ -49,27 +49,27 @@ class TorNetworkService extends EventEmitter {
             // Check if Tor is running by testing the SOCKS port
             const net = require('net');
             const socket = new net.Socket();
-            
+
             socket.setTimeout(5000);
-            
+
             socket.on('connect', () => {
                 socket.destroy();
                 this.isConnected = true;
                 resolve({ running: true, port: this.torSocksPort });
             });
-            
+
             socket.on('timeout', () => {
                 socket.destroy();
                 this.isConnected = false;
                 resolve({ running: false, error: 'Connection timeout' });
             });
-            
+
             socket.on('error', () => {
                 socket.destroy();
                 this.isConnected = false;
                 resolve({ running: false, error: 'Tor not running on port ' + this.torSocksPort });
             });
-            
+
             socket.connect(this.torSocksPort, this.torHost);
         });
     }
@@ -110,7 +110,7 @@ class TorNetworkService extends EventEmitter {
         }
 
         const agent = this.getProxyAgent();
-        
+
         try {
             const response = await fetch(url, {
                 ...options,
@@ -118,12 +118,12 @@ class TorNetworkService extends EventEmitter {
                 // Timeout for .onion sites can be longer
                 timeout: url.includes('.onion') ? 60000 : 30000
             });
-            
+
             this.stats.requestsMade++;
             if (url.includes('.onion')) {
                 this.stats.onionSitesVisited++;
             }
-            
+
             return response;
         } catch (error) {
             this.stats.errors++;
@@ -138,38 +138,39 @@ class TorNetworkService extends EventEmitter {
     async torFetchViaDocker(url, options = {}) {
         return new Promise((resolve, reject) => {
             const { exec } = require('child_process');
-            
+
             const method = options.method || 'GET';
             const timeout = url.includes('.onion') ? 60 : 30;
-            
+
             // Build curl command
-            let cmd = `docker exec th3_kali_tor curl -s --connect-timeout ${timeout} --socks5-hostname localhost:9050`;
-            
+            // Note: running in th3-kali (attached to th3-network), accessing th3-tor service
+            let cmd = `docker exec th3-kali curl -s --connect-timeout ${timeout} --socks5-hostname th3-tor:9050`;
+
             // Add method if not GET
             if (method !== 'GET') {
                 cmd += ` -X ${method}`;
             }
-            
+
             // Add headers
             if (options.headers) {
                 for (const [key, value] of Object.entries(options.headers)) {
                     cmd += ` -H "${key}: ${value}"`;
                 }
             }
-            
+
             // Add data for POST
             if (options.body) {
                 cmd += ` -d '${options.body}'`;
             }
-            
+
             cmd += ` "${url}"`;
-            
+
             exec(cmd, { timeout: (timeout + 10) * 1000 }, (error, stdout, stderr) => {
                 if (error) {
                     reject(new Error(`Docker Tor fetch failed: ${error.message}`));
                     return;
                 }
-                
+
                 // Create a mock Response object
                 const mockResponse = {
                     ok: true,
@@ -179,7 +180,7 @@ class TorNetworkService extends EventEmitter {
                     headers: new Map([['content-type', 'application/json']]),
                     _viaDocker: true
                 };
-                
+
                 console.log(`[TOR] Docker fetch successful: ${url.substring(0, 50)}...`);
                 resolve(mockResponse);
             });
@@ -209,7 +210,7 @@ class TorNetworkService extends EventEmitter {
                     continue;
                 }
             }
-            
+
             throw new Error('Could not determine exit IP');
         } catch (error) {
             console.error('[TOR] Failed to get current IP:', error.message);
@@ -224,7 +225,7 @@ class TorNetworkService extends EventEmitter {
         try {
             const response = await this.torFetch('https://check.torproject.org/api/ip');
             const data = await response.json();
-            
+
             return {
                 usingTor: data.IsTor || false,
                 ip: data.IP || null,
@@ -248,9 +249,9 @@ class TorNetworkService extends EventEmitter {
         return new Promise((resolve, reject) => {
             const net = require('net');
             const socket = new net.Socket();
-            
+
             socket.setTimeout(5000);
-            
+
             socket.on('connect', () => {
                 // Authenticate if password is set
                 if (this.torControlPassword) {
@@ -259,11 +260,11 @@ class TorNetworkService extends EventEmitter {
                     socket.write('AUTHENTICATE\r\n');
                 }
             });
-            
+
             let response = '';
             socket.on('data', (data) => {
                 response += data.toString();
-                
+
                 if (response.includes('250 OK') && !response.includes('SIGNAL')) {
                     // Authentication successful, send NEWNYM
                     socket.write('SIGNAL NEWNYM\r\n');
@@ -274,7 +275,7 @@ class TorNetworkService extends EventEmitter {
                     this.stats.ipChanges++;
                     this.lastCircuitChange = new Date();
                     this.agent = null; // Reset agent to use new circuit
-                    
+
                     console.log(`[TOR] Circuit changed (${this.circuitChanges} total changes)`);
                     this.emit('circuitChange', { count: this.circuitChanges });
                     resolve({ success: true, message: 'Nouveau circuit Tor établi' });
@@ -283,17 +284,17 @@ class TorNetworkService extends EventEmitter {
                     reject(new Error('Authentification Tor échouée. Configurez TOR_CONTROL_PASSWORD.'));
                 }
             });
-            
+
             socket.on('timeout', () => {
                 socket.destroy();
                 reject(new Error('Timeout connexion au ControlPort Tor'));
             });
-            
+
             socket.on('error', (err) => {
                 socket.destroy();
                 reject(new Error(`Erreur ControlPort: ${err.message}. Assurez-vous que ControlPort est activé dans torrc.`));
             });
-            
+
             socket.connect(this.torControlPort, this.torHost);
         });
     }
@@ -303,7 +304,7 @@ class TorNetworkService extends EventEmitter {
      */
     startAutoRotation(intervalMs = 300000) { // 5 minutes par défaut
         console.log(`[TOR] Starting auto IP rotation every ${intervalMs / 1000}s`);
-        
+
         this.rotationInterval = setInterval(async () => {
             try {
                 await this.changeCircuit();
@@ -339,14 +340,14 @@ class TorNetworkService extends EventEmitter {
         }
 
         console.log(`[TOR] Accessing onion site: ${onionUrl.substring(0, 30)}...`);
-        
+
         try {
             const response = await this.torFetch(onionUrl, {
                 headers: {
                     'User-Agent': this.getRandomUserAgent()
                 }
             });
-            
+
             return {
                 success: true,
                 status: response.status,
@@ -398,7 +399,7 @@ class TorNetworkService extends EventEmitter {
      */
     async clearTraces() {
         console.log('[TOR] 🧹 Clearing all traces...');
-        
+
         const tracesCleared = {
             timestamp: new Date().toISOString(),
             actions: []
@@ -429,9 +430,9 @@ class TorNetworkService extends EventEmitter {
 
             // 5. Émettre l'événement
             this.emit('tracesCleared', tracesCleared);
-            
+
             console.log('[TOR] ✅ Traces cleared successfully');
-            
+
             return {
                 success: true,
                 ...tracesCleared
@@ -476,7 +477,7 @@ class TorNetworkService extends EventEmitter {
 
         try {
             result.preRequestIP = await this.getCurrentIP();
-            
+
             const response = await this.torFetch(onionUrl, {
                 ...options,
                 headers: {

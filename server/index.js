@@ -126,13 +126,16 @@ app.get('/auth/google/callback', async (req, res) => {
         try {
             await googleService.handleCallback(code, state);
             // Redirect back to frontend with success parameter
-            res.redirect('http://localhost:5173?google_auth=success&email=' + encodeURIComponent(state));
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+            res.redirect(`${frontendUrl}?google_auth=success&email=${encodeURIComponent(state)}`);
         } catch (error) {
             console.error('[GOOGLE] Callback error:', error);
-            res.redirect('http://localhost:5173?google_auth=error&message=' + encodeURIComponent(error.message));
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+            res.redirect(`${frontendUrl}?google_auth=error&message=${encodeURIComponent(error.message)}`);
         }
     } else {
-        res.redirect('http://localhost:5173?google_auth=error&message=missing_params');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+        res.redirect(`${frontendUrl}?google_auth=error&message=missing_params`);
     }
 });
 
@@ -440,9 +443,10 @@ mcpService.connectSSE('pieces', PIECES_MCP_URL, piecesSessionId)
 llmService.setMCPService(mcpService);
 
 // Initialize Agent Director Service (Th3 Thirty3 Manager)
-const AgentDirectorService = require('./agent_director_service');
+// Initialize Agent Director Service (Th3 Thirty3 Manager)
+const Th3AgentDirectorService = require('./agent_director_service');
 const agentDirectorRoutes = require('./agent_director_routes');
-const agentDirector = new AgentDirectorService(llmService, llmService.anythingLLMWrapper);
+const agentDirector = new Th3AgentDirectorService(llmService, llmService.anythingLLMWrapper);
 agentDirectorRoutes.setAgentDirector(agentDirector);
 app.use('/api/director', agentDirectorRoutes);
 console.log('[AGENT_DIRECTOR] Th3 Thirty3 Director initialized - Managing: Cybersécurité, OSINT');
@@ -737,90 +741,8 @@ app.post('/ingest', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-// Google Auth Routes
-app.get('/auth/google', (req, res) => {
-    const email = req.query.email;
-    if (!email) return res.status(400).send("Email requis");
-    try {
-        const url = googleService.getAuthUrl(email);
-        res.redirect(url);
-    } catch (e) {
-        res.status(500).send(e.message);
-    }
-});
-
-app.get('/auth/google/callback', async (req, res) => {
-    const { code, state } = req.query; // state is the email
-    if (code && state) {
-        await googleService.handleCallback(code, state);
-        res.send("Connexion r�ussie ! Vous pouvez fermer cette fen�tre.");
-    } else {
-        res.status(400).send("Erreur d'authentification.");
-    }
-});
-
-app.get('/google/status', async (req, res) => {
-    const status = {};
-    for (const email of ACCOUNTS) {
-        const client = await googleService.getClient(email);
-        status[email] = !!client;
-    }
-    res.json(status);
-});
-
-app.get('/google/calendar', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    if (!email) return res.status(400).json({ error: "No account configured" });
-
-    try {
-        const events = await googleService.getUpcomingEvents(email);
-        res.json({ events });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/google/emails', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const emails = await googleService.getUnreadEmails(email);
-        res.json({ emails });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Alias: /google/mail ? /google/emails (for API consistency)
-app.get('/google/mail', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const emails = await googleService.getUnreadEmails(email);
-        res.json({ emails });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/google/tasks', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const tasks = await googleService.getTasks(email);
-        res.json({ tasks });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/google/drive', async (req, res) => {
-    const email = req.query.email || ACCOUNTS[0];
-    try {
-        const files = await googleService.getDriveFiles(email);
-        res.json({ files });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+// NOTE: Google Auth Routes moved to PUBLIC section (before authMiddleware) - lines 110-290
+// This prevents duplicate route handlers and ensures OAuth callback works properly
 
 // OSINT Endpoints
 app.get('/osint/tools', (req, res) => {

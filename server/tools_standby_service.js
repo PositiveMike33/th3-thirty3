@@ -22,14 +22,14 @@ class ToolsStandbyService {
             },
             kali: {
                 name: 'Kali Container',
-                container: 'th3_kali_tor',
+                container: 'th3-kali',
                 autoStart: true,  // Auto-start mais Tor désactivé par défaut
                 torEnabled: false, // Tor reste manuel
                 status: 'idle'
             },
             osint: {
                 name: 'OSINT Tools',
-                container: 'th3_kali_tor', // Partagé avec Kali
+                container: 'th3-kali', // Partagé avec Kali
                 autoStart: true,
                 status: 'idle'
             }
@@ -82,11 +82,11 @@ class ToolsStandbyService {
      */
     async startKaliContainer() {
         try {
-            const status = await dockerService.checkContainerStatus('th3_kali_tor');
+            const status = await dockerService.checkContainerStatus('th3-kali');
 
             if (!status.running) {
                 console.log('[STANDBY] Starting Kali container...');
-                await dockerService.startContainer('th3_kali_tor');
+                await dockerService.startContainer('th3-kali');
 
                 // Attendre que le container soit prêt
                 await new Promise(resolve => setTimeout(resolve, 3000));
@@ -119,93 +119,38 @@ class ToolsStandbyService {
     }
 
     /**
-     * Activer Tor via Tor Browser MANUELLEMENT
-     * Lance Tor Browser si pas déjà lancé
+     * Activer Tor via Docker Container
      */
     async enableTor() {
-        console.log('[STANDBY] 🧅 Enabling Tor via Tor Browser...');
+        console.log('[STANDBY] 🧅 Enabling Tor via Docker...');
 
         try {
-            // Chemins possibles pour Tor Browser sur Windows
-            const torBrowserPaths = [
-                'C:\\Users\\th3th\\Desktop\\Tor Browser\\Browser\\firefox.exe',
-                'C:\\Program Files\\Tor Browser\\Browser\\firefox.exe',
-                'C:\\Program Files (x86)\\Tor Browser\\Browser\\firefox.exe',
-                `${process.env.USERPROFILE}\\Desktop\\Tor Browser\\Browser\\firefox.exe`,
-                `${process.env.USERPROFILE}\\Downloads\\Tor Browser\\Browser\\firefox.exe`
-            ];
+            // Start Docker Container
+            const startResult = await dockerService.startContainer('th3-tor');
 
-            // Vérifier si Tor Browser est déjà en cours d'exécution sur port 9150
-            const net = require('net');
-            const torRunning = await new Promise((resolve) => {
-                const socket = new net.Socket();
-                socket.setTimeout(2000);
-                socket.on('connect', () => {
-                    socket.destroy();
-                    resolve(true);
-                });
-                socket.on('error', () => {
-                    socket.destroy();
-                    resolve(false);
-                });
-                socket.on('timeout', () => {
-                    socket.destroy();
-                    resolve(false);
-                });
-                socket.connect(9150, '127.0.0.1');
-            });
-
-            if (torRunning) {
+            if (startResult.success) {
                 this.torConfig.enabled = true;
-                this.torConfig.port = 9150;
+                this.torConfig.port = 9050;
                 this.standbyTools.kali.torEnabled = true;
-                console.log('[STANDBY] ✅ Tor Browser already running on port 9150');
+
+                // Wait for Tor to bootstrap (simple delay for now, could check logs)
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
                 return {
                     success: true,
-                    message: 'Tor Browser déjà actif!',
+                    message: 'Tor Network Proxy activé!',
                     status: 'connected',
-                    port: 9150
-                };
-            }
-
-            // Chercher et lancer Tor Browser
-            const fs = require('fs');
-            let torPath = null;
-
-            for (const path of torBrowserPaths) {
-                if (fs.existsSync(path)) {
-                    torPath = path;
-                    break;
-                }
-            }
-
-            if (torPath) {
-                console.log(`[STANDBY] Launching Tor Browser from: ${torPath}`);
-                exec(`start "" "${torPath}"`, (error) => {
-                    if (error) {
-                        console.error('[STANDBY] Failed to launch Tor Browser:', error);
-                    }
-                });
-
-                this.torConfig.enabled = true;
-                this.torConfig.port = 9150;
-                this.standbyTools.kali.torEnabled = true;
-
-                return {
-                    success: true,
-                    message: 'Tor Browser lancé! Attendez la connexion au réseau Tor.',
-                    status: 'launching',
-                    port: 9150,
-                    instruction: 'Tor Browser s\'ouvre. Une fois connecté, vous pouvez naviguer sur le Dark Web (.onion)'
+                    port: 9050,
+                    instruction: 'Le proxy Tor est actif sur le port 9050.'
                 };
             } else {
                 return {
                     success: false,
-                    message: 'Tor Browser non trouvé. Installez-le sur le Bureau.',
-                    downloadUrl: 'https://www.torproject.org/download/',
-                    instruction: 'Téléchargez Tor Browser et placez-le sur le Bureau'
+                    message: 'Erreur lors du démarrage du conteneur Tor.',
+                    error: startResult.error
                 };
             }
+
         } catch (error) {
             console.error('[STANDBY] Failed to enable Tor:', error.message);
             return { success: false, error: error.message };
@@ -219,7 +164,8 @@ class ToolsStandbyService {
         console.log('[STANDBY] Disabling Tor...');
 
         try {
-            await dockerService.execInKali('service tor stop', 10000);
+            const stopResult = await dockerService.stopContainer('th3-tor');
+
             this.torConfig.enabled = false;
             this.standbyTools.kali.torEnabled = false;
             console.log('[STANDBY] Tor disabled');
@@ -238,7 +184,7 @@ class ToolsStandbyService {
         this.healthCheckInterval = setInterval(async () => {
             // Check Kali container
             try {
-                const kaliStatus = await dockerService.checkContainerStatus('th3_kali_tor');
+                const kaliStatus = await dockerService.checkContainerStatus('th3-kali');
                 this.standbyTools.kali.status = kaliStatus.running ? 'ready' : 'offline';
                 this.standbyTools.osint.status = kaliStatus.running ? 'ready' : 'offline';
             } catch {
@@ -298,7 +244,8 @@ class ToolsStandbyService {
      */
     async hexstrikeExec(toolName, target) {
         try {
-            const response = await fetch('http://localhost:8888/execute', {
+            const url = process.env.HEXSTRIKE_URL || 'http://hexstrike:8888';
+            const response = await fetch(`${url}/execute`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ tool: toolName, params: { target } })
@@ -339,7 +286,8 @@ class ToolsStandbyService {
         // Ping HexStrike
         if (this.standbyTools.hexstrike.status === 'ready') {
             try {
-                await fetch('http://localhost:8888/health');
+                const url = process.env.HEXSTRIKE_URL || 'http://hexstrike:8888';
+                await fetch(`${url}/health`);
             } catch { }
         }
 

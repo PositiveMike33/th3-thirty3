@@ -25,6 +25,13 @@ RUN apt-get update && \
   wget \
   ca-certificates \
   curl \
+  gnupg \
+  && install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+  && chmod a+r /etc/apt/keyrings/docker.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(grep -oP '(?<=VERSION_CODENAME=)\w+' /etc/os-release) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends docker-ce-cli \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -43,10 +50,11 @@ COPY . .
 # Créer les répertoires nécessaires
 RUN mkdir -p /app/data /app/data/lancedb /app/logs
 
-# Sécurité: créer un utilisateur non-root
-RUN groupadd -r appuser && useradd -r -g appuser appuser && \
-  chown -R appuser:appuser /app
-USER appuser
+# Sécurité: Running as root to allow Docker socket access
+# In production with more strict security contexts, we would use a docker group mapped to host.
+# RUN groupadd -r appuser && useradd -r -g appuser appuser && \
+#   chown -R appuser:appuser /app
+# USER appuser
 
 EXPOSE 3000
 

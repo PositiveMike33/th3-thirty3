@@ -12,7 +12,7 @@ class DockerContainerService {
         // Configuration des conteneurs
         this.containers = {
             kaliTor: {
-                name: 'th3_kali_tor',
+                name: 'th3-kali',
                 ports: { socks: 9050, control: 9051 },
                 type: 'security'
             },
@@ -22,7 +22,7 @@ class DockerContainerService {
                 type: 'cache'
             },
             hexstrike: {
-                name: 'hexstrike_server',
+                name: 'th3-hexstrike',
                 ports: { api: 8888 },
                 type: 'security'
             }

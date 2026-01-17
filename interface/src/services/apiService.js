@@ -5,11 +5,21 @@
 
 import { API_URL, OLLAMA_URL, WS_URL, IS_PROD } from '../config';
 
-// Headers par défaut
-const getHeaders = () => ({
-    'Content-Type': 'application/json',
-    'x-api-key': localStorage.getItem('th3_api_key') || ''
-});
+// Headers par défaut - inclut le token JWT si disponible
+const getHeaders = () => {
+    const headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': localStorage.getItem('th3_api_key') || ''
+    };
+
+    // Ajouter le token JWT Bearer si disponible
+    const token = localStorage.getItem('nexus33_token');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
+};
 
 // Helper pour les requêtes fetch avec gestion d'erreur
 const fetchWithError = async (url, options = {}) => {

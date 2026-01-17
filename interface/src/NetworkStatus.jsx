@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-    Wifi, WifiOff, Cloud, Server, AlertTriangle, 
+import {
+    Wifi, WifiOff, Cloud, Server, AlertTriangle,
     RefreshCw, Activity, Zap, Globe, HardDrive, ArrowRightLeft
 } from 'lucide-react';
 import { API_URL } from './config';
+import api from './services/apiService';
 
 /**
  * NetworkStatus Component - RISK-006 Mitigation UI
@@ -28,21 +29,11 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
     // Fetch network status from backend
     const fetchStatus = useCallback(async () => {
         try {
-            const response = await fetch(`${API_URL}/api/network/status`);
-            if (response.ok) {
-                const data = await response.json();
-                setStatus(data);
-                setError(null);
-                if (onStatusChange) {
-                    onStatusChange(data);
-                }
-            } else {
-                // API not available, assume offline monitoring
-                setStatus(prev => ({
-                    ...prev,
-                    state: 'UNKNOWN',
-                    apiAvailable: false
-                }));
+            const data = await api.get('/api/network/status');
+            setStatus(data);
+            setError(null);
+            if (onStatusChange) {
+                onStatusChange(data);
             }
         } catch {
             setError('Network monitor unavailable');
@@ -61,14 +52,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
     // Set failover mode
     const setMode = async (mode) => {
         try {
-            const response = await fetch(`${API_URL}/api/network/mode`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode })
-            });
-            if (response.ok) {
-                fetchStatus();
-            }
+            await api.post('/api/network/mode', { mode });
+            fetchStatus();
         } catch (err) {
             console.error('Failed to set mode:', err);
         }
@@ -77,9 +62,7 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
     // Force failover (for testing)
     const handleForceFailover = async () => {
         try {
-            await fetch(`${API_URL}/api/network/force-failover`, {
-                method: 'POST'
-            });
+            await api.post('/api/network/force-failover', {});
             fetchStatus();
         } catch (err) {
             console.error('Failed to force failover:', err);
@@ -90,7 +73,7 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
     useEffect(() => {
         fetchStatus();
         const interval = setInterval(fetchStatus, 10000); // Poll every 10s
-        
+
         // Listen for online/offline events
         const handleOnline = () => {
             setStatus(prev => ({ ...prev, isOnline: true, state: 'ONLINE' }));
@@ -99,10 +82,10 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
         const handleOffline = () => {
             setStatus(prev => ({ ...prev, isOnline: false, state: 'OFFLINE' }));
         };
-        
+
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
-        
+
         return () => {
             clearInterval(interval);
             window.removeEventListener('online', handleOnline);
@@ -114,8 +97,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
     const getStatusIndicator = () => {
         switch (status.state) {
             case 'ONLINE':
-                return { 
-                    color: '#22c55e', 
+                return {
+                    color: '#22c55e',
                     bgColor: 'rgba(34, 197, 94, 0.1)',
                     borderColor: 'rgba(34, 197, 94, 0.3)',
                     icon: <Wifi size={16} />,
@@ -123,8 +106,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                     description: 'Modèles cloud actifs'
                 };
             case 'OFFLINE':
-                return { 
-                    color: '#ef4444', 
+                return {
+                    color: '#ef4444',
                     bgColor: 'rgba(239, 68, 68, 0.1)',
                     borderColor: 'rgba(239, 68, 68, 0.3)',
                     icon: <WifiOff size={16} />,
@@ -132,8 +115,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                     description: 'Basculement local actif'
                 };
             case 'DEGRADED':
-                return { 
-                    color: '#f59e0b', 
+                return {
+                    color: '#f59e0b',
                     bgColor: 'rgba(245, 158, 11, 0.1)',
                     borderColor: 'rgba(245, 158, 11, 0.3)',
                     icon: <AlertTriangle size={16} />,
@@ -141,8 +124,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                     description: 'Connectivité partielle'
                 };
             case 'CHECKING':
-                return { 
-                    color: '#3b82f6', 
+                return {
+                    color: '#3b82f6',
                     bgColor: 'rgba(59, 130, 246, 0.1)',
                     borderColor: 'rgba(59, 130, 246, 0.3)',
                     icon: <RefreshCw size={16} className="animate-spin" />,
@@ -150,8 +133,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                     description: 'Test de connectivité'
                 };
             default:
-                return { 
-                    color: '#64748b', 
+                return {
+                    color: '#64748b',
                     bgColor: 'rgba(100, 116, 139, 0.1)',
                     borderColor: 'rgba(100, 116, 139, 0.3)',
                     icon: <Activity size={16} />,
@@ -166,7 +149,7 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
     // Compact mode - just a small indicator
     if (compact) {
         return (
-            <div 
+            <div
                 onClick={() => setShowDetails(!showDetails)}
                 style={{
                     display: 'flex',
@@ -182,10 +165,10 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 title={`${indicator.label}: ${indicator.description}`}
             >
                 <span style={{ color: indicator.color }}>{indicator.icon}</span>
-                <span style={{ 
-                    color: indicator.color, 
-                    fontSize: '0.75rem', 
-                    fontWeight: 'bold' 
+                <span style={{
+                    color: indicator.color,
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold'
                 }}>
                     {status.state === 'OFFLINE' ? 'LOCAL' : 'CLOUD'}
                 </span>
@@ -227,16 +210,16 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                         {indicator.icon}
                     </div>
                     <div>
-                        <h3 style={{ 
-                            color: '#f8fafc', 
+                        <h3 style={{
+                            color: '#f8fafc',
                             fontWeight: 'bold',
                             fontSize: '1rem',
                             margin: 0
                         }}>
                             État Réseau: {indicator.label}
                         </h3>
-                        <p style={{ 
-                            color: '#94a3b8', 
+                        <p style={{
+                            color: '#94a3b8',
                             fontSize: '0.8rem',
                             margin: 0
                         }}>
@@ -244,7 +227,7 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                         </p>
                     </div>
                 </div>
-                
+
                 <button
                     onClick={fetchStatus}
                     disabled={loading}
@@ -274,20 +257,20 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 {/* Internet */}
                 <div style={{
                     padding: '0.75rem',
-                    background: status.isOnline 
-                        ? 'rgba(34, 197, 94, 0.1)' 
+                    background: status.isOnline
+                        ? 'rgba(34, 197, 94, 0.1)'
                         : 'rgba(239, 68, 68, 0.1)',
                     borderRadius: '10px',
                     textAlign: 'center'
                 }}>
-                    <Globe 
-                        size={24} 
-                        style={{ 
+                    <Globe
+                        size={24}
+                        style={{
                             color: status.isOnline ? '#22c55e' : '#ef4444',
                             marginBottom: '0.5rem'
-                        }} 
+                        }}
                     />
-                    <div style={{ 
+                    <div style={{
                         color: status.isOnline ? '#22c55e' : '#ef4444',
                         fontSize: '0.75rem',
                         fontWeight: 'bold'
@@ -302,20 +285,20 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 {/* Ollama */}
                 <div style={{
                     padding: '0.75rem',
-                    background: status.isOllamaAvailable 
-                        ? 'rgba(34, 197, 94, 0.1)' 
+                    background: status.isOllamaAvailable
+                        ? 'rgba(34, 197, 94, 0.1)'
                         : 'rgba(239, 68, 68, 0.1)',
                     borderRadius: '10px',
                     textAlign: 'center'
                 }}>
-                    <HardDrive 
-                        size={24} 
-                        style={{ 
+                    <HardDrive
+                        size={24}
+                        style={{
                             color: status.isOllamaAvailable ? '#22c55e' : '#ef4444',
                             marginBottom: '0.5rem'
-                        }} 
+                        }}
                     />
-                    <div style={{ 
+                    <div style={{
                         color: status.isOllamaAvailable ? '#22c55e' : '#ef4444',
                         fontSize: '0.75rem',
                         fontWeight: 'bold'
@@ -330,24 +313,24 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 {/* Current Mode */}
                 <div style={{
                     padding: '0.75rem',
-                    background: status.state === 'OFFLINE' 
-                        ? 'rgba(249, 115, 22, 0.1)' 
+                    background: status.state === 'OFFLINE'
+                        ? 'rgba(249, 115, 22, 0.1)'
                         : 'rgba(99, 102, 241, 0.1)',
                     borderRadius: '10px',
                     textAlign: 'center'
                 }}>
                     {status.state === 'OFFLINE' ? (
-                        <Server 
-                            size={24} 
-                            style={{ color: '#f97316', marginBottom: '0.5rem' }} 
+                        <Server
+                            size={24}
+                            style={{ color: '#f97316', marginBottom: '0.5rem' }}
                         />
                     ) : (
-                        <Cloud 
-                            size={24} 
-                            style={{ color: '#6366f1', marginBottom: '0.5rem' }} 
+                        <Cloud
+                            size={24}
+                            style={{ color: '#6366f1', marginBottom: '0.5rem' }}
                         />
                     )}
-                    <div style={{ 
+                    <div style={{
                         color: status.state === 'OFFLINE' ? '#f97316' : '#6366f1',
                         fontSize: '0.75rem',
                         fontWeight: 'bold'
@@ -369,8 +352,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 borderTop: '1px solid rgba(148, 163, 184, 0.1)'
             }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ 
-                        color: '#22c55e', 
+                    <div style={{
+                        color: '#22c55e',
                         fontWeight: 'bold',
                         fontSize: '1.25rem'
                     }}>
@@ -379,8 +362,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                     <div style={{ color: '#64748b', fontSize: '0.7rem' }}>Uptime</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ 
-                        color: '#f97316', 
+                    <div style={{
+                        color: '#f97316',
                         fontWeight: 'bold',
                         fontSize: '1.25rem'
                     }}>
@@ -389,8 +372,8 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                     <div style={{ color: '#64748b', fontSize: '0.7rem' }}>Failovers</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ 
-                        color: '#3b82f6', 
+                    <div style={{
+                        color: '#3b82f6',
                         fontWeight: 'bold',
                         fontSize: '1.25rem'
                     }}>
@@ -405,10 +388,10 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 padding: '1rem 1.5rem',
                 borderTop: '1px solid rgba(148, 163, 184, 0.1)'
             }}>
-                <div style={{ 
-                    color: '#94a3b8', 
-                    fontSize: '0.75rem', 
-                    marginBottom: '0.5rem' 
+                <div style={{
+                    color: '#94a3b8',
+                    fontSize: '0.75rem',
+                    marginBottom: '0.5rem'
                 }}>
                     Mode de basculement:
                 </div>
@@ -423,11 +406,11 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                             style={{
                                 flex: 1,
                                 padding: '0.5rem',
-                                background: status.mode === mode 
-                                    ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' 
+                                background: status.mode === mode
+                                    ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
                                     : 'rgba(255, 255, 255, 0.05)',
-                                border: status.mode === mode 
-                                    ? 'none' 
+                                border: status.mode === mode
+                                    ? 'none'
                                     : '1px solid rgba(148, 163, 184, 0.2)',
                                 borderRadius: '8px',
                                 color: status.mode === mode ? '#fff' : '#94a3b8',
@@ -476,10 +459,10 @@ const NetworkStatus = ({ compact = false, onStatusChange }) => {
                 }}>
                     <AlertTriangle size={18} style={{ color: '#f97316' }} />
                     <div>
-                        <div style={{ 
-                            color: '#f97316', 
-                            fontWeight: 'bold', 
-                            fontSize: '0.8rem' 
+                        <div style={{
+                            color: '#f97316',
+                            fontWeight: 'bold',
+                            fontSize: '0.8rem'
                         }}>
                             ⚡ Mode Secours Actif
                         </div>

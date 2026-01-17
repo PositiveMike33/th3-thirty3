@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile
     container_name: th3-server
     ports:
-      - "3000:3000"
+      - "3010:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -25,15 +25,20 @@ services:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - GPU_TRAINER_URL=http://tensorflow-trainer:5000
       - HEXSTRIKE_URL=http://hexstrike:8888
+      - TOR_HOST=tor
+      - TOR_SOCKS_PORT=9050
+      - TOR_CONTROL_PORT=9051
+      - TOR_CONTROL_PASSWORD=password
     volumes:
       - ./server/data:/app/data  # Persist model metrics and settings
       - ./server/.env:/app/.env:ro  # Mount environment file
       - ./server/credentials.json:/app/credentials.json  # Mount Google Credentials
+      - /var/run/docker.sock:/var/run/docker.sock # Control sibling containers
     networks:
       - th3-network
     restart: unless-stopped
-    depends_on:
-      - hexstrike
+    # depends_on:
+    #   - hexstrike
     extra_hosts:
       - "host.docker.internal:host-gateway"  # Access host services (Ollama)
 
@@ -104,6 +109,11 @@ services:
     container_name: th3-hexstrike
     ports:
       - "8888:8888"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       - HEXSTRIKE_HOST=0.0.0.0
       - HEXSTRIKE_PORT=8888
@@ -127,6 +137,35 @@ services:
     security_opt:
       - no-new-privileges:true
 
+
+  # Tor Network Proxy
+  tor:
+    image: dperson/torproxy
+    container_name: th3-tor
+    ports:
+      - "9050:9050" # SOCKS5 Proxy
+      - "9051:9051" # Control Port
+      - "8118:8118" # HTTP Proxy
+    environment:
+      - TOR_CONTROL_PASSWORD=password
+    networks:
+      - th3-network
+    restart: unless-stopped
+
+  # Kali Linux (General Purpose)
+  kali:
+    image: kalilinux/kali-rolling
+    container_name: th3-kali
+    tty: true
+    command: ["/bin/bash", "-c", "apt-get update && apt-get install -y curl nmap && tail -f /dev/null"]
+    networks:
+      - th3-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    
 networks:
   th3-network:
     driver: bridge

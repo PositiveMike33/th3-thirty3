@@ -357,7 +357,7 @@ const ChatInterface = () => {
                         <GoogleAuthPanel />
                     </div>
                     <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-                        <span>v1.2.0</span>
+                        <span>{APP_CONFIG.version}</span>
                         <div className="flex gap-2">
                             <button onClick={() => setCurrentView('settings')} className={`hover:text-cyan-400 ${currentView === 'settings' ? 'text-cyan-400' : ''}`}><Settings size={14} /></button>
                             <button className="hover:text-red-400"><LogOut size={14} /></button>

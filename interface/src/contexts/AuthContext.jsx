@@ -71,10 +71,18 @@ export const AuthProvider = ({ children }) => {
         return () => window.removeEventListener('auth:logout', handleAutoLogout);
     }, []);
 
-    // Login function
+    // Login function - DEBUG v1.2.1-debug
     const login = useCallback(async (email, password) => {
         setError(null);
         setLoading(true);
+
+        // [DEBUG] Log payload being sent
+        const payload = { email, password };
+        console.log('[AUTH DEBUG v1.2.1] Login attempt:', {
+            endpoint: `${API_URL}/auth/login`,
+            payload: { email, passwordLength: password?.length || 0 },
+            timestamp: new Date().toISOString()
+        });
 
         try {
             const response = await fetch(`${API_URL}/auth/login`, {
@@ -82,21 +90,41 @@ export const AuthProvider = ({ children }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify(payload)
+            });
+
+            // [DEBUG] Log response status and headers
+            console.log('[AUTH DEBUG v1.2.1] Response received:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok,
+                headers: Object.fromEntries(response.headers.entries())
             });
 
             const data = await response.json();
+
+            // [DEBUG] Log full response data
+            console.log('[AUTH DEBUG v1.2.1] Response body:', {
+                success: data.success,
+                hasToken: !!data.token,
+                hasUser: !!data.user,
+                error: data.error || null,
+                fullData: data
+            });
 
             if (data.success) {
                 setUser(data.user);
                 setToken(data.token);
                 localStorage.setItem('nexus33_token', data.token);
+                console.log('[AUTH DEBUG v1.2.1] ✅ Login SUCCESS - Token stored');
                 return { success: true };
             } else {
+                console.log('[AUTH DEBUG v1.2.1] ❌ Login FAILED:', data.error);
                 setError(data.error);
                 return { success: false, error: data.error };
             }
-        } catch {
+        } catch (err) {
+            console.error('[AUTH DEBUG v1.2.1] ❌ Login EXCEPTION:', err);
             const errorMsg = 'Connection failed. Please try again.';
             setError(errorMsg);
             return { success: false, error: errorMsg };

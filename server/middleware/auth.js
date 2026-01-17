@@ -7,11 +7,15 @@ const subscriptionService = new SubscriptionService();
 const authMiddleware = (req, res, next) => {
     // 1. Try JWT Token first (from Frontend AuthContext)
     const authHeader = req.headers.authorization;
+    console.log(`[AUTH DEBUG] Request to ${req.path} - Auth header: ${authHeader ? 'Bearer ***' + authHeader.slice(-10) : 'NONE'}`);
+
     if (authHeader && authHeader.startsWith('Bearer ')) {
         try {
             const token = authHeader.split(' ')[1];
+            console.log(`[AUTH DEBUG] Verifying JWT token (length: ${token.length})`);
             const user = authService.verifyToken(token);
             if (user) {
+                console.log(`[AUTH DEBUG] JWT verified successfully for user: ${user.email || user.id}`);
                 // Add tier info if not present (for backward compatibility)
                 req.user = {
                     ...user,
@@ -20,7 +24,7 @@ const authMiddleware = (req, res, next) => {
                 return next();
             }
         } catch (err) {
-            console.warn('[AUTH] JWT verification failed:', err.message);
+            console.warn('[AUTH DEBUG] JWT verification failed:', err.message);
             // Continue to try API Key
         }
     }

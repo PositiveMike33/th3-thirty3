@@ -7,8 +7,10 @@ import {
     RotateCw, Trash2
 } from 'lucide-react';
 import { API_URL } from './config';
+import { useAuth } from './contexts/AuthContext';
 
 const ToolsPage = () => {
+    const { token } = useAuth();
     const [activeCategory, setActiveCategory] = useState('hexstrike');
     const [tools, setTools] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -25,13 +27,25 @@ const ToolsPage = () => {
     const [standbyStatus, setStandbyStatus] = useState(null);
     const [torEnabled, setTorEnabled] = useState(false);
 
+    // Helper for authorized fetch
+    const fetchWithAuth = async (url, options = {}) => {
+        const headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`
+        };
+        return fetch(url, { ...options, headers });
+    };
+
     // Check Docker status
     const checkDocker = async () => {
+        if (!token) return;
         try {
-            const res = await fetch(`${API_URL}/api/docker/status`);
-            const data = await res.json();
-            setDockerStatus(data.docker);
-            setContainers(data.containers || {});
+            const res = await fetchWithAuth(`${API_URL}/api/docker/status`);
+            if (res.ok) {
+                const data = await res.json();
+                setDockerStatus(data.docker);
+                setContainers(data.containers || {});
+            }
         } catch (err) {
             setDockerStatus({ available: false });
         }
@@ -39,11 +53,14 @@ const ToolsPage = () => {
 
     // Check Tor status
     const checkTor = async () => {
+        if (!token) return;
         try {
-            const res = await fetch(`${API_URL}/api/docker/tor/status`);
-            const data = await res.json();
-            setTorStatus(data);
-            setTorEnabled(data.running && data.usingTor);
+            const res = await fetchWithAuth(`${API_URL}/api/docker/tor/status`);
+            if (res.ok) {
+                const data = await res.json();
+                setTorStatus(data);
+                setTorEnabled(data.running && data.usingTor);
+            }
         } catch {
             setTorStatus({ running: false });
             setTorEnabled(false);
@@ -52,10 +69,13 @@ const ToolsPage = () => {
 
     // Check Standby status
     const checkStandby = async () => {
+        if (!token) return;
         try {
-            const res = await fetch(`${API_URL}/api/docker/standby/status`);
-            const data = await res.json();
-            setStandbyStatus(data);
+            const res = await fetchWithAuth(`${API_URL}/api/docker/standby/status`);
+            if (res.ok) {
+                const data = await res.json();
+                setStandbyStatus(data);
+            }
         } catch {
             setStandbyStatus(null);
         }
@@ -63,10 +83,11 @@ const ToolsPage = () => {
 
     // Toggle Tor (Manual activation)
     const toggleTor = async () => {
+        if (!token) return;
         setExecuting(true);
         try {
             const action = torEnabled ? 'disable' : 'enable';
-            const res = await fetch(`${API_URL}/api/docker/tor/${action}`, { method: 'POST' });
+            const res = await fetchWithAuth(`${API_URL}/api/docker/tor/${action}`, { method: 'POST' });
             const data = await res.json();
             setResults(data);
             checkTor();
@@ -79,10 +100,15 @@ const ToolsPage = () => {
 
     // Check HexStrike health
     const checkHexStrike = async () => {
+        if (!token) return;
         try {
-            const res = await fetch(`${API_URL}/api/hexstrike/health`);
-            const data = await res.json();
-            setHexstrikeOnline(data.status === 'online');
+            // HexStrike endpoints explicitly mounted at /api/hexstrike are under auth now too?
+            // Assuming yes based on global middleware.
+            const res = await fetchWithAuth(`${API_URL}/api/hexstrike/health`);
+            if (res.ok) {
+                const data = await res.json();
+                setHexstrikeOnline(data.status === 'online');
+            }
         } catch {
             setHexstrikeOnline(false);
         }
@@ -90,11 +116,14 @@ const ToolsPage = () => {
 
     // Load HexStrike tools
     const loadTools = async () => {
+        if (!token) return;
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/api/hexstrike/tools`);
-            const data = await res.json();
-            setTools(data.tools || []);
+            const res = await fetchWithAuth(`${API_URL}/api/hexstrike/tools`);
+            if (res.ok) {
+                const data = await res.json();
+                setTools(data.tools || []);
+            }
         } catch (err) {
             setTools([]);
         }
@@ -436,14 +465,14 @@ const ToolsPage = () => {
                             </div>
                             <div className="bg-purple-900/20 border border-purple-500/50 rounded p-4 text-sm">
                                 <div className="flex items-center gap-2 text-purple-400 font-bold mb-2">
-                                    🧅 Accès Dark Web via Tor Browser
+                                    🧅 Accès Dark Web via Proxy Tor (Docker)
                                 </div>
                                 <p className="text-gray-400 text-xs mb-3">
-                                    Cliquez sur "ACTIVER TOR" pour lancer Tor Browser. Une fois connecté au réseau Tor,
-                                    vous pouvez naviguer sur les sites .onion en toute sécurité.
+                                    Cliquez sur "ACTIVER TOR" pour démarrer le conteneur Tor. Ce proxy permet aux
+                                    outils (Kali, OSINT, HexStrike) de router leur trafic via le réseau Tor.
                                 </p>
                                 <div className="text-[10px] text-gray-500">
-                                    Port SOCKS5: 9150 | Tor Browser doit être installé sur le Bureau
+                                    Port SOCKS5: 9050 | Control: 9051 | Conteneur: th3-tor
                                 </div>
                             </div>
                         </div>

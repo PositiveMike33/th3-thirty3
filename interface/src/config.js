@@ -24,7 +24,7 @@ const IS_PRODUCTION = !IS_LOCALHOST && (
 const ENVIRONMENTS = {
     development: {
         API_URL: 'http://localhost:3000',
-        FRONTEND_URL: 'http://localhost:5173',
+        FRONTEND_URL: 'http://localhost:5174',
         OLLAMA_URL: 'http://localhost:11434',
         ANYTHINGLLM_URL: 'http://localhost:3001', // AnythingLLM usually 3001
         WS_URL: 'ws://localhost:3000',
@@ -47,7 +47,7 @@ const ENV = IS_PRODUCTION ? ENVIRONMENTS.production : ENVIRONMENTS.development;
 export const APP_CONFIG = {
     name: "Th3 Thirty3",
     displayName: IS_PRODUCTION ? "Nexus33" : "Th3 Thirty3",
-    version: "1.3.0",
+    version: "v1.2.1-debug",
     theme: {
         primary: "#00ff41",     // Matrix Green
         secondary: "#800080",   // Cyberpunk Purple

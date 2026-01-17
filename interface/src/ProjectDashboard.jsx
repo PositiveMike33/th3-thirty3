@@ -9,6 +9,7 @@ import ModelIntelligenceDashboard from './components/ModelIntelligenceDashboard'
 import GmailSidebar from './components/GmailSidebar';
 import WWTMapComponent from './components/WWTMapComponent';
 import { API_URL } from './config';
+import api from './services/apiService';
 
 const ProjectDashboard = () => {
     // Socket State
@@ -47,8 +48,7 @@ const ProjectDashboard = () => {
 
     const fetchAgents = React.useCallback(async () => {
         try {
-            const res = await fetch(`${API_URL}/models?computeMode=cloud`);
-            const data = await res.json();
+            const data = await api.get('/models?computeMode=cloud');
             // The backend returns { local: [], cloud: [] }
             const allModels = [...(data.local || []), ...(data.cloud || [])];
             // Filter for AnythingLLM agents
@@ -65,8 +65,7 @@ const ProjectDashboard = () => {
 
     const fetchProjects = React.useCallback(async () => {
         try {
-            const res = await fetch(`${API_URL}/projects`);
-            const data = await res.json();
+            const data = await api.get('/projects');
             // Ensure data is an array before setting
             const projectsArray = Array.isArray(data) ? data : (data.projects || []);
             setProjects(projectsArray);
@@ -85,17 +84,12 @@ const ProjectDashboard = () => {
     const fetchGoogleData = React.useCallback(async () => {
         setGoogleLoading(true);
         try {
-            const [eventsRes, emailsRes, tasksRes, filesRes] = await Promise.all([
-                fetch(`${API_URL}/google/calendar`),
-                fetch(`${API_URL}/google/emails`),
-                fetch(`${API_URL}/google/tasks`),
-                fetch(`${API_URL}/google/drive`)
+            const [events, emails, tasks, files] = await Promise.all([
+                api.get('/google/calendar'),
+                api.get('/google/emails'),
+                api.get('/google/tasks'),
+                api.get('/google/drive')
             ]);
-
-            const events = await eventsRes.json();
-            const emails = await emailsRes.json();
-            const tasks = await tasksRes.json();
-            const files = await filesRes.json();
 
             setGoogleData({
                 events: events.events || [],
@@ -163,12 +157,7 @@ const ProjectDashboard = () => {
     const _handleCreateProject = async (name) => {
         if (!name?.trim()) return;
         try {
-            const res = await fetch(`${API_URL}/projects`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description: "New Project" })
-            });
-            const project = await res.json();
+            const project = await api.post('/projects', { name, description: "New Project" });
             setProjects(prev => [...prev, project]);
             setActiveProject(project);
         } catch (error) {
@@ -180,7 +169,7 @@ const ProjectDashboard = () => {
     const _handleDeleteProject = async (id) => {
         if (!confirm("Supprimer ce projet ?")) return;
         try {
-            await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
+            await api.delete(`/projects/${id}`);
             setProjects(prev => prev.filter(p => p.id !== id));
             if (activeProject?.id === id) setActiveProject(null);
         } catch (error) {
@@ -191,11 +180,7 @@ const ProjectDashboard = () => {
     const handleAddTask = async (status = 'todo') => {
         if (!newTaskContent.trim() || !activeProject) return;
         try {
-            await fetch(`${API_URL}/projects/${activeProject.id}/tasks`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: newTaskContent, status })
-            });
+            await api.post(`/projects/${activeProject.id}/tasks`, { content: newTaskContent, status });
             await fetchProjects();
             setNewTaskContent("");
         } catch (error) {
@@ -206,11 +191,7 @@ const ProjectDashboard = () => {
     const handleMoveTask = async (taskId, newStatus) => {
         if (!activeProject) return;
         try {
-            await fetch(`${API_URL}/projects/${activeProject.id}/tasks/${taskId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            });
+            await api.put(`/projects/${activeProject.id}/tasks/${taskId}`, { status: newStatus });
             fetchProjects();
         } catch (error) {
             console.error("Error moving task:", error);
@@ -220,7 +201,7 @@ const ProjectDashboard = () => {
     const handleDeleteTask = async (taskId) => {
         if (!activeProject) return;
         try {
-            await fetch(`${API_URL}/projects/${activeProject.id}/tasks/${taskId}`, { method: 'DELETE' });
+            await api.delete(`/projects/${activeProject.id}/tasks/${taskId}`);
             fetchProjects();
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -378,21 +359,13 @@ const ProjectDashboard = () => {
                                             if (!selectedAgent || !agentTask.trim()) return;
 
                                             try {
-                                                // Trigger Agent
-                                                const res = await fetch(`${API_URL || 'http://localhost:3000'}/chat`, {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'x-api-key': localStorage.getItem('th3_api_key') || ''
-                                                    },
-                                                    body: JSON.stringify({
-                                                        message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
-                                                        provider: 'anythingllm',
-                                                        model: selectedAgent
-                                                    })
+                                                // Trigger Agent via centralized API service
+                                                const data = await api.post('/chat', {
+                                                    message: `[AGENT TASK] ${agentTask} (Context: Project ${activeProject?.name})`,
+                                                    provider: 'anythingllm',
+                                                    model: selectedAgent
                                                 });
 
-                                                const data = await res.json();
                                                 // Handle various response formats (AnythingLLM wrapper returns textResponse)
                                                 const responseText = data.textResponse || data.response || data.message || "";
 
