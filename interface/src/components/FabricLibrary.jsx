@@ -75,10 +75,15 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
     const [previewPattern, setPreviewPattern] = useState(null);
     const [patternContent, setPatternContent] = useState({ system: '', user: '' });
     const [loadingPreview, setLoadingPreview] = useState(false);
+    const scrollRef = React.useRef(null);
 
     useEffect(() => {
         if (isOpen) {
             setLoading(true);
+            // Reset scroll to top
+            if (scrollRef.current) {
+                scrollRef.current.scrollTop = 0;
+            }
             fetch(`${API_URL}/patterns`)
                 .then(res => res.json())
                 .then(data => {
@@ -99,11 +104,11 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-gray-900 border border-cyan-500/50 rounded-xl w-full max-w-4xl h-[80vh] flex flex-col shadow-[0_0_50px_rgba(8,145,178,0.3)] animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-gray-900 border border-cyan-500/50 rounded-xl w-full max-w-4xl h-[85vh] flex flex-col shadow-[0_0_50px_rgba(8,145,178,0.3)] animate-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header */}
-                <div className="p-6 border-b border-cyan-900/50 flex justify-between items-center bg-black/40 rounded-t-xl">
+                <div className="p-6 border-b border-cyan-900/50 flex justify-between items-center bg-black/40 rounded-t-xl flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <BookOpen className="text-cyan-400" size={24} />
                         <div>
@@ -117,7 +122,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                 </div>
 
                 {/* Search Bar */}
-                <div className="p-4 bg-gray-900/50 border-b border-cyan-900/30">
+                <div className="p-4 bg-gray-900/50 border-b border-cyan-900/30 flex-shrink-0">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                         <input
@@ -132,7 +137,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                 </div>
 
                 {/* Content Grid */}
-                <div className="flex-1 overflow-y-auto p-6 bg-[url('/grid.png')]">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 bg-[url('/grid.png')]">
                     {loading ? (
                         <div className="flex justify-center items-center h-full text-cyan-500 animate-pulse">
                             Chargement de la base de données...

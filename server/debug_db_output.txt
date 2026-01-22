@@ -1,0 +1,20 @@
+Connected to DB
+Users found: 3
+User: th3thirty3@gmail.com
+Has Google Tokens: true
+ - Access Token: true
+ - Refresh Token: true
+ - Expiry: Tue Jan 20 2026 11:41:51 GMT-0500 (heure normale de l’Est)
+---
+User: mikegauthierguillet@gmail.com
+Has Google Tokens: true
+ - Access Token: true
+ - Refresh Token: true
+ - Expiry: Tue Jan 20 2026 11:41:51 GMT-0500 (heure normale de l’Est)
+---
+User: mgauthierguillet@gmail.com
+Has Google Tokens: true
+ - Access Token: true
+ - Refresh Token: true
+ - Expiry: Tue Jan 20 2026 11:43:20 GMT-0500 (heure normale de l’Est)
+---

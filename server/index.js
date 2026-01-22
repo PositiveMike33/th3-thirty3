@@ -224,11 +224,14 @@ const ACCOUNTS_PUBLIC = [
 
 app.get('/google/status', async (req, res) => {
     const status = {};
+    console.log("[GOOGLE] /google/status called. Checking accounts:", ACCOUNTS_PUBLIC);
     for (const email of ACCOUNTS_PUBLIC) {
         try {
             const client = await googleService.getClient(email);
             status[email] = !!client;
+            console.log(`[GOOGLE] Status for ${email}: ${!!client}`);
         } catch (e) {
+            console.error(`[GOOGLE] Error checking status for ${email}:`, e.message);
             status[email] = false;
         }
     }

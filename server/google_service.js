@@ -98,10 +98,21 @@ class GoogleService {
             }
         }
 
+        if (!this.credentials) {
+            console.error('[GOOGLE] getClient: Credentials not loaded.');
+            return null;
+        }
+
         // Fetch from MongoDB
         const user = await User.findOne({ email });
-        if (!user || !user.googleTokens) return null;
-        if (!this.credentials) return null;
+        if (!user) {
+            console.warn(`[GOOGLE] getClient: User not found in DB for ${email}`);
+            return null;
+        }
+        if (!user.googleTokens) {
+            console.warn(`[GOOGLE] getClient: No tokens found in DB for ${email}`);
+            return null;
+        }
 
         const { client_secret, client_id, redirect_uris } = this.credentials.installed || this.credentials.web;
         const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);

@@ -14,10 +14,17 @@ const SettingsPage = () => {
         reflectionMode: 'think'
     });
 
+    // Constant Accounts List
+    const ACCOUNTS = [
+        'th3thirty3@gmail.com',
+        'mgauthierguillet@gmail.com',
+        'mikegauthierguillet@gmail.com'
+    ];
+
     // State for Connectors Status
     const [connectors, setConnectors] = useState({
-        gmail: [],
-        calendar: [],
+        gmail: ACCOUNTS.map((email, i) => ({ id: i, email, status: 'inactive' })), // Default to visible but inactive
+        calendar: ACCOUNTS.map((email, i) => ({ id: i, email, status: 'inactive' })),
         dart: { status: 'active' },
         wwt: { status: 'active' }
     });
@@ -60,17 +67,13 @@ const SettingsPage = () => {
             });
 
         // 2. Get Google Status
-        fetch(`${API_URL}/google/status`)
+        console.log("Fetching Google Status...");
+        fetch(`${API_URL}/google/status?t=${Date.now()}`) // Cache buster
             .then(res => res.json())
             .then(statusMap => {
-                // Map the 3 specific accounts
-                const accounts = [
-                    'th3thirty3@gmail.com',
-                    'mgauthierguillet@gmail.com',
-                    'mikegauthierguillet@gmail.com'
-                ];
+                console.log("Google Status Response:", statusMap);
 
-                const gmailStatus = accounts.map((email, i) => ({
+                const gmailStatus = ACCOUNTS.map((email, i) => ({
                     id: i,
                     email,
                     status: statusMap[email] ? 'active' : 'inactive'
@@ -83,6 +86,30 @@ const SettingsPage = () => {
                 }));
             })
             .catch(err => console.error("Failed to load google status", err));
+    }, []);
+
+    // Check for URL Params (Success Alert) and Auto-Refresh
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search);
+        const email = query.get('email');
+        if (query.get('google_auth') === 'success') {
+            window.history.replaceState({}, '', '/settings'); // Clean URL
+            // Force refresh status immediately
+            console.log("Auth success detected for:", email, "Refreshing status...");
+            setTimeout(() => {
+                // Re-fetch status
+                fetch(`${API_URL}/google/status?t=${Date.now()}`)
+                    .then(res => res.json())
+                    .then(statusMap => {
+                        const gmailStatus = ACCOUNTS.map((acc, i) => ({
+                            id: i,
+                            email: acc,
+                            status: statusMap[acc] ? 'active' : 'inactive'
+                        }));
+                        setConnectors(prev => ({ ...prev, gmail: gmailStatus, calendar: gmailStatus }));
+                    });
+            }, 1000);
+        }
     }, []);
 
     // Helper to update and save settings
