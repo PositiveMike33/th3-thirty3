@@ -5,6 +5,9 @@ REM Secure OSINT/Hacking Environment
 REM ===============================================
 title Th3 Thirty3 - Secure Mode
 
+REM Set working directory to project root (one level up from scripts location)
+cd /d "%~dp0.."
+
 echo.
 echo ========================================
 echo    Th3 Thirty3 - Secure Mode
@@ -18,29 +21,36 @@ set "TOR_PATH=%UserProfile%\OneDrive\Desktop\Tor Browser\Browser\firefox.exe"
 
 REM Start Tor Service (Background SOCKS5 Proxy)
 echo [0/4] Starting Tor Network...
-powershell -ExecutionPolicy Bypass -File ".\start_tor_proxy.ps1"
-if %ERRORLEVEL% NEQ 0 (
-    echo [!] Failed to start Tor Proxy. Continuing anyway...
-) else (
-    echo [OK] Tor Proxy active on port 9050
-)
+powershell -ExecutionPolicy Bypass -File "scripts\start_tor_proxy.ps1"
+if %errorlevel% neq 0 goto TorFailed
+echo [OK] Tor Proxy active on port 9050
+goto TorDone
+
+:TorFailed
+echo [!] Failed to start Tor Proxy. Continuing anyway...
+
+:TorDone
 
 REM Start Ollama if not running
 tasklist /FI "IMAGENAME eq ollama.exe" 2>NUL | find /I /N "ollama.exe">NUL
-if "%ERRORLEVEL%"=="1" (
-    echo [1/4] Starting Ollama (Local AI)...
-    start "" "ollama" serve
-    timeout /t 3 /nobreak >nul
-)
+if not errorlevel 1 goto OllamaRunning
+echo [1/4] Starting Ollama (Local AI)...
+start "" "ollama" serve
+timeout /t 3 /nobreak >nul
+
+:OllamaRunning
 
 REM Start Docker Services (GPU Trainer + HexStrike)
 echo [3/5] Starting Docker Services (GPU Trainer + HexStrike)...
 docker-compose up -d tensorflow-trainer hexstrike
-if %ERRORLEVEL% NEQ 0 (
-    echo [!] Docker startup failed. Ensuring fallback...
-) else (
-    echo [OK] Docker services started.
-)
+if %errorlevel% neq 0 goto DockerFailed
+echo [OK] Docker services started.
+goto DockerDone
+
+:DockerFailed
+echo [!] Docker startup failed. Ensuring fallback...
+
+:DockerDone
 
 REM Start the server
 echo [4/5] Starting backend server on port 3000...

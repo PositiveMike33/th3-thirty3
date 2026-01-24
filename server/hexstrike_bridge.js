@@ -5,7 +5,7 @@
  * the HexStrike AI server running on port 8888.
  */
 
-const HEXSTRIKE_URL = process.env.HEXSTRIKE_URL || 'http://hexstrike:8888';
+const HEXSTRIKE_URL = process.env.HEXSTRIKE_URL || 'http://localhost:8888';
 
 class HexStrikeBridge {
     constructor() {

@@ -1,0 +1,98 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <!-- Theme colors: Chrome/Edge/Safari support this, Firefox/Opera ignore it (expected behavior) -->
+    <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#6366f1" />
+    <meta name="msapplication-navbutton-color" content="#6366f1" />
+    <!-- Apple PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Th3 33" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Plateforme IA avec agents OSINT, Hacking et Cyber Training" />
+    <meta name="keywords" content="AI, Intelligence Artificielle, OSINT, Cybersécurité, Hacking, Training" />
+    <meta name="author" content="Th3 Thirty3" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: http://localhost:*; connect-src 'self' https: wss: http://localhost:* ws://localhost:*; font-src 'self' data: https:; frame-src 'self' https:;" />
+    
+    <!-- Performance Optimization -->
+    <link rel="preconnect" href="https://static.claydar.com" />
+    <link rel="dns-prefetch" href="https://static.claydar.com" />
+    
+    <title>Th3 Thirty3 - AI Platform</title>
+    
+    <!-- Analytics (Claydar) -->
+    <script src="https://static.claydar.com/init.v1.js?id=cqyB56eM1c" defer></script>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5182160372262051"
+     crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <noscript>
+      <div style="text-align: center; padding: 50px; font-family: sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>This application requires JavaScript to run. Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+    
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx?t=1769184393581"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+              console.log('[PWA] Service Worker registered:', reg.scope);
+              // Check for updates every hour
+              setInterval(() => reg.update(), 3600000);
+            })
+            .catch(err => console.error('[PWA] SW registration failed:', err));
+        });
+      }
+      
+      // Offline/Online status detection
+      window.addEventListener('online', () => {
+        console.log('[NETWORK] Back online');
+        document.body.classList.remove('offline');
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('[NETWORK] Gone offline');
+        document.body.classList.add('offline');
+      });
+      
+      // Error boundary for uncaught errors
+      window.addEventListener('error', (event) => {
+        console.error('[GLOBAL ERROR]', event.error);
+      });
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        console.error('[UNHANDLED PROMISE]', event.reason);
+      });
+    </script>
+  </body>
+</html>
+

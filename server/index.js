@@ -161,6 +161,7 @@ app.get('/patterns', (req, res) => {
 app.get('/patterns/:name', (req, res) => {
     try {
         const patternName = req.params.name;
+        // Now returns object { system, user } or null
         const content = getPatternContent(patternName);
 
         if (!content) {
@@ -168,9 +169,9 @@ app.get('/patterns/:name', (req, res) => {
         }
 
         res.json({
-            content: content,
-            system: content,
-            user: ''
+            content: content.system || '', // Backward compatibility
+            system: content.system || '',
+            user: content.user || ''
         });
     } catch (error) {
         console.error("Error reading pattern content:", error);

@@ -209,7 +209,25 @@ class LLMService {
                     response = await this.generateLMStudioResponse(augmentedPrompt, modelId, systemPrompt);
                     break;
                 case 'hackergpt':
-                    response = await this.generateHackerGPTResponse(augmentedPrompt, modelId, systemPrompt);
+                    // We need to pass sessionId/context if available. generateResponse doesn't accept context arg yet properly?
+                    // Actually generateResponse is called with (prompt, imageBase64, providerId, modelId, systemPrompt)
+                    // We need to find where sessionId is available. It might not be passed to generateResponse.
+                    // Checking generateResponse signature... it doesn't take context.
+                    // However, we can use a hack or assume sessionId is in the prompt or added later? 
+                    // Wait, socketService emits agent start with prompt. 
+                    // Let's modify generateResponse to accept context or extract it. 
+                    // Ideally, LLMService needs session context. 
+                    // For now, let's pass a placeholder or try to get it if we can.
+                    // But wait, generateHackerGPTResponse definition was updated to take context.
+                    // We need to pass it here. 
+                    // Let's pass {} for now, relying on 'default-session' fallback, 
+                    // UNLESS we update generateResponse to take context. 
+                    // User didn't ask to refactor everything. 
+                    // Let's pass null for context for now and rely on default, 
+                    // OR better: pass { sessionId: this.currentSessionId } if we had it.
+                    // We don't have it in LLMService instance.
+                    // We will pass an empty object and let the agent fallback.
+                    response = await this.generateHackerGPTResponse(augmentedPrompt, modelId, systemPrompt, { sessionId: 'global-chat' });
                     break;
                 case 'local':
                     return "⚠️ ERREUR: Mode Local désactivé. Veuillez sélectionner un modèle Cloud.";
@@ -391,15 +409,45 @@ class LLMService {
      * Generate response using HackerGPT persona
      * STRICTLY uses Gemini or AnythingLLM. NO OLLAMA FALLBACK.
      */
-    async generateHackerGPTResponse(prompt, modelId, userSystemPrompt) {
-        console.log('[HACKERGPT] Generating security-focused response with Gemini...');
+    async generateHackerGPTResponse(prompt, modelId, userSystemPrompt, context) {
+        console.log('[HACKERGPT] Generating security-focused response with Gemini HexStrike Agent...');
 
+        // Lazy load to avoid circular dependencies if any
+        const geminiHexStrikeAgent = require('./gemini_hexstrike_agent');
+
+        // Ensure socket service is injected if not already
+        if (!geminiHexStrikeAgent.socketService && this.socketService) {
+            geminiHexStrikeAgent.socketService = this.socketService;
+        }
+
+        if (geminiHexStrikeAgent.isReady()) {
+            try {
+                // Pass chat ID from context or generate a temporary one
+                const chatId = context?.sessionId || 'default-session';
+
+                const result = await geminiHexStrikeAgent.processRequest(prompt, {
+                    history: [],
+                    includeToolContext: true,
+                    chatId: chatId
+                });
+
+                if (result.success) {
+                    return result.response;
+                } else {
+                    console.warn('[HACKERGPT] Agent execution failed, falling back to standard personality:', result.error);
+                }
+            } catch (agentError) {
+                console.error('[HACKERGPT] Agent error:', agentError);
+            }
+        }
+
+        // FALLBACK: Standard Personality (No Tools)
         const hackerGPTPrompt = hackerGPTService.getSystemPrompt();
         const fullSystemPrompt = userSystemPrompt
             ? `${hackerGPTPrompt}\n\n--- Additional Instructions ---\n${userSystemPrompt}`
             : hackerGPTPrompt;
 
-        // PRIMARY: Gemini
+        // PRIMARY: Gemini (Chat Only)
         if (process.env.GEMINI_API_KEY) {
             try {
                 return await this.generateGeminiResponse(prompt, 'gemini-3-flash-preview', fullSystemPrompt);

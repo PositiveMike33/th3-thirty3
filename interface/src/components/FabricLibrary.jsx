@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, BookOpen, ChevronRight, Filter } from 'lucide-react';
+import { X, Search, BookOpen, ChevronRight, ChevronLeft, Filter, Grid, List } from 'lucide-react';
 import { API_URL } from '../config';
 
 // Descriptions en français des patterns populaires
@@ -75,6 +75,8 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
     const [previewPattern, setPreviewPattern] = useState(null);
     const [patternContent, setPatternContent] = useState({ system: '', user: '' });
     const [loadingPreview, setLoadingPreview] = useState(false);
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' ou 'single'
+    const [currentPatternIndex, setCurrentPatternIndex] = useState(0);
     const scrollRef = React.useRef(null);
 
     useEffect(() => {
@@ -104,8 +106,8 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-gray-900 border border-cyan-500/50 rounded-xl w-full max-w-4xl h-[85vh] flex flex-col shadow-[0_0_50px_rgba(8,145,178,0.3)] animate-in zoom-in-95 duration-200 overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/80 backdrop-blur-sm pt-4 pb-4 px-2 sm:px-4 overflow-y-auto animate-in fade-in duration-200">
+            <div className="bg-gray-900 border border-cyan-500/50 rounded-xl w-full max-w-5xl max-h-[calc(100vh-2rem)] flex flex-col shadow-[0_0_50px_rgba(8,145,178,0.3)] animate-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header */}
                 <div className="p-6 border-b border-cyan-900/50 flex justify-between items-center bg-black/40 rounded-t-xl flex-shrink-0">
@@ -136,13 +138,118 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                     </div>
                 </div>
 
-                {/* Content Grid */}
-                <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 bg-[url('/grid.png')]">
+                {/* Mode Toggle: Grid vs Single Pattern */}
+                <div className="px-4 py-2 bg-gray-900/30 border-b border-cyan-900/30 flex justify-between items-center flex-shrink-0">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`px-3 py-1 rounded text-xs flex items-center gap-1 transition-all ${viewMode === 'grid' ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-cyan-300'}`}
+                        >
+                            <Grid size={12} /> Grille
+                        </button>
+                        <button
+                            onClick={() => { setViewMode('single'); setCurrentPatternIndex(0); }}
+                            className={`px-3 py-1 rounded text-xs flex items-center gap-1 transition-all ${viewMode === 'single' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-purple-300'}`}
+                        >
+                            <List size={12} /> Un par un
+                        </button>
+                    </div>
+                    {viewMode === 'single' && filteredPatterns.length > 0 && (
+                        <span className="text-xs text-gray-500">
+                            {currentPatternIndex + 1} / {filteredPatterns.length}
+                        </span>
+                    )}
+                </div>
+
+                <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 bg-[url('/grid.png')] scrollbar-thin scrollbar-thumb-cyan-700 scrollbar-track-gray-900">
                     {loading ? (
                         <div className="flex justify-center items-center h-full text-cyan-500 animate-pulse">
                             Chargement de la base de données...
                         </div>
+                    ) : viewMode === 'single' ? (
+                        /* Mode UN PATTERN À LA FOIS */
+                        <div className="h-full flex flex-col">
+                            {filteredPatterns.length > 0 ? (
+                                <>
+                                    {/* Navigation */}
+                                    <div className="flex items-center justify-between mb-4">
+                                        <button
+                                            onClick={() => setCurrentPatternIndex(prev => Math.max(0, prev - 1))}
+                                            disabled={currentPatternIndex === 0}
+                                            className={`p-3 rounded-lg border transition-all flex items-center gap-2 ${currentPatternIndex === 0 ? 'border-gray-700 text-gray-600 cursor-not-allowed' : 'border-cyan-700 text-cyan-400 hover:bg-cyan-900/30'}`}
+                                        >
+                                            <ChevronLeft size={20} /> Précédent
+                                        </button>
+                                        <span className="text-lg font-bold text-purple-400">
+                                            {currentPatternIndex + 1} / {filteredPatterns.length}
+                                        </span>
+                                        <button
+                                            onClick={() => setCurrentPatternIndex(prev => Math.min(filteredPatterns.length - 1, prev + 1))}
+                                            disabled={currentPatternIndex === filteredPatterns.length - 1}
+                                            className={`p-3 rounded-lg border transition-all flex items-center gap-2 ${currentPatternIndex === filteredPatterns.length - 1 ? 'border-gray-700 text-gray-600 cursor-not-allowed' : 'border-cyan-700 text-cyan-400 hover:bg-cyan-900/30'}`}
+                                        >
+                                            Suivant <ChevronRight size={20} />
+                                        </button>
+                                    </div>
+
+                                    {/* Pattern actuel en FULL */}
+                                    <div className="flex-1 overflow-y-auto bg-gray-800/50 border border-purple-500/50 rounded-xl p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <span className="text-[10px] text-gray-500 bg-gray-900 px-2 py-1 rounded">
+                                                    {getPatternCategory(filteredPatterns[currentPatternIndex])}
+                                                </span>
+                                                <h3 className="text-2xl font-bold text-cyan-300 font-mono mt-2">
+                                                    {filteredPatterns[currentPatternIndex]}
+                                                </h3>
+                                                <p className="text-sm text-gray-400 mt-1">
+                                                    {PATTERN_DESCRIPTIONS_FR[filteredPatterns[currentPatternIndex]] || `Pattern pour ${filteredPatterns[currentPatternIndex].replace(/_/g, ' ')}`}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    onSelectPattern(filteredPatterns[currentPatternIndex]);
+                                                    onClose();
+                                                }}
+                                                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold transition-colors flex items-center gap-2"
+                                            >
+                                                Utiliser ce pattern
+                                            </button>
+                                        </div>
+
+                                        {/* Bouton pour voir le contenu complet */}
+                                        <button
+                                            onClick={async () => {
+                                                setPreviewPattern(filteredPatterns[currentPatternIndex]);
+                                                setLoadingPreview(true);
+                                                try {
+                                                    const res = await fetch(`${API_URL}/patterns/${filteredPatterns[currentPatternIndex]}`);
+                                                    const data = await res.json();
+                                                    setPatternContent(data);
+                                                } catch (err) {
+                                                    console.error("Pattern load error:", err);
+                                                    setPatternContent({
+                                                        system: 'Erreur de chargement',
+                                                        user: `Serveur non disponible ou erreur API. Détails: ${err.message}`
+                                                    });
+                                                } finally {
+                                                    setLoadingPreview(false);
+                                                }
+                                            }}
+                                            className="w-full mt-4 p-4 bg-purple-900/30 border border-purple-700/50 rounded-lg text-purple-300 hover:bg-purple-800/40 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <BookOpen size={18} /> Voir le contenu complet du pattern
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center text-gray-500 py-10">
+                                    Aucun pattern trouvé pour "{searchTerm}".
+                                </div>
+                            )}
+                        </div>
                     ) : (
+                        /* Mode GRILLE */
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {filteredPatterns.map(pattern => (
                                 <div
@@ -162,10 +269,11 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                                         const res = await fetch(`${API_URL}/patterns/${pattern}`);
                                                         const data = await res.json();
                                                         setPatternContent(data);
-                                                    } catch {
+                                                    } catch (err) {
+                                                        console.error("Pattern load error (grid):", err);
                                                         setPatternContent({
                                                             system: 'Erreur de chargement',
-                                                            user: 'Serveur non disponible. Démarrez le serveur pour voir le contenu.'
+                                                            user: `Serveur non disponible. Détails: ${err.message}`
                                                         });
                                                     } finally {
                                                         setLoadingPreview(false);
@@ -213,11 +321,11 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
             {/* Preview Modal */}
             {previewPattern && (
                 <div
-                    className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+                    className="fixed inset-0 z-[110] flex items-start justify-center bg-black/90 backdrop-blur-sm pt-8 pb-4 px-4 overflow-y-auto"
                     onClick={() => setPreviewPattern(null)}
                 >
                     <div
-                        className="bg-gray-900 border-2 border-cyan-500 rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden shadow-[0_0_80px_rgba(8,145,178,0.5)]"
+                        className="bg-gray-900 border-2 border-cyan-500 rounded-xl w-full max-w-4xl max-h-[calc(100vh-3rem)] flex flex-col overflow-hidden shadow-[0_0_80px_rgba(8,145,178,0.5)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-4 border-b border-cyan-800 bg-black/60 flex justify-between items-center">
@@ -237,12 +345,12 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                 Chargement du contenu...
                             </div>
                         ) : (
-                            <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)] space-y-4">
+                            <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-cyan-700 scrollbar-track-gray-900">
                                 <div>
                                     <div className="text-xs text-cyan-500 uppercase tracking-wider mb-2 font-bold">
                                         💬 Prompt Système
                                     </div>
-                                    <div className="bg-gray-800/50 border border-gray-700 rounded p-4 text-sm text-gray-300 font-mono whitespace-pre-wrap">
+                                    <div className="bg-gray-800/50 border border-gray-700 rounded p-4 text-sm text-gray-300 font-mono whitespace-pre-wrap max-h-[35vh] overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-700 scrollbar-track-gray-800">
                                         {patternContent.system || 'Aucun prompt système disponible'}
                                     </div>
                                 </div>
@@ -252,7 +360,7 @@ const FabricLibrary = ({ isOpen, onClose, onSelectPattern }) => {
                                         <div className="text-xs text-purple-400 uppercase tracking-wider mb-2 font-bold">
                                             👤 Prompt Utilisateur
                                         </div>
-                                        <div className="bg-purple-900/20 border border-purple-700/50 rounded p-4 text-sm text-gray-300 font-mono whitespace-pre-wrap">
+                                        <div className="bg-purple-900/20 border border-purple-700/50 rounded p-4 text-sm text-gray-300 font-mono whitespace-pre-wrap max-h-[25vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-700 scrollbar-track-gray-800">
                                             {patternContent.user}
                                         </div>
                                     </div>

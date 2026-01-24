@@ -41,11 +41,25 @@ const getPatternContent = (patternName) => {
     const patternsDir = getPatternsDir();
     if (!patternsDir) return null;
 
-    const patternPath = path.join(patternsDir, patternName, 'system.md');
-    if (fs.existsSync(patternPath)) {
-        return fs.readFileSync(patternPath, 'utf8');
+    const patternPath = path.join(patternsDir, patternName);
+    const content = {
+        system: null,
+        user: null
+    };
+
+    const systemPath = path.join(patternPath, 'system.md');
+    if (fs.existsSync(systemPath)) {
+        content.system = fs.readFileSync(systemPath, 'utf8');
     }
-    return null;
+
+    const userPath = path.join(patternPath, 'user.md');
+    if (fs.existsSync(userPath)) {
+        content.user = fs.readFileSync(userPath, 'utf8');
+    }
+
+    if (!content.system && !content.user) return null;
+
+    return content;
 };
 
 module.exports = {

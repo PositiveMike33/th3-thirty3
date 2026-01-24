@@ -5,16 +5,18 @@
  * Bypasses geo-restrictions using TorNetworkService.
  */
 
+const { spawn } = require('child_process');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const hexstrikeBridge = require('./hexstrike_bridge');
 const settingsService = require('./settings_service');
 const TorNetworkService = require('./tor_network_service');
 
 class GeminiHexStrikeAgent {
-    constructor() {
+    constructor(modelName = 'gemini-3-pro-preview', socketService = null) {
         this.initialized = false;
         this.apiKey = null;
-        this.modelName = 'gemini-3-pro-preview'; // Explicitly requested by user.
+        this.modelName = modelName;
+        this.socketService = socketService; // Injection de dépendance
         this.chatHistory = [];
         this.toolsUsed = [];
         this.torService = new TorNetworkService();
@@ -22,6 +24,83 @@ class GeminiHexStrikeAgent {
 
         // Initialize immediately if possible
         this.initialize();
+    }
+
+    /**
+     * Exécute une commande shell avec streaming temps réel vers le frontend.
+     * @param {string} command - La commande principale (ex: 'nmap')
+     * @param {Array} args - Les arguments (ex: ['-sV', 'localhost'])
+     * @param {string} chatId - ID de la session pour le ciblage socket
+     * @returns {Promise<string>} - Le résultat final complet pour le contexte du LLM
+     */
+    async executeCommandStream(command, args, chatId) {
+        return new Promise((resolve, reject) => {
+            // Wrap command in docker exec to run inside hexstrike container
+            // docker exec -i th3-hexstrike <command> <args>
+            // We use -i (interactive) but not -t (tty) to avoid formatting issues with logs, or maybe -t is needed for colors?
+            // User requested "Matrix" effect, so ANSI colors are welcome. Let's try without -t first for cleaner data, or maybe with -t.
+            // Let's stick to strict spawn of the command first.
+
+            // To run inside docker:
+            const dockerBinary = 'docker';
+            const dockerArgs = ['exec', 'th3-hexstrike', command, ...args];
+
+            this._emitToSocket(chatId, 'SYSTEM', `> [HEXSTRIKE] Initializing process: ${command} ${args.join(' ')}`);
+            this._emitToSocket(chatId, 'SYSTEM', `> [DOCKER] Container: th3-hexstrike`);
+
+            const process = spawn(dockerBinary, dockerArgs);
+
+            let fullOutput = '';
+            let fullError = '';
+
+            // 2. Capture du flux STDOUT (Sortie standard)
+            process.stdout.on('data', (data) => {
+                const line = data.toString();
+                fullOutput += line;
+                // Émission immédiate vers le frontend
+                this._emitToSocket(chatId, 'STDOUT', line);
+            });
+
+            // 3. Capture du flux STDERR (Erreurs/Avertissements)
+            process.stderr.on('data', (data) => {
+                const line = data.toString();
+                fullError += line;
+                // Émission en rouge ou orange côté front
+                this._emitToSocket(chatId, 'STDERR', line);
+            });
+
+            // 4. Gestion de la fin du processus
+            process.on('close', (code) => {
+                if (code === 0) {
+                    this._emitToSocket(chatId, 'SYSTEM', `> [HEXSTRIKE] Process finished successfully.`);
+                    resolve(fullOutput);
+                } else {
+                    this._emitToSocket(chatId, 'SYSTEM', `> [HEXSTRIKE] Process failed with code ${code}.`);
+                    // Resolve with error info so the agent knows what happened
+                    resolve(`Error (Code ${code}): ${fullError}\nOutput: ${fullOutput}`);
+                }
+            });
+
+            // Gestion des erreurs de lancement
+            process.on('error', (err) => {
+                this._emitToSocket(chatId, 'STDERR', `Critical Execution Error: ${err.message}`);
+                reject(err);
+            });
+        });
+    }
+
+    /**
+     * Helper privé pour standardiser l'envoi socket
+     */
+    _emitToSocket(chatId, type, content) {
+        if (this.socketService) {
+            this.socketService.emit('agent:terminal:stream', {
+                chatId: chatId,
+                type: type, // 'STDOUT', 'STDERR', 'SYSTEM'
+                content: content,
+                timestamp: new Date().toISOString()
+            });
+        }
     }
 
     async initialize(apiKeyOverride = null) {
@@ -179,7 +258,8 @@ ONLY test authorized targets.
             }
 
             // Execute Tools
-            const toolResults = await this.executeToolsFromResponse(responseText, newHistory, systemPrompt);
+            const chatId = context.chatId || 'default-session';
+            const toolResults = await this.executeToolsFromResponse(responseText, newHistory, systemPrompt, chatId);
 
             // Update History
             this.chatHistory = [
@@ -210,7 +290,7 @@ ONLY test authorized targets.
         }
     }
 
-    async executeToolsFromResponse(response, history, systemPrompt) {
+    async executeToolsFromResponse(response, history, systemPrompt, chatId = 'default-session') {
         const toolExecutions = [];
         const findings = [];
         let finalResponse = response;
@@ -226,10 +306,35 @@ ONLY test authorized targets.
                     console.log(`[GEMINI-HEXSTRIKE] 🔧 Executing: ${toolRequest.tool}`);
 
                     const startTime = Date.now();
-                    const result = await hexstrikeBridge.executeTool(
-                        toolRequest.tool,
-                        toolRequest.params || {}
-                    );
+                    // chatId matches the one passed to executeToolsFromResponse
+
+                    let result = {};
+                    let streamed = false;
+
+                    // STREAMING EXECUTION (For long running tools)
+                    // Currently mapping 'nmap_scan' and general commands
+                    if (toolRequest.tool === 'nmap_scan' || toolRequest.tool === 'nmap') {
+                        const target = toolRequest.params.target;
+                        const flags = toolRequest.params.flags || '-sV'; // Default safe args
+                        // Simple construction - improve based on params
+                        const args = [...flags.split(' '), target];
+
+                        try {
+                            const output = await this.executeCommandStream('nmap', args, chatId);
+                            result = { output: output };
+                            streamed = true;
+                        } catch (err) {
+                            result = { error: err.message };
+                        }
+                    }
+                    // Fallback to legacy HTTP bridge for tools not yet mapped to streaming
+                    else {
+                        result = await hexstrikeBridge.executeTool(
+                            toolRequest.tool,
+                            toolRequest.params || {}
+                        );
+                    }
+
                     const duration = Date.now() - startTime;
 
                     toolExecutions.push({

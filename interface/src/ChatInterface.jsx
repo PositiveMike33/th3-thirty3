@@ -13,7 +13,7 @@ import SettingsPage from './SettingsPage';
 // OllamaTrainingDashboard removed - Cloud Only Mode
 import { APP_CONFIG, API_URL } from './config';
 import FabricLibrary from './components/FabricLibrary';
-import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase, BookOpen, X, Brain, Facebook, Youtube, Linkedin, Instagram, Twitter } from 'lucide-react';
+import { MessageSquare, LayoutDashboard, Settings, LogOut, Telescope, Briefcase, BookOpen, X, Brain, Facebook, Youtube, Linkedin, Instagram, Twitter, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
 
 const ChatInterface = () => {
     const [messages, setMessages] = useState([
@@ -25,6 +25,7 @@ const ChatInterface = () => {
     const messagesEndRef = useRef(null);
     const [selectedPattern, setSelectedPattern] = useState('');
     const [libraryOpen, setLibraryOpen] = useState(false);
+    const [sidebarExpanded, setSidebarExpanded] = useState(false); // Mode élargi pour voir les patterns
 
     // View State (Chat vs Dashboard)
     const [currentView, setCurrentView] = useState('chat');
@@ -307,83 +308,28 @@ const ChatInterface = () => {
 
     return (
         <div className="flex h-full w-full bg-transparent text-cyan-300 font-mono overflow-hidden">
-            <div className="w-64 bg-black border-r border-cyan-900 flex flex-col">
-                <div className="p-4 border-b border-cyan-900 flex justify-center items-center">
-                    <div className="w-24 h-24 max-w-[96px] max-h-[96px]">
-                        <Avatar isSpeaking={isAgentSpeaking} size="w-full h-full" />
-                    </div>
-                </div>
-
-                <div className="p-2 space-y-1">
-                    <div className="text-xs uppercase tracking-widest text-gray-500 px-3 py-2 mb-2">Réseaux Sociaux</div>
-                    <a href="https://www.facebook.com/mike.g.guillet" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-blue-900/30 text-gray-400 hover:text-blue-400 group">
-                        <Facebook size={18} className="group-hover:scale-110 transition-transform" /> <span>Facebook</span>
-                    </a>
-                    <a href="https://x.com/guillet_mike" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-gray-800/50 text-gray-400 hover:text-white group">
-                        <Twitter size={18} className="group-hover:scale-110 transition-transform" /> <span>X (Twitter)</span>
-                    </a>
-                    <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-red-900/30 text-gray-400 hover:text-red-400 group">
-                        <Youtube size={18} className="group-hover:scale-110 transition-transform" /> <span>YouTube</span>
-                    </a>
-                    <a href="https://www.instagram.com/mikegauthierguillet/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-pink-800/30 text-gray-400 hover:text-pink-300 group">
-                        <Instagram size={18} className="group-hover:scale-110 transition-transform" /> <span>Instagram</span>
-                    </a>
-                    <a href="https://www.linkedin.com/in/micha%C3%ABl-gauthier-guillet-2141b8198/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded transition-all hover:bg-blue-800/30 text-gray-400 hover:text-blue-300 group">
-                        <Linkedin size={18} className="group-hover:scale-110 transition-transform" /> <span>LinkedIn</span>
-                    </a>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xs uppercase tracking-widest text-gray-500">Missions</h2>
-                        <button onClick={createNewSession} className="text-xs text-cyan-400 hover:text-cyan-300 border border-cyan-900 px-2 py-1 rounded hover:bg-cyan-900/30 transition-all">+ NEW</button>
-                    </div>
-                    <div className="space-y-2">
-                        {sessions.map(session => (
-                            <div key={session.id} onClick={() => loadSession(session.id)} className={`group p-3 rounded cursor-pointer border transition-all ${currentSessionId === session.id ? 'bg-cyan-900/30 border-cyan-500 text-white' : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-cyan-700'}`}>
-                                <div className="font-bold text-sm truncate">{session.title}</div>
-                                <div className="text-xs text-gray-600 mt-1 flex justify-between items-center">
-                                    <span>{new Date(session.lastModified).toLocaleDateString()}</span>
-                                    <button onClick={(e) => deleteSession(session.id, e)} className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400">×</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="p-4 border-t border-cyan-900 bg-black/50">
-                    <div className="mb-2">
-                        <span className="text-xs text-gray-500 uppercase tracking-widest">Comptes Google</span>
-                        <GoogleAuthPanel />
-                    </div>
-                    <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-                        <span>{APP_CONFIG.version}</span>
-                        <div className="flex gap-2">
-                            <button onClick={() => setCurrentView('settings')} className={`hover:text-cyan-400 ${currentView === 'settings' ? 'text-cyan-400' : ''}`}><Settings size={14} /></button>
-                            <button className="hover:text-red-400"><LogOut size={14} /></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            {/* Zone principale - Chat en pleine page */}
             <div className="flex-1 flex flex-col relative bg-transparent">
+                {/* Header avec Model Selector */}
                 <div className="h-16 border-b border-cyan-900 bg-black/80 backdrop-blur flex items-center justify-between px-6 z-40">
                     <div className="flex items-center gap-4">
-                        <ModelSelector currentProvider={selectedProvider} currentModel={selectedModel} onSelectModel={handleModelSelect} />
-                        <div className="flex items-center gap-2 border-l border-cyan-900 pl-4">
-                            <button onClick={() => setLibraryOpen(true)} className={`flex items-center gap-2 px-3 py-1 rounded text-sm border transition-all ${selectedPattern ? 'bg-cyan-900/50 border-cyan-500 text-cyan-300' : 'bg-black border-cyan-900 text-gray-400 hover:text-cyan-400 hover:border-cyan-700'}`}>
-                                <BookOpen size={14} /> <span>{selectedPattern || "Bibliothèque Fabric"}</span>
-                            </button>
-                            {selectedPattern && (
-                                <button onClick={() => setSelectedPattern('')} className="text-gray-500 hover:text-red-400" title="Désactiver le pattern"><X size={14} /></button>
-                            )}
+                        <div className="w-12 h-12">
+                            <Avatar isSpeaking={isAgentSpeaking} size="w-full h-full" />
                         </div>
-                        <FabricLibrary isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} onSelectPattern={(pattern) => setSelectedPattern(pattern)} />
+                        <ModelSelector currentProvider={selectedProvider} currentModel={selectedModel} onSelectModel={handleModelSelect} />
+
+                        {/* Sessions dropdown */}
+                        <div className="flex items-center gap-2 border-l border-cyan-900 pl-4">
+                            <button onClick={createNewSession} className="text-xs text-cyan-400 hover:text-cyan-300 border border-cyan-900 px-3 py-2 rounded hover:bg-cyan-900/30 transition-all flex items-center gap-2">
+                                <MessageSquare size={14} /> + Nouvelle Session
+                            </button>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <button onClick={() => setIsMuted(!isMuted)} className={`p-2 rounded-full border ${isMuted ? 'border-red-500 text-red-500' : 'border-cyan-500 text-cyan-500'} hover:bg-gray-800 transition-all`}>
                             {isMuted ? '🔇' : '🔊'}
                         </button>
+                        <GoogleAuthPanel />
                     </div>
                 </div>
 
@@ -405,10 +351,22 @@ const ChatInterface = () => {
                     </div>
                 ) : (
                     <>
+                        {/* Zone de messages - pleine largeur */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-cyan-900 scrollbar-track-black">
+                            {/* Sessions actives - barre horizontale compacte */}
+                            {sessions.length > 0 && (
+                                <div className="flex gap-2 overflow-x-auto pb-2 mb-4 border-b border-cyan-900/50">
+                                    {sessions.slice(0, 5).map(session => (
+                                        <button key={session.id} onClick={() => loadSession(session.id)} className={`flex-shrink-0 px-3 py-1 rounded text-xs transition-all ${currentSessionId === session.id ? 'bg-cyan-900/50 border-cyan-500 text-cyan-300' : 'bg-gray-900/50 border-gray-700 text-gray-400 hover:text-cyan-400'} border`}>
+                                            {session.title?.substring(0, 20) || 'Session'}...
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
                             {messages.map((msg) => (
                                 <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] p-4 rounded-lg border backdrop-blur-sm ${msg.sender === 'user' ? 'bg-cyan-900/20 border-cyan-500/50 text-cyan-100 rounded-br-none' : 'bg-black/60 border-gray-700 text-gray-300 rounded-bl-none shadow-[0_0_15px_rgba(0,255,255,0.1)]'}`}>
+                                    <div className={`max-w-[70%] p-4 rounded-lg border backdrop-blur-sm ${msg.sender === 'user' ? 'bg-cyan-900/20 border-cyan-500/50 text-cyan-100 rounded-br-none' : 'bg-black/60 border-gray-700 text-gray-300 rounded-bl-none shadow-[0_0_15px_rgba(0,255,255,0.1)]'}`}>
                                         <div className="flex items-center gap-2 mb-2 border-b border-white/10 pb-1 justify-between">
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-xs font-bold uppercase tracking-wider ${msg.sender === 'user' ? 'text-cyan-400' : 'text-purple-400'}`}>{msg.sender === 'user' ? 'OPERATOR' : APP_CONFIG.name}</span>
@@ -431,12 +389,14 @@ const ChatInterface = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
+                        {/* Zone de saisie - pleine largeur */}
                         <div className="p-6 bg-black/80 border-t border-cyan-900 backdrop-blur">
-                            <div className="relative max-w-4xl mx-auto">
-                                <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Entrez votre commande..." className="w-full bg-gray-900/50 border border-cyan-700 rounded-lg py-4 pl-4 pr-12 text-cyan-100 placeholder-cyan-800 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(8,145,178,0.3)] transition-all" />
+                            <div className="relative max-w-full mx-auto">
+                                <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Entrez votre commande..." className="w-full bg-gray-900/50 border border-cyan-700 rounded-lg py-4 pl-4 pr-32 text-cyan-100 placeholder-cyan-800 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(8,145,178,0.3)] transition-all" />
                                 <button onClick={toggleListening} className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'text-cyan-600 hover:text-cyan-400'}`}>{isListening ? '🛑' : '🎤'}</button>
                                 <button onClick={() => setShowWebcam(true)} className={`absolute right-12 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${capturedImage ? 'text-green-500' : 'text-cyan-600 hover:text-cyan-400'}`} title="Activer la Vision">📷</button>
                                 <button onClick={() => setIsMuted(!isMuted)} className={`absolute right-20 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${isMuted ? 'text-red-500' : 'text-cyan-600 hover:text-cyan-400'}`} title={isMuted ? "Activer le son" : "Couper le son"}>{isMuted ? '🔇' : '🔊'}</button>
+                                <button onClick={handleSend} className="absolute right-28 top-1/2 -translate-y-1/2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded transition-all">↵</button>
                             </div>
                             {capturedImage && (
                                 <div className="mt-2 flex items-center gap-2"><span className="text-xs text-green-500 font-mono">Image capturée</span><button onClick={() => setCapturedImage(null)} className="text-red-500 text-xs hover:underline">Supprimer</button></div>
@@ -447,9 +407,87 @@ const ChatInterface = () => {
                 )}
             </div>
 
+            {/* Bande de droite - Réseaux Sociaux + Fabric - Mode redimensionnable */}
+            <div className={`${sidebarExpanded ? 'w-[700px]' : 'w-72'} bg-black/90 border-l border-cyan-900 flex flex-col backdrop-blur-sm transition-all duration-300 ease-in-out`}>
+                {/* Bouton Toggle Expand/Collapse */}
+                <div className="p-2 border-b border-cyan-900/50 flex justify-between items-center">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-600">{sidebarExpanded ? '📖 MODE LECTURE PATTERNS' : 'MODE COMPACT'}</span>
+                    <button
+                        onClick={() => setSidebarExpanded(!sidebarExpanded)}
+                        className="p-2 rounded hover:bg-purple-900/30 text-gray-400 hover:text-purple-400 transition-all flex items-center gap-1 text-xs"
+                        title={sidebarExpanded ? 'Réduire' : 'Élargir pour voir les patterns en entier'}
+                    >
+                        {sidebarExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                        <span>{sidebarExpanded ? 'Réduire' : 'Élargir'}</span>
+                    </button>
+                </div>
+
+                {/* Section Fabric Library - Mode intégré quand élargi */}
+                <div className={`p-4 border-b border-cyan-900 ${sidebarExpanded ? 'flex-1 overflow-hidden flex flex-col' : ''}`}>
+                    <div className="text-xs uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2">
+                        <Brain size={14} /> Fabric Patterns
+                    </div>
+
+                    {/* Bouton pour ouvrir la modal ou le mode intégré */}
+                    <button onClick={() => setLibraryOpen(true)} className={`w-full flex items-center gap-2 px-3 py-3 rounded text-sm border transition-all ${selectedPattern ? 'bg-purple-900/50 border-purple-500 text-purple-300' : 'bg-black border-purple-900/50 text-gray-400 hover:text-purple-400 hover:border-purple-700'}`}>
+                        <BookOpen size={16} /> <span className={sidebarExpanded ? '' : 'truncate'}>{selectedPattern || "Ouvrir la bibliothèque"}</span>
+                    </button>
+
+                    {selectedPattern && (
+                        <button onClick={() => setSelectedPattern('')} className="w-full mt-2 text-xs text-gray-500 hover:text-red-400 flex items-center justify-center gap-1">
+                            <X size={12} /> Désactiver le pattern
+                        </button>
+                    )}
+
+                    {/* Mode élargi: Instructions pour naviguer */}
+                    {sidebarExpanded && (
+                        <div className="mt-4 p-3 bg-purple-900/20 border border-purple-800/50 rounded-lg">
+                            <p className="text-xs text-purple-300 text-center">
+                                💡 Cliquez sur "Ouvrir la bibliothèque" pour parcourir tous les patterns. En mode élargi, vous verrez chaque pattern en détail complet!
+                            </p>
+                        </div>
+                    )}
+
+                    <FabricLibrary isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} onSelectPattern={(pattern) => setSelectedPattern(pattern)} />
+                </div>
+
+                {/* Section Réseaux Sociaux - Compacte en mode élargi */}
+                <div className={`p-4 ${sidebarExpanded ? '' : 'flex-1'}`}>
+                    <div className="text-xs uppercase tracking-widest text-gray-500 mb-3">Réseaux Sociaux</div>
+                    <div className={`${sidebarExpanded ? 'flex flex-wrap gap-2' : 'space-y-2'}`}>
+                        <a href="https://www.facebook.com/mike.g.guillet" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 ${sidebarExpanded ? 'p-2 text-sm' : 'p-3 w-full'} rounded transition-all hover:bg-blue-900/30 text-gray-400 hover:text-blue-400 group border border-transparent hover:border-blue-900/50`}>
+                            <Facebook size={sidebarExpanded ? 16 : 18} className="group-hover:scale-110 transition-transform" /> {!sidebarExpanded && <span>Facebook</span>}
+                        </a>
+                        <a href="https://x.com/guillet_mike" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 ${sidebarExpanded ? 'p-2 text-sm' : 'p-3 w-full'} rounded transition-all hover:bg-gray-800/50 text-gray-400 hover:text-white group border border-transparent hover:border-gray-700`}>
+                            <Twitter size={sidebarExpanded ? 16 : 18} className="group-hover:scale-110 transition-transform" /> {!sidebarExpanded && <span>X (Twitter)</span>}
+                        </a>
+                        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 ${sidebarExpanded ? 'p-2 text-sm' : 'p-3 w-full'} rounded transition-all hover:bg-red-900/30 text-gray-400 hover:text-red-400 group border border-transparent hover:border-red-900/50`}>
+                            <Youtube size={sidebarExpanded ? 16 : 18} className="group-hover:scale-110 transition-transform" /> {!sidebarExpanded && <span>YouTube</span>}
+                        </a>
+                        <a href="https://www.instagram.com/mikegauthierguillet/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 ${sidebarExpanded ? 'p-2 text-sm' : 'p-3 w-full'} rounded transition-all hover:bg-pink-800/30 text-gray-400 hover:text-pink-300 group border border-transparent hover:border-pink-800/50`}>
+                            <Instagram size={sidebarExpanded ? 16 : 18} className="group-hover:scale-110 transition-transform" /> {!sidebarExpanded && <span>Instagram</span>}
+                        </a>
+                        <a href="https://www.linkedin.com/in/micha%C3%ABl-gauthier-guillet-2141b8198/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 ${sidebarExpanded ? 'p-2 text-sm' : 'p-3 w-full'} rounded transition-all hover:bg-blue-800/30 text-gray-400 hover:text-blue-300 group border border-transparent hover:border-blue-800/50`}>
+                            <Linkedin size={sidebarExpanded ? 16 : 18} className="group-hover:scale-110 transition-transform" /> {!sidebarExpanded && <span>LinkedIn</span>}
+                        </a>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-cyan-900 bg-black/50">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{APP_CONFIG.version}</span>
+                        <div className="flex gap-2">
+                            <button onClick={() => setCurrentView('settings')} className={`hover:text-cyan-400 ${currentView === 'settings' ? 'text-cyan-400' : ''}`}><Settings size={14} /></button>
+                            <button className="hover:text-red-400"><LogOut size={14} /></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <FeedbackModal isOpen={feedbackModalOpen} onClose={() => setFeedbackModalOpen(false)} onSubmit={submitFeedback} correctionText={correctionText} setCorrectionText={setCorrectionText} />
             {showWebcam && (<WebcamInput onCapture={(img) => { setCapturedImage(img); setShowWebcam(false); }} onClose={() => setShowWebcam(false)} />)}
-        </div >
+        </div>
     );
 };
 

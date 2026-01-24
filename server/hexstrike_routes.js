@@ -264,6 +264,57 @@ router.post('/nmap', async (req, res) => {
 });
 
 /**
+ * POST /api/hexstrike/scan
+ * Async Nmap scan with Redis Queue (returns job_id immediately)
+ */
+router.post('/scan', async (req, res) => {
+    try {
+        const { target, options } = req.body;
+
+        if (!target) {
+            return res.status(400).json({ error: 'Target required' });
+        }
+
+        console.log('[HEXSTRIKE-API] Async scan request:', target, options);
+
+        // Forward to HexStrike container
+        const hexstrikeUrl = process.env.HEXSTRIKE_URL || 'http://localhost:8888';
+        const response = await fetch(`${hexstrikeUrl}/scan`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target, options: options || '-F' })
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('[HEXSTRIKE-API] Scan error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/hexstrike/result/:jobId
+ * Get async scan result by job ID
+ */
+router.get('/result/:jobId', async (req, res) => {
+    try {
+        const { jobId } = req.params;
+
+        console.log('[HEXSTRIKE-API] Fetching result for job:', jobId);
+
+        // Forward to HexStrike container
+        const hexstrikeUrl = process.env.HEXSTRIKE_URL || 'http://localhost:8888';
+        const response = await fetch(`${hexstrikeUrl}/result/${jobId}`);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('[HEXSTRIKE-API] Result fetch error:', error);
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+});
+
+/**
  * POST /api/hexstrike/amass
  * Subdomain enumeration
  */
