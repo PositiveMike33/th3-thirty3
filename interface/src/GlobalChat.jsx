@@ -1,4 +1,7 @@
-import AgentMonitor from './components/AgentMonitor'; // Ensure import
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageSquare, X, Send, Mic, Minimize2, Maximize2 } from 'lucide-react';
+import { APP_CONFIG, API_URL } from './config';
+import AgentMonitor from './components/AgentMonitor';
 
 const GlobalChat = () => {
     const [isOpen, setIsOpen] = useState(false);

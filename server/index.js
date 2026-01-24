@@ -794,6 +794,12 @@ app.get('/osint/spiderfoot/status', async (req, res) => {
     }
 });
 
+// Astrometry.net Routes
+const astrometryRoutes = require('./astrometry_routes');
+app.use('/api/astrometry', astrometryRoutes);
+console.log('[SYSTEM] Astrometry Routes loaded (Plate Solving)');
+
+
 
 
 

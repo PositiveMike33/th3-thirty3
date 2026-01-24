@@ -38,6 +38,7 @@ const SettingsPage = () => {
         perplexity: '',
         anythingllm_url: '',
         anythingllm_key: '',
+        astrometry: '',
         userApiKey: '' // New field for SaaS Key
     });
 
@@ -295,6 +296,7 @@ const SettingsPage = () => {
                                 { label: 'OpenAI API Key', name: 'openai', placeholder: 'sk-...' },
                                 { label: 'Anthropic Claude Key', name: 'anthropic', placeholder: 'sk-ant-...' },
                                 { label: 'Perplexity API Key', name: 'perplexity', placeholder: 'pplx-...' },
+                                { label: 'Astrometry.net Key', name: 'astrometry', placeholder: 'API key...' },
                             ].map(field => (
                                 <div key={field.name}>
                                     <div className="flex justify-between items-center mb-1">

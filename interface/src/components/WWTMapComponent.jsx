@@ -1,42 +1,113 @@
-import React from 'react';
-import { Maximize, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
-const WWTMapComponent = () => {
+const WWTMapComponent = forwardRef((props, ref) => {
+    const [wwtControl, setWwtControl] = useState(null);
+    const [initialized, setInitialized] = useState(false);
+
+    // Provide methods to parent
+    useImperativeHandle(ref, () => ({
+        // This method will be called when Astrometry.net solves an image
+        addSolvedImage: (imageUrl, calibration) => {
+            if (!wwtControl) {
+                console.error("WWT Control not initialized");
+                return;
+            }
+            console.log("Adding solved image:", imageUrl, calibration);
+
+            try {
+                // Calculation of parameters from Astrometry.net calibration
+                // Calibration usually has: ra, dec (degrees), radius (deg), pixscale (arcsec/pixel), orientation (deg), parity
+                // WWT needs: CenterX (RA), CenterY (Dec in deg), Rotation (deg), Scale (deg/pixel)
+
+                const centerX = calibration.ra;
+                const centerY = calibration.dec;
+                const rotation = calibration.orientation || 0; // check sign?
+                const scale = (calibration.pixscale || 1) / 3600; // arcsec -> deg
+
+                // We need image dimensions. 
+                // Since we don't have them easily from calibration API alone without another call, 
+                // we might need them passed in or default. 
+                // However, WWT creates an ImageSet. 
+                // Let's rely on WWT to handle generic image set creation if possible, 
+                // or we use a helper. 
+
+                // For now, let's try setting the view to the location at least!
+                wwtControl.gotoRaDecZoom(centerX, centerY, calibration.radius * 2, false);
+
+                // TODO: To properly overlay the image, we need to create a WWT Imageset.
+                // This requires constructing the ImageSet object or loading a WTML.
+                // Since Astrometry provides a WTML link: https://nova.astrometry.net/api/jobs/[JOBID]/wtml
+                // We should probably use that!
+
+                if (calibration.wtml_url) {
+                    wwtControl.loadImageCollection(calibration.wtml_url);
+                } else {
+                    console.warn("No WTML URL provided in calibration");
+                }
+
+            } catch (e) {
+                console.error("Error adding image to WWT", e);
+            }
+        }
+    }));
+
+    useEffect(() => {
+        const startTime = Date.now();
+        const initWWT = () => {
+            if (typeof window.wwtLib === 'undefined') {
+                // Check timeout (20s)
+                if (Date.now() - startTime > 20000) {
+                    console.error("WWT Script load timeout");
+                    return;
+                }
+                setTimeout(initWWT, 500); // Poll slower
+                return;
+            }
+
+            try {
+                // Initialize the WWT Control
+                // "WWTCanvas" must match the div ID
+                const control = window.wwtLib.WWTControl.initControl("WWTCanvas");
+
+                // Default settings
+                control.settings.set_showConstellationFigures(false);
+                control.settings.set_showCrosshairs(true);
+                control.settings.set_showConstellationBoundaries(false);
+
+                // Hide UI elements we don't want (SDK usually is plain canvas)
+                // Set default background
+                control.setBackgroundImageByName("Digitized Sky Survey (Color)");
+
+                setWwtControl(control);
+                setInitialized(true);
+                console.log("WWT SDK Initialized");
+            } catch (error) {
+                console.error("WWT Init Failed:", error);
+            }
+        };
+
+        initWWT();
+    }, []);
+
     return (
-        <div className="w-full h-full bg-black relative overflow-hidden">
-            <iframe
-                src="https://worldwidetelescope.org/webclient/?wtml=http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=Sky"
-                title="WorldWide Telescope"
-                className="absolute left-0 right-0 border-none"
+        <div className="w-full h-full bg-black relative">
+            <div
+                id="WWTCanvas"
                 style={{
-                    top: '-110px',        // Hide the top header/tabs
-                    height: 'calc(100% + 250px)', // Increase height to push bottom UI off-screen
-                    width: '100%'
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'black'
                 }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
             />
+
+            {/* Loading Indicator */}
+            {!initialized && (
+                <div className="absolute inset-0 flex items-center justify-center text-cyan-500">
+                    Initializing Universe...
+                </div>
+            )}
         </div>
     );
-};
-
-const GlobeIcon = ({ className }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="2" x2="22" y1="12" y2="12" />
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-);
+});
 
 export default WWTMapComponent;

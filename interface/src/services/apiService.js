@@ -181,6 +181,18 @@ export const api = {
     }),
     getAuthStatus: () => fetch(`${API_URL}/auth/status`, { headers: getHeaders() }).then(r => r.json()).catch(() => ({ authenticated: false })),
 
+    // Astrometry
+    uploadAstrometry: (formData) => fetch(`${API_URL}/api/astrometry/upload`, {
+        method: 'POST',
+        headers: {
+            'x-api-key': localStorage.getItem('th3_api_key') || '',
+            ...(localStorage.getItem('nexus33_token') ? { 'Authorization': `Bearer ${localStorage.getItem('nexus33_token')}` } : {})
+        },
+        body: formData
+    }).then(r => r.json()),
+
+    getAstrometryStatus: (id) => fetchWithError(`${API_URL}/api/astrometry/status/${id}`),
+
     // Payments
     getSubscription: () => fetchWithError(`${API_URL}/payments/subscription`),
     createCheckout: (plan) => fetchWithError(`${API_URL}/payments/create-checkout`, {

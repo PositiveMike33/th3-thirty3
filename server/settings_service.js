@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS = {
         anthropic: '',
         gemini: '',
         groq: '',
+        astrometry: '',
         anythingllm: '',
         anythingllmUrl: 'http://localhost:3001/api/v1'
     },
