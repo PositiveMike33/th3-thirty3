@@ -22,7 +22,7 @@ const HexStrikeExperts = () => {
 
     const fetchExperts = async () => {
         try {
-            const res = await apiService.get('/hexstrike-experts/categories');
+            const res = await apiService.get('/api/hexstrike-experts/categories');
             setExperts(res.data);
             // Set first category as active
             const categories = Object.keys(res.data);
@@ -41,7 +41,7 @@ const HexStrikeExperts = () => {
         setResponse(null);
 
         try {
-            const res = await apiService.post('/hexstrike-experts/consult', {
+            const res = await apiService.post('/api/hexstrike-experts/consult', {
                 toolId: selectedExpert.id,
                 question: question,
                 context: {}

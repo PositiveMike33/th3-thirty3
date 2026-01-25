@@ -144,6 +144,15 @@ app.get('/auth/google/callback', async (req, res) => {
 // Patterns & Models - needed by frontend before login
 // ============================================
 
+// HexStrike Expert Agents Routes (Moved to Public for Visibility)
+const hexstrikeExpertRoutes = require('./hexstrike_expert_agents_routes');
+app.use('/api/hexstrike-experts', hexstrikeExpertRoutes);
+
+// Elite Hacker Scenarios Routes (Moved to Public for Visibility)
+const eliteScenariosRoutes = require('./elite_scenarios_routes');
+app.use('/api/elite-scenarios', eliteScenariosRoutes);
+
+
 // Fabric Patterns Endpoints (PUBLIC)
 app.get('/patterns', (req, res) => {
     try {
@@ -336,15 +345,6 @@ const hexstrikeRoutes = require('./hexstrike_routes');
 app.use('/api/hexstrike', hexstrikeRoutes);
 console.log('[SYSTEM] HexStrike AI integration loaded (150+ security tools)');
 
-// HexStrike Expert Agents Routes (Specialized tool experts)
-const hexstrikeExpertRoutes = require('./hexstrike_expert_agents_routes');
-app.use('/api/hexstrike-experts', hexstrikeExpertRoutes);
-console.log('[HEXSTRIKE-EXPERTS] Expert Agents routes loaded');
-
-// Elite Hacker Scenarios Routes (33 elite scenarios)
-const eliteScenariosRoutes = require('./elite_scenarios_routes');
-app.use('/api/elite-scenarios', eliteScenariosRoutes);
-console.log('[ELITE-SCENARIOS] 33 elite hacker scenarios loaded');
 
 
 // Docker Container Routes (Kali, Tor, Security Tools)

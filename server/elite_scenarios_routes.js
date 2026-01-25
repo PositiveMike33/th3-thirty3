@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const EliteHackerScenariosService = require('./elite_scenarios_service');
+const orchestrator = require('./orchestrator_instance'); // Singleton
 
 let scenariosService = null;
 
@@ -37,6 +38,60 @@ router.get('/', (req, res) => {
             tools: s.tools
         }))
     });
+});
+
+/**
+ * POST /api/elite-scenarios/execute
+ * Exécuter un scénario via l'Orchestrateur
+ */
+router.post('/execute', async (req, res) => {
+    if (!scenariosService || !orchestrator) {
+        return res.status(503).json({ error: 'Services not available' });
+    }
+
+    const { scenarioId, target } = req.body;
+
+    if (!scenarioId) {
+        return res.status(400).json({ error: 'scenarioId is required' });
+    }
+
+    try {
+        const scenario = scenariosService.getScenarioById(scenarioId);
+        if (!scenario) {
+            return res.status(404).json({ error: 'Scenario not found' });
+        }
+
+        console.log(`[ELITE-SCENARIOS] executing scenario ${scenario.id}: ${scenario.title}`);
+
+        // Construire la tâche pour l'orchestrateur
+        const prompt = scenariosService.generateTrainingPrompt(scenario.id);
+        const missionTask = `MISSION CRITIQUE: Exécution du Scénario #${scenario.id} - ${scenario.title}
+        
+CIBLE: ${target || 'SIMULATION_ENVIRONMENT'}
+        
+${prompt}
+        
+INSTRUCTION: Coordonne les équipes HexStrike, OSINT et Hacking pour exécuter ce scénario étape par étape.
+Rapporte chaque succès et échec. Utilise les outils spécifiés.`;
+
+        // Lancer la mission via l'orchestrateur
+        const mission = await orchestrator.executeMission(missionTask, {
+            priority: 'CRITICAL',
+            source: 'elite_scenarios',
+            scenarioId: scenario.id
+        });
+
+        res.json({
+            success: true,
+            msg: `Scenario ${scenario.id} initiated`,
+            missionId: mission.id,
+            mission
+        });
+
+    } catch (error) {
+        console.error('[ELITE-SCENARIOS] Execution failed:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 /**

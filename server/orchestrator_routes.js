@@ -4,9 +4,7 @@
 
 const express = require('express');
 const router = express.Router();
-const OrchestratorService = require('./orchestrator_service');
-
-const orchestrator = new OrchestratorService();
+const orchestrator = require('./orchestrator_instance');
 
 /**
  * GET /api/orchestrator/status
@@ -39,7 +37,7 @@ router.get('/teams', (req, res) => {
  */
 router.post('/analyze', async (req, res) => {
     const { task } = req.body;
-    
+
     if (!task) {
         return res.status(400).json({ success: false, error: 'task requis' });
     }
@@ -58,7 +56,7 @@ router.post('/analyze', async (req, res) => {
  */
 router.post('/mission', async (req, res) => {
     const { task, options } = req.body;
-    
+
     if (!task) {
         return res.status(400).json({ success: false, error: 'task requis' });
     }
@@ -77,7 +75,7 @@ router.post('/mission', async (req, res) => {
  */
 router.post('/delegate', async (req, res) => {
     const { team, task } = req.body;
-    
+
     if (!team || !task) {
         return res.status(400).json({ success: false, error: 'team et task requis' });
     }
@@ -119,7 +117,7 @@ router.get('/missions/history', (req, res) => {
  */
 router.post('/quick', async (req, res) => {
     const { query } = req.body;
-    
+
     if (!query) {
         return res.status(400).json({ success: false, error: 'query requis' });
     }
@@ -128,12 +126,12 @@ router.post('/quick', async (req, res) => {
         // Analyse rapide pour déterminer l'équipe
         const keywords = query.toLowerCase();
         let team = 'general';
-        
-        if (keywords.includes('scan') || keywords.includes('nmap') || keywords.includes('exploit') || 
+
+        if (keywords.includes('scan') || keywords.includes('nmap') || keywords.includes('exploit') ||
             keywords.includes('hack') || keywords.includes('password') || keywords.includes('vuln')) {
             team = 'hacking';
         } else if (keywords.includes('osint') || keywords.includes('recherche') || keywords.includes('email') ||
-                   keywords.includes('domain') || keywords.includes('social') || keywords.includes('ip')) {
+            keywords.includes('domain') || keywords.includes('social') || keywords.includes('ip')) {
             team = 'osint';
         }
 

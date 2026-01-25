@@ -25,6 +25,8 @@ import ServerConsole from './ServerConsole';
 import LoginPage from './LoginPage';
 import ToolsPage from './ToolsPage';
 import EmailDetailPage from './EmailDetailPage';
+import HexStrikeExperts from './components/HexStrikeExperts';
+import EliteScenarios from './components/EliteScenarios';
 import { API_URL } from './config';
 import './index.css';
 
@@ -72,6 +74,8 @@ function App() {
                       <Link to="/" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">CHAT</Link>
 
                       <Link to="/tools" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🛡️ OUTILS</Link>
+                      <Link to="/hexstrike" className="hover:text-orange-400 transition-colors font-mono text-sm tracking-widest">🔥 HEXSTRIKE</Link>
+                      <Link to="/scenarios" className="hover:text-red-400 transition-colors font-mono text-sm tracking-widest">🎯 SCENARIOS</Link>
                       <Link to="/projects" className="hover:text-cyan-400 transition-colors font-mono text-sm tracking-widest">PROJECTS</Link>
                       <Link to="/simulator" className="hover:text-pink-400 transition-colors font-mono text-sm tracking-widest">🎮 SIMULATOR</Link>
                       <Link to="/space" className="hover:text-blue-400 transition-colors font-mono text-sm tracking-widest"> SPACE</Link>
@@ -89,6 +93,8 @@ function App() {
                           <Route path="/tools" element={<ToolsPage />} />
                           <Route path="/projects" element={<ProjectDashboard />} />
                           <Route path="/osint" element={<OsintDashboard />} />
+                          <Route path="/hexstrike" element={<HexStrikeExperts />} />
+                          <Route path="/scenarios" element={<EliteScenarios />} />
                           <Route path="/cyber-training" element={<CyberTrainingPage />} />
 
                           <Route path="/dashboard" element={<KPIDashboard />} />
