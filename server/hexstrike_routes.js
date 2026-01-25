@@ -512,4 +512,149 @@ router.post('/processes/:pid/terminate', async (req, res) => {
     }
 });
 
+// ============================================================================
+// CIPHERLINK SECURE FILE TRANSFER
+// ============================================================================
+
+/**
+ * GET /api/hexstrike/cipherlink/status
+ * Get CipherLink service status
+ */
+router.get('/cipherlink/status', async (req, res) => {
+    try {
+        const status = await hexstrikeBridge.getCipherLinkStatus();
+        res.json(status);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/hexstrike/cipherlink/encrypt
+ * Encrypt a file using AES-256
+ */
+router.post('/cipherlink/encrypt', async (req, res) => {
+    try {
+        const { filepath, password } = req.body;
+
+        if (!filepath || !password) {
+            return res.status(400).json({ error: 'filepath and password are required' });
+        }
+
+        const result = await hexstrikeBridge.encryptFile(filepath, password);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/hexstrike/cipherlink/decrypt
+ * Decrypt base64 data and save to file
+ */
+router.post('/cipherlink/decrypt', async (req, res) => {
+    try {
+        const { encrypted_data, iv, password, filename, output_dir } = req.body;
+
+        if (!encrypted_data || !iv || !password || !filename) {
+            return res.status(400).json({
+                error: 'encrypted_data, iv, password, and filename are required'
+            });
+        }
+
+        const result = await hexstrikeBridge.decryptFile(
+            encrypted_data,
+            iv,
+            password,
+            filename,
+            output_dir
+        );
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/hexstrike/cipherlink/send
+ * Send an encrypted file to a remote receiver
+ */
+router.post('/cipherlink/send', async (req, res) => {
+    try {
+        const { host, port, filepath, password, timeout } = req.body;
+
+        if (!host || !port || !filepath || !password) {
+            return res.status(400).json({
+                error: 'host, port, filepath, and password are required'
+            });
+        }
+
+        console.log(`[HEXSTRIKE-API] CipherLink send: ${filepath} -> ${host}:${port}`);
+
+        const result = await hexstrikeBridge.sendSecureFile(
+            host,
+            parseInt(port),
+            filepath,
+            password,
+            timeout || 30
+        );
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/hexstrike/cipherlink/receive/start
+ * Start listening for incoming encrypted file
+ */
+router.post('/cipherlink/receive/start', async (req, res) => {
+    try {
+        const { port, password, save_dir, timeout } = req.body;
+
+        if (!port || !password) {
+            return res.status(400).json({ error: 'port and password are required' });
+        }
+
+        console.log(`[HEXSTRIKE-API] CipherLink receiver starting on port ${port}`);
+
+        const result = await hexstrikeBridge.startReceiver(
+            parseInt(port),
+            password,
+            save_dir,
+            timeout || 300
+        );
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/hexstrike/cipherlink/receive/stop
+ * Stop the file receiver
+ */
+router.post('/cipherlink/receive/stop', async (req, res) => {
+    try {
+        const result = await hexstrikeBridge.stopReceiver();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * GET /api/hexstrike/cipherlink/receive/result
+ * Get the last receive operation result
+ */
+router.get('/cipherlink/receive/result', async (req, res) => {
+    try {
+        const result = await hexstrikeBridge.getReceiveResult();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
+

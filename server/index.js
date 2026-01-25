@@ -336,6 +336,17 @@ const hexstrikeRoutes = require('./hexstrike_routes');
 app.use('/api/hexstrike', hexstrikeRoutes);
 console.log('[SYSTEM] HexStrike AI integration loaded (150+ security tools)');
 
+// HexStrike Expert Agents Routes (Specialized tool experts)
+const hexstrikeExpertRoutes = require('./hexstrike_expert_agents_routes');
+app.use('/api/hexstrike-experts', hexstrikeExpertRoutes);
+console.log('[HEXSTRIKE-EXPERTS] Expert Agents routes loaded');
+
+// Elite Hacker Scenarios Routes (33 elite scenarios)
+const eliteScenariosRoutes = require('./elite_scenarios_routes');
+app.use('/api/elite-scenarios', eliteScenariosRoutes);
+console.log('[ELITE-SCENARIOS] 33 elite hacker scenarios loaded');
+
+
 // Docker Container Routes (Kali, Tor, Security Tools)
 const dockerRoutes = require('./docker_routes');
 app.use('/api/docker', dockerRoutes);

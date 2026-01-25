@@ -29,9 +29,10 @@ Priorité absolue: NE JAMAIS CORROMPRE le projet. Chaque changement doit être s
 3) Synthèse et exécution
 
 # ÉQUIPES D’AGENTS DISPONIBLES
-- OSINT TEAM: Reconnaissance, Shodan, Social Media...
-- HACKING TEAM: Nmap, Metasploit, PrivEsc...
-- GENERAL EXPERTS: CyberSec, Dev, Marketing...
+- HEXSTRIKE TEAM (35 agents): Experts sécurité par outil - ÉQUIPE PRIORITAIRE
+- OSINT TEAM (10 agents): Reconnaissance, Shodan, Social Media...
+- HACKING TEAM (11 agents): PrivEsc, Persistence, Advanced Attacks...
+- GENERAL EXPERTS (6 agents): CyberSec, Dev, Marketing...
 `;
 
 class OrchestratorService extends EventEmitter {
@@ -44,29 +45,56 @@ class OrchestratorService extends EventEmitter {
 
         // Équipes d'agents
         this.teams = {
+            hexstrike: {
+                name: 'HexStrike Security Team',
+                emoji: '🔥',
+                agents: [
+                    'nmap', 'masscan', 'rustscan', 'amass', 'subfinder',
+                    'httpx', 'katana', 'gau', 'waybackurls',
+                    'gobuster', 'feroxbuster', 'ffuf', 'dirsearch',
+                    'arjun', 'paramspider', 'x8',
+                    'nuclei', 'nikto', 'jaeles', 'dalfox',
+                    'sqlmap', 'metasploit', 'hydra', 'john', 'hashcat',
+                    'wireshark', 'tcpdump', 'sherlock', 'theharvester',
+                    'prowler', 'trivy', 'ghidra', 'radare2', 'checksec', 'cipherlink'
+                ],
+                serviceFile: 'hexstrike_expert_agents_service',
+                priority: 1
+            },
             osint: {
                 name: 'OSINT Team',
                 emoji: '🔍',
-                agents: ['shodan', 'theharvester', 'maltego', 'reconng', 'spiderfoot',
-                    'amass', 'socialmedia', 'geoint', 'darkweb', 'imagint', 'crypto', 'osintframework'],
-                serviceFile: 'osint_expert_agents_service'
+                agents: ['shodan', 'maltego', 'reconng', 'spiderfoot',
+                    'socialmedia', 'geoint', 'darkweb', 'imagint', 'crypto', 'osintframework'],
+                serviceFile: 'osint_expert_agents_service',
+                priority: 2
             },
             hacking: {
                 name: 'Hacking Team',
                 emoji: '💀',
-                agents: ['nmap', 'masscan', 'metasploit', 'sqlmap', 'burpsuite', 'hydra',
-                    'hashcat', 'johntheripper', 'wireshark', 'responder', 'mitmproxy',
-                    'reverseshells', 'persistence', 'privesc_linux', 'privesc_windows',
-                    'aircrack', 'bloodhound', 'impacket', 'mimikatz'],
-                serviceFile: 'hacking_expert_agents_service'
+                agents: ['mitmproxy', 'reverseshells', 'persistence',
+                    'privesc_linux', 'privesc_windows', 'aircrack',
+                    'bloodhound', 'impacket', 'mimikatz', 'responder', 'burpsuite'],
+                serviceFile: 'hacking_expert_agents_service',
+                priority: 2
             },
             general: {
                 name: 'General Experts',
                 emoji: '🧠',
                 agents: ['cybersec', 'vpo', 'marketing', 'dev', 'osint_general', 'finance'],
-                serviceFile: 'expert_agents_service'
+                serviceFile: 'expert_agents_service',
+                priority: 3
             }
         };
+
+        // Initialize HexStrike Expert Service
+        try {
+            const HexStrikeExpertAgentsService = require('./hexstrike_expert_agents_service');
+            this.hexstrikeExperts = new HexStrikeExpertAgentsService();
+            console.log('[ORCHESTRATOR] 🔥 HexStrike Experts:', this.hexstrikeExperts.agents.size, 'tools');
+        } catch (e) {
+            this.hexstrikeExperts = null;
+        }
 
         // État des missions
         this.activeMissions = [];

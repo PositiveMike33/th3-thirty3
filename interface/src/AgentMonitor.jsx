@@ -122,6 +122,13 @@ const AgentMonitor = () => {
             addLog(type, msg);
         });
 
+        // Listen for internal CustomEvents (Local Logs)
+        const handleLocalLog = (e) => {
+            const { type, message } = e.detail;
+            addLog(type || 'LOCAL', message);
+        };
+        window.addEventListener('agent-log', handleLocalLog);
+
         // Listen for training commentary events
         socket.on('training:commentary', (data) => {
             addLog('TRAINING', `Model ${data.model}: Score ${data.score}/100 - ${data.commentary?.substring(0, 80)}...`);
@@ -141,6 +148,7 @@ const AgentMonitor = () => {
 
         return () => {
             if (socketRef.current) socketRef.current.disconnect();
+            window.removeEventListener('agent-log', handleLocalLog);
         };
     }, [addLog]);
 

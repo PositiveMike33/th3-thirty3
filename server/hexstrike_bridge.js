@@ -528,6 +528,106 @@ class HexStrikeBridge {
     async listTools() {
         return this.apiRequest('/api/tools');
     }
+
+    // ============================================================================
+    // CIPHERLINK SECURE FILE TRANSFER
+    // ============================================================================
+
+    /**
+     * Get CipherLink service status
+     */
+    async getCipherLinkStatus() {
+        return this.apiRequest('/api/cipherlink/status');
+    }
+
+    /**
+     * Encrypt a file using AES-256
+     * @param {string} filepath - Path to the file to encrypt
+     * @param {string} password - Encryption password
+     * @returns {Promise<Object>} - Encrypted data with IV and base64 content
+     */
+    async encryptFile(filepath, password) {
+        console.log(`[HEXSTRIKE] 🔐 Encrypting file: ${filepath}`);
+        return this.apiRequest('/api/cipherlink/encrypt', 'POST', {
+            filepath,
+            password
+        });
+    }
+
+    /**
+     * Decrypt base64 data and save to file
+     * @param {string} encryptedData - Base64-encoded encrypted data
+     * @param {string} iv - Base64-encoded IV
+     * @param {string} password - Decryption password
+     * @param {string} filename - Output filename
+     * @param {string} outputDir - Optional output directory
+     * @returns {Promise<Object>} - Decryption result with file path
+     */
+    async decryptFile(encryptedData, iv, password, filename, outputDir = null) {
+        console.log(`[HEXSTRIKE] 🔓 Decrypting to: ${filename}`);
+        return this.apiRequest('/api/cipherlink/decrypt', 'POST', {
+            encrypted_data: encryptedData,
+            iv,
+            password,
+            filename,
+            output_dir: outputDir
+        });
+    }
+
+    /**
+     * Send an encrypted file to a remote receiver
+     * @param {string} host - Remote host address
+     * @param {number} port - Remote port
+     * @param {string} filepath - Path to file to send
+     * @param {string} password - Encryption password
+     * @param {number} timeout - Connection timeout in seconds (default: 30)
+     * @returns {Promise<Object>} - Transfer result
+     */
+    async sendSecureFile(host, port, filepath, password, timeout = 30) {
+        console.log(`[HEXSTRIKE] 📤 Sending encrypted file: ${filepath} -> ${host}:${port}`);
+        return this.apiRequest('/api/cipherlink/send', 'POST', {
+            host,
+            port,
+            filepath,
+            password,
+            timeout
+        });
+    }
+
+    /**
+     * Start listening for incoming encrypted file
+     * @param {number} port - Port to listen on
+     * @param {string} password - Decryption password
+     * @param {string} saveDir - Directory to save received files
+     * @param {number} timeout - Listen timeout in seconds (default: 300)
+     * @returns {Promise<Object>} - Receiver status
+     */
+    async startReceiver(port, password, saveDir = null, timeout = 300) {
+        console.log(`[HEXSTRIKE] 📥 Starting receiver on port ${port}`);
+        return this.apiRequest('/api/cipherlink/receive/start', 'POST', {
+            port,
+            password,
+            save_dir: saveDir,
+            timeout
+        });
+    }
+
+    /**
+     * Stop the file receiver
+     * @returns {Promise<Object>} - Stop result
+     */
+    async stopReceiver() {
+        console.log('[HEXSTRIKE] ⏹️ Stopping receiver');
+        return this.apiRequest('/api/cipherlink/receive/stop', 'POST');
+    }
+
+    /**
+     * Get the last receive operation result
+     * @returns {Promise<Object>} - Receive result
+     */
+    async getReceiveResult() {
+        return this.apiRequest('/api/cipherlink/receive/result');
+    }
 }
 
 // Export singleton instance

@@ -1,6 +1,7 @@
 /**
  * Agent Memory Service - Embeddings + Pieces Integration
  * Mémoire persistante pour les agents experts via embeddings et Pieces
+ * CLOUD-ONLY MODE: Uses Gemini Embedding API (NO OLLAMA)
  */
 
 const fs = require('fs');
@@ -13,19 +14,16 @@ class AgentMemoryService {
         const settings = settingsService.getSettings();
         const apiKeys = settings.apiKeys || {};
 
-        // Ollama URL from settings (proxy or direct)
-        this.ollamaUrl = apiKeys.ollama_use_proxy
-            ? (apiKeys.ollama_proxy_url || 'http://localhost:8080')
-            : (apiKeys.ollama_direct_url || 'http://localhost:11434');
-
-        this.embeddingModel = 'mxbai-embed-large:latest';
+        // Gemini API (Cloud-Only - NO OLLAMA)
+        this.geminiApiKey = process.env.GEMINI_API_KEY || apiKeys.gemini;
+        this.embeddingModel = 'text-embedding-004'; // Gemini embedding model
         this.dataPath = path.join(__dirname, 'data', 'embeddings');
         this.piecesUrl = apiKeys.pieces_host || 'http://localhost:39300';
 
         this.ensureDataFolder();
         this.loadEmbeddings();
 
-        console.log(`[AGENT-MEMORY] Embedding service initialized (Ollama: ${this.ollamaUrl})`);
+        console.log(`[AGENT-MEMORY] Embedding service initialized (Gemini Cloud Mode)`);
     }
 
     ensureDataFolder() {
@@ -50,25 +48,36 @@ class AgentMemoryService {
     }
 
     /**
-     * Générer un embedding avec mxbai-embed-large
+     * Générer un embedding avec Gemini Embedding API (Cloud-Only)
      */
     async generateEmbedding(text) {
         try {
-            const response = await fetch(`${this.ollamaUrl}/api/embeddings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.embeddingModel,
-                    prompt: text
-                })
-            });
+            if (!this.geminiApiKey) {
+                console.error('[AGENT-MEMORY] No Gemini API key configured');
+                return null;
+            }
+
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${this.embeddingModel}:embedContent?key=${this.geminiApiKey}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: `models/${this.embeddingModel}`,
+                        content: {
+                            parts: [{ text: text }]
+                        }
+                    })
+                }
+            );
 
             if (!response.ok) {
-                throw new Error(`Embedding error: ${response.status}`);
+                const error = await response.text();
+                throw new Error(`Gemini Embedding error: ${response.status} - ${error}`);
             }
 
             const data = await response.json();
-            return data.embedding;
+            return data.embedding?.values || null;
         } catch (error) {
             console.error('[AGENT-MEMORY] Embedding error:', error.message);
             return null;

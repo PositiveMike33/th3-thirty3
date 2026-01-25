@@ -1,0 +1,326 @@
+/**
+ * HexStrikeExperts.css
+ * Styles for HexStrike Expert Agents Dashboard
+ */
+
+.hexstrike-experts {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+    min-height: 100vh;
+    padding: 24px;
+    color: #fff;
+}
+
+.hex-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.hex-logo {
+    font-size: 64px;
+    filter: drop-shadow(0 0 20px rgba(255, 100, 50, 0.6));
+    animation: pulse-fire 2s infinite;
+}
+
+@keyframes pulse-fire {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.hex-header h1 {
+    font-size: 2.5rem;
+    margin: 12px 0 8px;
+    background: linear-gradient(90deg, #ff6b35, #f7931e, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hex-subtitle {
+    color: #888;
+    font-size: 1rem;
+}
+
+/* Categories */
+.hex-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.hex-cat-btn {
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: #aaa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hex-cat-btn:hover {
+    background: rgba(255, 107, 53, 0.1);
+    border-color: rgba(255, 107, 53, 0.3);
+}
+
+.hex-cat-btn.active {
+    background: rgba(255, 107, 53, 0.2);
+    border-color: #ff6b35;
+    color: #ff6b35;
+}
+
+.cat-count {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+}
+
+/* Expert Grid */
+.hex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.hex-expert-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hex-expert-card:hover {
+    background: rgba(255, 107, 53, 0.1);
+    border-color: rgba(255, 107, 53, 0.3);
+    transform: translateY(-2px);
+}
+
+.hex-expert-card.selected {
+    background: rgba(255, 107, 53, 0.15);
+    border-color: #ff6b35;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+}
+
+.expert-emoji {
+    font-size: 28px;
+}
+
+.expert-info h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.expert-info code {
+    font-size: 0.75rem;
+    color: #888;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Consultation Panel */
+.hex-consult-panel {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.consult-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.consult-emoji {
+    font-size: 48px;
+}
+
+.consult-header h2 {
+    margin: 0 0 4px;
+    font-size: 1.5rem;
+    color: #ff6b35;
+}
+
+.consult-header p {
+    margin: 0;
+    color: #888;
+}
+
+.consult-input {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.consult-input textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 14px;
+    color: #fff;
+    font-size: 0.95rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.consult-input textarea:focus {
+    outline: none;
+    border-color: rgba(255, 107, 53, 0.5);
+}
+
+.consult-btn {
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: flex-end;
+}
+
+.consult-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+}
+
+.consult-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Response */
+.consult-response {
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.consult-response.success {
+    background: rgba(50, 200, 50, 0.1);
+    border: 1px solid rgba(50, 200, 50, 0.3);
+}
+
+.consult-response.error {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.response-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px 16px;
+    color: #4caf50;
+    font-weight: 600;
+}
+
+.response-error {
+    padding: 16px;
+    color: #f44336;
+}
+
+.response-content {
+    padding: 16px;
+}
+
+.response-content pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #ddd;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.response-commands {
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.response-commands h4 {
+    margin: 0 0 12px;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.response-commands code {
+    display: block;
+    padding: 8px 12px;
+    margin: 6px 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    color: #4caf50;
+    font-size: 0.85rem;
+}
+
+/* Stats Footer */
+.hex-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    padding: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ff6b35;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hex-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hex-stats {
+        gap: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hex-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hex-categories {
+        flex-direction: column;
+    }
+}
