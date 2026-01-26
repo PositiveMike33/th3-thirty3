@@ -656,18 +656,21 @@ QUESTION: ${question}
 
 Réponds en tant qu'expert ${agent.name} avec des commandes précises et des explications techniques.`;
 
-            const response = await this.llmService.generate({
+            // Use hackergpt provider with gemini-3-pro-preview model
+            const response = await this.llmService.generateResponse(
                 prompt,
-                systemPrompt: agent.systemPrompt,
-                model: 'gemini-3-pro-preview'
-            });
+                null,  // image
+                'hackergpt',  // provider
+                'gemini-3-pro-preview',  // model
+                agent.systemPrompt  // system prompt
+            );
 
             return {
                 success: true,
                 expert: agent.name,
                 tool: agent.tool,
                 category: agent.category,
-                response: response.text || response,
+                response: response,
                 commands: agent.commands
             };
 

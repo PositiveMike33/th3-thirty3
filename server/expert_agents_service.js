@@ -35,7 +35,7 @@ class ExpertAgentsService {
                 name: 'Agent CyberSec',
                 emoji: '🔒',
                 model: 'gemini-3-pro-preview',
-                provider: 'gemini',
+                provider: 'hackergpt',
                 domain: 'Cybersécurité et Ethical Hacking',
                 systemPrompt: `Tu es un expert en cybersécurité éthique et pentesting.
 EXPERTISE: OSINT, reconnaissance, scanning, exploitation, défense
@@ -159,10 +159,11 @@ RÈGLE: Toujours mentionner les risques`,
         const fullPrompt = `QUESTION: ${question}`;
 
         try {
+            // Use hackergpt provider
             const response = await this.llmService.generateResponse(
                 fullPrompt,
                 null,
-                expert.provider || 'gemini',
+                'hackergpt',  // Force hackergpt provider
                 expert.model,
                 `${expert.systemPrompt}${learnedContext}\n\nCONTEXTE: ${context}`
             );

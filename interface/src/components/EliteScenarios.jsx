@@ -16,6 +16,8 @@ const EliteScenarios = () => {
     const [trainingPrompt, setTrainingPrompt] = useState('');
     const [activeMissions, setActiveMissions] = useState({}); // Track active scenario missions
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [debugInfo, setDebugInfo] = useState('');
     const [filter, setFilter] = useState('all');
 
     useEffect(() => {
@@ -25,12 +27,17 @@ const EliteScenarios = () => {
     const fetchScenarios = async () => {
         try {
             const res = await apiService.get('/api/elite-scenarios');
-            setScenarios(res.data.scenarios || []);
+            // apiService returns JSON directly, not wrapped in .data
+            const scenariosData = res?.scenarios || [];
+            setScenarios(scenariosData);
 
             const catRes = await apiService.get('/api/elite-scenarios/categories');
-            setCategories(catRes.data.categories || []);
+            setCategories(catRes?.categories || []);
+            setDebugInfo(`Loaded ${scenariosData.length} scenarios from ${apiService.baseUrl}`);
         } catch (err) {
             console.error('[EliteScenarios] Fetch error:', err);
+            setError(err.message + (err.cause ? ` (${err.cause})` : ''));
+            setDebugInfo(`Failed to load from ${apiService.baseUrl}/api/elite-scenarios`);
         } finally {
             setLoading(false);
         }
@@ -89,6 +96,25 @@ const EliteScenarios = () => {
         return (
             <div className="elite-scenarios loading">
                 <div className="loader">⚡ CHARGEMENT DU SYSTÈME...</div>
+                <div style={{ marginTop: 20, color: '#666', fontSize: '0.8rem' }}>Connection à {apiService.baseUrl}...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="elite-scenarios error" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+                <h2 style={{ color: '#ff4444' }}>❌ ERREUR DE CONNEXION</h2>
+                <p style={{ color: '#fff', fontSize: '1.2rem', margin: '20px 0' }}>{error}</p>
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: 15, borderRadius: 8, fontFamily: 'monospace', color: '#aaa' }}>
+                    DEBUG: {debugInfo}
+                </div>
+                <button
+                    onClick={() => { setLoading(true); setError(null); fetchScenarios(); }}
+                    style={{ marginTop: 30, padding: '12px 30px', background: '#ff4444', border: 'none', borderRadius: 8, color: 'white', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                    🔄 RÉESSAYER
+                </button>
             </div>
         );
     }

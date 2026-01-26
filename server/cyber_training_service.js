@@ -138,7 +138,7 @@ Format concis comme un CTF.`;
 Réponds de manière précise et concise.`;
 
         try {
-            const response = await this.llmService.generateResponse(prompt, null, 'gemini', 'gemini-3-flash-preview', this.kaliEnv.getSystemPrompt());
+            const response = await this.llmService.generateResponse(prompt, null, 'hackergpt', 'gemini-3-pro-preview', this.kaliEnv.getSystemPrompt());
             return {
                 success: true,
                 answers: response,

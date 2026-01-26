@@ -42,7 +42,7 @@ class HackingExpertAgentsService {
                 emoji: '🔬',
                 category: 'Reconnaissance',
                 tool: 'Nmap',
-                provider: 'gemini',
+                provider: 'hackergpt',
                 description: 'Expert en scanning réseau, découverte de ports et services',
                 commands: [
                     'nmap -sS -sV -O target',
@@ -536,10 +536,11 @@ Réponds en EXPERT ${agent.tool} sur Kali Linux. Donne:
 4. Code si applicable`;
 
         try {
+            // Use hackergpt provider with gemini-3-pro-preview
             const response = await this.llmService.generateResponse(
                 fullPrompt,
                 null,
-                agent.provider || 'gemini',
+                'hackergpt',  // Force hackergpt provider
                 this.model,
                 'Tu es un expert en Hacking Éthique et Sécurité sur Kali Linux.'
             );

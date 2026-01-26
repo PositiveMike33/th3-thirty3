@@ -463,10 +463,11 @@ Fournis:
      */
     async callLLM(prompt) {
         try {
+            // Use hackergpt provider with gemini-3-pro-preview
             return await this.llmService.generateResponse(
                 prompt,
                 null,
-                'gemini',
+                'hackergpt',  // Force hackergpt provider
                 this.model,
                 SYSTEM_PROMPT
             );

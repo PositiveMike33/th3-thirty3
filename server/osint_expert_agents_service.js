@@ -40,7 +40,7 @@ class OsintExpertAgentsService {
                 emoji: '🔍',
                 category: 'Search Engines',
                 tool: 'Shodan',
-                provider: 'gemini',
+                provider: 'hackergpt',
                 description: 'Expert en recherche de dispositifs connectés, IoT, services exposés',
                 commands: [
                     'shodan search "apache"',
@@ -353,10 +353,11 @@ QUESTION: ${question}
 Réponds en expert ${agent.tool} sur Kali Linux. Sois technique, précis, et donne des commandes compatibles Kali.`;
 
         try {
+            // Use hackergpt provider with gemini-3-pro-preview
             const response = await this.llmService.generateResponse(
                 fullPrompt,
                 null,
-                agent.provider || 'gemini',
+                'hackergpt',  // Force hackergpt provider
                 this.model,
                 'Tu es un expert en Cybersécurité et OSINT sur Kali Linux.'
             );

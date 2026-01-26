@@ -23,14 +23,17 @@ const HexStrikeExperts = () => {
     const fetchExperts = async () => {
         try {
             const res = await apiService.get('/api/hexstrike-experts/categories');
-            setExperts(res.data);
+            // apiService returns JSON directly, not wrapped in .data
+            const data = res || {};
+            setExperts(data);
             // Set first category as active
-            const categories = Object.keys(res.data);
+            const categories = Object.keys(data);
             if (categories.length > 0) {
                 setActiveCategory(categories[0]);
             }
         } catch (err) {
             console.error('[HexStrikeExperts] Fetch error:', err);
+            setExperts({});
         }
     };
 
@@ -46,7 +49,7 @@ const HexStrikeExperts = () => {
                 question: question,
                 context: {}
             });
-            setResponse(res.data);
+            setResponse(res);
         } catch (err) {
             setResponse({ error: err.message });
         } finally {
@@ -54,7 +57,7 @@ const HexStrikeExperts = () => {
         }
     };
 
-    const categories = Object.keys(experts);
+    const categories = Object.keys(experts || {});
 
     return (
         <div className="hexstrike-experts">
@@ -157,7 +160,7 @@ const HexStrikeExperts = () => {
                 </div>
                 <div className="stat">
                     <span className="stat-value">
-                        {Object.values(experts).reduce((sum, arr) => sum + arr.length, 0)}
+                        {Object.values(experts || {}).reduce((sum, arr) => sum + (arr?.length || 0), 0)}
                     </span>
                     <span className="stat-label">Experts</span>
                 </div>
