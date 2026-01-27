@@ -12,8 +12,118 @@
 
 .hex-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
+
+/* Feed */
+.live-monitor-feed {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.1);
+}
+
+.live-monitor-placeholder {
+    margin-bottom: 32px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px dashed rgba(255, 193, 7, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffc107;
+    font-family: monospace;
+}
+
+.feed-header {
+    background: rgba(255, 193, 7, 0.1);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.feed-badge {
+    color: #ffc107;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    animation: flash 2s infinite;
+}
+
+@keyframes flash {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.feed-expert {
+    color: #ddd;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.feed-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feed-command {
+    background: #000;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border-left: 3px solid #ffc107;
+    font-family: 'Courier New', monospace;
+    color: #4caf50;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.cmd-prompt {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.feed-command code {
+    color: #81c784;
+}
+
+.feed-explanation {
+    color: #ccc;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.feed-explanation strong {
+    color: #ffc107;
+    display: block;
+    margin-top: 12px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.feed-explanation strong:first-child {
+    margin-top: 0;
+}
+
 
 .hex-logo {
     font-size: 64px;
@@ -323,4 +433,86 @@
     .hex-categories {
         flex-direction: column;
     }
+}
+
+/* Command Stepper */
+.commands-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cmd-counter {
+    font-size: 0.8rem;
+    color: #ffc107;
+    background: rgba(255, 193, 7, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.command-stepper-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stepper-content {
+    margin-bottom: 16px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.active-command {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: #000;
+    border-radius: 6px;
+    border-left: 3px solid #ff6b35;
+    color: #4caf50;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    word-break: break-all;
+    white-space: pre-wrap;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.stepper-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.step-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.step-btn:hover:not(:disabled) {
+    background: rgba(255, 107, 53, 0.2);
+    color: #ff6b35;
+}
+
+.step-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+.manual-action-hint {
+    font-size: 0.75rem;
+    color: #888;
+    text-align: center;
+    flex: 1;
 }

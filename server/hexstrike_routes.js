@@ -656,5 +656,40 @@ router.get('/cipherlink/receive/result', async (req, res) => {
     }
 });
 
+
+// ============================================================================
+// LAZY TOOLKIT "5 TOOLS" AUTOMATION
+// ============================================================================
+
+const lazyService = require('./services/lazyToolkitService');
+
+/**
+ * POST /api/hexstrike/lazy/start
+ * Start the 5-Tool Automated Pipeline
+ */
+router.post('/lazy/start', async (req, res) => {
+    try {
+        const { target } = req.body;
+        if (!target) return res.status(400).json({ error: 'Target required' });
+
+        const result = await lazyService.startPipeline(target);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/hexstrike/lazy/status/:jobId
+ * Get status of Lazy Pipeline
+ */
+router.get('/lazy/status/:jobId', (req, res) => {
+    const status = lazyService.getJobStatus(req.params.jobId);
+    if (status.status === 'not_found') {
+        return res.status(404).json({ error: 'Job not found' });
+    }
+    res.json(status);
+});
+
 module.exports = router;
 

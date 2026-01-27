@@ -11,7 +11,7 @@ Quand vous double-cliquez dessus, il lance automatiquement toute la "stack" dans
 2.  **🐳 Services Docker (GPU)** :
     *   Lance `tensorflow-trainer` (pour l'entrainement IA avec votre RTX 4050).
     *   Lance `hexstrike` (pour les outils de hacking).
-3.  **🧠 Serveur Backend** : Connecte tous les services (Gemini, Ollama, Docker).
+3.  **🧠 Serveur Backend** : Connecte tous les services (Gemini, Docker).
 4.  **💻 Interface Visuelle** : Ouvre votre tableau de bord dans le navigateur.
 
 ### Dois-je garder les autres raccourcis ?

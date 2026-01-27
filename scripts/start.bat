@@ -19,6 +19,16 @@ REM Define Brave path
 set "BRAVE_PATH=%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe"
 set "TOR_PATH=%UserProfile%\OneDrive\Desktop\Tor Browser\Browser\firefox.exe"
 
+REM Start Netcam Studio (Surveillance Server)
+echo [0/5] Checking Netcam Studio...
+if exist "C:\Program Files\Netcam Studio - 64-bit\NetcamStudioX.exe" (
+    echo    Starting Netcam Studio Server...
+    start "" "C:\Program Files\Netcam Studio - 64-bit\NetcamStudioX.exe" -minimized
+    timeout /t 2 /nobreak >nul
+) else (
+    echo    [!] Netcam Studio not found. Skipping auto-start.
+)
+
 REM Start Tor Service (Background SOCKS5 Proxy)
 echo [0/4] Starting Tor Network...
 powershell -ExecutionPolicy Bypass -File "scripts\start_tor_proxy.ps1"
@@ -31,14 +41,8 @@ echo [!] Failed to start Tor Proxy. Continuing anyway...
 
 :TorDone
 
-REM Start Ollama if not running
-tasklist /FI "IMAGENAME eq ollama.exe" 2>NUL | find /I /N "ollama.exe">NUL
-if not errorlevel 1 goto OllamaRunning
-echo [1/4] Starting Ollama (Local AI)...
-start "" "ollama" serve
-timeout /t 3 /nobreak >nul
+REM Ollama removed as per user request
 
-:OllamaRunning
 
 REM Start Docker Services (GPU Trainer + HexStrike)
 echo [3/5] Starting Docker Services (GPU Trainer + HexStrike)...

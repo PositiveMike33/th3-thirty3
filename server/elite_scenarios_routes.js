@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const EliteHackerScenariosService = require('./elite_scenarios_service');
 const orchestrator = require('./orchestrator_instance'); // Singleton
-
+let liveMonitor = null; // Injected monitor instance
 let scenariosService = null;
 
 try {
@@ -16,6 +16,12 @@ try {
 } catch (error) {
     console.error('[ELITE-SCENARIOS] Failed to initialize:', error.message);
 }
+
+// Method to inject Live Monitor
+router.setLiveMonitor = (monitor) => {
+    liveMonitor = monitor;
+    console.log('[ELITE-SCENARIOS] Live Monitor connected');
+};
 
 /**
  * GET /api/elite-scenarios
@@ -80,6 +86,38 @@ Rapporte chaque succès et échec. Utilise les outils spécifiés.`;
             source: 'elite_scenarios',
             scenarioId: scenario.id
         });
+
+        // BROADCAST TO LIVE MONITOR
+        // BROADCAST TO LIVE MONITOR
+        if (liveMonitor) {
+            console.log(`[ELITE-SCENARIOS] Broadcasting scenario ${scenario.id} to Live Monitor`);
+
+            // Format special lesson for scenario activation (Educational Focus)
+            const specialLesson = {
+                expert: 'Elite Mission Control',
+                emoji: '🎯',
+                command: `START_MISSION_${scenario.id}: ${scenario.title}`,
+                lesson: `## 🎯 OBJECTIFS & QUESTIONS CRITIQUES
+${scenario.question}
+
+## 🏆 RÉSULTATS ATTENDUS
+${scenario.expected_result}
+
+## 🛡️ PERSPECTIVE DÉFENSIVE
+${scenario.defense_perspective}
+
+## ⚡ ORDRE DE MISSION
+L'équipe HexStrike a reçu vos ordres. Exécution des outils ${scenario.tools.slice(0, 3).join(', ')} en cours...`,
+                timestamp: new Date().toISOString()
+            };
+
+            // Use forceLesson to ensure it stays visible (resets timer)
+            if (liveMonitor.forceLesson) {
+                liveMonitor.forceLesson(specialLesson);
+            } else {
+                liveMonitor.emit('monitor:lesson', specialLesson);
+            }
+        }
 
         res.json({
             success: true,

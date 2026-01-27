@@ -564,3 +564,135 @@
 .es-modal-body::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* Carousel for Detailed Scenarios */
+.scenarios-carousel {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
+}
+
+.step-counter {
+    background: #ff4444;
+    color: #fff;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.scenario-slide.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.scenario-name-highlight {
+    font-size: 1.5rem;
+    color: #ff9900;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+}
+
+.scenario-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.scenario-field {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.scenario-field.full {
+    grid-column: span 2;
+}
+
+.field-label {
+    display: block;
+    color: #888;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.field-label-phys {
+    color: #00ff41;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.field-label-cyber {
+    color: #00d5ff;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.field-value {
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.impact-box {
+    background: rgba(255, 68, 68, 0.1);
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.field-label-impact {
+    color: #ff4444;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.carousel-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

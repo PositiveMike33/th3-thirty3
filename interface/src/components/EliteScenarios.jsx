@@ -19,6 +19,11 @@ const EliteScenarios = () => {
     const [error, setError] = useState(null);
     const [debugInfo, setDebugInfo] = useState('');
     const [filter, setFilter] = useState('all');
+    const [currentDetailedScenarioIdx, setCurrentDetailedScenarioIdx] = useState(0);
+
+    useEffect(() => {
+        setCurrentDetailedScenarioIdx(0);
+    }, [selectedScenario]);
 
     useEffect(() => {
         fetchScenarios();
@@ -238,8 +243,62 @@ const EliteScenarios = () => {
 
                             <div className="detail-section">
                                 <h4>🎯 OBJECTIF & QUESTION</h4>
-                                <div className="question-box">{selectedScenario.question}</div>
+                                <div className="question-box">
+                                    {selectedScenario.objective_text || selectedScenario.question}
+                                </div>
                             </div>
+
+                            {selectedScenario.detailed_scenarios && (
+                                <div className="detail-section scenarios-carousel">
+                                    <div className="carousel-header">
+                                        <h4>🎬 SCÉNARIOS OPÉRATIONNELS</h4>
+                                        <span className="step-counter">{currentDetailedScenarioIdx + 1} / {selectedScenario.detailed_scenarios.length}</span>
+                                    </div>
+
+                                    <div className="scenario-slide fade-in">
+                                        <h3 className="scenario-name-highlight">{selectedScenario.detailed_scenarios[currentDetailedScenarioIdx].name}</h3>
+
+                                        <div className="scenario-grid">
+                                            <div className="scenario-field full">
+                                                <span className="field-label">📍 Contexte:</span>
+                                                <span className="field-value">{selectedScenario.detailed_scenarios[currentDetailedScenarioIdx].context}</span>
+                                            </div>
+
+                                            <div className="scenario-field">
+                                                <span className="field-label-phys">🕵️ Phase Physique</span>
+                                                <p>{selectedScenario.detailed_scenarios[currentDetailedScenarioIdx].phase_physique}</p>
+                                            </div>
+
+                                            <div className="scenario-field">
+                                                <span className="field-label-cyber">💻 Phase Cyber</span>
+                                                <p>{selectedScenario.detailed_scenarios[currentDetailedScenarioIdx].phase_cyber}</p>
+                                            </div>
+
+                                            <div className="scenario-field full impact-box">
+                                                <span className="field-label-impact">💥 Impact Cinétique:</span>
+                                                <span className="field-value">{selectedScenario.detailed_scenarios[currentDetailedScenarioIdx].impact}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="carousel-controls">
+                                        <button
+                                            className="nav-btn"
+                                            disabled={currentDetailedScenarioIdx === 0}
+                                            onClick={() => setCurrentDetailedScenarioIdx(prev => Math.max(0, prev - 1))}
+                                        >
+                                            ⬅️ PRÉCÉDENT
+                                        </button>
+                                        <button
+                                            className="nav-btn"
+                                            disabled={currentDetailedScenarioIdx === selectedScenario.detailed_scenarios.length - 1}
+                                            onClick={() => setCurrentDetailedScenarioIdx(prev => Math.min(prev + 1, selectedScenario.detailed_scenarios.length - 1))}
+                                        >
+                                            SUIVANT ➡️
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="detail-section">
                                 <h4>🛠️ ARSENAL REQUIS ({selectedScenario.tools?.length})</h4>

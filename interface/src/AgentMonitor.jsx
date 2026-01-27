@@ -146,9 +146,32 @@ const AgentMonitor = () => {
             }
         });
 
+        // Listen for live monitor lessons
+        socket.on('monitor:lesson', (data) => {
+            if (data.expert && data.command) {
+                addLog('LESSON', `${data.emoji || '📚'} ${data.expert}: ${data.command}`);
+            }
+        });
+
+        // Poll Live Monitor for new lessons (fallback if socket not receiving)
+        let lastLessonTimestamp = null;
+        const pollInterval = setInterval(async () => {
+            try {
+                const res = await fetch('/api/live-monitor/lessons/latest');
+                const data = await res.json();
+                if (data.lesson && data.lesson.timestamp !== lastLessonTimestamp) {
+                    lastLessonTimestamp = data.lesson.timestamp;
+                    addLog('LESSON', `${data.lesson.emoji || '📚'} ${data.lesson.expert}: ${data.lesson.command}`);
+                }
+            } catch (e) {
+                // Silent fail - monitor might not be running
+            }
+        }, 10000); // Poll every 10 seconds
+
         return () => {
             if (socketRef.current) socketRef.current.disconnect();
             window.removeEventListener('agent-log', handleLocalLog);
+            clearInterval(pollInterval);
         };
     }, [addLog]);
 
@@ -280,7 +303,8 @@ const AgentMonitor = () => {
                                                 log.type === 'TRAINING' ? 'text-pink-400' :
                                                     log.type === 'BENCHMARK' ? 'text-orange-400' :
                                                         log.type === 'METRICS' ? 'text-indigo-400' :
-                                                            'text-gray-400'
+                                                            log.type === 'LESSON' ? 'text-amber-400' :
+                                                                'text-gray-400'
                                 }`}>
                                 {log.type}:
                             </span>

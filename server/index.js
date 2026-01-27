@@ -152,6 +152,22 @@ app.use('/api/hexstrike-experts', hexstrikeExpertRoutes);
 const eliteScenariosRoutes = require('./elite_scenarios_routes');
 app.use('/api/elite-scenarios', eliteScenariosRoutes);
 
+// HexStrike Live Training Monitor Routes (Continuous Learning)
+const liveMonitorRoutes = require('./hexstrike_live_monitor_routes');
+app.use('/api/live-monitor', liveMonitorRoutes);
+
+// Inject Live Monitor into Elite Scenarios (for activation broadcast)
+if (liveMonitorRoutes.getMonitor) {
+    const monitor = liveMonitorRoutes.getMonitor();
+    eliteScenariosRoutes.setLiveMonitor(monitor);
+
+    // AUTO-START MONITOR (Looping 45s)
+    monitor.start(45);
+    console.log('[SYSTEM] HexStrike Live Monitor auto-started');
+}
+
+console.log('[SYSTEM] HexStrike Live Training Monitor loaded');
+
 
 // Fabric Patterns Endpoints (PUBLIC)
 app.get('/patterns', (req, res) => {
@@ -344,6 +360,11 @@ app.use('/api/dart', dartRoutes);
 const hexstrikeRoutes = require('./hexstrike_routes');
 app.use('/api/hexstrike', hexstrikeRoutes);
 console.log('[SYSTEM] HexStrike AI integration loaded (150+ security tools)');
+
+// Netcam Studio Routes (Real-time Surveillance)
+const netcamRoutes = require('./routes/netcamRoutes');
+app.use('/api/netcam', netcamRoutes);
+console.log('[SYSTEM] Netcam Studio Integration loaded (Real-time Surveillance)');
 
 
 

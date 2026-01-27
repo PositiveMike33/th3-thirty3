@@ -1,15 +1,24 @@
 $WshShell = New-Object -comObject WScript.Shell
-$DesktopPath = [Environment]::GetFolderPath("Desktop")
+$DesktopPath = "C:\Users\th3th\OneDrive\Desktop"
 $ShortcutPath = Join-Path $DesktopPath "Th3 Thirty3 - Secure Mode.lnk"
-$TargetPath = "c:\Users\th3th\th3-thirty3\start.bat"
-$WorkingDirectory = "c:\Users\th3th\th3-thirty3"
-$IconPath = "c:\Users\th3th\th3-thirty3\interface\public\logo_security_clean.png"
+$TargetPath = "C:\Users\th3th\th3-thirty3\scripts\start.bat"
+$WorkingDirectory = "C:\Users\th3th\th3-thirty3\scripts"
+$IconPath = "C:\Users\th3th\th3-thirty3\icon.ico"
 
 $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $Shortcut.TargetPath = $TargetPath
 $Shortcut.WorkingDirectory = $WorkingDirectory
 $Shortcut.IconLocation = "$IconPath"
-$Shortcut.Description = "Launch Th3 Thirty3 Secure Envrionment (Tor + Docker + GPU)"
+$Shortcut.Description = "Launch Th3 Thirty3 Secure Environment (Tor + Docker + GPU)"
 $Shortcut.Save()
 
-Write-Host "Shortcut created successfully at: $ShortcutPath"
+Write-Host "New shortcut created at: $ShortcutPath"
+
+$OldShortcutPath = Join-Path $DesktopPath "Th3 Thirty3 - Elite Platform.lnk"
+if (Test-Path $OldShortcutPath) {
+    Remove-Item $OldShortcutPath -Force
+    Write-Host "Old shortcut removed: $OldShortcutPath"
+}
+else {
+    Write-Host "Old shortcut not found."
+}
